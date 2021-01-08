@@ -14,9 +14,7 @@ This package was tested with the [easy_perception_deployment](https://github.com
 ---
 ## Full Documentation/Wiki
 
-Current UPDATED Documentation is [Here](https://gitlab.com/gtan039/emd_docs) until the repo goes public (then we have a proper link)
-
-<!--[Check out the full documentation here](https://easy-manipulation-deployment.readthedocs.io/en/latest/index.html)-->
+[Check out the full documentation here](https://easy-manipulation-deployment-tanjpg.readthedocs.io/)
 
 
 
