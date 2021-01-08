@@ -2,9 +2,7 @@
 
 <img src="./docs/sphinx/source/images/logo.png"  width="25%" height="25%">
 
-[![pipeline status](https://gitlab.com/ROSI-AP/rosi-ap_rect/easy_manipulation_deployment/badges/glenn_devel/pipeline.svg)](https://gitlab.com/ROSI-AP/rosi-ap_rect/easy_manipulation_deployment/commits/glenn_devel) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
-
-[![Coverage](https://codecov.io/gl/ROSI-AP:rosi-ap_rect/easy_manipulation_deployment/branch/glenn_devel/graphs/badge.svg)](https://codecov.io/gl/ROSI-AP:rosi-ap_rect/easy_manipulation_deployment/branch/glenn_devel)
+[![Build Status](https://www.travis-ci.com/tanjpg/easy_manipulation_deployment.svg?branch=master)](https://www.travis-ci.com/tanjpg/easy_manipulation_deployment) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![codecov](https://codecov.io/gh/tanjpg/easy_manipulation_deployment/branch/master/graph/badge.svg?token=9K2EIVNZ8F)](https://codecov.io/gh/tanjpg/easy_manipulation_deployment)
 
 ### This ROS package provides a modular and easy to deploy manipulation pipeline that integrates perception elements to establish an end-to-end pick and place task
 <br>
