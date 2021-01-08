@@ -1,0 +1,38 @@
+# Build merge request, push and tag
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
+image: docker:git
+services:
+  - docker:dind
+
+before_script:
+  - apk add --update bash coreutils tar curl
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
+
+cache:
+  key: ${CI_JOB_NAME}
+  paths: 
+    - .ccache/
+
+variables:
+  TMPDIR: "${CI_PROJECT_DIR}.tmp"
+  DOCKER_RUN_OPTS: "-v /etc/ssl/certs:/etc/ssl/certs:ro"
+  CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+  CODE_COVERAGE: "codecov.io"
+  CODECOV_TOKEN: "36cef827-7894-4feb-b0d5-5c5c133cb341"
+
+foxy-moveit2:
+  variables:
+    ROS_DISTRO: "foxy"
+    DOCKER_IMAGE: "registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly"
+    AFTER_INIT_EMBED: "source /opt/moveit2/install/setup.bash"
+  script: 
+    - echo "tLqbxEsTsUwtbjjwdBMd" | docker login -u rosi --password-stdin registry.gitlab.com
+    - .industrial_ci/gitlab.sh
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash)

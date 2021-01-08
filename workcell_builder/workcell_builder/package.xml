@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>workcell_builder</name>
+  <version>0.0.0</version>
+  
+  <description>A ROS2 package that provides a GUI for workcell building</description>
+  <maintainer email="glenn_tan@artc.a-star.edu.sg">rosi</maintainer>
+  <license>Apache License 2.0</license>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>yaml-cpp</build_depend>
+  <build_depend>boost</build_depend>
+  <build_depend>pkg-config</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
+  <build_depend>qt5-qmake</build_depend>
+  <exec_depend>libqt5-core</exec_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

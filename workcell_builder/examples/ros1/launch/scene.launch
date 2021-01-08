@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot" default="robot_name"/>
+  <arg name="scene" default="scene_name"/>
+  <arg name="sim_robot" default="false" /> 
+  <arg name="moveit_cfg" default="$(eval arg('robot') + '_moveit_config')"/>
+
+
+  <!--arg name="pipeline" default="chomp" /-->
+  <node name="grasp_execution" pkg="grasp_execution" type="grasp_execution" respawn="false" output="screen">
+	<param name="sim" type="bool" value="$(arg sim_robot)"/>
+  </node>
+
+  <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+  <include file="$(eval find(arg('scene')) + '/launch/planning_context.launch')">
+    <arg name="load_robot_description" value="true"/>
+    <arg name="scene" value="$(arg scene)"/>
+    <arg name="robot" value="$(arg robot)"/>
+  </include>
+
+  <!-- If needed, broadcast static tf for robot root -->
+  <group if="$(arg sim_robot)"> 
+
+	  <!-- We do not have a robot connected, so publish fake joint states-->
+	  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	    <param name="/use_gui" value="false"/> 
+	    <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
+	  </node>
+
+	  <include file="$(eval find(arg('scene')) + '/launch/move_group.launch')">
+	    <arg name="allow_trajectory_execution" value="true"/>  
+	    <arg name="fake_execution" value="true"/>
+	    <arg name="info" value="true"/>
+	    <arg name="scene" value="$(arg scene)"/>
+	    <arg name="robot" value="$(arg robot)"/>
+	  </include>
+  </group>
+
+  <group unless="$(arg sim_robot)">
+	  <include file="$(find ur_modern_driver)/launch/(arg robot)_bringup.launch">
+	    <arg name="robot_ip" value="192.168.1.10"/>  
+	  </include>
+
+	  <!-- We HAVE a robot connected, so publish real joint states-->
+	  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	    <rosparam param="source_list">[/joint_states, /gripper/joint_states]</rosparam>
+	  </node>
+
+	  <!-- Run the main MoveIt executable with trajectory execution (we do not have controllers   configured by default) -->
+	  <include file="$(eval find(arg('scene')) + '/launch/move_group.launch')">
+	    <arg name="allow_trajectory_execution" value="true"/>  
+	    <arg name="fake_execution" value="false"/>
+	    <arg name="info" value="true"/>
+	    <arg name="scene" value="$(arg scene)"/>
+	    <arg name="robot" value="$(arg robot)"/>
+	    <!--arg name="pipeline" value="$(arg pipeline)"/-->
+	  </include>
+  </group>
+  
+  <!-- Given the published joint states, publish tf for the robot links -->
+
+  <!-- Run Rviz and load the default config to see the state of the move_group node -->
+  <include file="$(eval find(arg('moveit_cfg')) + '/launch/moveit_rviz.launch')">
+    <arg name="config" value="true"/>
+  </include>
+
+
+
+</launch>

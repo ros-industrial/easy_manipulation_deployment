@@ -1,0 +1,23 @@
+table:
+  child_link: table
+  links:
+    table:
+      visual:
+        name: table
+        geometry:
+          filepath: /home/rosi/error_check_ws/src/assets/environment/table_description/meshes/visual/table.stl
+          scale:
+            scale_x: 0.001
+            scale_y: 0.001
+            scale_z: 0.001
+      collision:
+        name: None
+        geometry:
+          filepath: /home/rosi/error_check_ws/src/assets/environment/table_description/meshes/visual/table.stl
+          scale:
+            scale_x: 0.001
+            scale_y: 0.001
+            scale_z: 0.001
+  table_base_joint:
+    ext_joint_type: fixed
+    child_link: table

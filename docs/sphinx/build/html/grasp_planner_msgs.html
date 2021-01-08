@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grasp Planner Message Definitions &#8212; EMD alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="grasp-planner-message-definitions">
+<span id="id1"></span><h1>Grasp Planner Message Definitions<a class="headerlink" href="#grasp-planner-message-definitions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="package-subcriber">
+<h2>Package Subcriber<a class="headerlink" href="#package-subcriber" title="Permalink to this headline">¶</a></h2>
+<p>This is the topic name and message type required for the grasp planner package. The <a class="reference external" href="https://github.com/ros-industrial/easy_perception_deployment/">easy_perception_deployment</a> package follows this convention, but you can use any other perception system as long as it adheres to the following:</p>
+<div class="section" id="topic-name-perception-output">
+<h3>Topic Name :  <cite>/perception_output</cite><a class="headerlink" href="#topic-name-perception-output" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="message-name-rectoutput-msg">
+<h3>Message Name: RectOutput.msg<a class="headerlink" href="#message-name-rectoutput-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 27%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Message name</p></th>
+<th class="head"><p>Field Type</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>header</p></td>
+<td><p>std_msgs/Header</p></td>
+<td><p>General information from the camera</p></td>
+</tr>
+<tr class="row-odd"><td><p>objects</p></td>
+<td><p>DlObject[]</p></td>
+<td><p>Information about the object (refer below to the DlOBject message type.</p></td>
+</tr>
+<tr class="row-even"><td><p>frame_width</p></td>
+<td><p>uint32</p></td>
+<td><p>Width of the depth image</p></td>
+</tr>
+<tr class="row-odd"><td><p>frame_height</p></td>
+<td><p>uint32</p></td>
+<td><p>Height of the depth image</p></td>
+</tr>
+<tr class="row-even"><td><p>num_objects</p></td>
+<td><p>uint32</p></td>
+<td><p>Number of objects in scene</p></td>
+</tr>
+<tr class="row-odd"><td><p>depth_image</p></td>
+<td><p>sensor_msgs/Image</p></td>
+<td><p>Depth image of the work area</p></td>
+</tr>
+<tr class="row-even"><td><p>camera_info</p></td>
+<td><p>sensor_msgs/CameraInfo</p></td>
+<td><p>Camera-specific information</p></td>
+</tr>
+<tr class="row-odd"><td><p>roi_array</p></td>
+<td><p>sensor_msgs/RegionOfInterest[]</p></td>
+<td><p>Array of bounding boxes containing the objects</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="message-name-dlobject-msg">
+<h3>Message Name: DlObject.msg<a class="headerlink" href="#message-name-dlobject-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 0%" />
+<col style="width: 41%" />
+<col style="width: 1%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p>Message name | Field Type                     | Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>name</p></td>
+<td colspan="2"><p>string</p></td>
+<td colspan="2"><p>Name of object</p></td>
+</tr>
+<tr class="row-odd"><td><p>pos</p></td>
+<td colspan="2"><p>geometry_msgs/PoseStamped</p></td>
+<td colspan="2"><p>Pose of object</p></td>
+</tr>
+<tr class="row-even"><td><p>roi</p></td>
+<td colspan="2"><p>sensor_msgs/RegionOfInterest</p></td>
+<td colspan="2"><p>Bounding Box for the object</p></td>
+</tr>
+<tr class="row-odd"><td><p>breadth</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object breadth</p></td>
+</tr>
+<tr class="row-even"><td><p>length</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object breadth</p></td>
+</tr>
+<tr class="row-odd"><td><p>height</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object height</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="package-publisher">
+<h2>Package Publisher<a class="headerlink" href="#package-publisher" title="Permalink to this headline">¶</a></h2>
+<p>This package consists of a publisher that publishes to the following topic with the message structure shown</p>
+<div class="section" id="topic-name-grasp-poses">
+<h3>Topic Name :  <cite>/grasp_poses</cite><a class="headerlink" href="#topic-name-grasp-poses" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="message-name-grasppose-msg">
+<h3>Message Name: GraspPose.msg<a class="headerlink" href="#message-name-grasppose-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 24%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Message name</p></th>
+<th class="head"><p>Field Type</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>num_objects</p></td>
+<td><p>uint32</p></td>
+<td><p>Number of grasp objects in the scene</p></td>
+</tr>
+<tr class="row-odd"><td><p>grasp_poses</p></td>
+<td><p>geometry_msgs/PoseStamped[]</p></td>
+<td><p>Array of grasp object poses</p></td>
+</tr>
+<tr class="row-even"><td><p>object_poses</p></td>
+<td><p>geometry_msgs/PoseStamped[]</p></td>
+<td><p>Array of grasp poses</p></td>
+</tr>
+<tr class="row-odd"><td><p>object_shapes</p></td>
+<td><p>shape_msgs/SolidPrimitive[]</p></td>
+<td><p>Array of object shapes (Used to create collision objects for path planning)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">EMD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Glenn Tan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/grasp_planner_msgs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

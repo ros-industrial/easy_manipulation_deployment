@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grasp Planner Configuration &#8212; EMD alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Grasp Planner Message Definitions" href="grasp_planner_msgs.html" />
+    <link rel="prev" title="Grasp Planner" href="grasp_planner.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="grasp-planner-configuration">
+<span id="id1"></span><h1>Grasp Planner Configuration<a class="headerlink" href="#grasp-planner-configuration" title="Permalink to this headline">¶</a></h1>
+<p>In order for the grasp planner to plan the right type of grasp, we need to first create a configuration file in the config folder , <strong>attributes.yaml</strong> . It is advised to write over the current <strong>attributes.yaml</strong> file to prevent any YAML parsing errors.</p>
+<p>This File will be located in grasp_planner/config/attributes.yaml</p>
+<div class="section" id="finger-gripper">
+<h2>Finger Gripper<a class="headerlink" href="#finger-gripper" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/finger_yaml.png" src="_images/finger_yaml.png" />
+<div class="section" id="fingers">
+<h3><strong>fingers</strong><a class="headerlink" href="#fingers" title="Permalink to this headline">¶</a></h3>
+<p>Number of fingers for the end effector. <strong>Currently only 2 fingered grippers are supported</strong></p>
+</div>
+<div class="section" id="distance-between-fingers">
+<h3><strong>distance_between_fingers</strong><a class="headerlink" href="#distance-between-fingers" title="Permalink to this headline">¶</a></h3>
+<p>The distance between the fingers of the end effector(in mm). Using the Robotiq 2F-85 gripper as an example:</p>
+</div>
+<div class="section" id="longest-gripper-dim">
+<h3><strong>longest_gripper_dim</strong><a class="headerlink" href="#longest-gripper-dim" title="Permalink to this headline">¶</a></h3>
+<p>The longest dimensions of a finger (in mm). Using the robotiq 2F-85 gripper:</p>
+</div>
+<div class="section" id="table-height">
+<h3><strong>table_height</strong><a class="headerlink" href="#table-height" title="Permalink to this headline">¶</a></h3>
+<p>The distance between the camera used to capture the workspace and the surface on which the object is on.</p>
+</div>
+<div class="section" id="min-zero-angle">
+<h3><strong>min_zero_angle</strong><a class="headerlink" href="#min-zero-angle" title="Permalink to this headline">¶</a></h3>
+<p>Minimum angle (in radians) that can be regarded as 0 rad. Increase this value to increase planning speeds (but might result in a less desirable grasp)</p>
+</div>
+<div class="section" id="min-height-diff-to-grip">
+<h3><strong>min_height_diff_to_grip</strong><a class="headerlink" href="#min-height-diff-to-grip" title="Permalink to this headline">¶</a></h3>
+<p>Minimum height difference that can be gripped. Increase this to increase stability of grasps, but may lead to the grasp planner not finding any grasps if too high.</p>
+</div>
+<div class="section" id="min-gdi-diff-for-comparison">
+<h3><strong>min_gdi_diff_for_comparison</strong><a class="headerlink" href="#min-gdi-diff-for-comparison" title="Permalink to this headline">¶</a></h3>
+<p>Used to determine when centroid position is taken into comparison. Increasing this number increases the consideration of centroid grasp position compared to finger collision</p>
+</div>
+</div>
+<div class="section" id="suction-gripper">
+<h2>Suction Gripper<a class="headerlink" href="#suction-gripper" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/suction_yaml.png" src="_images/suction_yaml.png" />
+<div class="section" id="length-cups">
+<h3><strong>length_cups</strong><a class="headerlink" href="#length-cups" title="Permalink to this headline">¶</a></h3>
+<p>The number of cups in the length dimension. <strong>Currently only support value of 1</strong></p>
+</div>
+<div class="section" id="breadth-cups">
+<h3><strong>breadth_cups</strong><a class="headerlink" href="#breadth-cups" title="Permalink to this headline">¶</a></h3>
+<p>The number of cups in the breadth dimension. <strong>Currently only support value of 1</strong></p>
+</div>
+<div class="section" id="radius">
+<h3><strong>radius</strong><a class="headerlink" href="#radius" title="Permalink to this headline">¶</a></h3>
+<p>The radius one of the suction cup.</p>
+</div>
+<div class="section" id="id2">
+<h3><strong>table_height</strong><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The distance between the camera used to capture the workspace and the surface on which the object is on.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">EMD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Grasp Planner Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finger-gripper">Finger Gripper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#suction-gripper">Suction Gripper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner_msgs.html">Grasp Planner Message Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner.html#solution-summary">Solution Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner.html#running-the-grasp-planner">Running the grasp_planner</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="grasp_planner.html">Grasp Planner</a><ul>
+      <li>Previous: <a href="grasp_planner.html" title="previous chapter">Grasp Planner</a></li>
+      <li>Next: <a href="grasp_planner_msgs.html" title="next chapter">Grasp Planner Message Definitions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Glenn Tan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/grasp_planner_config.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

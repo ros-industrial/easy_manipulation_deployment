@@ -1,0 +1,158 @@
+\subsubsection*{This R\+O\+S2 package provides an {\bfseries algorithmic, depth based approach} to generate a {\bfseries 3+1 Degree of Freedom (D\+OF) Grasp pose} from a depth image.}
+
+\href{https://travis-ci.com/gtan039/algorithmic-depth-based-grasp-planner}{\tt }
+
+\section*{Introduction}
+
+Traditionally, grasp pose generation is done through using convolutional neural networks (C\+N\+Ns) to achieve grasp plans. The issues with using machine learning and neural networks is several fold
+
+
+\begin{DoxyEnumerate}
+\item Computation power required for fast grasp pose planning using C\+N\+Ns.
+\item Dataset for training neural netwoks are currently restricted to 2 finger grippers (notably, the \href{http://pr.cs.cornell.edu/grasping/rect_data/data.php}{\tt Cornell Grasping Dataset} has been the most comprehensive and well labelled dataset for current grasp planning neural networks)
+\item Training of new types of grippers require {\bfseries manual labelling} of new datasets (labour intensive).
+\item Accurate and stable grasp poses may not be available for {\bfseries irregular objects}, so specifically labelled dataset is needed in order to generate accurate grasps
+\end{DoxyEnumerate}
+
+\subsection*{Package example}
+
+This R\+O\+S2 package presents a solution that requires no training, no labelling and little computational power to generate a 3 + 1 D\+OF grasp poses. The modular design of this package also allows for expansion into other gripper types. Current support for this package includes {\bfseries 2 finger gripper and single suction cup gripper}
+
+~\newline
+
+
+\section*{Package Details}
+
+\subsection*{Assumptions}
+
+\subsubsection*{Grasp object poses}
+
+This package assumes a {\bfseries top down} camera set up overlooking the grasping area. Assuming that the axis through the image plane is the z axis, grasp poses will consider a {\bfseries one dimensional change in orientation} in the z-\/direction (resulting in a 3+1 D\+OF grasp pose)
+
+\subsubsection*{Image Quality}
+
+This package was tested using an input depth image from the Intel Realsense D415 R\+G\+B-\/D camera. Certain variations may occur if a different camera is used
+
+\subsubsection*{Work Surface}
+
+This package assumes that the object is placed on a relatively flat surface. As this package requires the use of the depth image from the camera above the work surface, we assume that the distance from the work surface to the camera is constant.
+
+\subsubsection*{End Effector Support}
+
+This package currently supports a 2 Finger gripper and a single suction cup gripper. Further development will include multiple finger gripper and suction cup array support.
+
+\subsection*{Package subscriber}
+
+This package consists of a subscriber that subscribes to the following topic with the message structure shown
+
+Topic Name \+: {\ttfamily /perception\+\_\+output}
+
+Message Name\+: Rect\+Output.\+msg
+
+\tabulinesep=1mm
+\begin{longtabu} spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endhead
+header &std\+\_\+msgs/\+Header &General information from the camera \\\cline{1-3}
+objects &Dl\+Object\mbox{[}\mbox{]} &Information about the object (refer below to the Dl\+O\+Bject message type. \\\cline{1-3}
+frame\+\_\+width &uint32 &Width of the depth image \\\cline{1-3}
+frame\+\_\+height &uint32 &Height of the depth image \\\cline{1-3}
+num\+\_\+objects &uint32 &Number of objects in scene \\\cline{1-3}
+depth\+\_\+image &sensor\+\_\+msgs/\+Image &Depth image of the work area \\\cline{1-3}
+camera\+\_\+info &sensor\+\_\+msgs/\+Camera\+Info &Camera-\/specific information \\\cline{1-3}
+roi\+\_\+array &sensor\+\_\+msgs/\+Region\+Of\+Interest\mbox{[}\mbox{]} &Array of bounding boxes containing the objects \\\cline{1-3}
+\end{longtabu}
+Message Name\+: Dl\+Object.\+msg
+
+\tabulinesep=1mm
+\begin{longtabu} spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endhead
+name &string &Name of object \\\cline{1-3}
+pos &geometry\+\_\+msgs/\+Pose\+Stamped &Pose of object \\\cline{1-3}
+roi &sensor\+\_\+msgs/\+Region\+Of\+Interest &Bounding Box for the object \\\cline{1-3}
+breadth &float64 &Real object breadth \\\cline{1-3}
+length &float64 &Real object breadth \\\cline{1-3}
+height &float64 &Real object height \\\cline{1-3}
+\end{longtabu}
+
+
+\subsection*{Package Publisher}
+
+This package consists of a publisher that publishes to the following topic with the message structure shown
+
+Topic Name \+: {\ttfamily /grasp\+\_\+poses}
+
+\tabulinesep=1mm
+\begin{longtabu} spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\rowcolor{\tableheadbgcolor}\textbf{ Message name }&\textbf{ Field Type }&\textbf{ Explanation  }\\\cline{1-3}
+\endhead
+num\+\_\+objects &uint32 &Number of grasp objects in the scene \\\cline{1-3}
+grasp\+\_\+poses &geometry\+\_\+msgs/\+Pose\+Stamped\mbox{[}\mbox{]} &Array of grasp object poses \\\cline{1-3}
+object\+\_\+poses &geometry\+\_\+msgs/\+Pose\+Stamped\mbox{[}\mbox{]} &Array of grasp poses \\\cline{1-3}
+object\+\_\+shapes &shape\+\_\+msgs/\+Solid\+Primitive\mbox{[}\mbox{]} &Array of object shapes (Used to create collision objects for path planning) \\\cline{1-3}
+\end{longtabu}
+~\newline
+ 
+
+
+
+\subsection*{Configuring grasp attributes}
+
+In order for the grasp planner to plan the right type of grasp, we need to first create a configuration file in the config folder , {\ttfamily attributes.\+yaml}. It is advised to write over the current {\ttfamily attributes.\+yaml} file to prevent any Y\+A\+ML parsing errors
+
+\subsubsection*{Finger Gripper}
+
+\paragraph*{fingers}
+
+Number of fingers for the end effector. {\bfseries currently only 2 fingered grippers are supported} \paragraph*{distance\+\_\+between\+\_\+fingers}
+
+The distance between the fingers of the end effector(in mm). Using the Robotiq 2\+F-\/85 gripper as an example\+:
+
+\paragraph*{longest\+\_\+gripper\+\_\+dim}
+
+The longest dimensions of a finger (in mm). Using the robotiq 2\+F-\/85 gripper\+:
+
+\paragraph*{table\+\_\+height}
+
+The distance between the camera used to capture the workspace and the surface on which the object is on.
+
+\subsubsection*{Suction Gripper}
+
+\paragraph*{length\+\_\+cups}
+
+The number of cups in the length dimension. {\bfseries Currently only support value of 1} \paragraph*{breadth\+\_\+cups}
+
+The number of cups in the breadth dimension. {\bfseries Currently only support value of 1} \paragraph*{radius}
+
+The radius one of the suction cup. \paragraph*{table\+\_\+height}
+
+The distance between the camera used to capture the workspace and the surface on which the object is on. 
+
+
+
+\section*{How the package works}
+
+This package uses information from the depth image captured by the camera to generate grasp samples, and the quality of the grasps will be determined by a Grasp Decide Index (G\+DI).
+
+This concept was demonstrated in \href{https://arxiv.org/pdf/2001.05856.pdf}{\tt this paper}, with changes in the method of sampling potential points, due to the abstraction of the perception component of the system to a separate perception package. There is also an additonal support for single suction cup grippers.
+
+Given that a two finger gripper and a single suction cup gripper are considered to be the \char`\"{}base cases\char`\"{} for a finger gripper and a suction cup array, this provides opportunities for expansion to more complicated grippers beyond the scope of the paper. 

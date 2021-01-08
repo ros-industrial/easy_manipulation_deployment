@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generate Files and Folders &#8212; EMD alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run workcell demo" href="workcell_builder_run_demo.html" />
+    <link rel="prev" title="Create A Scene" href="workcell_builder_create_scene.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="generate-files-and-folders">
+<span id="id1"></span><h1>Generate Files and Folders<a class="headerlink" href="#generate-files-and-folders" title="Permalink to this headline">¶</a></h1>
+<p>The next step after creating a scene is to generate the relevant files and folders required to create the simulations</p>
+<div class="section" id="generating-yaml-files">
+<h2>Generating yaml files<a class="headerlink" href="#generating-yaml-files" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/generate_yaml.png"><img alt="_images/generate_yaml.png" class="align-center" src="_images/generate_yaml.png" style="width: 305.25px; height: 258.0px;" /></a>
+<p>To generate this scene, click on the “Generate yaml for scene” button. An <cite>environment.yaml</cite> yaml file will be created in the src/scenes/&lt;scene_name&gt; folder</p>
+<a class="reference internal image-reference" href="_images/yaml.png"><img alt="_images/yaml.png" class="align-center" src="_images/yaml.png" style="width: 693.75px; height: 520.5px;" /></a>
+<p>This file is an easy to read textual representation of the scene. This file is important and required to properly generate the workcell. This is also important for reloading a scene into the GUI for editing. It is possible to do these changes via the YAML file directly rather than the GUI. <strong>However, do note that errors may arise if you do not follow the proper YAML format.</strong></p>
+<a class="reference internal image-reference" href="_images/generated_yaml.png"><img alt="_images/generated_yaml.png" class="align-center" src="_images/generated_yaml.png" style="width: 293.25px; height: 258.0px;" /></a>
+<p>Once succesful, the Generate Files from yaml will be available</p>
+</div>
+<div class="section" id="other-files-general">
+<h2>Other Files (General)<a class="headerlink" href="#other-files-general" title="Permalink to this headline">¶</a></h2>
+<p>Click the Generate Files from yaml button to generate the actual required components to build the simulation</p>
+<a class="reference internal image-reference" href="_images/generate_folders.png"><img alt="_images/generate_folders.png" class="align-center" src="_images/generate_folders.png" style="width: 293.25px; height: 258.0px;" /></a>
+<p>The following components will be generated through this button:</p>
+<div class="section" id="environment-object-packages">
+<h3>Environment Object Packages<a class="headerlink" href="#environment-object-packages" title="Permalink to this headline">¶</a></h3>
+<p>The environment objects that were created in the GUI will now have its URDF Xacros and folders generated in the <code class="code docutils literal notranslate"><span class="pre">assets/environment_objects/&lt;object_name&gt;_description</span></code> folder. This folder will be referenced in the environment urdf</p>
+</div>
+<div class="section" id="environment-urdf-xacro">
+<h3>environment.urdf.xacro<a class="headerlink" href="#environment-urdf-xacro" title="Permalink to this headline">¶</a></h3>
+<p>This file is located in the scenes/&lt;scene_name&gt;/urdf/ folder. This is the main urdf file that combines all the different elements of the workcell and will be the main file that launch files will reference to when launching files.</p>
+</div>
+<div class="section" id="arm-hand-srdf-xacro">
+<h3>arm_hand.srdf.xacro<a class="headerlink" href="#arm-hand-srdf-xacro" title="Permalink to this headline">¶</a></h3>
+<p>This file is located in the <code class="code docutils literal notranslate"><span class="pre">scenes/&lt;scene_name&gt;/urdf/</span></code> folder. This is the srdf file that combines the robot arm and end effector and contains information such as ignoring link collisions , and will be referenced in launch files.</p>
+</div>
+</div>
+<div class="section" id="other-files-ros1">
+<h2>Other Files (ROS1)<a class="headerlink" href="#other-files-ros1" title="Permalink to this headline">¶</a></h2>
+<p>&lt;will be edited later&gt;</p>
+<ol class="arabic simple">
+<li><p>The launch file for simulation</p></li>
+<li><p>The move_group.launch file</p></li>
+<li><p>The planning_context.launch</p></li>
+</ol>
+</div>
+<div class="section" id="other-files-ros2">
+<h2>Other Files (ROS2)<a class="headerlink" href="#other-files-ros2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="demo-launch-py">
+<h3>demo.launch.py<a class="headerlink" href="#demo-launch-py" title="Permalink to this headline">¶</a></h3>
+<p>This file is located in the scenes/&lt;scene_name&gt;/launch/ folder. This file serves as a demo launch file that launches an example RVIZ simulation of the workspace. Note that this launch file does not incorporate Moveit2 Components. To find out how to do so, check out <a class="reference internal" href="grasp_execution_demo.html#grasp-execution-demo"><span class="std std-ref">Grasp Execution Demo</span></a></p>
+<p>Once done, you will see the following screen. You can then exit the GUI</p>
+<a class="reference internal image-reference" href="_images/generated_folders.png"><img alt="_images/generated_folders.png" class="align-center" src="_images/generated_folders.png" style="width: 293.25px; height: 258.0px;" /></a>
+<p>Next Steps: <a class="reference internal" href="workcell_builder_run_demo.html#run-workcell-demo"><span class="std std-ref">Run workcell demo</span></a></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">EMD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generate Files and Folders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generating-yaml-files">Generating yaml files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-general">Other Files (General)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-ros1">Other Files (ROS1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-ros2">Other Files (ROS2)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_edit_scene.html">Editing Existing Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="workcell_builder.html">Workcell Builder</a><ul>
+      <li>Previous: <a href="workcell_builder_create_scene.html" title="previous chapter">Create A Scene</a></li>
+      <li>Next: <a href="workcell_builder_run_demo.html" title="next chapter">Run workcell demo</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Glenn Tan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/workcell_builder_generate_folder_files.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

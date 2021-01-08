@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editing Existing Scene &#8212; EMD alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Conventions" href="workcell_builder_conventions.html" />
+    <link rel="prev" title="Run workcell demo" href="workcell_builder_run_demo.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="editing-existing-scene">
+<span id="id1"></span><h1>Editing Existing Scene<a class="headerlink" href="#editing-existing-scene" title="Permalink to this headline">¶</a></h1>
+<p>If you want to edit the existing scene, there are multiple ways you can do so. The first way is to directly edit the <code class="code docutils literal notranslate"><span class="pre">environment.yaml</span></code> file for minor changes. <strong>Do note that you need to follow the YAML format for editing files, if not errors will be thrown.</strong></p>
+<div class="section" id="loading-yaml-file-into-gui">
+<h2>Loading YAML file into GUI<a class="headerlink" href="#loading-yaml-file-into-gui" title="Permalink to this headline">¶</a></h2>
+<p>To load a yaml file into the GUI, you need to ensure that the <strong>scene folder</strong> is located in the workcell_ws/src/scenes/&lt;scene_name&gt;/ folder. You also need to make sure you have the <strong>environment.yaml</strong> file in the workcell_ws/src/scenes/&lt;scene_name&gt;/ folder as well, if not the GUi will not be able to load the files to edit.</p>
+<p>If the scene can be found, it will be available to be clicked to be edited.</p>
+<a class="reference internal image-reference" href="_images/multiple_scenes.png"><img alt="_images/multiple_scenes.png" class="align-center" src="_images/multiple_scenes.png" style="width: 282.75px; height: 237.0px;" /></a>
+<p>Ensure that after you edit the scene, follow the rest of the steps in ref:<cite>Generate Files and Folders</cite> to re-generate the required files.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">EMD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html">Generate Files and Folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Editing Existing Scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#loading-yaml-file-into-gui">Loading YAML file into GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="workcell_builder.html">Workcell Builder</a><ul>
+      <li>Previous: <a href="workcell_builder_run_demo.html" title="previous chapter">Run workcell demo</a></li>
+      <li>Next: <a href="workcell_builder_conventions.html" title="next chapter">Conventions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Glenn Tan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/workcell_builder_edit_scene.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Getting Started &#8212; EMD alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workcell Builder" href="workcell_builder.html" />
+    <link rel="prev" title="Easy Manipulation Deployment" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="manipulation-pipeline">
+<h2>Manipulation Pipeline<a class="headerlink" href="#manipulation-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>To preserve the modularity of this package, the manipulation pipeline can be broken down into three main aspects, each of which can function separately, or together as an end to end pipeline. Each component has its own documentation and tutorials which are linked in the headers.</p>
+<div class="section" id="workcell-builder">
+<h3><a class="reference internal" href="workcell_builder.html#workcell-builder"><span class="std std-ref">Workcell Builder</span></a><a class="headerlink" href="#workcell-builder" title="Permalink to this headline">¶</a></h3>
+<p>The Workcell Builder provides an easy to use GUI that allows users to create a representation of their robot task space to provide robot simulation and to provide the initial state for trajectory planning using frameworks such as <a class="reference external" href="https://github.com/ros-planning/moveit2">Moveit2</a></p>
+</div>
+<div class="section" id="grasp-planner">
+<h3><a class="reference internal" href="grasp_planner.html#grasp-planner"><span class="std std-ref">Grasp Planner</span></a><a class="headerlink" href="#grasp-planner" title="Permalink to this headline">¶</a></h3>
+<p>The Grasp Planner subscribes to a topic published by a perception source and outputs an End-effector specific grasp pose for the end effector using a novel, algorithmic depth-based method. This pose is then published to a ROS2 topic.</p>
+</div>
+<div class="section" id="grasp-execution-demo">
+<h3><a class="reference internal" href="grasp_execution_demo.html#grasp-execution-demo"><span class="std std-ref">Grasp Execution Demo</span></a><a class="headerlink" href="#grasp-execution-demo" title="Permalink to this headline">¶</a></h3>
+<p>The Grasp Execution component subscribes to the output published by the Grasp Planner, and uses <a class="reference external" href="https://github.com/ros-planning/moveit2">Moveit2</a>  to develop a collision free trajectory for the robot to navigate to the required grasp object.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">EMD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#manipulation-pipeline">Manipulation Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#workcell-builder"><span class="xref std std-ref">workcell_builder</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grasp-planner"><span class="xref std std-ref">grasp_planner</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grasp-execution-demo"><span class="xref std std-ref">grasp_execution_demo</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Easy Manipulation Deployment</a></li>
+      <li>Next: <a href="workcell_builder.html" title="next chapter">Workcell Builder</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Glenn Tan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/getting_started.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
