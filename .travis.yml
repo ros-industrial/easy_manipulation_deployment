@@ -23,6 +23,8 @@ env:
     - DOCKER_IMAGE="registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly"
     - AFTER_INIT_EMBED="source /opt/moveit2/install/setup.bash"
     - PARALLEL_TESTS=true  # Global Variable
+    - CODE_COVERAGE="codecov.io"
+    - CODECOV_TOKEN="36cef827-7894-4feb-b0d5-5c5c133cb341"
   matrix:
     - ROS_DISTRO="foxy"
     
