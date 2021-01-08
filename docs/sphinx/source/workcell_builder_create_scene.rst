@@ -36,7 +36,7 @@ To add the robot into the workspace, check the **include robot** box and the add
 
 **Current implementation of this GUI assumes that the Robot is connected to the World link**. Manual editing of the world link can be done through the URDF. 
 
-If the error " No robot is detected in the workcell folder" is seen in the Robot Brand and Robot Model Fields, it means that the robot description folder and moveit_config is not properly loaded. Refer to [Uploading Relevant Assets](#uploading-relevant-assets)
+If the error " No robot is detected in the workcell folder" is seen in the Robot Brand and Robot Model Fields, it means that the robot description folder and moveit_config is not properly loaded. Refer to " Uploading Relevant Assets " in :ref:`workcell_initialization`
 
 Otherwise, you will see the window below
 

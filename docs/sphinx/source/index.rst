@@ -11,13 +11,17 @@ A modular and easy to deploy ROS2 manipulation pipeline that integrates percepti
 This package was tested with the `easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ ROS2 package, but any other perception system that provides the same ROS2 message in the right topic can work with this package as well. 
 
 
-
 .. toctree::
    :maxdepth: 3
    
-   getting_started
+   overview
+   common_concepts
+   download_instructions
+   emd_example
    workcell_builder
    grasp_planner
    grasp_execution_demo
+   faq
+   future_plans
 
 

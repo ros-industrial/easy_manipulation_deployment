@@ -8,8 +8,7 @@
 Grasp Planner
 ========================================================
 
-Motivation
-^^^^^^^^^^^^
+**Motivation**
 
 Traditionally, grasp pose generation is done through using convolutional neural networks (CNNs) to achieve grasp plans. The issues with using machine learning and neural networks is several fold
 
@@ -24,8 +23,6 @@ Traditionally, grasp pose generation is done through using convolutional neural 
 3. Training of new types of grippers require **manual labelling** of new datasets (labour intensive).
 4. Accurate and stable grasp poses may not be available for **irregular objects**, so specifically labelled dataset is needed in order to generate accurate grasps
 
-Solution Summary
-^^^^^^^^^^^^^^^^^
 This ROS2 package presents a solution that requires no training, no labelling and little computational power to generate a 3 + 1 DOF grasp poses. The modular design of this package also allows for expansion into other gripper types. Current support for this package includes **2 finger gripper and single suction cup gripper**.
 
 .. |original1| image:: ./images/original_1.jpg   
@@ -56,33 +53,11 @@ This ROS2 package presents a solution that requires no training, no labelling an
 |   |original2|    |      |finger2|       |         |suction2|          |
 +------------------+----------------------+-----------------------------+
 
-Before running the Grasp Planner
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
    
-   grasp_planner_config
-   grasp_planner_msgs
-
-Running the grasp_planner
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Before running the grasp planner, ensure that the initialization is done through :ref:`Grasp Planner Configuration` .
-
-In your colcon workspace: 
-
-.. code-block:: bash
-
-   $ source /opt/ros/foxy/setup.bash
-   
-   $ colcon build
-   
-   $ source install/setup.bash
-   
-   $ ros2 run grasp_planning grasp_planning_node
-
-
-
-
+   grasp_planner_before
+   grasp_planner_run
+   grasp_validator
 

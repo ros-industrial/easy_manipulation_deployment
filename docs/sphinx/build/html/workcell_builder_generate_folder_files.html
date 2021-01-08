@@ -1,37 +1,188 @@
 
-<!DOCTYPE html>
 
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Generate Files and Folders &#8212; EMD alpha documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Generate Files and Folders &mdash; EMD alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Run workcell demo" href="workcell_builder_run_demo.html" />
-    <link rel="prev" title="Create A Scene" href="workcell_builder_create_scene.html" />
+    <link rel="prev" title="Create an object" href="workcell_builder_create_object.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
-          <div class="body" role="main">
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> EMD
+          
+
+          
+            
+            <img src="_static/emd_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common_concepts.html">Common Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download_instructions.html">Download Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emd_example.html">Step-By-Step Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generate Files and Folders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generating-yaml-files">Generating yaml files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-general">Other Files (General)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#environment-object-packages">Environment Object Packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-urdf-xacro">environment.urdf.xacro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arm-hand-srdf-xacro">arm_hand.srdf.xacro</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-ros1">Other Files (ROS1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-files-ros2">Other Files (ROS2)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#demo-launch-py">demo.launch.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_edit_scene.html">Editing Existing Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future_plans.html">Future Plans</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EMD</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="workcell_builder.html">Workcell Builder</a> &raquo;</li>
+        
+      <li>Generate Files and Folders</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/workcell_builder_generate_folder_files.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="generate-files-and-folders">
 <span id="id1"></span><h1>Generate Files and Folders<a class="headerlink" href="#generate-files-and-folders" title="Permalink to this headline">¶</a></h1>
@@ -85,90 +236,59 @@
 </div>
 
 
+           </div>
+           
           </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">EMD</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Generate Files and Folders</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#generating-yaml-files">Generating yaml files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#other-files-general">Other Files (General)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#other-files-ros1">Other Files (ROS1)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#other-files-ros2">Other Files (ROS2)</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="workcell_builder_edit_scene.html">Editing Existing Scene</a></li>
-<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="workcell_builder.html">Workcell Builder</a><ul>
-      <li>Previous: <a href="workcell_builder_create_scene.html" title="previous chapter">Create A Scene</a></li>
-      <li>Next: <a href="workcell_builder_run_demo.html" title="next chapter">Run workcell demo</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="workcell_builder_run_demo.html" class="btn btn-neutral float-right" title="Run workcell demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="workcell_builder_create_object.html" class="btn btn-neutral float-left" title="Create an object" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+  
 
+  <hr/>
 
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Glenn Tan
 
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-
-
-
+</footer>
 
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2020, Glenn Tan.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="_sources/workcell_builder_generate_folder_files.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-  </body>
+   
+
+</body>
 </html>

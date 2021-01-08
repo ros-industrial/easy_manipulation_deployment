@@ -11,35 +11,34 @@ Grasp Planner Message Definitions
 Package Subcriber
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This is the topic name and message type required for the grasp planner package. The `easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ package follows this convention, but you can use any other perception system as long as it adheres to the following:
+You are able to use any perception package to work with the grasp planner, **as long as it follows the message type definitions below**. The grasp planner ROS2 subscriber subscribes to the topic :code:`/processor/epd_localize_output` of message type :code:`EPDObjectLocalization.msg` , so make sure that your perception package publishes to a topic in that format. For convenience, you can use the `easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ package which follows this convention.
 
-Topic Name :  `/perception_output`
-----------------------------------
+Topic Name :  `/processor/epd_localize_output`
+------------------------------------------------
 
-Message Name: RectOutput.msg
------------------------------
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| Message name  | Field Type                     | Explanation                                                            |
-+===============+================================+========================================================================+
-| header        | std_msgs/Header                | General information from the camera                                    |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| objects       | DlObject[]                     | Information about the object (refer below to the DlOBject message type.|
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| frame_width   | uint32                         | Width of the depth image                                               |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| frame_height  | uint32                         | Height of the depth image                                              |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| num_objects   | uint32                         | Number of objects in scene                                             |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| depth_image   | sensor_msgs/Image              | Depth image of the work area                                           |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| camera_info   | sensor_msgs/CameraInfo         | Camera-specific information                                            |
-+---------------+--------------------------------+------------------------------------------------------------------------+
-| roi_array     | sensor_msgs/RegionOfInterest[] | Array of bounding boxes containing the objects                         |
-+---------------+--------------------------------+------------------------------------------------------------------------+
+Message Name: EPDObjectLocalization.msg
+-----------------------------------------
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| Message name  | Field Type                     | Explanation                                                                   |
++===============+================================+===============================================================================+
+| header        | std_msgs/Header                | General information from the camera                                           |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| objects       | LocalizedObject[]              | Information about the object (refer below to the LocalizedObject message type.|
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| frame_width   | uint32                         | Width of the depth image                                                      |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| frame_height  | uint32                         | Height of the depth image                                                     |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| depth_image   | sensor_msgs/Image              | Depth image of the work area                                                  |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| camera_info   | sensor_msgs/CameraInfo         | Camera-specific information                                                   |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
+| roi_array     | sensor_msgs/RegionOfInterest[] | Array of bounding boxes containing the objects                                |
++---------------+--------------------------------+-------------------------------------------------------------------------------+
 
-Message Name: DlObject.msg
----------------------------
+Message Name: LocalizedObject.msg
+-------------------------------------
 +---------------+-------------------------------+--------------------------+
 | Message name | Field Type                     | Explanation              |
 +==============+==============================+============================+

@@ -12,7 +12,6 @@ This ROS package provides an easy to use Graphical User Interface for generation
 
 .. image:: ./images/suction.png
 
-
 .. toctree::
    :maxdepth: 5
    
