@@ -42,3 +42,5 @@ To visualize the previously generated grasps, run the grasp validator:
 You should then see a visualization of the grasp as seen below
 
 .. image:: ./images/example/example_validator.png
+
+Once the grasp plan is verified, we will execute the grasp plan in a simulation with the manipulator: :ref:`grasp_execution_example`

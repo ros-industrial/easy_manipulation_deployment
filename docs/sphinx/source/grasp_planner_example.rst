@@ -12,7 +12,7 @@ In this part of the tutorial we will reference the scene that we have generated 
 
 If you currently do not have a working perception system, you can still test out the package using a ROSbag located in :code:`/workcell_ws/src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example.zip`
 
-The perception rosbag is an simple box that is slightly angled as shown below.
+The perception rosbag is an simple box as shown below.
 
 .. image:: ./images/example/example_object.png
 
