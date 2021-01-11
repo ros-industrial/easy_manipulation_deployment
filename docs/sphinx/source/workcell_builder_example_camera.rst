@@ -104,11 +104,22 @@ For some cameras, the link representing the model may not be in the same orienta
 
 .. image:: ./images/example/example_d415_screw_frame.png
 
-This is how we are currently referencing the camera in the scene. However, based off the perception system we are using (easy_perception_system), the actual camera frame is supposed to be :code:`camera_depth_optical_frame` , thus we need to make sure to define the camera frame as such during the :code:`grasp_execution` part of the package.  
+This is how we are currently referencing the camera in the scene. However, based off the perception system we are using (easy_perception_system), the actual camera frame is supposed to be as shown below.
 
 .. image:: ./images/example/example_d415_actual_frame.png
 
+To do so, we need to add a link in this orientation in the URDF. In the file :code:`/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro` add the following lines under the declaration of the camera object: 
 
+.. code-block:: bash
+
+    <link name="camera_frame" />
+    <joint name="d415_to_camera" type="fixed">
+    	<parent link="camera_link"/>
+    	<child link="camera_frame"/>
+    	<origin xyz="0 0 0" rpy="1.57079506 0 1.57079506"/>
+    </joint>
+
+This addes a new frame :code:`camera_frame` that will be the frame in which the object is detected, and the frame that will be transformed to the world frame during the grasp execution phase of the pipeline.
 
 Now that we have the main scene set up, we can move on to the grasp planner: :ref:`grasp_planner_example`
 
