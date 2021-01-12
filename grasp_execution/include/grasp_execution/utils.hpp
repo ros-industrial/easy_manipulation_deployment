@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/random_generator.hpp"
@@ -90,6 +91,41 @@ void to_frame(
     _target_frame, in_.header.frame_id, rclcpp::Time());
 
   tf2::doTransform(in_, out_, base_frame2target_frame);
+}
+
+/// Parse vector with 6 or 7 variables to a pose
+inline bool parse_pose_vector(
+  const std::vector<double> & param,
+  geometry_msgs::msg::Pose & pose)
+{
+  // Location is x y z qx qy qz qw
+  if (param.size() == 7) {
+    pose.position.x = param[0];
+    pose.position.y = param[1];
+    pose.position.z = param[2];
+    tf2::Quaternion temp_qr(
+      param[3],
+      param[4],
+      param[5],
+      param[6]);
+    pose.orientation = tf2::toMsg(temp_qr.normalized());
+    return true;
+  } else if (param.size() == 6) {
+    // Location is x y z roll pitch yaw
+    pose.position.x = param[0];
+    pose.position.y = param[1];
+    pose.position.z = param[2];
+    tf2::Quaternion temp_qr;
+    temp_qr.setRPY(
+      param[3],
+      param[4],
+      param[5]);
+    pose.orientation = tf2::toMsg(temp_qr);
+    return true;
+  } else {
+    // Location invalid
+    return false;
+  }
 }
 
 }  // namespace grasp_execution

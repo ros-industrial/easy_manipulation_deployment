@@ -1,0 +1,12 @@
+fake_grasp_pose_publisher:
+  ros__parameters:
+    frame_id: camera_frame
+    grasp_pose: [0.0126, 0.0322, 0.477,
+                 0.0, 0.0, 0.9997, 0.0250]
+    
+    object_pose: [0.0128, 0.0330, 0.488,
+                  0.0, 0.0, 0.9997, 0.0250]
+
+    object_dimensions: [0.087, 0.167, 0.023]
+
+    delay: 1.5
