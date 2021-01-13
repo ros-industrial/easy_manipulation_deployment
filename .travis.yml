@@ -1,0 +1,34 @@
+language: generic
+
+image: docker:git
+services:
+  - docker:dind
+  
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libyaml-cpp-dev
+  - sudo apt-get install pkg-config
+  - sudo apt-get install cmake-data
+  - sudo apt-get install libboost-all-dev
+  - sudo apt install libboost-program-options-dev
+  - sudo apt-get install qt5-default
+  
+before_script:
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci -b master
+
+variables:
+  - DOCKER_RUN_OPTS="-v /etc/ssl/certs:/etc/ssl/certs:ro"
+env:
+  global:
+    - DOCKER_IMAGE="registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly"
+    - AFTER_INIT_EMBED="source /opt/moveit2/install/setup.bash"
+    - PARALLEL_TESTS=true  # Global Variable
+    - CODE_COVERAGE="codecov.io"
+    - CODECOV_TOKEN="36cef827-7894-4feb-b0d5-5c5c133cb341"
+  matrix:
+    - ROS_DISTRO="foxy"
+    
+
+script:
+  - - echo "tLqbxEsTsUwtbjjwdBMd" | docker login -u rosi --password-stdin registry.gitlab.com
+  - .industrial_ci/travis.sh

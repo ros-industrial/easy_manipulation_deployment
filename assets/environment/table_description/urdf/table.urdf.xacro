@@ -1,0 +1,22 @@
+<?xml version="1.0" ?> 
+<robot xmlns:xacro="http://wiki.ros.org/xacro"> 
+<xacro:macro name="table" params="parent *origin prefix"> 
+	<link name="table_${prefix}">
+	  <visual name="table_${prefix}">
+	    <geometry>
+	      <mesh filename="package://table_description/meshes/visual/table.stl" scale="0.001000 0.001000 0.001000"/>
+	    </geometry>
+	  </visual>
+	  <collision name="None_${prefix}">
+	    <geometry>
+	      <mesh filename="package://table_description/meshes/visual/table.stl" scale="0.001000 0.001000 0.001000"/>
+	    </geometry>
+	  </collision>
+	</link>
+	<joint name="table_base_joint_${prefix}" type="fixed">
+	  <xacro:insert_block name="origin" />
+	  <parent link="${parent}"/>
+	  <child link="table_${prefix}"/>
+	</joint>
+</xacro:macro>
+</robot> 

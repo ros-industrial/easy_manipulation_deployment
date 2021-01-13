@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot
+  name="double_fixture">
+  <link name="wrist_fixture">
+    <inertial>
+      <origin xyz="-0.0217515165915374 -9.97842315909634E-12 0.00161452700025897" rpy="0 0 0" />
+      <mass value="0.159581379421063" />
+      <inertia
+        ixx="2.89607613104341E-06"
+        ixy="-4.62033398488708E-14"
+        ixz="-1.53914118337679E-05"
+        iyy="0.000132250835361537"
+        iyz="3.97755040354793E-14"
+        izz="0.000129661489903914" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://dual_gripper/meshes/wrist_fixture.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://dual_gripper/meshes/wrist_fixture.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="suction_cup_link">
+    <origin xyz= "-0.22836 0.053 0"/>
+  </link>
+
+  <joint name="virtual_ee_joint" type="fixed">
+    <origin xyz="-0.22836 0.053 0" rpy="0 ${pi/2} 0" />
+    <parent link="wrist_fixture" />
+    <child link="suction_cup_link" />
+    <axis xyz="0 0 0" />
+  </joint>
+
+</robot>

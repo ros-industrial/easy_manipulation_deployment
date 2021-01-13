@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>workcellexample</name>
+  <version>0.0.0</version>
+  <description>The workcellexample package</description>
+  <maintainer email="rosi5@todo.todo">rosi5</maintainer>
+  <license>TODO</license>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

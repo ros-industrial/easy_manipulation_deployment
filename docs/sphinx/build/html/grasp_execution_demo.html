@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Grasp Execution Demo &mdash; EMD alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Frequently Asked Questions" href="faq.html" />
+    <link rel="prev" title="Grasp Validator" href="grasp_validator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> EMD
+          
+
+          
+            
+            <img src="_static/emd_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common_concepts.html">Common Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download_instructions.html">Download Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emd_example.html">Step-By-Step Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grasp Execution Demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#package-configuration">Package configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launch-file">Launch file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grasp-execution-node-cpp">grasp_execution_node.cpp</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-grasp-execution">Running grasp execution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#changing-the-home-state">Changing the home state</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future_plans.html">Future Plans</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EMD</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Grasp Execution Demo</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/grasp_execution_demo.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grasp-execution-demo">
+<span id="id1"></span><h1>Grasp Execution Demo<a class="headerlink" href="#grasp-execution-demo" title="Permalink to this headline">¶</a></h1>
+<p>This package serves as a grasp execution simulator using Moveit2 path planners and the results from our grasp planner. It is recommended that you use scene packages generated by the  <a class="reference internal" href="workcell_builder.html#workcell-builder"><span class="std std-ref">Workcell Builder</span></a> . If you are using a robot, make sure you have the <strong>moveit config folder</strong> ( check out <a class="reference internal" href="workcell_builder_initial.html#workcell-initialization"><span class="std std-ref">Workcell Initialization</span></a> for more information about the moveit_config folder)</p>
+<div class="section" id="package-configuration">
+<h2>Package configuration<a class="headerlink" href="#package-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Before running the grasp execution package, make sure that you have a scene package in the workcell/src/scenes/ folder.</p>
+<div class="section" id="launch-file">
+<h3>Launch file<a class="headerlink" href="#launch-file" title="Permalink to this headline">¶</a></h3>
+<p>Open the grasp_execution.launch.py file in /workcell/src/easy_manipulation_deployment/grasp_execution/launch/ and change the parameters accordingly</p>
+<p><strong>scene_pkg</strong></p>
+<p>The name of your scene package</p>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">scene_pkg</span> <span class="o">=</span> <span class="s1">&#39;ur5_robotiq_table&#39;</span>
+</pre></div>
+</div>
+<p><strong>base_link</strong></p>
+<p>The base link of the robot connected to the table surface</p>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">robot_base_link</span> <span class="o">=</span> <span class="s1">&#39;base_link&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="grasp-execution-node-cpp">
+<h3>grasp_execution_node.cpp<a class="headerlink" href="#grasp-execution-node-cpp" title="Permalink to this headline">¶</a></h3>
+<p>Open the grasp_execution.launch.py file in /workcell/src/easy_manipulation_deployment/grasp_execution/src/ and change the parameters accordingly</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>std::string <span class="nv">robot_frame</span> <span class="o">=</span> <span class="s2">&quot;base_link&quot;</span><span class="p">;</span>
+std::string <span class="nv">camera_frame</span> <span class="o">=</span> <span class="s2">&quot;camera_frame&quot;</span><span class="p">;</span>
+std::string <span class="nv">ee_frame</span> <span class="o">=</span> <span class="s2">&quot;gripper_base_link&quot;</span><span class="p">;</span>
+std::string <span class="nv">ee_link</span> <span class="o">=</span> <span class="s2">&quot;tool0&quot;</span><span class="p">;</span>
+std::string <span class="nv">robot_group</span> <span class="o">=</span> <span class="s2">&quot;manipulator&quot;</span><span class="p">;</span>
+
+std::vector&lt;std::string&gt; ignore_links<span class="o">{</span>
+    <span class="s2">&quot;gripper_finger1_finger_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger1_finger_tip_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger1_inner_knuckle_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger1_knuckle_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger2_finger_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger2_finger_tip_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger2_inner_knuckle_link&quot;</span>,
+    <span class="s2">&quot;gripper_finger2_knuckle_link&quot;</span>,
+    <span class="s2">&quot;gripper_base_link&quot;</span>
+  <span class="o">}</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><strong>robot_frame</strong></p>
+<p>Base link of robot</p>
+<p><strong>camera_frame</strong></p>
+<p>Base link of camera</p>
+<p><strong>ee_frame</strong></p>
+<p>Base link of End effector</p>
+<p><strong>ee_link</strong></p>
+<p>Tip link of end effector</p>
+<p><strong>robot_group</strong></p>
+<p>Robot group state that is declared in the srdf. for example, in the file ur5_moveit_config/config/ur5.srdf.xacro:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;!--GROUPS: Representation of a <span class="nb">set</span> of joints and links. This can be useful <span class="k">for</span> specifying DOF to plan <span class="k">for</span>, defining arms, end effectors, etc--&gt;
+&lt;group <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;manipulator&quot;</span>&gt;
+    &lt;chain <span class="nv">base_link</span><span class="o">=</span><span class="s2">&quot;base_link&quot;</span> <span class="nv">tip_link</span><span class="o">=</span><span class="s2">&quot;ee_link&quot;</span> /&gt;
+&lt;/group&gt;
+</pre></div>
+</div>
+<p>the robot_group is then <em>manipulator</em></p>
+<p><strong>ignore_links</strong></p>
+<p>The list of links that should be ignored during attach and detach operations. Typically we start with including all end effector links to prevent errors.</p>
+</div>
+</div>
+<div class="section" id="running-grasp-execution">
+<h2>Running grasp execution<a class="headerlink" href="#running-grasp-execution" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch grasp_execution grasp_execution.launch.py
+</pre></div>
+</div>
+<p>You should then see Rviz launch and the initial workcell scene, with the robot arm at its home state.</p>
+<div class="section" id="changing-the-home-state">
+<h3>Changing the home state<a class="headerlink" href="#changing-the-home-state" title="Permalink to this headline">¶</a></h3>
+<p>To change the home state, you need to first define a robot group state in the srdf. For example,in the file ur5_moveit_config/config/ur5.srdf.xacro:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;!--GROUP STATES: Purpose: Define a named state <span class="k">for</span> a particular group, in terms of joint values. This is useful to define states like <span class="s1">&#39;folded arms&#39;</span>--&gt;
+&lt;group_state <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;home&quot;</span> <span class="nv">group</span><span class="o">=</span><span class="s2">&quot;manipulator&quot;</span>&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;elbow_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;2.4345&quot;</span> /&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;shoulder_lift_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;-2.298&quot;</span> /&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;shoulder_pan_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;1.7011&quot;</span> /&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;wrist_1_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;-1.7011&quot;</span> /&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;wrist_2_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;-1.6082&quot;</span> /&gt;
+    &lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;wrist_3_joint&quot;</span> <span class="nv">value</span><span class="o">=</span><span class="s2">&quot;-0.0592&quot;</span> /&gt;
+&lt;/group_state&gt;
+</pre></div>
+</div>
+<p>Next, based on the group state name, change the <em>initial</em> field in ur5_moveit_config/config/fake_controllers.yaml to your group state <em>home</em>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>controller_names:
+  - fake_manipulator_controller
+fake_manipulator_controller:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+initial:
+   manipulator: home
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="faq.html" class="btn btn-neutral float-right" title="Frequently Asked Questions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grasp_validator.html" class="btn btn-neutral float-left" title="Grasp Validator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Glenn Tan.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

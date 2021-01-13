@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Grasp Planner Message Definitions &mdash; EMD alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running the Grasp Planner" href="grasp_planner_run.html" />
+    <link rel="prev" title="Grasp Planner Configuration" href="grasp_planner_config.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> EMD
+          
+
+          
+            
+            <img src="_static/emd_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common_concepts.html">Common Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download_instructions.html">Download Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emd_example.html">Step-By-Step Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="grasp_planner_before.html">Before running the Grasp Planner</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grasp_planner_config.html">Grasp Planner Configuration</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Grasp Planner Message Definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#package-subcriber">Package Subcriber</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#package-publisher">Package Publisher</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner_run.html">Running the Grasp Planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_validator.html">Grasp Validator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future_plans.html">Future Plans</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EMD</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="grasp_planner.html">Grasp Planner</a> &raquo;</li>
+        
+          <li><a href="grasp_planner_before.html">Before running the Grasp Planner</a> &raquo;</li>
+        
+      <li>Grasp Planner Message Definitions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/grasp_planner_msgs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grasp-planner-message-definitions">
+<span id="id1"></span><h1>Grasp Planner Message Definitions<a class="headerlink" href="#grasp-planner-message-definitions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="package-subcriber">
+<h2>Package Subcriber<a class="headerlink" href="#package-subcriber" title="Permalink to this headline">¶</a></h2>
+<p>You are able to use any perception package to work with the grasp planner, <strong>as long as it follows the message type definitions below</strong>. The grasp planner ROS2 subscriber subscribes to the topic <code class="code docutils literal notranslate"><span class="pre">/processor/epd_localize_output</span></code> of message type <code class="code docutils literal notranslate"><span class="pre">EPDObjectLocalization.msg</span></code> , so make sure that your perception package publishes to a topic in that format. For convenience, you can use the <a class="reference external" href="https://github.com/ros-industrial/easy_perception_deployment/">easy_perception_deployment</a> package which follows this convention.</p>
+<div class="section" id="topic-name-processor-epd-localize-output">
+<h3>Topic Name :  <cite>/processor/epd_localize_output</cite><a class="headerlink" href="#topic-name-processor-epd-localize-output" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="message-name-epdobjectlocalization-msg">
+<h3>Message Name: EPDObjectLocalization.msg<a class="headerlink" href="#message-name-epdobjectlocalization-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Message name</p></th>
+<th class="head"><p>Field Type</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>header</p></td>
+<td><p>std_msgs/Header</p></td>
+<td><p>General information from the camera</p></td>
+</tr>
+<tr class="row-odd"><td><p>objects</p></td>
+<td><p>LocalizedObject[]</p></td>
+<td><p>Information about the object (refer below to the LocalizedObject message type.</p></td>
+</tr>
+<tr class="row-even"><td><p>frame_width</p></td>
+<td><p>uint32</p></td>
+<td><p>Width of the depth image</p></td>
+</tr>
+<tr class="row-odd"><td><p>frame_height</p></td>
+<td><p>uint32</p></td>
+<td><p>Height of the depth image</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>depth_image</p></td>
+<td><p>sensor_msgs/Image</p></td>
+<td><p>Depth image of the work area</p></td>
+</tr>
+<tr class="row-even"><td><p>camera_info</p></td>
+<td><p>sensor_msgs/CameraInfo</p></td>
+<td><p>Camera-specific information</p></td>
+</tr>
+<tr class="row-odd"><td><p>roi_array</p></td>
+<td><p>sensor_msgs/RegionOfInterest[]</p></td>
+<td><p>Array of bounding boxes containing the objects</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="message-name-localizedobject-msg">
+<h3>Message Name: LocalizedObject.msg<a class="headerlink" href="#message-name-localizedobject-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 0%" />
+<col style="width: 41%" />
+<col style="width: 1%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p>Message name | Field Type                     | Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>name</p></td>
+<td colspan="2"><p>string</p></td>
+<td colspan="2"><p>Name of object</p></td>
+</tr>
+<tr class="row-odd"><td><p>pos</p></td>
+<td colspan="2"><p>geometry_msgs/PoseStamped</p></td>
+<td colspan="2"><p>Pose of object</p></td>
+</tr>
+<tr class="row-even"><td><p>roi</p></td>
+<td colspan="2"><p>sensor_msgs/RegionOfInterest</p></td>
+<td colspan="2"><p>Bounding Box for the object</p></td>
+</tr>
+<tr class="row-odd"><td><p>breadth</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object breadth</p></td>
+</tr>
+<tr class="row-even"><td><p>length</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object breadth</p></td>
+</tr>
+<tr class="row-odd"><td><p>height</p></td>
+<td colspan="2"><p>float64</p></td>
+<td colspan="2"><p>Real object height</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="package-publisher">
+<h2>Package Publisher<a class="headerlink" href="#package-publisher" title="Permalink to this headline">¶</a></h2>
+<p>This package consists of a publisher that publishes to the following topic with the message structure shown</p>
+<div class="section" id="topic-name-grasp-poses">
+<h3>Topic Name :  <cite>/grasp_poses</cite><a class="headerlink" href="#topic-name-grasp-poses" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="message-name-grasppose-msg">
+<h3>Message Name: GraspPose.msg<a class="headerlink" href="#message-name-grasppose-msg" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 24%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Message name</p></th>
+<th class="head"><p>Field Type</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>num_objects</p></td>
+<td><p>uint32</p></td>
+<td><p>Number of grasp objects in the scene</p></td>
+</tr>
+<tr class="row-odd"><td><p>grasp_poses</p></td>
+<td><p>geometry_msgs/PoseStamped[]</p></td>
+<td><p>Array of grasp object poses</p></td>
+</tr>
+<tr class="row-even"><td><p>object_poses</p></td>
+<td><p>geometry_msgs/PoseStamped[]</p></td>
+<td><p>Array of grasp poses</p></td>
+</tr>
+<tr class="row-odd"><td><p>object_shapes</p></td>
+<td><p>shape_msgs/SolidPrimitive[]</p></td>
+<td><p>Array of object shapes (Used to create collision objects for path planning)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="grasp_planner_run.html" class="btn btn-neutral float-right" title="Running the Grasp Planner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grasp_planner_config.html" class="btn btn-neutral float-left" title="Grasp Planner Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Glenn Tan.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

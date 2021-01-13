@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="double_ee" >
+
+       <xacro:arg name="limited" default="true"/>
+
+       <link name = "ref"/>
+
+       <!-- LOAD IN VACUUM FIXTURE -->
+       <xacro:include filename="$(find dual_gripper)/urdf/double_fixture.urdf"/>
+
+       <joint name="from_ref" type="fixed">
+         <parent link="ref"/>
+         <child link = "wrist_fixture"/>
+         <origin xyz= "0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+       </joint>
+
+       <!-- Robotiq Gripper -->
+       <xacro:include filename="$(find robotiq_85_description)/urdf/robotiq_85_gripper.urdf.xacro"/>
+
+       <xacro:robotiq_85_gripper prefix="" parent="wrist_fixture">
+           <origin xyz="0 0 0" rpy="${pi} 0 ${pi/2}"/>
+       </xacro:robotiq_85_gripper>
+
+      <joint name="to_gripp_ee_joint" type="fixed">
+        <parent link="gripper_base_link"/>
+        <child link="gripper_ee_link"/>
+        <origin xyz="0.12 0 0" rpy="0 0 0"/>
+      </joint>
+
+      <link name="gripper_ee_link"/>
+
+       <gazebo>
+       	  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+       	  </plugin>
+       	</gazebo>
+</robot>

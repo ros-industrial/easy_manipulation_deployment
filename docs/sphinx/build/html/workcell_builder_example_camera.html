@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Adding a camera to the scene &mdash; EMD alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Grasp Planner Example" href="grasp_planner_example.html" />
+    <link rel="prev" title="Check if scene is properly generated" href="workcell_builder_example_check_scene.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> EMD
+          
+
+          
+            
+            <img src="_static/emd_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common_concepts.html">Common Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download_instructions.html">Download Instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="emd_example.html">Step-By-Step Tutorial</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="workcell_builder_example.html">Workcell Builder Example</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_initial.html">Before running the GUI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_gui.html">Starting the Workcell Builder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_manipulator.html">Adding A Manipulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_ee.html">Adding an end effector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_object.html">Adding an Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_extj.html">Adding External joints for Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_files.html">Generating files and folders</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_example_check_scene.html">Check if scene is properly generated</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Adding a camera to the scene</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#downloading-camera-description-folder">Downloading Camera Description Folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-the-camera-to-the-scene">Add the camera to the scene</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#checking-camera-frame-reference">Checking camera frame reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_planner_example.html">Grasp Planner Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_validator_example.html">Grasp Validator Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_execution_example.html">Grasp Execution Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future_plans.html">Future Plans</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EMD</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="emd_example.html">Step-By-Step Tutorial</a> &raquo;</li>
+        
+          <li><a href="workcell_builder_example.html">Workcell Builder Example</a> &raquo;</li>
+        
+      <li>Adding a camera to the scene</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/workcell_builder_example_camera.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="adding-a-camera-to-the-scene">
+<span id="workcell-builder-example-camera"></span><h1>Adding a camera to the scene<a class="headerlink" href="#adding-a-camera-to-the-scene" title="Permalink to this headline">¶</a></h1>
+<p>For manipulation systems with cameras, you would need to have a representation of the camera in the scene. The current workcell builder version <strong>does not support</strong>  camera addition via the gui, but in this tutorial we will teach you how to add a camera to the scene.</p>
+<p>For this example, we will adding the <strong>Intel Realsense D415</strong> depth camera in the scene.</p>
+<div class="section" id="downloading-camera-description-folder">
+<h2>Downloading Camera Description Folder<a class="headerlink" href="#downloading-camera-description-folder" title="Permalink to this headline">¶</a></h2>
+<p>In the directory <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/assets/environment/</span></code> , download the realsense repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/IntelRealSense/realsense-ros.git -b eloquent
+</pre></div>
+</div>
+<p>Only keep the <code class="code docutils literal notranslate"><span class="pre">realsense2_description</span></code> folder. Your <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/assets/environment/</span></code> folder should be as shown:</p>
+<img alt="_images/example_realsense_folder.png" src="_images/example_realsense_folder.png" />
+<p>Next, build your package again to make sure that the realsense package builds correctly.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> /opt/ros/foxy/setup.bash
+
+<span class="nb">cd</span> ~/workcell_ws
+
+colcon build
+
+<span class="nb">source</span> install/setup.bash
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-the-camera-to-the-scene">
+<h2>Add the camera to the scene<a class="headerlink" href="#add-the-camera-to-the-scene" title="Permalink to this headline">¶</a></h2>
+<p>Now we shall add the camera to the scene we created previously, <code class="code docutils literal notranslate"><span class="pre">new_scene</span></code> .</p>
+<p>Open up the urdf file in <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro</span></code> and add the following lines <strong>before</strong> the <code class="code docutils literal notranslate"><span class="pre">&lt;/robot&gt;</span></code> tag:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;xacro:include <span class="nv">filename</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>find realsense2_description<span class="k">)</span><span class="s2">/urdf/_d415.urdf.xacro&quot;</span>/&gt;
+&lt;xacro:arg <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;use_nominal_extrinsics&quot;</span> <span class="nv">default</span><span class="o">=</span><span class="s2">&quot;true&quot;</span> /&gt;
+&lt;xacro:sensor_d415 <span class="nv">parent</span><span class="o">=</span><span class="s2">&quot;table_&quot;</span> <span class="nv">use_nominal_extrinsics</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>arg use_nominal_extrinsics<span class="k">)</span><span class="s2">&quot;</span>&gt;
+     &lt;origin <span class="nv">xyz</span><span class="o">=</span><span class="s2">&quot;-0.5 0.2 0.46&quot;</span> <span class="nv">rpy</span><span class="o">=</span><span class="s2">&quot;0 1.57079506 0&quot;</span>/&gt;
+&lt;/xacro:sensor_d415&gt;
+</pre></div>
+</div>
+<p>Now, rebuild the package and launch the demo visualization</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> /opt/ros/foxy/setup.bash
+
+<span class="nb">cd</span> ~/workcell_ws/src
+
+colcon build
+
+<span class="nb">source</span> install/setup.bash
+
+ros2 launch new_scene demo.launch.py
+</pre></div>
+</div>
+<p>you should see the camera in scene.</p>
+<img alt="_images/example_d415_rviz.png" src="_images/example_d415_rviz.png" />
+</div>
+<div class="section" id="checking-camera-frame-reference">
+<h2>Checking camera frame reference<a class="headerlink" href="#checking-camera-frame-reference" title="Permalink to this headline">¶</a></h2>
+<p>First we need to check which link is the child link when connecting the camera to the xacro. This can be found in <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/assets/environment/realsense2_description/urdf/_d415.urdf.xacro</span></code></p>
+<img alt="_images/example_d415_link.png" src="_images/example_d415_link.png" />
+<p>From the URDF we can see that the link that is connected to the external scene is <code class="code docutils literal notranslate"><span class="pre">${name}_bottom_screw_frame</span></code>.</p>
+<p>Next, We will launch RViz to check the orientation of this link. <strong>Note that for this step, you will need to be in ROS1, as the current launch files for realsense are in ROS1 as well.</strong>. To prevent confusion, we will create a new workspace just to check the orientation Note that this example uses ROS Noetic. To install Noetic, follow the <a class="reference external" href="http://wiki.ros.org/noetic/Installation">installation instructions</a> (If you face this error during your <code class="code docutils literal notranslate"><span class="pre">catkin</span> <span class="pre">build</span></code> command : <code class="code docutils literal notranslate"><span class="pre">catkin:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> , try to do <code class="code docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python3-osrf-pycommon</span> <span class="pre">python3-catkin-tools</span></code> .</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p ~/realsense_test_ws/src
+
+<span class="nb">cd</span> ~/realsense_test_ws/src
+
+git clone https://github.com/IntelRealSense/realsense-ros.git
+
+<span class="nb">cd</span> ~/realsense_test_ws
+
+<span class="nb">source</span> /opt/ros/noetic/setup.bash
+
+catkin build
+
+<span class="nb">source</span> devel/setup.bash
+
+roslaunch realsense2_description view_d415_model.launch
+</pre></div>
+</div>
+<p>For some cameras, the link representing the model may not be in the same orientation as the actual camera frame the perception system references . This can be shown in RViz,</p>
+<img alt="_images/example_d415_screw_frame.png" src="_images/example_d415_screw_frame.png" />
+<p>This is how we are currently referencing the camera in the scene. However, based off the perception system we are using (easy_perception_system), the actual camera frame is supposed to be as shown below.</p>
+<img alt="_images/example_d415_actual_frame.png" src="_images/example_d415_actual_frame.png" />
+<p>To do so, we need to add a link in this orientation in the URDF. In the file <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro</span></code> add the following lines under the declaration of the camera object:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;link <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;camera_frame&quot;</span> /&gt;
+&lt;joint <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;d415_to_camera&quot;</span> <span class="nv">type</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span>&gt;
+    &lt;parent <span class="nv">link</span><span class="o">=</span><span class="s2">&quot;camera_link&quot;</span>/&gt;
+    &lt;child <span class="nv">link</span><span class="o">=</span><span class="s2">&quot;camera_frame&quot;</span>/&gt;
+    &lt;origin <span class="nv">xyz</span><span class="o">=</span><span class="s2">&quot;0 0 0&quot;</span> <span class="nv">rpy</span><span class="o">=</span><span class="s2">&quot;1.57079506 0 1.57079506&quot;</span>/&gt;
+&lt;/joint&gt;
+</pre></div>
+</div>
+<p>This addes a new frame <code class="code docutils literal notranslate"><span class="pre">camera_frame</span></code> that will be the frame in which the object is detected, and the frame that will be transformed to the world frame during the grasp execution phase of the pipeline.</p>
+<p>Now that we have the main scene set up, we can move on to the grasp planner: <a class="reference internal" href="grasp_planner_example.html#grasp-planner-example"><span class="std std-ref">Grasp Planner Example</span></a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="grasp_planner_example.html" class="btn btn-neutral float-right" title="Grasp Planner Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="workcell_builder_example_check_scene.html" class="btn btn-neutral float-left" title="Check if scene is properly generated" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Glenn Tan.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

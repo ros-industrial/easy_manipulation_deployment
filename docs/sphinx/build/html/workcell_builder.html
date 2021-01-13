@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Workcell Builder &mdash; EMD alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workcell Initialization" href="workcell_builder_initial.html" />
+    <link rel="prev" title="Grasp Execution Example" href="grasp_execution_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> EMD
+          
+
+          
+            
+            <img src="_static/emd_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common_concepts.html">Common Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download_instructions.html">Download Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emd_example.html">Step-By-Step Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workcell Builder</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html">Generate Files and Folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_edit_scene.html">Editing Existing Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_planner.html">Grasp Planner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_execution_demo.html">Grasp Execution Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future_plans.html">Future Plans</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EMD</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Workcell Builder</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/workcell_builder.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="workcell-builder">
+<span id="id1"></span><h1>Workcell Builder<a class="headerlink" href="#workcell-builder" title="Permalink to this headline">¶</a></h1>
+<p>This ROS package provides an easy to use Graphical User Interface for generation of a robotic workcell in RViz which serves as the first step in the pipeline for a pick and place task</p>
+<img alt="_images/suction.png" src="_images/suction.png" />
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_initial.html">Workcell Initialization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html#folder-structure">Folder structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_initial.html#folder-structure-for-assets">Folder Structure for Assets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html#generating-moveit-config-packages">Generating Moveit Config packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_initial.html#for-ros-2"><strong>FOR ROS 2</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_initial.html#uploading-relevant-assets">Uploading Relevant Assets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_initial.html#robots">Robots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_initial.html#end-effector">End Effector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_initial.html#environment-objects">Environment Objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_create_scene.html">Create A Scene</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html#adding-a-robot-into-scene">Adding a Robot into scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#origin">Origin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#robot-base-link">Robot Base Link</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#robot-end-effector-link">Robot End Effector Link</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html#adding-an-end-effector-into-scene">Adding an End Effector into scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#id2">Origin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#end-effector-link">End Effector Link</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_scene.html#end-effector-type">End Effector Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html#adding-objects-into-scene">Adding Objects into scene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_create_object.html">Create an object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="workcell_builder_create_object.html#adding-links">Adding Links</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="workcell_builder_create_object.html#adding-visual-component">Adding Visual Component</a></li>
+<li class="toctree-l5"><a class="reference internal" href="workcell_builder_create_object.html#adding-inertial-component">Adding Inertial Component</a></li>
+<li class="toctree-l5"><a class="reference internal" href="workcell_builder_create_object.html#adding-collision-component">Adding Collision Component</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="workcell_builder_create_object.html#adding-joints">Adding Joints</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="workcell_builder_create_object.html#inheritance">Inheritance</a></li>
+<li class="toctree-l5"><a class="reference internal" href="workcell_builder_create_object.html#axis">Axis</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="workcell_builder_create_object.html#origin-explanations">Origin Explanations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_create_scene.html#complete-scene">Complete Scene</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_generate_folder_files.html">Generate Files and Folders</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html#generating-yaml-files">Generating yaml files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html#other-files-general">Other Files (General)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_generate_folder_files.html#environment-object-packages">Environment Object Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_generate_folder_files.html#environment-urdf-xacro">environment.urdf.xacro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_generate_folder_files.html#arm-hand-srdf-xacro">arm_hand.srdf.xacro</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html#other-files-ros1">Other Files (ROS1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_generate_folder_files.html#other-files-ros2">Other Files (ROS2)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workcell_builder_generate_folder_files.html#demo-launch-py">demo.launch.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_run_demo.html">Run workcell demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html#ros1">ROS1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_run_demo.html#ros2">ROS2</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_edit_scene.html">Editing Existing Scene</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_edit_scene.html#loading-yaml-file-into-gui">Loading YAML file into GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workcell_builder_conventions.html">Conventions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html#description-folders">Description folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html#urdf-folders">URDF folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workcell_builder_conventions.html#moveit-config-folder">moveit_config folder</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="workcell_builder_initial.html" class="btn btn-neutral float-right" title="Workcell Initialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grasp_execution_example.html" class="btn btn-neutral float-left" title="Grasp Execution Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Glenn Tan.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
