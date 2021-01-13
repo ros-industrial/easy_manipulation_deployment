@@ -28,9 +28,9 @@ The end effector we are currently using is the Robotiq 2F-85 gripper, thus we ne
      type: finger
      attributes:
        fingers: 2
-       distance_between_fingers: 250
-       longest_gripper_dim: 40
-       table_height: 530
+       distance_between_fingers: 100
+       longest_gripper_dim: 25
+       table_height: 450
    parameters:
      min_zero_angle: 0.01
      min_height_diff_to_grip: 5
@@ -77,15 +77,14 @@ In Terminal 2:
 
    source install/setup.bash
 
-   ros2 bag play src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example/rosbag/rosbag2_2020_09_25-15_54_55_0.db3
+   ros2 bag play src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3
    
 You should then see the output in terminal 2: 
 
 .. code-block:: bash
 
-   [INFO] [1605754174.300681975] [rosbag2_storage]: Opened database 'src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example/rosbag/rosbag2_2020_09_25-15_54_55_0.db3' for READ_ONLY.
+   [INFO] [1610531624.795616932] [rosbag2_storage]: Opened database 'src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3' for READ_ONLY.
    
-
 In Terminal 1, you should then see the following
 
 .. code-block:: bash

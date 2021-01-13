@@ -189,9 +189,9 @@
   type: finger
   attributes:
     fingers: <span class="m">2</span>
-    distance_between_fingers: <span class="m">250</span>
-    longest_gripper_dim: <span class="m">40</span>
-    table_height: <span class="m">530</span>
+    distance_between_fingers: <span class="m">100</span>
+    longest_gripper_dim: <span class="m">25</span>
+    table_height: <span class="m">450</span>
 parameters:
   min_zero_angle: <span class="m">0</span>.01
   min_height_diff_to_grip: <span class="m">5</span>
@@ -228,11 +228,11 @@ colcon build
 
 <span class="nb">source</span> install/setup.bash
 
-ros2 bag play src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example/rosbag/rosbag2_2020_09_25-15_54_55_0.db3
+ros2 bag play src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3
 </pre></div>
 </div>
 <p>You should then see the output in terminal 2:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>INFO<span class="o">]</span> <span class="o">[</span><span class="m">1605754174</span>.300681975<span class="o">]</span> <span class="o">[</span>rosbag2_storage<span class="o">]</span>: Opened database <span class="s1">&#39;src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example/rosbag/rosbag2_2020_09_25-15_54_55_0.db3&#39;</span> <span class="k">for</span> READ_ONLY.
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>INFO<span class="o">]</span> <span class="o">[</span><span class="m">1610531624</span>.795616932<span class="o">]</span> <span class="o">[</span>rosbag2_storage<span class="o">]</span>: Opened database <span class="s1">&#39;src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3&#39;</span> <span class="k">for</span> READ_ONLY.
 </pre></div>
 </div>
 <p>In Terminal 1, you should then see the following</p>
