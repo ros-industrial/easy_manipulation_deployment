@@ -4,7 +4,7 @@ end_effector:
     fingers: 2
     distance_between_fingers: 100
     longest_gripper_dim: 25
-    table_height: 430
+    table_height: 450
 parameters:
   min_zero_angle: 0.01
   min_height_diff_to_grip: 5
