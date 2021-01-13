@@ -111,6 +111,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="grasp_planner_example.html">Grasp Planner Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grasp_validator_example.html">Grasp Validator Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_execution_example.html">Grasp Execution Example</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="workcell_builder.html">Workcell Builder</a></li>
@@ -217,10 +218,10 @@ colcon build
 <p>Now we shall add the camera to the scene we created previously, <code class="code docutils literal notranslate"><span class="pre">new_scene</span></code> .</p>
 <p>Open up the urdf file in <code class="code docutils literal notranslate"><span class="pre">/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro</span></code> and add the following lines <strong>before</strong> the <code class="code docutils literal notranslate"><span class="pre">&lt;/robot&gt;</span></code> tag:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;xacro:include <span class="nv">filename</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>find realsense2_description<span class="k">)</span><span class="s2">/urdf/_d415.urdf.xacro&quot;</span>/&gt;
-&lt;xacro:arg <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;use_nominal_extrinsics&quot;</span> <span class="nv">default</span><span class="o">=</span><span class="s2">&quot;false&quot;</span> /&gt;
-  &lt;xacro:sensor_d415 <span class="nv">parent</span><span class="o">=</span><span class="s2">&quot;table&quot;</span> <span class="nv">use_nominal_extrinsics</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>arg use_nominal_extrinsics<span class="k">)</span><span class="s2">&quot;</span>&gt;
-     &lt;origin <span class="nv">xyz</span><span class="o">=</span><span class="s2">&quot;-0.6385 0.2 0.56&quot;</span> <span class="nv">rpy</span><span class="o">=</span><span class="s2">&quot;0 1.57079506 0&quot;</span>/&gt;
-  &lt;/xacro:sensor_d415&gt;
+&lt;xacro:arg <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;use_nominal_extrinsics&quot;</span> <span class="nv">default</span><span class="o">=</span><span class="s2">&quot;true&quot;</span> /&gt;
+&lt;xacro:sensor_d415 <span class="nv">parent</span><span class="o">=</span><span class="s2">&quot;table_&quot;</span> <span class="nv">use_nominal_extrinsics</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>arg use_nominal_extrinsics<span class="k">)</span><span class="s2">&quot;</span>&gt;
+     &lt;origin <span class="nv">xyz</span><span class="o">=</span><span class="s2">&quot;-0.5 0.2 0.46&quot;</span> <span class="nv">rpy</span><span class="o">=</span><span class="s2">&quot;0 1.57079506 0&quot;</span>/&gt;
+&lt;/xacro:sensor_d415&gt;
 </pre></div>
 </div>
 <p>Now, rebuild the package and launch the demo visualization</p>

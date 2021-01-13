@@ -48,10 +48,10 @@ Open up the urdf file in :code:`/workcell_ws/src/scenes/new_scene/urdf/scene.urd
 .. code-block:: bash
 
    <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
-   <xacro:arg name="use_nominal_extrinsics" default="false" />
-     <xacro:sensor_d415 parent="table" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
-        <origin xyz="-0.6385 0.2 0.56" rpy="0 1.57079506 0"/>
-     </xacro:sensor_d415>
+   <xacro:arg name="use_nominal_extrinsics" default="true" />
+   <xacro:sensor_d415 parent="table_" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+	<origin xyz="-0.5 0.2 0.46" rpy="0 1.57079506 0"/>
+   </xacro:sensor_d415>
 
 Now, rebuild the package and launch the demo visualization
 
@@ -78,7 +78,7 @@ First we need to check which link is the child link when connecting the camera t
 
 .. image:: ./images/example/example_d415_link.png
 
-From the URDF we can see that the link that is connected to the external scene is :code:`${name}_bottom_screw_frame`.
+From the URDF we can see that the link that is connected to the external scene is :code:`${name}_bottom_screw_frame`. 
 
 Next, We will launch RViz to check the orientation of this link. **Note that for this step, you will need to be in ROS1, as the current launch files for realsense are in ROS1 as well.**. To prevent confusion, we will create a new workspace just to check the orientation Note that this example uses ROS Noetic. To install Noetic, follow the `installation instructions <http://wiki.ros.org/noetic/Installation>`_ (If you face this error during your :code:`catkin build` command : :code:`catkin: command not found` , try to do :code:`sudo apt-get install python3-osrf-pycommon python3-catkin-tools` .
 

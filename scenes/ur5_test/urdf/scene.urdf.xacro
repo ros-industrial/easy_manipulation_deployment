@@ -26,7 +26,7 @@
  <xacro:arg name="use_nominal_extrinsics" default="true" />
  <xacro:sensor_d415 parent="table_" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
 	<!--origin xyz="-0.6385 0.2 0.56" rpy="0 1.57079506 0"/-->
-	<origin xyz="-0.5 0.2 0.50" rpy="0 1.57079506 0"/>
+	<origin xyz="-0.5 0.2 0.46" rpy="0 1.57079506 0"/>
  </xacro:sensor_d415>
 
  <link name="camera_frame" />
