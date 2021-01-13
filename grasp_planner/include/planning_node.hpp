@@ -170,15 +170,20 @@ private:
         for (int j = 0; j < static_cast<int>(msg->num_objects); j++) {
           std::cout << " [easy_manipulation_deployment][Grasp Planner] "
             "Generating Finger grasps" << std::endl;
-          grasp.distance_between_fingers = round(length_to_pixel(grasp.distance_between_fingers,
-            depth_img.at<ushort>(
-              message.center_y[j],
-              message.center_x[j]), msg->camera_info));
-          grasp.gripper_thickness = round(length_to_pixel(grasp.gripper_thickness,
-            depth_img.at<ushort>(
-              message.center_y[j],
-              message.center_x[j]), msg->camera_info));
-          grasp.target_length = sqrt(pow(grasp.distance_between_fingers, 2) + pow(grasp.gripper_thickness, 2));
+          grasp.distance_between_fingers = round(
+            length_to_pixel(
+              grasp.distance_between_fingers,
+              depth_img.at<ushort>(
+                message.center_y[j],
+                message.center_x[j]), msg->camera_info));
+          grasp.gripper_thickness = round(
+            length_to_pixel(
+              grasp.gripper_thickness,
+              depth_img.at<ushort>(
+                message.center_y[j],
+                message.center_x[j]), msg->camera_info));
+          grasp.target_length =
+            sqrt(pow(grasp.distance_between_fingers, 2) + pow(grasp.gripper_thickness, 2));
           grasp.get_checkpoints(message);
           if (grasp.get_best_grasp(message, depth_img, j) > 0) {
             // Store the coordinate of the object pixel in the text file,
