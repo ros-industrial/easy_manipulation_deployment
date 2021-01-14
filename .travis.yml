@@ -20,7 +20,7 @@ variables:
   - DOCKER_RUN_OPTS="-v /etc/ssl/certs:/etc/ssl/certs:ro"
 env:
   global:
-    - DOCKER_IMAGE="registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly"
+    - DOCKER_IMAGE="tanjpg/easy_manipulation_deployment:ci"
     - AFTER_INIT_EMBED="source /opt/moveit2/install/setup.bash"
     - PARALLEL_TESTS=true  # Global Variable
     - CODE_COVERAGE="codecov.io"
@@ -30,5 +30,4 @@ env:
     
 
 script:
-  - - echo "tLqbxEsTsUwtbjjwdBMd" | docker login -u rosi --password-stdin registry.gitlab.com
   - .industrial_ci/travis.sh
