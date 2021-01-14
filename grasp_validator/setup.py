@@ -7,16 +7,14 @@ setup(
     version='0.0.0',
     packages=[package_name],
     data_files=[
-        ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='rosi',
+    maintainer='Tan Jing Peng Glenn',
     maintainer_email='glenn_tan_from.tp@artc.a-star.edu.sg',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='ROS2 Package to visually represent grasps and to check depth values.',
+    license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
