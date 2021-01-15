@@ -4,8 +4,8 @@
   <name>ur5_test</name>
   <version>2.0.0</version>
   <description>ur5_test description</description>
-  <maintainer email="example@gmail.com">name</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng GLenn</maintainer>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

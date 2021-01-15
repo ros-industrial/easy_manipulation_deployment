@@ -28,10 +28,9 @@ variables:
 foxy-moveit2:
   variables:
     ROS_DISTRO: "foxy"
-    DOCKER_IMAGE: "registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly"
+    DOCKER_IMAGE: "tanjpg/easy_manipulation_deployment:ci"
     AFTER_INIT_EMBED: "source /opt/moveit2/install/setup.bash"
   script: 
-    - echo "tLqbxEsTsUwtbjjwdBMd" | docker login -u rosi --password-stdin registry.gitlab.com
     - .industrial_ci/gitlab.sh
 
 after_script:

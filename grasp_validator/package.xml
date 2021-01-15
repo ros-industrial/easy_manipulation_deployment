@@ -4,7 +4,7 @@
   <name>grasp_validator</name>
   <version>0.0.0</version>
   <description>A ROS2 package that validates the grasp from the emd grasp_planner</description>
-  <maintainer email="glenn_tan@artc.a-star.edu.sg">rosi</maintainer>
+  <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng Glenn</maintainer>
   <license>Apache License 2.0</license>
 
   <test_depend>ament_copyright</test_depend>
