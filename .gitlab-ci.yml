@@ -22,8 +22,6 @@ variables:
   TMPDIR: "${CI_PROJECT_DIR}.tmp"
   DOCKER_RUN_OPTS: "-v /etc/ssl/certs:/etc/ssl/certs:ro"
   CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
-  CODE_COVERAGE: "codecov.io"
-  CODECOV_TOKEN: "36cef827-7894-4feb-b0d5-5c5c133cb341"
 
 foxy-moveit2:
   variables:
