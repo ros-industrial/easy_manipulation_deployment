@@ -10,7 +10,7 @@ jobs:
           - ROS_DISTRO: foxy
             ROS_REPO: main
             DOCKER_IMAGE: "tanjpg/easy_manipulation_deployment:ci"
-            AFTER_INIT_EMBED: "source /opt/moveit2/install/setup.bash"
+            AFTER_INIT_EMBED: "ici_source_setup /opt/moveit2/install"
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
     runs-on: ubuntu-latest
