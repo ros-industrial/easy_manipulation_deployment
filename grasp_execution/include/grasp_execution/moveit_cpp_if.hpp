@@ -15,6 +15,7 @@
 #ifndef GRASP_EXECUTION__MOVEIT_CPP_IF_HPP_
 #define GRASP_EXECUTION__MOVEIT_CPP_IF_HPP_
 
+#include <deque>
 #include <memory>
 #include <string>
 #include <thread>
@@ -29,8 +30,28 @@
 
 #include "grasp_planning/msg/grasp_pose.hpp"
 
+#include "moveit/trajectory_processing/iterative_time_parameterization.h"
+
 namespace grasp_execution
 {
+
+void squash_trajectories(
+  std::deque<robot_trajectory::RobotTrajectoryPtr> & trajs,
+  int start_idx = 0, int end_idx = -1,
+  bool time_parameterization = false)
+{
+  int _end_idx = (end_idx == -1) ? trajs.size() : end_idx;
+  if (start_idx < _end_idx) {
+    while (trajs.size() > trajs.size() - (_end_idx + start_idx)) {
+      trajs[start_idx]->append(*trajs[start_idx + 1], 0);
+      trajs.erase(trajs.begin() + start_idx + 1);
+    }
+    if (time_parameterization) {
+      trajectory_processing::IterativeParabolicTimeParameterization time_param;
+      time_param.computeTimeStamps(*trajs[start_idx], 1.0);
+    }
+  }
+}
 
 struct JmgContext
 {
@@ -49,7 +70,7 @@ struct JmgContext
   // TODO(Briancbn): Replace with end-effector abstraction class
   std::string ee_link;
   moveit::planning_interface::PlanningComponentPtr planner;
-  std::vector<robot_trajectory::RobotTrajectoryPtr> traj;
+  std::deque<robot_trajectory::RobotTrajectoryPtr> traj;
 };
 
 class MoveitCppGraspExecution : public GraspExecutionInterface
