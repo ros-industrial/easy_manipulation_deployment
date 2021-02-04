@@ -104,12 +104,12 @@ def generate_launch_description():
         }
 
     # MoveItCpp demo executable
-    grasp_execution_node = Node(
+    grasp_execution_demo_node = Node(
         name='grasp_execution_node',
         package='grasp_execution',
         # TODO(henningkayser): add debug argument
         # prefix='xterm -e gdb --args',
-        executable='grasp_execution_node',
+        executable='demo_node',
         output='screen',
         parameters=[grasp_execution_yaml_file_name,
                     robot_description,
@@ -159,5 +159,5 @@ def generate_launch_description():
         robot_state_publisher,
         rviz_node,
         joint_state_publisher,
-        grasp_execution_node
+        grasp_execution_demo_node
         ])

@@ -17,15 +17,17 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(grasp_planning REQUIRED)
 find_package(tf2 REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(
+  PUBLIC
   include
 )
 
-add_library(grasp_execution src/moveit_cpp_if.cpp)
-ament_target_dependencies(grasp_execution
+add_library(grasp_execution_interface
+  SHARED
+  src/moveit_cpp_if.cpp)
+ament_target_dependencies(grasp_execution_interface
   moveit_ros_planning_interface
   grasp_planning
   rclcpp
@@ -33,28 +35,17 @@ ament_target_dependencies(grasp_execution
   tf2_ros
 )
 
-add_executable(grasp_execution_node src/grasp_execution_node.cpp)
-target_link_libraries(grasp_execution_node
-  grasp_execution
-)
-ament_target_dependencies(grasp_execution_node
-  rclcpp
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
 
-add_executable(fake_grasp_pose_publisher src/fake_grasp_pose_publisher.cpp)
-ament_target_dependencies(fake_grasp_pose_publisher
-  grasp_planning
-  rclcpp
-  tf2
-  tf2_geometry_msgs
-)
-
-install(TARGETS
-  grasp_execution_node
-  fake_grasp_pose_publisher
-  EXPORT export_${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME}
-)
+install(
+  TARGETS
+  grasp_execution_interface
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -67,12 +58,22 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
+# TODO(Briancbn): convert to tests instead
+add_subdirectory(
+  example
 )
 
-install(DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  grasp_execution_interface
+)
+ament_export_dependencies(
+  moveit_ros_planning_interface
+  grasp_planning
+  tf2
+  tf2_ros
 )
 
 ament_package()
