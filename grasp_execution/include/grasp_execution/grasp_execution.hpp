@@ -22,6 +22,8 @@
 #include <utility>
 #include <vector>
 
+#include "grasp_execution/scheduler.hpp"
+
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
@@ -32,119 +34,6 @@
 
 namespace grasp_execution
 {
-
-struct Worker
-{
-  std::shared_ptr<std::thread> execution_thread;
-  std::future<bool> execution_future;
-};
-
-class Scheduler
-{
-public:
-  typedef std::function<void ()> WorkflowT;
-
-  explicit Scheduler(size_t concurrency)
-  : concurrency_(concurrency)
-  {
-    workers_.resize(concurrency);
-  }
-
-  ~Scheduler()
-  {
-    for (auto & worker : workers_) {
-      if (worker.execution_thread) {
-        worker.execution_thread->join();
-      }
-    }
-  }
-
-  int add_workflow(
-    WorkflowT workflow)
-  {
-    _stop_finished_worker();
-    int worker_id = get_available_worker();
-    if (worker_id == -1) {
-      std::lock_guard<std::mutex> guard(wf_q_mutex);
-      workflow_queue_.push_back(workflow);
-      return -1;
-    } else {
-      _start_worker(worker_id, workflow);
-      return worker_id;
-    }
-  }
-
-  int get_available_worker() const
-  {
-    for (size_t i = 0; i < concurrency_; i++) {
-      if (!workers_[i].execution_thread) {
-        return static_cast<int>(i);
-      }
-    }
-    return -1;
-  }
-
-  void wait_till_all_complete() const
-  {
-    for (auto & worker : workers_) {
-      worker.execution_future.wait();
-    }
-  }
-
-private:
-  void _stop_finished_worker()
-  {
-    for (auto & worker : workers_) {
-      // Check if there are on going tasks
-      if (worker.execution_thread) {
-        // Check if the ongoing tasks is finished
-        auto status = worker.execution_future.wait_for(std::chrono::nanoseconds(0));
-        if (status == std::future_status::ready) {
-          worker.execution_thread->join();
-          worker.execution_thread.reset();
-        }
-      }
-    }
-  }
-
-  void _start_worker(size_t worker_id, const WorkflowT & workflow)
-  {
-    auto sig = std::promise<bool>();
-    workers_[worker_id].execution_future = sig.get_future();
-    workers_[worker_id].execution_thread = std::make_shared<std::thread>(
-      [ = ](std::promise<bool> && _sig) {
-        workflow();
-        _execution_ending_cb();
-        _sig.set_value(true);
-      }, std::move(sig));
-  }
-
-  void _execution_ending_cb()
-  {
-    WorkflowT workflow;
-    bool queue = false;
-    {
-      std::lock_guard<std::mutex> guard(wf_q_mutex);
-      if (!workflow_queue_.empty()) {
-        queue = true;
-        workflow = std::move(workflow_queue_.front());
-        workflow_queue_.erase(workflow_queue_.begin());
-      }
-    }
-    if (queue) {
-      workflow();
-      _execution_ending_cb();
-    }
-  }
-
-  std::mutex wf_q_mutex;
-  // TODO(Briancbn): Maybe a linked list is the best choice here.
-  std::vector<WorkflowT> workflow_queue_;
-
-  size_t concurrency_;
-
-  std::vector<Worker> workers_;
-};
 
 class GraspExecutionInterface
 {

@@ -26,7 +26,10 @@ include_directories(
 
 add_library(grasp_execution_interface
   SHARED
-  src/moveit_cpp_if.cpp)
+  src/scheduler.cpp
+  src/moveit_cpp_if.cpp
+)
+
 ament_target_dependencies(grasp_execution_interface
   moveit_ros_planning_interface
   grasp_planning
