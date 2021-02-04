@@ -42,7 +42,7 @@ struct Worker
 class Scheduler
 {
 public:
-  typedef std::function<void (std::promise<bool>&&)> WorkflowT;
+  typedef std::function<void ()> WorkflowT;
 
   explicit Scheduler(size_t concurrency)
   : concurrency_(concurrency)
@@ -113,17 +113,27 @@ private:
     workers_[worker_id].execution_future = sig.get_future();
     workers_[worker_id].execution_thread = std::make_shared<std::thread>(
       [ = ](std::promise<bool> && _sig) {
-        workflow(std::move(_sig));
-        _execution_ending_cb(worker_id);
+        workflow();
+        _execution_ending_cb();
+        _sig.set_value(true);
       }, std::move(sig));
   }
 
-  void _execution_ending_cb(size_t worker_id)
+  void _execution_ending_cb()
   {
-    std::lock_guard<std::mutex> guard(wf_q_mutex);
-    if (!workflow_queue_.empty()) {
-      _start_worker(worker_id, std::move(workflow_queue_[0]));
-      workflow_queue_.erase(workflow_queue_.begin());
+    WorkflowT workflow;
+    bool queue = false;
+    {
+      std::lock_guard<std::mutex> guard(wf_q_mutex);
+      if (!workflow_queue_.empty()) {
+        queue = true;
+        workflow = std::move(workflow_queue_.front());
+        workflow_queue_.erase(workflow_queue_.begin());
+      }
+    }
+    if (queue) {
+      workflow();
+      _execution_ending_cb();
     }
   }
 
@@ -162,12 +172,10 @@ public:
   virtual ~GraspExecutionInterface() {}
 
   virtual void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg,
-    std::promise<bool> && _sig) = 0;
+    const grasp_planning::msg::GraspPose::SharedPtr & msg) = 0;
 
   virtual void execution_workflow(
-    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg,
-    std::promise<bool> && _sig) = 0;
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg) = 0;
 
   virtual void order_schedule(
     const grasp_planning::msg::GraspPose::SharedPtr & msg) = 0;

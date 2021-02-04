@@ -47,7 +47,7 @@ public:
     const grasp_planning::msg::GraspPose::SharedPtr & msg) override
   {
     int worker_id = planning_scheduler.add_workflow(
-      std::bind(&Demo::planning_workflow, this, msg, std::placeholders::_1));
+      std::bind(&Demo::planning_workflow, this, msg));
 
     RCLCPP_INFO(node_->get_logger(), "New Job Added!!");
     if (worker_id < 0) {
@@ -56,8 +56,7 @@ public:
   }
 
   void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg,
-    std::promise<bool> && _sig) override
+    const grasp_planning::msg::GraspPose::SharedPtr & msg) override
   {
     std::string ee_link = EE_LINK;
     std::string planning_group = PLANNING_GROUP;
@@ -239,8 +238,6 @@ public:
       move_to(planning_group, *home_state);  // Robot is above the object
     }
     // -------------------------------------------------------------
-
-    _sig.set_value(true);
   }
 
 private:

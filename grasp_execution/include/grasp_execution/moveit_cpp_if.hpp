@@ -66,12 +66,10 @@ public:
   bool init(const std::string & planning_group, const std::string & _ee_link = "");
 
   void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg,
-    std::promise<bool> && _sig) override {}
+    const grasp_planning::msg::GraspPose::SharedPtr & msg) override {}
 
   void execution_workflow(
-    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg,
-    std::promise<bool> && _sig) override {}
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg) override {}
 
   void order_schedule(
     const grasp_planning::msg::GraspPose::SharedPtr & msg) override {}
