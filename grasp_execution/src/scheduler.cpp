@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <deque>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -53,8 +54,8 @@ public:
   size_t concurrency;
 
   std::mutex wf_q_mutex;
-  // TODO(Briancbn): Maybe a linked list is the best choice here.
-  std::vector<WorkflowT> workflow_queue;
+
+  std::deque<WorkflowT> workflow_queue;
 
   std::vector<Worker> workers;
 };
@@ -112,7 +113,7 @@ void Scheduler::Impl::execution_ending_cb()
     if (!workflow_queue.empty()) {
       queue = true;
       workflow = std::move(workflow_queue.front());
-      workflow_queue.erase(workflow_queue.begin());
+      workflow_queue.pop_front();
     }
   }
   if (queue) {
