@@ -38,7 +38,7 @@ inline std::string gen_uuid()
 }
 
 /// Print Pose Message TODO(Briancbn): default std::cout doesn't seems to work here.
-void print_pose(
+inline void print_pose(
   const geometry_msgs::msg::Pose & _pose,
   std::ostream & _out = std::cout,
   bool _euler = true)
@@ -70,7 +70,7 @@ void print_pose(
 }
 
 /// Print PoseStamped Message
-void print_pose(
+inline void print_pose(
   const geometry_msgs::msg::PoseStamped & _pose,
   std::ostream & _out = std::cout,
   bool _euler = true)
@@ -81,7 +81,7 @@ void print_pose(
 }
 
 /// Transform pose to target end reference frame
-void to_frame(
+inline void to_frame(
   const geometry_msgs::msg::PoseStamped & in_,
   geometry_msgs::msg::PoseStamped & out_,
   const std::string & _target_frame,

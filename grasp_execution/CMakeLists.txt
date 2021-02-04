@@ -24,7 +24,7 @@ include_directories(
   include
 )
 
-add_library(grasp_execution src/grasp_execution.cpp)
+add_library(grasp_execution src/moveit_cpp_if.cpp)
 ament_target_dependencies(grasp_execution
   moveit_ros_planning_interface
   grasp_planning
