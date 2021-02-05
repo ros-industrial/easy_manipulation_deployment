@@ -10,7 +10,7 @@ ament_target_dependencies(demo_node
 
 add_executable(fake_grasp_pose_publisher src/fake_grasp_pose_publisher.cpp)
 ament_target_dependencies(fake_grasp_pose_publisher
-  grasp_planning
+  emd_msgs
   rclcpp
   tf2
   tf2_geometry_msgs

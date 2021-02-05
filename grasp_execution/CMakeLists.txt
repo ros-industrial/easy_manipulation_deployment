@@ -15,7 +15,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
 find_package(moveit_ros_planning_interface REQUIRED)
-find_package(grasp_planning REQUIRED)
+find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
@@ -32,7 +32,7 @@ add_library(grasp_execution_interface
 
 ament_target_dependencies(grasp_execution_interface
   moveit_ros_planning_interface
-  grasp_planning
+  emd_msgs
   rclcpp
   tf2
   tf2_ros
