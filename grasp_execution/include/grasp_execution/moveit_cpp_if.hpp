@@ -70,7 +70,7 @@ public:
   bool init(const std::string & planning_group, const std::string & _ee_link = "");
 
   void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg) override {}
+    const emd_msgs::msg::GraspTask::SharedPtr &) override {}
 
   void register_target_objects(
     const emd_msgs::msg::GraspTask::SharedPtr & msg) override;
@@ -93,14 +93,14 @@ public:
     bool execute = true);
 
   bool home(
-    const std::string & planning_group) override {return true;}
+    const std::string &) override {return true;}
 
   // Skipped
   // TODO(Briancbn): Generic type function call
   bool move_to(
-    const std::string & planning_group,
-    const sensor_msgs::msg::JointState & state,
-    bool execute = true) override {return true;}
+    const std::string &,
+    const sensor_msgs::msg::JointState &,
+    bool) override {return true;}
 
   bool cartesian_to(
     const std::string & planning_group,

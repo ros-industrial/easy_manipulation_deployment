@@ -527,7 +527,7 @@ void MoveitCppGraspExecution::attach_object_to_ee(
 
 void MoveitCppGraspExecution::detach_object_from_ee(
   const moveit_msgs::msg::CollisionObject & object,
-  const std::string & ee_link)
+  const std::string & /*ee_link*/)
 {
   /*
   moveit_msgs::AttachedCollisionObject
