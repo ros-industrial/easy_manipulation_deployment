@@ -25,25 +25,52 @@
 namespace grasp_execution
 {
 
+using result_t = bool;
+
 struct Worker
 {
   std::shared_ptr<std::thread> execution_thread;
-  std::future<bool> execution_future;
+  std::future<result_t> execution_future;
 };
+
+namespace Workflow
+{
+
+enum class Status : uint8_t
+{
+  COMPLETED = 1,
+  QUEUED = 2,
+  ONGOING = 3,
+  CANCELLED = 4,
+  INVALID = 5
+};
+
+}  // namespace Workflow
 
 class Scheduler
 {
 public:
-  typedef std::function<void ()> WorkflowT;
+  typedef std::function<result_t(const std::string &)> WorkflowT;
 
   explicit Scheduler(size_t concurrency);
 
   ~Scheduler();
 
-  int add_workflow(
+  Workflow::Status add_workflow(
+    const std::string & workflow_id,
     WorkflowT workflow);
 
+  Workflow::Status cancel_workflow(
+    const std::string & workflow_id);
+
   void wait_till_all_complete() const;
+
+  Workflow::Status wait_till_complete(
+    const std::string & workflow_id,
+    result_t & result) const;
+
+  Workflow::Status get_status(
+    const std::string & workflow_id) const;
 
   class Impl;
 

@@ -28,30 +28,13 @@
 #include "moveit/moveit_cpp/moveit_cpp.h"
 #include "moveit/moveit_cpp/planning_component.h"
 
-#include "grasp_planning/msg/grasp_pose.hpp"
+#include "emd_msgs/msg/grasp_task.hpp"
 
 #include "moveit/trajectory_processing/iterative_time_parameterization.h"
+#include "moveit/trajectory_processing/time_optimal_trajectory_generation.h"
 
 namespace grasp_execution
 {
-
-void squash_trajectories(
-  std::deque<robot_trajectory::RobotTrajectoryPtr> & trajs,
-  int start_idx = 0, int end_idx = -1,
-  bool time_parameterization = false)
-{
-  int _end_idx = (end_idx == -1) ? trajs.size() : end_idx;
-  if (start_idx < _end_idx) {
-    while (trajs.size() > trajs.size() - (_end_idx + start_idx)) {
-      trajs[start_idx]->append(*trajs[start_idx + 1], 0);
-      trajs.erase(trajs.begin() + start_idx + 1);
-    }
-    if (time_parameterization) {
-      trajectory_processing::IterativeParabolicTimeParameterization time_param;
-      time_param.computeTimeStamps(*trajs[start_idx], 1.0);
-    }
-  }
-}
 
 struct JmgContext
 {
@@ -78,7 +61,7 @@ class MoveitCppGraspExecution : public GraspExecutionInterface
 public:
   explicit MoveitCppGraspExecution(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_poses_topic = "grasp_poses",
+    const std::string & grasp_poses_topic = "grasp_request",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0);
 
@@ -86,18 +69,17 @@ public:
 
   bool init(const std::string & planning_group, const std::string & _ee_link = "");
 
-  void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) override {}
-
-  void execution_workflow(
-    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg) override {}
-
   void order_schedule(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) override {}
+    const emd_msgs::msg::GraspTask::SharedPtr & msg) override {}
+
+  void register_target_objects(
+    const emd_msgs::msg::GraspTask::SharedPtr & msg) override;
 
   geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const override;
 
   geometry_msgs::msg::PoseStamped get_curr_pose(const std::string & link_name) const override;
+
+  moveit::core::RobotStatePtr get_curr_state() const;
 
   bool move_to(
     const std::string & planning_group,
@@ -110,6 +92,11 @@ public:
     const moveit::core::RobotState & state,
     bool execute = true);
 
+  bool home(
+    const std::string & planning_group) override {return true;}
+
+  // Skipped
+  // TODO(Briancbn): Generic type function call
   bool move_to(
     const std::string & planning_group,
     const sensor_msgs::msg::JointState & state,
@@ -136,21 +123,38 @@ public:
     const moveit_msgs::msg::CollisionObject & object,
     const std::string & ee_link);
 
-  // TODO(Briancbn): Generic type function call
   void attach_object_to_ee(
-    const shape_msgs::msg::SolidPrimitive & object,
-    const std::string & ee_link) override {}
+    const std::string & target_id,
+    const std::string & ee_link) override;
 
-  // TODO(Briancbn): Generic type function call
   void detach_object_from_ee(
-    const shape_msgs::msg::SolidPrimitive & object,
-    const std::string & ee_link) override {}
+    const std::string & target_id,
+    const std::string & ee_link) override;
+
+  void remove_object(
+    const std::string & target_id) override;
 
 protected:
+  void squash_trajectories(
+    const std::string & planning_group,
+    int start_idx = 0, int end_idx = -1,
+    bool time_parameterization = false);
+
+  void print_trajectory_ros(
+    const rclcpp::Logger & logger,
+    const robot_trajectory::RobotTrajectoryPtr & traj)
+  {
+    std::ostringstream oss;
+    print_trajectory(traj, oss);
+    RCLCPP_INFO(logger, oss.str());
+  }
+
+  void print_trajectory(
+    const robot_trajectory::RobotTrajectoryPtr & traj,
+    std::ostream & _out = std::cout);
+
   moveit::planning_interface::MoveItCppPtr moveit_cpp_;
   std::unordered_map<std::string, JmgContext> arms_;
-
-  std::string robot_frame_;
 };
 
 }  // namespace grasp_execution

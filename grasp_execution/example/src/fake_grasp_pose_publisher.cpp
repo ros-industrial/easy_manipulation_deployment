@@ -22,7 +22,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 #include "rclcpp/rclcpp.hpp"
-#include "grasp_planning/msg/grasp_pose.hpp"
+#include "emd_msgs/msg/grasp_task.hpp"
 
 #include "grasp_execution/utils.hpp"
 
@@ -35,7 +35,6 @@ public:
   FakeGraspPosePublisher()
   : Node("fake_grasp_pose_publisher")
   {
-    request_.num_objects = 1;
     geometry_msgs::msg::PoseStamped grasp_pose, object_pose;
     grasp_pose.header.stamp = this->now();
 
@@ -106,16 +105,22 @@ public:
 
     grasp_pose.header.stamp = object_pose.header.stamp = this->now();
 
+    request_.task_id = gen_uuid();
 
-    request_.grasp_poses.push_back(grasp_pose);
+    request_.grasp_targets.resize(1);
+    request_.grasp_targets[0].target_shape = object_shape;
+    request_.grasp_targets[0].target_pose = object_pose;
 
-    request_.object_poses.push_back(object_pose);
+    request_.grasp_targets[0].grasp_methods.resize(1);
 
-    request_.object_shapes.push_back(object_shape);
+    auto & grasp_method = request_.grasp_targets[0].grasp_methods[0];
 
+    grasp_method.ee_id = "robotiq_2f_gripper";
+    grasp_method.grasp_poses.push_back(grasp_pose);
+    grasp_method.grasp_ranks = {1.0};
 
     publisher_ =
-      this->create_publisher<grasp_planning::msg::GraspPose>("grasp_poses", 10);
+      this->create_publisher<emd_msgs::msg::GraspTask>("grasp_request", 10);
 
     rclcpp::sleep_for(
       std::chrono::milliseconds(
@@ -132,9 +137,9 @@ public:
   }
 
 private:
-  rclcpp::Publisher<grasp_planning::msg::GraspPose>::SharedPtr publisher_;
+  rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr publisher_;
 
-  grasp_planning::msg::GraspPose request_;
+  emd_msgs::msg::GraspTask request_;
 
   float delay_;
 };

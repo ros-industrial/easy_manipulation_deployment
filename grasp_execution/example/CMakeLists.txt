@@ -2,7 +2,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 
 add_executable(demo_node src/demo_node.cpp)
 target_link_libraries(demo_node
-  grasp_execution_interface
+  moveit_cpp_grasp_execution_interface
 )
 ament_target_dependencies(demo_node
   rclcpp

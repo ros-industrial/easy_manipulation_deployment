@@ -29,215 +29,220 @@ namespace grasp_execution
 
 static const char PLANNING_GROUP[] = "manipulator";
 
-static const char CAMERA_FRAME[] = "camera_frame";
-
 static const char EE_LINK[] = "ee_palm";
 
 static const float CLEARANCE = 0.1;
 
+static const char GRASP_TASK_TOPIC[] = "grasp_request";
+
 class Demo : public MoveitCppGraspExecution
 {
 public:
-  explicit Demo(const rclcpp::Node::SharedPtr & node)
-  : MoveitCppGraspExecution(node),
+  explicit Demo(
+    const rclcpp::Node::SharedPtr & node,
+    const std::string & grasp_task_topic)
+  : MoveitCppGraspExecution(node, grasp_task_topic, 1, 1),
     node_(node)
   {}
 
   void order_schedule(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) override
+    const emd_msgs::msg::GraspTask::SharedPtr & msg) override
   {
-    int worker_id = planning_scheduler.add_workflow(
-      std::bind(&Demo::planning_workflow, this, msg));
+    // target id will be "#<shape>-<task_id>-<target-index>"
 
-    RCLCPP_INFO(node_->get_logger(), "New Job Added!!");
-    if (worker_id < 0) {
-      RCLCPP_INFO(node_->get_logger(), "No available planning worker, job in queue.");
+    // ------------------- Prepare object for grasping --------------------------
+    register_target_objects(msg);
+
+    // -------------------------------------------------------------
+
+
+    for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
+      auto grasp_target = std::make_shared<emd_msgs::msg::GraspTarget>(msg->grasp_targets[i]);
+
+      auto target_id =
+        gen_target_object_id(msg, i);
+
+      // Start planning workflow using planning schedule
+      auto status = planning_scheduler.add_workflow(
+        target_id,
+        std::bind(
+          &Demo::planning_workflow, this,
+          std::move(grasp_target),
+          std::placeholders::_1));
+
+      // Check if workflow started properly
+      switch (status) {
+        case Workflow::Status::ONGOING:
+          RCLCPP_INFO(
+            node_->get_logger(),
+            MOVEIT_CONSOLE_COLOR_YELLOW
+            "New job [%s] started!!"
+            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+          break;
+        case Workflow::Status::QUEUED:
+          RCLCPP_INFO(
+            node_->get_logger(),
+            MOVEIT_CONSOLE_COLOR_YELLOW
+            "New job [%s] started!!"
+            "No available planning worker, new job in queue."
+            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+          break;
+        case Workflow::Status::INVALID:
+          RCLCPP_INFO(
+            node_->get_logger(),
+            MOVEIT_CONSOLE_COLOR_RED
+            "New job [%s] is invalid, it could be already completed, ongoing or queued."
+            "You can check with get_status(<workflow-id>), or use another <workflow-id>"
+            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+          break;
+        default:
+          break;
+      }
     }
   }
 
-  void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) override
+  bool planning_workflow(
+    const emd_msgs::msg::GraspTarget::SharedPtr & target,
+    const std::string & target_id)
   {
-    std::string ee_link = EE_LINK;
-    std::string planning_group = PLANNING_GROUP;
-    auto release_pose = get_curr_pose(ee_link);
     double clearance = CLEARANCE;
 
     // Get home state
-    moveit::core::RobotStatePtr home_state;
-    moveit_cpp_->getCurrentState(home_state, 0);
+    moveit::core::RobotStatePtr home_state(get_curr_state());
 
-    // ------------------- Prepare object for grasping --------------------------
-    RCLCPP_INFO(
-      node_->get_logger(),
-      MOVEIT_CONSOLE_COLOR_CYAN
-      "Adding objects to scene"
-      MOVEIT_CONSOLE_COLOR_RESET);
+    // TODO(Briancbn): select grasp method based on end effector availability
+    auto & grasp_method = target->grasp_methods[0];
+    std::string ee_link = EE_LINK;
+    std::string planning_group = PLANNING_GROUP;
+    auto release_pose = get_curr_pose(ee_link);
 
-    std::vector<moveit_msgs::msg::CollisionObject> grasp_objects;
+    // TODO(Briancbn): iterate to find the valid grasp_pose within grasp_method
+    const auto & grasp_pose = grasp_method.grasp_poses[0];
 
-    for (size_t i = 0; i < msg->num_objects; i++) {
-      moveit_msgs::msg::CollisionObject temp_collision_object;
-      temp_collision_object.header.frame_id =
-        (msg->object_poses[i].header.frame_id.empty() ? CAMERA_FRAME :
-        msg->object_poses[i].header.frame_id);
-      // Use random UUID unless specified object name
-      // TODO(Briancbn): Use primitive shapes as part of id header
-      temp_collision_object.id = "#object-" + gen_uuid();
-      temp_collision_object.primitives.push_back(msg->object_shapes[i]);
-      temp_collision_object.primitive_poses.push_back(msg->object_poses[i].pose);
+    bool result;
 
-      // Print out all object poses as debug information
-      std::ostringstream oss;
-      print_pose(msg->object_poses[i], oss);
-      RCLCPP_INFO(node_->get_logger(), oss.str());
+    // ------------------- Plan to grasp location --------------------------
+    prompt_job_start(node_->get_logger(), target_id, "Plan to grasp location.");
 
-      auto tmp_pose = msg->object_poses[i];
-      to_frame(msg->object_poses[i], tmp_pose, robot_frame_, *tf_buffer_);
-      std::ostringstream oss2;
-      print_pose(tmp_pose, oss2);
-      RCLCPP_INFO(node_->get_logger(), oss2.str());
+    // Initial approach doesn't move down yet
+    result = this->default_plan_pre_grasp(
+      planning_group, ee_link, grasp_pose, clearance);
 
+    prompt_job_end(node_->get_logger(), result);
 
-      temp_collision_object.operation = temp_collision_object.ADD;
-      grasp_objects.push_back(temp_collision_object);
-
-      // Add object to planning scene
-      {    // Lock PlanningScene
-        planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
-        scene->processCollisionObjectMsg(temp_collision_object);
-      }    // Unlock PlanningScene
+    if (!result) {
+      return false;
     }
 
-    // -------------------------------------------------------------
+    // ------------------- Move to grasp location --------------------------
+    prompt_job_start(node_->get_logger(), target_id, "Move to grasp location.");
+    //  execute(planning_group);
+    squash_trajectories(planning_group, 0, -1, true);
 
-    // ------------------- Executing grasp poses one by one --------------------------
-    for (size_t i = 0; i < msg->grasp_poses.size(); i++) {
-      auto & grasp_pose = msg->grasp_poses[i];
+    result = moveit_cpp_->execute(planning_group, arms_[planning_group].traj[0]);
 
-      // Frame ID default will be the Camera ID if not set
-      if (grasp_pose.header.frame_id.empty()) {
-        grasp_pose.header.frame_id = CAMERA_FRAME;
-      }
+    arms_[planning_group].traj.clear();
 
-      geometry_msgs::msg::PoseStamped target_pose;
-      to_frame(grasp_pose, target_pose, robot_frame_, *tf_buffer_);
+    prompt_job_end(node_->get_logger(), result);
 
-      auto temp_target_pose = target_pose;
+    if (!result) {
+      return false;
+    }
 
-      // ------------------- Move to pre grasp location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Moving to pre-grasp location for [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
+    // TODO(Briancbn): Call to gripper driver
 
-      // Initial approach doesn't move down yet
-      temp_target_pose.pose.position.z = target_pose.pose.position.z + clearance;
+    // ------------------- Attach grasp object to robot --------------------------
+    prompt_job_start(
+      node_->get_logger(), target_id,
+      "Attaching to robot ee frame: [" + ee_link + "]");
 
-      // Print out target pose for debug purpose
-      std::ostringstream oss;
-      print_pose(temp_target_pose, oss);
-      RCLCPP_INFO(node_->get_logger(), oss.str());
+    attach_object_to_ee(target_id, ee_link);
 
-      // Robot is above the object
-      move_to(planning_group, temp_target_pose, ee_link);
+    result = true;
 
-      // ------------------- Approaching grasp location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Approaching grasp location for [%s]. "
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
-      // Move down to pick
-      move_until_before_collide(planning_group, temp_target_pose, ee_link, -0.002, 40, 'z');
+    prompt_job_end(node_->get_logger(), result);
 
-      // TODO(Briancbn): Call to gripper driver
+    if (!result) {
+      return false;
+    }
 
-      // ------------------- Attach grasp object to robot --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Attaching [%s] to robot ee frame: [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str(), ee_link.c_str());
+    // ------------------- Plan to release location --------------------------
+    prompt_job_start(
+      node_->get_logger(), target_id,
+      "Plan to release location");
 
-      attach_object_to_ee(grasp_objects[i], ee_link);
+    // TODO(Briancbn): Configurable release pose
+    geometry_msgs::msg::PoseStamped base_grasp_pose;
+    to_frame(grasp_pose, base_grasp_pose, this->robot_frame_);
+    release_pose.pose.position.x -= 0.3;
+    release_pose.pose.position.z = base_grasp_pose.pose.position.z;
+    release_pose.pose.orientation = base_grasp_pose.pose.orientation;
 
-      // ------------------- Cartesian move to pose grasp location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Cartesian to post grasp location for [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
+    result = this->default_plan_transport(
+      planning_group, ee_link, release_pose, clearance);
 
-      temp_target_pose.pose.position.z = target_pose.pose.position.z + clearance;
-      cartesian_to(
-        planning_group,
-        std::vector<geometry_msgs::msg::Pose>{temp_target_pose.pose},
-        ee_link, 0.01);
+    prompt_job_end(node_->get_logger(), result);
+    if (!result) {
+      return false;
+    }
 
-      // ------------------- Cartesian move to release location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Cartesian to pre-release location for [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
+    // TODO(Briancbn): Call to gripper driver
 
-      // TODO(Briancbn): Configurable release pose
-      release_pose.pose.position.x -= 0.3;
-      release_pose.pose.orientation = target_pose.pose.orientation;
-      release_pose.pose.position.z = target_pose.pose.position.z + clearance;
+    // ------------------- Move to release location --------------------------
+    prompt_job_start(node_->get_logger(), target_id, "Move to release location.");
+    //  execute(planning_group);
+    squash_trajectories(planning_group, 0, -1, true);
 
-      cartesian_to(
-        planning_group,
-        std::vector<geometry_msgs::msg::Pose>{release_pose.pose},
-        ee_link, 0.01);
+    result = moveit_cpp_->execute(planning_group, arms_[planning_group].traj[0]);
 
-      // ------------------- Approaching release location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Approaching release location for [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
-      // move to release
-      move_until_before_collide(planning_group, release_pose, ee_link, -0.01, 20, 'z');
+    prompt_job_end(node_->get_logger(), result);
 
-      // TODO(Briancbn): Call to gripper driver
+    arms_[planning_group].traj.clear();
 
-      // ------------------- detach grasp object from robot --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Detaching [%s] from robot ee frame: [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str(), ee_link.c_str());
+    if (!result) {
+      return false;
+    }
 
-      detach_object_from_ee(grasp_objects[i], ee_link);
+    // ------------------- detach grasp object from robot --------------------------
+    prompt_job_start(
+      node_->get_logger(), target_id,
+      "Detaching from robot ee frame: [" + ee_link + "]");
 
-      // ------------------- Cartesian move to pose grasp location --------------------------
-      RCLCPP_INFO(
-        node_->get_logger(),
-        MOVEIT_CONSOLE_COLOR_CYAN
-        "Cartesian to post release location for [%s]."
-        MOVEIT_CONSOLE_COLOR_RESET,
-        grasp_objects[i].id.c_str());
+    detach_object_from_ee(target_id, ee_link);
 
-      temp_target_pose.pose.position.z = target_pose.pose.position.z + clearance;
-      cartesian_to(
-        planning_group,
-        std::vector<geometry_msgs::msg::Pose>{release_pose.pose},
-        ee_link, 0.01);
+    result = true;
 
-      // ------------------- Cartesian move back to Home --------------------------
-      move_to(planning_group, *home_state);  // Robot is above the object
+    prompt_job_end(node_->get_logger(), result);
+
+    if (!result) {
+      return false;
+    }
+
+    // ------------------- Move back to Home --------------------------
+    prompt_job_start(
+      node_->get_logger(), target_id,
+      "Move back to home");
+    result = move_to(planning_group, *home_state);  // Robot is above the object
+
+    prompt_job_end(node_->get_logger(), result);
+
+    if (!result) {
+      return false;
     }
     // -------------------------------------------------------------
+
+    // ------------------ Remove Object from world -------------------
+
+    prompt_job_start(
+      node_->get_logger(), target_id,
+      "Remove object from world");
+
+    remove_object(target_id);
+
+    result = true;
+
+    prompt_job_end(node_->get_logger(), result);
+    return result;
   }
 
 private:
@@ -254,7 +259,7 @@ int main(int argc, char ** argv)
   rclcpp::Node::SharedPtr node =
     rclcpp::Node::make_shared("grasp_execution_demo_node", "", node_options);
 
-  grasp_execution::Demo demo(node);
+  grasp_execution::Demo demo(node, grasp_execution::GRASP_TASK_TOPIC);
 
   demo.init("manipulator", "ee_palm");
 

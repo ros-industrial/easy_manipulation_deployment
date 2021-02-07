@@ -26,16 +26,29 @@ include_directories(
 
 add_library(grasp_execution_interface
   SHARED
+  src/default_planning_action.cpp
+  src/grasp_execution.cpp
   src/scheduler.cpp
-  src/moveit_cpp_if.cpp
 )
 
 ament_target_dependencies(grasp_execution_interface
-  moveit_ros_planning_interface
   emd_msgs
   rclcpp
   tf2
   tf2_ros
+)
+
+add_library(moveit_cpp_grasp_execution_interface
+  SHARED
+  src/moveit_cpp_if.cpp
+)
+
+target_link_libraries(moveit_cpp_grasp_execution_interface
+  grasp_execution_interface
+)
+
+ament_target_dependencies(moveit_cpp_grasp_execution_interface
+  moveit_ros_planning_interface
 )
 
 install(
@@ -46,6 +59,7 @@ install(
 install(
   TARGETS
   grasp_execution_interface
+  moveit_cpp_grasp_execution_interface
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
@@ -71,6 +85,7 @@ ament_export_include_directories(
 )
 ament_export_libraries(
   grasp_execution_interface
+  moveit_cpp_grasp_execution_interface
 )
 ament_export_dependencies(
   moveit_ros_planning_interface

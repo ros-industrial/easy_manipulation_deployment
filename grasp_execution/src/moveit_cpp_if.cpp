@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "grasp_execution/moveit_cpp_if.hpp"
-#include "grasp_execution/utils.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -40,16 +39,11 @@
 #include "tf2_eigen/tf2_eigen.h"
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include "grasp_planning/msg/grasp_pose.hpp"
 
 namespace grasp_execution
 {
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("grasp_execution");
-
-static const char SEPARATOR[] =
-  "------------------------------------------------"
-  "------------------------------------------------";
 
 MoveitCppGraspExecution::MoveitCppGraspExecution(
   const rclcpp::Node::SharedPtr & node,
@@ -83,15 +77,11 @@ MoveitCppGraspExecution::~MoveitCppGraspExecution()
 bool MoveitCppGraspExecution::init(
   const std::string & planning_group, const std::string & _ee_link)
 {
+  prompt_job_start(
+    LOGGER, "",
+    "Initializing planning group: [" + planning_group + "].");
   // Check if planner is already registered
   if (arms_.find(planning_group) == arms_.end()) {
-    RCLCPP_INFO(
-      LOGGER,
-      MOVEIT_CONSOLE_COLOR_CYAN
-      "Initializing planning group: [%s]."
-      MOVEIT_CONSOLE_COLOR_RESET,
-      planning_group.c_str());
-
     // Print out basic planning group info for debugging
     moveit::core::RobotStatePtr state;
     moveit_cpp_->getCurrentState(state, 0);
@@ -103,6 +93,7 @@ bool MoveitCppGraspExecution::init(
 
     if (dof < 1) {
       RCLCPP_ERROR(LOGGER, "Planning Group [%s] is empty", planning_group.c_str());
+      prompt_job_end(LOGGER, false);
       return false;
     } else {
       RCLCPP_INFO(
@@ -134,31 +125,59 @@ bool MoveitCppGraspExecution::init(
           MOVEIT_CONSOLE_COLOR_RESET, _ee_link.c_str(), link_names.back().c_str());
       }
 
-      // // Set end effector frame to the child link of ee_link
-      // auto ee_joint_models = robot_model->getLinkModel(ee_link_)->getChildJointModels();
-      // if (ee_joint_models.empty()) {
-      //   RCLCPP_WARN(
-      //     LOGGER,
-      //     MOVEIT_CONSOLE_COLOR_YELLOW
-      //     "No valid child frame for [%s], use itself as attach frame for object"
-      //     MOVEIT_CONSOLE_COLOR_RESET, ee_link_.c_str());
-      //   ee_frame_ = ee_link_;
-      // } else {
-      //   RCLCPP_INFO(LOGGER, "End effectors attached to [%s]:", ee_link_.c_str());
-      //   for (auto & ee_joint_model : ee_joint_models) {
-      //     RCLCPP_INFO(
-      //       LOGGER, "- %s",
-      //       ee_joint_model->getChildLinkModel()->getName().c_str());
-      //   }
-      //   // TODO(Briancbn): multiple end effector
-      //   ee_frame_ = ee_joint_models.front()->getChildLinkModel()->getName();
-      // }
+      prompt_job_end(LOGGER, true);
       return true;
     }
 
   } else {
     RCLCPP_WARN(LOGGER, "Planning Group [%s] already ended", planning_group.c_str());
+    prompt_job_end(LOGGER, false);
     return false;
+  }
+}
+
+void MoveitCppGraspExecution::register_target_objects(
+  const emd_msgs::msg::GraspTask::SharedPtr & msg)
+{
+  // Add all targets into the scene
+  moveit_msgs::msg::CollisionObject temp_collision_object;
+  temp_collision_object.operation = temp_collision_object.ADD;
+
+  for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
+    const auto & target = msg->grasp_targets[i];
+    const auto target_id =
+      this->gen_target_object_id(msg, i);
+
+    prompt_job_start(
+      LOGGER, target_id,
+      "Register object in the world");
+
+    temp_collision_object.id = target_id;
+    temp_collision_object.header.frame_id =
+      target.target_pose.header.frame_id;
+
+    temp_collision_object.primitives.push_back(target.target_shape);
+    temp_collision_object.primitive_poses.push_back(target.target_pose.pose);
+
+    // // Print out all object poses as debug information
+    // std::ostringstream oss;
+    // print_pose(target.target_pose, oss);
+    // RCLCPP_INFO(node_->get_logger(), oss.str());
+
+    auto tmp_pose = target.target_pose;
+    to_frame(target.target_pose, tmp_pose, this->robot_frame_);
+    // std::ostringstream oss2;
+    // print_pose(tmp_pose, oss2);
+    // RCLCPP_INFO(node_->get_logger(), oss2.str());
+
+    bool result;
+    // Add object to planning scene
+    {    // Lock PlanningScene
+      planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+      result = scene->processCollisionObjectMsg(temp_collision_object);
+    }    // Unlock PlanningScene
+
+    prompt_job_end(LOGGER, !result);
   }
 }
 
@@ -181,6 +200,14 @@ geometry_msgs::msg::Pose MoveitCppGraspExecution::get_object_pose(
   }    // Unlock PlanningScene
 
   return object_pose;
+}
+
+moveit::core::RobotStatePtr MoveitCppGraspExecution::get_curr_state() const
+{
+  // Get home state
+  moveit::core::RobotStatePtr curr_state;
+  moveit_cpp_->getCurrentState(curr_state, 0);
+  return curr_state;
 }
 
 geometry_msgs::msg::PoseStamped MoveitCppGraspExecution::get_curr_pose(
@@ -222,7 +249,6 @@ bool MoveitCppGraspExecution::move_to(
   } else {
     arm.planner->setStartStateToCurrentState();
   }
-  RCLCPP_INFO(LOGGER, SEPARATOR);
   arm.planner->setGoal(pose, link);
   const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
   if (plan_solution) {
@@ -230,14 +256,12 @@ bool MoveitCppGraspExecution::move_to(
     if (execute) {
       RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
       arm.planner->execute(true);  // blocked execution
-      RCLCPP_INFO(LOGGER, SEPARATOR);
     } else {
       arm.traj.push_back(plan_solution.trajectory);
     }
 
     return true;
   } else {
-    RCLCPP_INFO(LOGGER, SEPARATOR);
     return false;
   }
 }
@@ -257,7 +281,6 @@ bool MoveitCppGraspExecution::move_to(
   } else {
     arm.planner->setStartStateToCurrentState();
   }
-  RCLCPP_INFO(LOGGER, SEPARATOR);
   arm.planner->setGoal(state);
   const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
   if (plan_solution) {
@@ -265,13 +288,11 @@ bool MoveitCppGraspExecution::move_to(
     if (execute) {
       RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
       arm.planner->execute(true);  // blocked execution
-      RCLCPP_INFO(LOGGER, SEPARATOR);
     } else {
       arm.traj.push_back(plan_solution.trajectory);
     }
     return true;
   } else {
-    RCLCPP_INFO(LOGGER, SEPARATOR);
     return false;
   }
 }
@@ -286,8 +307,6 @@ bool MoveitCppGraspExecution::cartesian_to(
   const auto & arm = arms_[planning_group];
   double fraction = 0.0;
   robot_trajectory::RobotTrajectoryPtr rt;
-
-  RCLCPP_INFO(LOGGER, SEPARATOR);
 
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   // Start Cartesian Planning
@@ -331,7 +350,6 @@ bool MoveitCppGraspExecution::cartesian_to(
         RCLCPP_ERROR(
           LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
           "was not specified (this value needs to be > 0)");
-        RCLCPP_INFO(LOGGER, SEPARATOR);
         return false;
       } else {
         if (!waypoints.empty()) {
@@ -386,7 +404,6 @@ bool MoveitCppGraspExecution::cartesian_to(
         }
       }
     } else {
-      RCLCPP_INFO(LOGGER, SEPARATOR);
       return false;
     }
   }    // Lock PlanningScene
@@ -397,15 +414,14 @@ bool MoveitCppGraspExecution::cartesian_to(
     if (execute) {
       RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
       moveit_cpp_->execute(planning_group, rt);
-      RCLCPP_INFO(LOGGER, SEPARATOR);
     } else {
       auto & arm = arms_[planning_group];
       arm.traj.push_back(rt);
     }
     return true;
+  } else {
+    return false;
   }
-  RCLCPP_INFO(LOGGER, SEPARATOR);
-  return true;
 }
 
 bool MoveitCppGraspExecution::move_until_before_collide(
@@ -415,16 +431,16 @@ bool MoveitCppGraspExecution::move_until_before_collide(
   char axis,
   bool execute)
 {
-  auto next_waypoint = [&axis, &step_size](geometry_msgs::msg::Pose & _pose) {
+  auto next_waypoint = [&axis, &step_size](tf2::Vector3 & _origin) {
       switch (axis) {
         case 'x':
-          _pose.position.x += step_size;
+          _origin.m_floats[0] += step_size;
           break;
         case 'y':
-          _pose.position.y += step_size;
+          _origin.m_floats[1] += step_size;
           break;
         case 'z':
-          _pose.position.z += step_size;
+          _origin.m_floats[2] += step_size;
           break;
         default:
           return false;
@@ -437,13 +453,21 @@ bool MoveitCppGraspExecution::move_until_before_collide(
   }
 
   std::vector<geometry_msgs::msg::Pose> waypoints;
-  geometry_msgs::msg::Pose temp_target_pose = pose.pose;
-  if (!next_waypoint(temp_target_pose)) {
+
+  auto temp_target_pose = pose;
+
+  tf2::Transform base_to_ee;
+  tf2::fromMsg(pose.pose, base_to_ee);
+
+  tf2::Transform ee_w_clearance;
+  ee_w_clearance.setIdentity();
+  if (!next_waypoint(ee_w_clearance.getOrigin())) {
     return false;
   }
   for (int i = 0; i < max_attempts; i++) {
-    waypoints.push_back(temp_target_pose);
-    next_waypoint(temp_target_pose);
+    tf2::toMsg(base_to_ee * ee_w_clearance, temp_target_pose.pose);
+    waypoints.push_back(temp_target_pose.pose);
+    next_waypoint(ee_w_clearance.getOrigin());
   }
 
   return cartesian_to(planning_group, waypoints, link, std::abs(step_size / 3), 0, execute);
@@ -468,7 +492,7 @@ void MoveitCppGraspExecution::attach_object_to_ee(
   object_pose.header.frame_id = object.header.frame_id;
   object_pose.pose = object.pose;
 
-  to_frame(object_pose, ee_pose, ee_link, *tf_buffer_);
+  to_frame(object_pose, ee_pose, ee_link);
 
   moveit_msgs::msg::AttachedCollisionObject attached_object;
   attached_object.link_name = ee_link;
@@ -477,10 +501,27 @@ void MoveitCppGraspExecution::attach_object_to_ee(
   attached_object.object.pose = ee_pose.pose;
   attached_object.object.operation = attached_object.object.ADD;
 
-  // Add object to planning scene
+  // Attach object to ee_link
   {    // Lock PlanningScene
     planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
     scene->processAttachedCollisionObjectMsg(attached_object);
+  }    // Unlock PlanningScene
+}
+
+void MoveitCppGraspExecution::attach_object_to_ee(
+  const std::string & target_id,
+  const std::string & ee_link)
+{
+  moveit_msgs::msg::AttachedCollisionObject attach_object;
+
+  attach_object.object.id = target_id;
+  attach_object.link_name = ee_link;
+  attach_object.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+
+  // Attach object to ee_link
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    scene->processAttachedCollisionObjectMsg(attach_object);
   }    // Unlock PlanningScene
 }
 
@@ -508,6 +549,90 @@ void MoveitCppGraspExecution::detach_object_from_ee(
     planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
     scene->processAttachedCollisionObjectMsg(detach_object);
   }    // Unlock PlanningScene
+}
+
+
+void MoveitCppGraspExecution::detach_object_from_ee(
+  const std::string & target_id,
+  const std::string & ee_link)
+{
+  moveit_msgs::msg::AttachedCollisionObject detach_object;
+
+  detach_object.object.id = target_id;
+  detach_object.link_name = ee_link;
+  detach_object.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+
+  // Attach object to ee_link
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    scene->processAttachedCollisionObjectMsg(detach_object);
+  }    // Unlock PlanningScene
+}
+
+void MoveitCppGraspExecution::remove_object(
+  const std::string & target_id)
+{
+  moveit_msgs::msg::CollisionObject object;
+  object.id = target_id;
+  object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+
+  // Add object to planning scene
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    scene->processCollisionObjectMsg(object);
+  }    // Unlock PlanningScene
+}
+
+void MoveitCppGraspExecution::squash_trajectories(
+  const std::string & planning_group,
+  int start_idx, int end_idx,
+  bool time_parameterization)
+{
+  auto & trajs = arms_[planning_group].traj;
+  int _end_idx = (end_idx == -1) ? (trajs.size() - 1) : end_idx;
+  size_t size = trajs.size();
+  if (start_idx <= _end_idx) {
+    while (trajs.size() > size - (_end_idx - start_idx)) {
+      trajs[start_idx]->append(*trajs[start_idx + 1], 0);
+      trajs.erase(trajs.begin() + start_idx + 1);
+    }
+    if (time_parameterization) {
+      trajectory_processing::IterativeParabolicTimeParameterization time_param;
+      time_param.computeTimeStamps(*trajs[start_idx], 1.0);
+    }
+  }
+}
+
+void MoveitCppGraspExecution::print_trajectory(
+  const robot_trajectory::RobotTrajectoryPtr & traj,
+  std::ostream & _out)
+{
+  _out << "Robot Trajectory:" << std::endl;
+  _out << "Plannning Group: " << traj->getGroupName() << std::endl;
+  _out << "Total waypoints: " << traj->getWayPointCount() << std::endl;
+
+  _out << "t\t\tpos\t\tvel\t\taccel" << std::endl;
+  int dof = traj->getGroup()->getVariableCount();
+  for (size_t i = 0; i < traj->getWayPointCount(); i++) {
+    _out << traj->getWayPointDurationFromStart(i) << "\t";
+    _out << "|\t";
+    for (int j = 0; j < dof; j++) {
+      _out << traj->getWayPointPtr(i)->getVariablePosition(j) << "\t";
+    }
+    if (traj->getWayPointPtr(i)->hasVelocities()) {
+      _out << "|\t";
+      for (int j = 0; j < dof; j++) {
+        _out << traj->getWayPointPtr(i)->getVariableVelocity(j) << "\t";
+      }
+    }
+    if (traj->getWayPointPtr(i)->hasAccelerations()) {
+      _out << "|\t";
+      for (int j = 0; j < dof; j++) {
+        _out << traj->getWayPointPtr(i)->getVariableAcceleration(j) << "\t";
+      }
+    }
+    _out << std::endl;
+  }
 }
 
 }  // namespace grasp_execution

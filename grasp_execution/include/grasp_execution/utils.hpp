@@ -75,9 +75,31 @@ inline void print_pose(
   std::ostream & _out = std::cout,
   bool _euler = true)
 {
-  _out << "Grasp Pose Frame ID: " << _pose.header.frame_id << std::endl;
+  _out << "Frame ID: " << _pose.header.frame_id << std::endl;
 
   print_pose(_pose.pose, _out, _euler);
+}
+
+/// Use ROS to print PoseStamped message
+inline void print_pose_ros(
+  const rclcpp::Logger logger,
+  const geometry_msgs::msg::Pose & _pose,
+  bool _euler = true)
+{
+  std::ostringstream oss;
+  print_pose(_pose, oss, _euler);
+  RCLCPP_INFO(logger, oss.str());
+}
+
+/// Use ROS to print PoseStamped message
+inline void print_pose_ros(
+  const rclcpp::Logger logger,
+  const geometry_msgs::msg::PoseStamped & _pose,
+  bool _euler = true)
+{
+  std::ostringstream oss;
+  print_pose(_pose, oss, _euler);
+  RCLCPP_INFO(logger, oss.str());
 }
 
 /// Transform pose to target end reference frame

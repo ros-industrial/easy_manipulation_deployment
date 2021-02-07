@@ -28,7 +28,8 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
-#include "grasp_planning/msg/grasp_pose.hpp"
+#include "grasp_execution/utils.hpp"
+#include "emd_msgs/msg/grasp_task.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
@@ -40,35 +41,33 @@ class GraspExecutionInterface
 public:
   GraspExecutionInterface(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_poses_topic = "grasp_poses",
+    const std::string & grasp_task_topic = "grasp_request",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0
-  )
-  : node_(node),
-    tf_buffer_(std::make_shared<tf2_ros::Buffer>(node_->get_clock())),
-    tf_listener_(*tf_buffer_),
-    planning_scheduler(planning_concurrency),
-    execution_scheduler(execution_concurrency)
-  {
-    grasp_planning_sub_ = node_->create_subscription<grasp_planning::msg::GraspPose>(
-      grasp_poses_topic, 10,
-      [ = ](grasp_planning::msg::GraspPose::UniquePtr msg) {
-        order_schedule(std::move(msg));
-      }
-    );
-  }
+  );
 
-  virtual ~GraspExecutionInterface() {}
+  virtual ~GraspExecutionInterface();
 
-  virtual void planning_workflow(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) = 0;
+  bool default_plan_pre_grasp(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    const geometry_msgs::msg::PoseStamped & grasp_pose,
+    double clearance);
 
-  virtual void execution_workflow(
-    const trajectory_msgs::msg::JointTrajectory::SharedPtr & msg) = 0;
+  bool default_plan_transport(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    const geometry_msgs::msg::PoseStamped & release_pose,
+    double clearance);
+
+  virtual bool home(
+    const std::string & planning_group) = 0;
+
+  virtual void register_target_objects(
+    const emd_msgs::msg::GraspTask::SharedPtr & msg) = 0;
 
   virtual void order_schedule(
-    const grasp_planning::msg::GraspPose::SharedPtr & msg) = 0;
-
+    const emd_msgs::msg::GraspTask::SharedPtr & msg) = 0;
 
   virtual geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const = 0;
 
@@ -98,17 +97,64 @@ public:
     char axis,
     bool execute = true) = 0;
 
-  // TODO(Briancbn): Generic type function call
   virtual void attach_object_to_ee(
-    const shape_msgs::msg::SolidPrimitive & object,
+    const std::string & target_id,
     const std::string & ee_link) = 0;
 
-  // TODO(Briancbn): Generic type function call
   virtual void detach_object_from_ee(
-    const shape_msgs::msg::SolidPrimitive & object,
+    const std::string & target_id,
     const std::string & ee_link) = 0;
+
+  virtual void remove_object(
+    const std::string & target_id) = 0;
+
+  virtual void prompt_job_start(
+    const std::string & job_id,
+    const std::string & message,
+    char separator = '>',
+    std::ostream & out = std::cout);
+
+  void prompt_job_start(
+    const rclcpp::Logger & logger,
+    const std::string & job_id,
+    const std::string & message,
+    char separator = '>')
+  {
+    std::ostringstream oss;
+    prompt_job_start(job_id, message, separator, oss);
+    RCLCPP_INFO(logger, oss.str());
+  }
+
+  virtual void prompt_job_end(
+    bool end_result = true,
+    char separator = '<',
+    std::ostream & out = std::cout);
+
+  void prompt_job_end(
+    const rclcpp::Logger & logger,
+    bool end_result = true,
+    char separator = '<')
+  {
+    std::ostringstream oss;
+    prompt_job_end(end_result, separator, oss);
+    RCLCPP_INFO(logger, oss.str());
+  }
 
 protected:
+  std::string gen_target_object_id(
+    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    size_t index) const;
+
+  void to_frame(
+    const geometry_msgs::msg::PoseStamped & in_,
+    geometry_msgs::msg::PoseStamped & out_,
+    const std::string & _target_frame)
+  {
+    ::grasp_execution::to_frame(in_, out_, _target_frame, *tf_buffer_);
+  }
+
+  std::string robot_frame_;
+
   rclcpp::Node::SharedPtr node_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -118,7 +164,7 @@ protected:
   Scheduler execution_scheduler;
 
 private:
-  rclcpp::Subscription<grasp_planning::msg::GraspPose>::SharedPtr grasp_planning_sub_;
+  rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
 };
 
 }  // namespace grasp_execution
