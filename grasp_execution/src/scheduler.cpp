@@ -288,8 +288,10 @@ Workflow::Status Scheduler::cancel_workflow(
 
 void Scheduler::wait_till_all_complete() const
 {
-  for (auto & worker : impl_->workers) {
-    worker.execution_future.wait();
+  while (!impl_->id_queue.empty()) {
+    for (auto & worker : impl_->workers) {
+      worker.execution_future.wait();
+    }
   }
 }
 
