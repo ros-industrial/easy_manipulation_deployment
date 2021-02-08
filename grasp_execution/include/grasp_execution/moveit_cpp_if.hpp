@@ -102,6 +102,13 @@ public:
     const sensor_msgs::msg::JointState &,
     bool) override {return true;}
 
+  double cartesian_to(
+    const std::string & planning_group,
+    moveit::core::RobotState & start_state,
+    const std::vector<geometry_msgs::msg::Pose> & _waypoints,
+    robot_trajectory::RobotTrajectoryPtr & traj,
+    const std::string & _link, double step, double jump_threshold = 0);
+
   bool cartesian_to(
     const std::string & planning_group,
     const std::vector<geometry_msgs::msg::Pose> & _waypoints,

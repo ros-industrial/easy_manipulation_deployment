@@ -249,21 +249,75 @@ bool MoveitCppGraspExecution::move_to(
   } else {
     arm.planner->setStartStateToCurrentState();
   }
-  arm.planner->setGoal(pose, link);
-  const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
-  if (plan_solution) {
-    // Execute immediately
-    if (execute) {
-      RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
-      arm.planner->execute(true);  // blocked execution
-    } else {
-      arm.traj.push_back(plan_solution.trajectory);
-    }
 
-    return true;
-  } else {
-    return false;
+  // Strategy 1
+  RCLCPP_INFO(
+    LOGGER, "\nStarting strategy 1: Cartesian move to destination with 1cm step. "
+    "This works well within relatively empty space");
+  robot_trajectory::RobotTrajectoryPtr traj;
+  auto fraction = cartesian_to(
+    planning_group, *arm.planner->getStartState(), {pose.pose},
+    traj, link, 0.01, 0);
+
+  if (fraction < 1.0 && fraction > 0.0 &&
+    traj->getWayPointCount() > 10)
+  {
+    // Strategy 2
+    RCLCPP_INFO(
+      LOGGER,
+      "\nStrategy 1 failed :<\n"
+      "Starting strategy 2: Back track cartesian path 10cm"
+      "to last viable point and start non-deterministic planning");
+
+    arm.planner->setStartState(
+      traj->getWayPoint(traj->getWayPointCount() - 10));
+    arm.planner->setGoal(pose, link);
+    const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+
+    if (plan_solution) {
+      auto temp_traj = traj;
+      traj->clear();
+      traj->append(*temp_traj, 0, 0, temp_traj->getWayPointCount() - 10);
+      traj->append(*plan_solution.trajectory, 0, 1);
+
+      trajectory_processing::IterativeParabolicTimeParameterization time_param;
+      time_param.computeTimeStamps(*traj, 1.0);
+    } else {
+      // Strategy 3
+      RCLCPP_INFO(
+        LOGGER,
+        "\nStrategy 1 & 2 failed :<\n"
+        "Starting strategy 3: Start over with non-deterministic planning");
+
+      // Reset the start state
+      if (!execute &&
+        !arm.traj.empty())
+      {
+        arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
+      } else {
+        arm.planner->setStartStateToCurrentState();
+      }
+
+      arm.planner->setGoal(pose, link);
+      const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+
+      if (plan_solution) {
+        traj = plan_solution.trajectory;
+      } else {
+        // All 3 strategies failed, exiting
+        return false;
+      }
+    }
   }
+
+  // Execute immediately
+  if (execute) {
+    RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
+    moveit_cpp_->execute(planning_group, traj);  // blocked execution
+  } else {
+    arm.traj.push_back(traj);
+  }
+  return true;
 }
 
 bool MoveitCppGraspExecution::move_to(
@@ -281,6 +335,7 @@ bool MoveitCppGraspExecution::move_to(
   } else {
     arm.planner->setStartStateToCurrentState();
   }
+
   arm.planner->setGoal(state);
   const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
   if (plan_solution) {
@@ -297,7 +352,6 @@ bool MoveitCppGraspExecution::move_to(
   }
 }
 
-/// Referenced from Move Group capability MoveGroupCartesianPathService::computeService
 bool MoveitCppGraspExecution::cartesian_to(
   const std::string & planning_group,
   const std::vector<geometry_msgs::msg::Pose> & _waypoints,
@@ -305,16 +359,14 @@ bool MoveitCppGraspExecution::cartesian_to(
   bool execute)
 {
   const auto & arm = arms_[planning_group];
-  double fraction = 0.0;
   robot_trajectory::RobotTrajectoryPtr rt;
 
-  RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
-  // Start Cartesian Planning
+  // Get start state
+  moveit::core::RobotState start_state(moveit_cpp_->getRobotModel());
+
   {    // Lock PlanningScene
     moveit_cpp_->getPlanningSceneMonitor()->updateFrameTransforms();
 
-    // Get start state
-    moveit::core::RobotState start_state(moveit_cpp_->getRobotModel());
     // Set the start state to the last point of the trajectory
     // if immediate execution is not needed
     if (!execute &&
@@ -326,87 +378,12 @@ bool MoveitCppGraspExecution::cartesian_to(
         moveit_cpp_->getPlanningSceneMonitor());
       start_state = lscene->getCurrentState();
     }
-    // Check if planning group valid
-    if (const moveit::core::JointModelGroup * jmg =
-      start_state.getJointModelGroup(planning_group))
-    {
-      std::string link_name = _link;
-      if (link_name.empty() && !jmg->getLinkModelNames().empty()) {
-        link_name = jmg->getLinkModelNames().back();
-      }
+  }    // Unlock PlanningScene
 
-      EigenSTL::vector_Isometry3d waypoints(_waypoints.size());
-
-      for (size_t i = 0; i < _waypoints.size(); i++) {
-        tf2::fromMsg(_waypoints[i], waypoints[i]);
-      }
-
-      // TODO(Briancbn): Properly deal with this
-      // Create path_constraint
-      moveit_msgs::msg::Constraints path_constraints;
-      bool avoid_collisions = true;
-
-      if (step < std::numeric_limits<double>::epsilon()) {
-        RCLCPP_ERROR(
-          LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
-          "was not specified (this value needs to be > 0)");
-        return false;
-      } else {
-        if (!waypoints.empty()) {
-          moveit::core::GroupStateValidityCallbackFn constraint_fn;
-          std::unique_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
-          std::unique_ptr<kinematic_constraints::KinematicConstraintSet> kset;
-          if (avoid_collisions || !moveit::core::isEmpty(path_constraints)) {
-            ls.reset(
-              new planning_scene_monitor::LockedPlanningSceneRO(
-                moveit_cpp_->
-                getPlanningSceneMonitor()));
-            kset.reset(new kinematic_constraints::KinematicConstraintSet((*ls)->getRobotModel()));
-            kset->add(path_constraints, (*ls)->getTransforms());
-            constraint_fn = [
-              planning_scene =
-              (avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls)
-              .get() : nullptr),
-              constraint_set = (kset->empty() ? nullptr : kset.get())
-              ](moveit::core::RobotState * state,
-                const moveit::core::JointModelGroup * group, const double * ik_solution) {
-                state->setJointGroupPositions(group, ik_solution);
-                state->update();
-                return (!planning_scene ||
-                       !planning_scene->isStateColliding(*state, group->getName())) &&
-                       (!constraint_set || constraint_set->decide(*state).satisfied);
-              };
-          }
-
-          bool global_frame = true;
-
-          std::vector<moveit::core::RobotStatePtr> traj;
-          fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
-            &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
-            moveit::core::MaxEEFStep(step), moveit::core::JumpThreshold(
-              jump_threshold), constraint_fn);
-
-          rt = std::make_shared<robot_trajectory::RobotTrajectory>(
-            moveit_cpp_->getPlanningSceneMonitor()->getRobotModel(), planning_group);
-          for (const moveit::core::RobotStatePtr & traj_state : traj) {
-            rt->addSuffixWayPoint(traj_state, 0.0);
-          }
-
-          // time trajectory
-          // \todo optionally compute timing to move the eef with constant speed
-          trajectory_processing::IterativeParabolicTimeParameterization time_param;
-          time_param.computeTimeStamps(*rt, 1.0);
-
-          RCLCPP_INFO(
-            LOGGER,
-            "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
-            (unsigned int)traj.size(), fraction * 100.0);
-        }
-      }
-    } else {
-      return false;
-    }
-  }    // Lock PlanningScene
+  // Start Cartesian Planning
+  auto fraction = cartesian_to(
+    planning_group, start_state,
+    _waypoints, rt, _link, step, jump_threshold);
 
   // Execute cartesian path
   if (fraction > 0) {
@@ -422,6 +399,99 @@ bool MoveitCppGraspExecution::cartesian_to(
   } else {
     return false;
   }
+}
+
+/// Referenced from Move Group capability MoveGroupCartesianPathService::computeService
+double MoveitCppGraspExecution::cartesian_to(
+  const std::string & planning_group,
+  moveit::core::RobotState & start_state,
+  const std::vector<geometry_msgs::msg::Pose> & _waypoints,
+  robot_trajectory::RobotTrajectoryPtr & traj,
+  const std::string & _link, double step, double jump_threshold)
+{
+  double fraction = 0.0;
+
+  RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
+
+  // Check if planning group valid
+  if (const moveit::core::JointModelGroup * jmg =
+    start_state.getJointModelGroup(planning_group))
+  {
+    std::string link_name = _link;
+    if (link_name.empty() && !jmg->getLinkModelNames().empty()) {
+      link_name = jmg->getLinkModelNames().back();
+    }
+
+    EigenSTL::vector_Isometry3d waypoints(_waypoints.size());
+
+    for (size_t i = 0; i < _waypoints.size(); i++) {
+      tf2::fromMsg(_waypoints[i], waypoints[i]);
+    }
+
+    // TODO(Briancbn): Properly deal with this
+    // Create path_constraint
+    moveit_msgs::msg::Constraints path_constraints;
+    bool avoid_collisions = true;
+
+    if (step < std::numeric_limits<double>::epsilon()) {
+      RCLCPP_ERROR(
+        LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
+        "was not specified (this value needs to be > 0)");
+      return fraction;
+    } else {
+      if (!waypoints.empty()) {
+        moveit::core::GroupStateValidityCallbackFn constraint_fn;
+        std::unique_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
+        std::unique_ptr<kinematic_constraints::KinematicConstraintSet> kset;
+        if (avoid_collisions || !moveit::core::isEmpty(path_constraints)) {
+          ls.reset(
+            new planning_scene_monitor::LockedPlanningSceneRO(
+              moveit_cpp_->
+              getPlanningSceneMonitor()));
+          kset.reset(new kinematic_constraints::KinematicConstraintSet((*ls)->getRobotModel()));
+          kset->add(path_constraints, (*ls)->getTransforms());
+          constraint_fn = [
+            planning_scene =
+            (avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls)
+            .get() : nullptr),
+            constraint_set = (kset->empty() ? nullptr : kset.get())
+            ](moveit::core::RobotState * state,
+              const moveit::core::JointModelGroup * group, const double * ik_solution) {
+              state->setJointGroupPositions(group, ik_solution);
+              state->update();
+              return (!planning_scene ||
+                     !planning_scene->isStateColliding(*state, group->getName())) &&
+                     (!constraint_set || constraint_set->decide(*state).satisfied);
+            };
+        }
+
+        bool global_frame = true;
+
+        std::vector<moveit::core::RobotStatePtr> rstraj;
+        fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
+          &start_state, jmg, rstraj, start_state.getLinkModel(link_name), waypoints, global_frame,
+          moveit::core::MaxEEFStep(step), moveit::core::JumpThreshold(
+            jump_threshold), constraint_fn);
+
+        traj = std::make_shared<robot_trajectory::RobotTrajectory>(
+          moveit_cpp_->getPlanningSceneMonitor()->getRobotModel(), planning_group);
+        for (const moveit::core::RobotStatePtr & traj_state : rstraj) {
+          traj->addSuffixWayPoint(traj_state, 0.0);
+        }
+
+        // time trajectory
+        // \todo optionally compute timing to move the eef with constant speed
+        trajectory_processing::IterativeParabolicTimeParameterization time_param;
+        time_param.computeTimeStamps(*traj, 1.0);
+
+        RCLCPP_INFO(
+          LOGGER,
+          "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
+          (unsigned int)rstraj.size(), fraction * 100.0);
+      }
+    }
+  }
+  return fraction;
 }
 
 bool MoveitCppGraspExecution::move_until_before_collide(
@@ -592,13 +662,39 @@ void MoveitCppGraspExecution::squash_trajectories(
   int _end_idx = (end_idx == -1) ? (trajs.size() - 1) : end_idx;
   size_t size = trajs.size();
   if (start_idx <= _end_idx) {
+    RCLCPP_INFO(LOGGER, "Squashing trajectory...");
     while (trajs.size() > size - (_end_idx - start_idx)) {
-      trajs[start_idx]->append(*trajs[start_idx + 1], 0);
+      trajs[start_idx]->append(*trajs[start_idx + 1], 0, 1);
       trajs.erase(trajs.begin() + start_idx + 1);
     }
+    RCLCPP_INFO(LOGGER, "Redo time parameterization...");
     if (time_parameterization) {
-      trajectory_processing::IterativeParabolicTimeParameterization time_param;
-      time_param.computeTimeStamps(*trajs[start_idx], 1.0);
+      // Strategy 1: TimeOptimization
+      RCLCPP_INFO(LOGGER, "\nStrategy 1: Time Optimization");
+      auto temp_traj = trajs[start_idx];
+      bool validity;
+      trajectory_processing::TimeOptimalTrajectoryGeneration time_op_param;
+      time_op_param.computeTimeStamps(*temp_traj, 1.0);
+
+      // TimeOptimization will cause waypoint to change
+      // Thus we need to check the new trajectory collision validity
+      {   // Lock PlanningScene
+        planning_scene_monitor::LockedPlanningSceneRO ls(
+          moveit_cpp_->getPlanningSceneMonitor());
+        validity = ls->isPathValid(*temp_traj, planning_group, true);
+      }   // Unlock PlanningScene
+
+      if (validity) {
+        trajs[start_idx] = std::move(temp_traj);
+        RCLCPP_INFO(LOGGER, "\nStrategy 1 succeeded!!");
+      } else {
+        // Strategy 2: Good old IterativeParabolicTimeParameterization
+        RCLCPP_INFO(
+          LOGGER, "\nStrategy 1 failed:<.\n"
+          "Strategy 2: Good old IterativeParabolicTimeParameterization");
+        trajectory_processing::IterativeParabolicTimeParameterization ip_time_param;
+        ip_time_param.computeTimeStamps(*trajs[start_idx], 1.0);
+      }
     }
   }
 }

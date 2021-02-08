@@ -97,9 +97,8 @@ bool GraspExecutionInterface::default_plan_transport(
 
   tf2::toMsg(base_to_ee * ee_w_clearance, pre_release_pose.pose);
 
-  result = cartesian_to(
-    planning_group,
-    {pre_release_pose.pose}, ee_link, 0.01, 0, false);
+  result = move_to(
+    planning_group, pre_release_pose, ee_link, false);
 
   if (!result) {
     return false;
