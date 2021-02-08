@@ -121,6 +121,7 @@ public:
     char separator = '>')
   {
     std::ostringstream oss;
+    oss << std::endl;
     prompt_job_start(job_id, message, separator, oss);
     RCLCPP_INFO(logger, oss.str());
   }
@@ -136,6 +137,7 @@ public:
     char separator = '<')
   {
     std::ostringstream oss;
+    oss << std::endl;
     prompt_job_end(end_result, separator, oss);
     RCLCPP_INFO(logger, oss.str());
   }

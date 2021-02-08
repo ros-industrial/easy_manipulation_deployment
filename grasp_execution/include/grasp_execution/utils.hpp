@@ -98,6 +98,7 @@ inline void print_pose_ros(
   bool _euler = true)
 {
   std::ostringstream oss;
+  oss << std::endl;
   print_pose(_pose, oss, _euler);
   RCLCPP_INFO(logger, oss.str());
 }

@@ -145,6 +145,7 @@ protected:
     const robot_trajectory::RobotTrajectoryPtr & traj)
   {
     std::ostringstream oss;
+    oss << std::endl;
     print_trajectory(traj, oss);
     RCLCPP_INFO(logger, oss.str());
   }
