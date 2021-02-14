@@ -60,6 +60,12 @@ public:
     const geometry_msgs::msg::PoseStamped & release_pose,
     double clearance);
 
+  bool default_plan_post_release(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    bool home,
+    double clearance);
+
   virtual bool home(
     const std::string & planning_group) = 0;
 
@@ -77,6 +83,11 @@ public:
     const std::string & planning_group,
     const geometry_msgs::msg::PoseStamped & pose,
     const std::string & link,
+    bool execute = true) = 0;
+
+  virtual bool move_to(
+    const std::string & planning_group,
+    const std::string & named_state,
     bool execute = true) = 0;
 
   virtual bool move_to(

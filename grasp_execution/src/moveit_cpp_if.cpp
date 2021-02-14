@@ -157,7 +157,7 @@ bool MoveitCppGraspExecution::init(
     }
 
   } else {
-    RCLCPP_WARN(LOGGER, "Planning Group [%s] already ended", planning_group.c_str());
+    RCLCPP_WARN(LOGGER, "Planning Group [%s] already exist", planning_group.c_str());
     prompt_job_end(LOGGER, false);
     return false;
   }
@@ -187,15 +187,13 @@ void MoveitCppGraspExecution::register_target_objects(
     temp_collision_object.primitive_poses.push_back(target.target_pose.pose);
 
     // // Print out all object poses as debug information
-    // std::ostringstream oss;
-    // print_pose(target.target_pose, oss);
-    // RCLCPP_INFO(node_->get_logger(), oss.str());
+    // print_pose_ros(LOGGER, target.target_pose);
 
     auto tmp_pose = target.target_pose;
     to_frame(target.target_pose, tmp_pose, this->robot_frame_);
-    // std::ostringstream oss2;
-    // print_pose(tmp_pose, oss2);
-    // RCLCPP_INFO(node_->get_logger(), oss2.str());
+
+    // // Print out all object poses as debug information
+    // print_pose_ros(LOGGER, tmp_pose);
 
     bool result;
     // Add object to planning scene
@@ -204,7 +202,7 @@ void MoveitCppGraspExecution::register_target_objects(
       result = scene->processCollisionObjectMsg(temp_collision_object);
     }    // Unlock PlanningScene
 
-    prompt_job_end(LOGGER, !result);
+    prompt_job_end(LOGGER, result);
   }
 }
 
@@ -267,6 +265,11 @@ bool MoveitCppGraspExecution::move_to(
   bool execute)
 {
   auto & arm = arms_[planning_group];
+  const auto & ee_link = (link.empty() ? arm.ee_link : link);
+
+  // Flag for planning
+  bool result = false;
+
   // Set the start state to the last point of the trajectory
   // if immediate execution is not needed
   if (!execute &&
@@ -286,10 +289,12 @@ bool MoveitCppGraspExecution::move_to(
     planning_group, *arm.planner->getStartState(), {pose.pose},
     traj, link, 0.01, 0);
 
-  if (fraction < 1.0 && fraction > 0.0 &&
-    traj->getWayPointCount() > 10)
-  {
-    // Strategy 2
+  RCLCPP_INFO(LOGGER, "fraction: %f", fraction);
+  result = (fraction == 1.0);
+
+  // Strategy 2
+  size_t backtrack = 20;
+  if (!result && traj->getWayPointCount() > backtrack) {
     RCLCPP_INFO(
       LOGGER,
       "\nStrategy 1 failed :<\n"
@@ -297,44 +302,66 @@ bool MoveitCppGraspExecution::move_to(
       "to last viable point and start non-deterministic planning");
 
     arm.planner->setStartState(
-      traj->getWayPoint(traj->getWayPointCount() - 10));
-    arm.planner->setGoal(pose, link);
-    const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+      traj->getWayPoint(traj->getWayPointCount() - backtrack));
+
+
+    // Hardset to try 5 times
+    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    int count = 0, max_tries = 5;
+
+    while (!plan_solution && count < max_tries) {
+      arm.planner->setGoal(pose, ee_link);
+      plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+      count++;
+    }
 
     if (plan_solution) {
-      auto temp_traj = traj;
+      auto temp_traj = *traj;
       traj->clear();
-      traj->append(*temp_traj, 0, 0, temp_traj->getWayPointCount() - 10);
+      traj->append(temp_traj, 0, 0, temp_traj.getWayPointCount() - backtrack);
       traj->append(*plan_solution.trajectory, 0, 1);
 
       trajectory_processing::IterativeParabolicTimeParameterization time_param;
       time_param.computeTimeStamps(*traj, 1.0);
-    } else {
-      // Strategy 3
-      RCLCPP_INFO(
-        LOGGER,
-        "\nStrategy 1 & 2 failed :<\n"
-        "Starting strategy 3: Start over with non-deterministic planning");
-
-      // Reset the start state
-      if (!execute &&
-        !arm.traj.empty())
-      {
-        arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
-      } else {
-        arm.planner->setStartStateToCurrentState();
-      }
-
-      arm.planner->setGoal(pose, link);
-      const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
-
-      if (plan_solution) {
-        traj = plan_solution.trajectory;
-      } else {
-        // All 3 strategies failed, exiting
-        return false;
-      }
+      result = true;
     }
+  }
+
+  // Strategy 3
+  if (!result) {
+    RCLCPP_INFO(
+      LOGGER,
+      "\nStrategy 1 & 2 failed :<\n"
+      "Starting strategy 3: Start over with non-deterministic planning");
+
+    // Reset the start state
+    if (!execute &&
+      !arm.traj.empty())
+    {
+      arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
+    } else {
+      arm.planner->setStartStateToCurrentState();
+    }
+
+    // Hardset to try 5 times
+    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    int count = 0, max_tries = 5;
+
+    while (!plan_solution && count < max_tries) {
+      arm.planner->setGoal(pose, ee_link);
+      plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+      count++;
+    }
+
+    if (plan_solution) {
+      traj = plan_solution.trajectory;
+      result = true;
+    }
+  }
+
+  // All strategies failed, exiting
+  if (!result) {
+    return false;
   }
 
   // Execute immediately
@@ -363,8 +390,56 @@ bool MoveitCppGraspExecution::move_to(
     arm.planner->setStartStateToCurrentState();
   }
 
-  arm.planner->setGoal(state);
-  const auto plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+  // Hardset to try 5 times
+  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  int count = 0, max_tries = 5;
+
+  while (!plan_solution && count < max_tries) {
+    arm.planner->setGoal(state);
+    plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+    count++;
+  }
+
+  if (plan_solution) {
+    // Execute immediately
+    if (execute) {
+      RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
+      return this->execute(plan_solution.trajectory);  // blocked execution
+    } else {
+      arm.traj.push_back(plan_solution.trajectory);
+      return true;
+    }
+  } else {
+    return false;
+  }
+}
+
+bool MoveitCppGraspExecution::move_to(
+  const std::string & planning_group,
+  const std::string & named_state,
+  bool execute)
+{
+  auto & arm = arms_[planning_group];
+  // Set the start state to the last point of the trajectory
+  // if immediate execution is not needed
+  if (!execute &&
+    !arm.traj.empty())
+  {
+    arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
+  } else {
+    arm.planner->setStartStateToCurrentState();
+  }
+
+  // Hardset to try 5 times
+  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  int count = 0, max_tries = 5;
+
+  while (!plan_solution && count < max_tries) {
+    arm.planner->setGoal(named_state);
+    plan_solution = arm.planner->plan();
+    count++;
+  }
+
   if (plan_solution) {
     // Execute immediately
     if (execute) {
@@ -444,10 +519,7 @@ double MoveitCppGraspExecution::cartesian_to(
   if (const moveit::core::JointModelGroup * jmg =
     start_state.getJointModelGroup(planning_group))
   {
-    std::string link_name = _link;
-    if (link_name.empty() && !jmg->getLinkModelNames().empty()) {
-      link_name = jmg->getLinkModelNames().back();
-    }
+    const std::string & link_name = (_link.empty() ? arms_[planning_group].ee_link : _link);
 
     EigenSTL::vector_Isometry3d waypoints(_waypoints.size());
 

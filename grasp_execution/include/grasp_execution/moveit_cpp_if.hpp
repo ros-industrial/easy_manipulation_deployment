@@ -105,6 +105,11 @@ public:
     const moveit::core::RobotState & state,
     bool execute = true);
 
+  bool move_to(
+    const std::string & planning_group,
+    const std::string & named_state,
+    bool execute = true) override;
+
   bool home(
     const std::string &) override {return true;}
 

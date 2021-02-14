@@ -111,4 +111,45 @@ bool GraspExecutionInterface::default_plan_transport(
   return result;
 }
 
+bool GraspExecutionInterface::default_plan_post_release(
+  const std::string & planning_group,
+  const std::string & ee_link,
+  bool home,
+  double clearance)
+{
+  if (clearance < 0) {
+    return false;
+  }
+
+  auto release_pose = get_curr_pose(ee_link);
+
+  // Move pre grasp pose in the length of clearance
+  // wrt the grasp_ee frame's -z axis direction
+  geometry_msgs::msg::PoseStamped post_release_pose;
+  to_frame(release_pose, post_release_pose, robot_frame_);
+
+  tf2::Transform base_to_ee;
+  tf2::fromMsg(post_release_pose.pose, base_to_ee);
+
+  tf2::Transform ee_w_clearance;
+  ee_w_clearance.setIdentity();
+  ee_w_clearance.setOrigin(tf2::Vector3(0, 0, -clearance));
+
+  tf2::toMsg(base_to_ee * ee_w_clearance, post_release_pose.pose);
+
+  bool result = cartesian_to(
+    planning_group,
+    {post_release_pose.pose}, ee_link, 0.01, 0, false);
+
+  if (!result) {
+    return false;
+  }
+
+  if (home) {
+    result = move_to(planning_group, "home", false);
+  }
+
+  return result;
+}
+
 }  // namespace grasp_execution
