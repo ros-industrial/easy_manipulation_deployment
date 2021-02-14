@@ -680,6 +680,56 @@ void MoveitCppGraspExecution::remove_object(
   }    // Unlock PlanningScene
 }
 
+bool MoveitCppGraspExecution::execute(
+  const robot_trajectory::RobotTrajectoryPtr & traj,
+  const std::string & method)
+{
+  if (method == "default" || method.empty()) {
+    // Use default execution method
+    return this->default_executor_->run(*traj);
+  } else {
+    const auto & group = traj->getGroupName();
+    if (arms_.find(group) != arms_.end()) {
+      auto & arm = arms_[group];
+      if (arm.executors.find(method) != arm.executors.end()) {
+        // Use customized execution method (per group)
+        return arm.executors[method]->run(*traj);
+      } else {
+        RCLCPP_ERROR(
+          LOGGER,
+          "Method [%s] not found for group [%s]. "
+          "Abort execution",
+          method.c_str(), group.c_str());
+        return false;
+      }
+    } else {
+      RCLCPP_ERROR(
+        LOGGER,
+        "Group [%s] not initialized, cannot execute using custom method [%s]"
+        "Abort execution",
+        group.c_str(), method.c_str());
+      return false;
+    }
+  }
+}
+
+bool MoveitCppGraspExecution::squash_and_execute(
+  const std::string & group,
+  const std::string & method)
+{
+  auto & arm = arms_[group];
+  squash_trajectories(group);
+  for (auto & traj : arm.traj) {
+    auto result = this->execute(traj, method);
+    // this->print_trajectory_ros(LOGGER, traj);
+    arm.traj.pop_front();
+    if (!result) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void MoveitCppGraspExecution::squash_trajectories(
   const std::string & planning_group,
   int start_idx, int end_idx,

@@ -108,6 +108,10 @@ public:
   virtual void remove_object(
     const std::string & target_id) = 0;
 
+  virtual bool squash_and_execute(
+    const std::string & group,
+    const std::string & method = "default") = 0;
+
   virtual void prompt_job_start(
     const std::string & job_id,
     const std::string & message,

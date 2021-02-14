@@ -154,11 +154,19 @@ public:
   void remove_object(
     const std::string & target_id) override;
 
+  bool execute(
+    const robot_trajectory::RobotTrajectoryPtr & traj,
+    const std::string & method = "default");
+
+  bool squash_and_execute(
+    const std::string & group,
+    const std::string & method = "default") override;
+
 protected:
   void squash_trajectories(
     const std::string & planning_group,
     int start_idx = 0, int end_idx = -1,
-    bool time_parameterization = false);
+    bool time_parameterization = true);
 
   void print_trajectory_ros(
     const rclcpp::Logger & logger,
