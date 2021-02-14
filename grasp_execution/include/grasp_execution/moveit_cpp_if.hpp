@@ -24,16 +24,21 @@
 #include <vector>
 
 #include "grasp_execution/grasp_execution.hpp"
+#include "grasp_execution/moveit2/executor.hpp"
 
 #include "moveit/moveit_cpp/moveit_cpp.h"
 #include "moveit/moveit_cpp/planning_component.h"
-
-#include "emd_msgs/msg/grasp_task.hpp"
-
 #include "moveit/trajectory_processing/iterative_time_parameterization.h"
 #include "moveit/trajectory_processing/time_optimal_trajectory_generation.h"
 
+#include "pluginlib/class_loader.hpp"
+
+#include "emd_msgs/msg/grasp_task.hpp"
+
 namespace grasp_execution
+{
+
+namespace moveit2
 {
 
 struct JmgContext
@@ -54,7 +59,10 @@ struct JmgContext
   std::string ee_link;
   moveit::planning_interface::PlanningComponentPtr planner;
   std::deque<robot_trajectory::RobotTrajectoryPtr> traj;
+  std::unordered_map<std::string, Executor::UniquePtr> executors;
 };
+
+}  // namespace moveit2
 
 class MoveitCppGraspExecution : public GraspExecutionInterface
 {
@@ -67,7 +75,12 @@ public:
 
   ~MoveitCppGraspExecution();
 
-  bool init(const std::string & planning_group, const std::string & _ee_link = "");
+  bool init(
+    const std::string & planning_group,
+    const std::string & _ee_link = "",
+    const std::string & execution_method = "default",
+    const std::string & execution_type = "",
+    const std::string & controller_name = "");
 
   void order_schedule(
     const emd_msgs::msg::GraspTask::SharedPtr &) override {}
@@ -162,7 +175,11 @@ protected:
     std::ostream & _out = std::cout);
 
   moveit::planning_interface::MoveItCppPtr moveit_cpp_;
-  std::unordered_map<std::string, JmgContext> arms_;
+  std::unordered_map<std::string, moveit2::JmgContext> arms_;
+  moveit2::Executor::UniquePtr default_executor_;
+
+  std::shared_ptr<pluginlib::ClassLoader<
+      grasp_execution::moveit2::Executor>> executor_loader_;
 };
 
 }  // namespace grasp_execution

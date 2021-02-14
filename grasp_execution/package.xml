@@ -22,5 +22,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <grasp_execution plugin="${prefix}/moveit_cpp_default_executor_plugin.xml"/>
   </export>
 </package>

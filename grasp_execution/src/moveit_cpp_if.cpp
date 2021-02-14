@@ -63,19 +63,38 @@ MoveitCppGraspExecution::MoveitCppGraspExecution(
   RCLCPP_INFO(
     LOGGER,
     "Robot Root Link Name: %s", robot_frame_.c_str());
+
+  // Initialize grasp_execution executor loader
+  executor_loader_ = std::make_shared<pluginlib::ClassLoader<
+        grasp_execution::moveit2::Executor>>(
+    "grasp_execution",
+    "grasp_execution::moveit2::Executor");
+
+  // load default executor plugin
+  default_executor_ = std::unique_ptr<grasp_execution::moveit2::Executor>(
+    executor_loader_->createUnmanagedInstance(
+      "grasp_execution/DefaultExecutor"));
+  default_executor_->load(moveit_cpp_, "");
 }
 
 MoveitCppGraspExecution::~MoveitCppGraspExecution()
 {
+  executor_loader_.reset();
+  default_executor_.reset();
   // Exit everything in order
   for (auto & arm : arms_) {
     arm.second.planner.reset();
+    arm.second.executors.clear();
   }
   moveit_cpp_.reset();
 }
 
 bool MoveitCppGraspExecution::init(
-  const std::string & planning_group, const std::string & _ee_link)
+  const std::string & planning_group,
+  const std::string & _ee_link,
+  const std::string & execution_method,
+  const std::string & execution_type,
+  const std::string & controller_name)
 {
   prompt_job_start(
     LOGGER, "",
@@ -114,7 +133,7 @@ bool MoveitCppGraspExecution::init(
       // Initializing planner
       arms_.emplace(
         planning_group,
-        JmgContext{planning_group, moveit_cpp_,
+        moveit2::JmgContext{planning_group, moveit_cpp_,
           (_ee_link.empty() ? link_names.back() : _ee_link)});
 
       if (_ee_link != link_names.back()) {
@@ -123,6 +142,14 @@ bool MoveitCppGraspExecution::init(
           MOVEIT_CONSOLE_COLOR_YELLOW
           "Assuming [%s] is rigidly attached to end_link [%s]"
           MOVEIT_CONSOLE_COLOR_RESET, _ee_link.c_str(), link_names.back().c_str());
+      }
+
+      // Initialize customized execution method
+      if (execution_method != "default" && !execution_method.empty()) {
+        auto customized_executor = std::unique_ptr<grasp_execution::moveit2::Executor>(
+          executor_loader_->createUnmanagedInstance(execution_type));
+        customized_executor->load(moveit_cpp_, controller_name);
+        arms_[planning_group].executors[execution_method] = std::move(customized_executor);
       }
 
       prompt_job_end(LOGGER, true);
@@ -239,7 +266,7 @@ bool MoveitCppGraspExecution::move_to(
   const std::string & link,
   bool execute)
 {
-  JmgContext & arm = arms_[planning_group];
+  auto & arm = arms_[planning_group];
   // Set the start state to the last point of the trajectory
   // if immediate execution is not needed
   if (!execute &&

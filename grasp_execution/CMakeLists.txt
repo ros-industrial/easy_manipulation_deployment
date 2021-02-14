@@ -51,6 +51,16 @@ ament_target_dependencies(moveit_cpp_grasp_execution_interface
   moveit_ros_planning_interface
 )
 
+# Default Executor plugin
+add_library(moveit_cpp_default_executor_plugin
+  SHARED
+  src/moveit2/default_executor.cpp
+)
+ament_target_dependencies(moveit_cpp_default_executor_plugin
+  moveit_ros_planning_interface
+  rclcpp
+)
+
 install(
   DIRECTORY include/
   DESTINATION include
@@ -60,6 +70,7 @@ install(
   TARGETS
   grasp_execution_interface
   moveit_cpp_grasp_execution_interface
+  moveit_cpp_default_executor_plugin
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
@@ -86,6 +97,7 @@ ament_export_include_directories(
 ament_export_libraries(
   grasp_execution_interface
   moveit_cpp_grasp_execution_interface
+  moveit_cpp_default_executor_plugin
 )
 ament_export_dependencies(
   moveit_ros_planning_interface
@@ -93,5 +105,8 @@ ament_export_dependencies(
   tf2
   tf2_ros
 )
+
+pluginlib_export_plugin_description_file(grasp_execution
+  moveit_cpp_default_executor_plugin.xml)
 
 ament_package()
