@@ -17,6 +17,7 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(
@@ -36,6 +37,7 @@ ament_target_dependencies(grasp_execution_interface
   rclcpp
   tf2
   tf2_ros
+  tf2_geometry_msgs
 )
 
 add_library(moveit_cpp_grasp_execution_interface
@@ -84,6 +86,20 @@ if(BUILD_TESTING)
   # uncomment the line when this package is not in a git repo
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_scheduler
+    test/test_scheduler.cpp
+  )
+  target_link_libraries(test_scheduler
+    grasp_execution_interface
+  )
+  ament_target_dependencies(test_scheduler
+    emd_msgs
+    rclcpp
+    tf2
+    tf2_ros
+  )
 endif()
 
 # TODO(Briancbn): convert to tests instead
@@ -101,7 +117,7 @@ ament_export_libraries(
 )
 ament_export_dependencies(
   moveit_ros_planning_interface
-  grasp_planning
+  emd_msgs
   tf2
   tf2_ros
 )

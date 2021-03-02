@@ -67,8 +67,9 @@ public:
   int get_available_worker() const;
 
   void execution_ending_cb(
-    size_t worker_id,
-    std::promise<result_t> & _sig);
+    const std::string & workflow_id,
+    std::promise<result_t> & _sig,
+    result_t result);
 
   size_t concurrency;
 
@@ -86,7 +87,6 @@ void Scheduler::Impl::add_queue(
   const WorkflowT & workflow,
   const std::string & workflow_id)
 {
-  std::lock_guard<std::mutex> guard(metadata_mutex);
   workflow_queue.push_back(workflow);
   id_queue.push_back(workflow_id);
 }
@@ -125,49 +125,45 @@ void Scheduler::Impl::start_worker(
   // Register future for monitoring signal
   workers[worker_id].execution_future = sig.get_future();
 
+  // Add workflow id into the ongoing task map
+  ongoing_task_map[workflow_id] = worker_id;
+
   // Start execution thread
   workers[worker_id].execution_thread = std::make_shared<std::thread>(
     [ = ](std::promise<result_t> && _sig, const std::string && _workflow_id) {
-      {    // Lock scheduler metadata
-        std::lock_guard<std::mutex> guard(metadata_mutex);
-
-        // Add workflow id into the ongoing task map
-        ongoing_task_map[_workflow_id] = worker_id;
-      }    // Unlock scheduler metadata
-
       result_t result = workflow(_workflow_id);
-
-      {    // Lock scheduler metadata
-        std::lock_guard<std::mutex> guard(metadata_mutex);
-
-        // Remove workflow id from the ongoing task map
-        ongoing_task_map.erase(_workflow_id);
-
-        // Add workflow id to finished task
-        finished_task_map[_workflow_id] = result;
-      }    // Unlock scheduler metadata
-
-      // workflow done, expose result
-      _sig.set_value(result);
 
       // Start execution ending callback
       // This will check if there are additional queue item in task
       // TODO(Briancbn): setting workflow prerequisite, (DAG)?
-      execution_ending_cb(worker_id, _sig);
+      execution_ending_cb(_workflow_id, _sig, result);
     }, std::move(sig), std::move(workflow_id));
 }
 
 void Scheduler::Impl::execution_ending_cb(
-  size_t worker_id,
-  std::promise<result_t> & _sig)
+  const std::string & workflow_id,
+  std::promise<result_t> & _sig,
+  result_t result)
 {
   WorkflowT workflow;
-  std::string workflow_id;
+  std::string new_workflow_id;
   bool queue = false;
   {    // Lock scheduler metadata
     std::lock_guard<std::mutex> guard(metadata_mutex);
+
+    size_t worker_id = ongoing_task_map[workflow_id];
+
+    // Remove workflow id from the ongoing task map
+    ongoing_task_map.erase(workflow_id);
+
+    // Add workflow id to finished task
+    finished_task_map[workflow_id] = result;
+
     if (!id_queue.empty()) {
       queue = true;
+
+      // workflow done, expose result
+      _sig.set_value(result);
 
       // reset signal for workcell result
       // TODO(anyone): inspect mutex implemetation?
@@ -178,35 +174,26 @@ void Scheduler::Impl::execution_ending_cb(
 
       // TODO(anyone): setting workflow prerequisite, (DAG)?
       // Select the first workflow and workflow_id in queue
-      workflow_id = std::move(id_queue.front());
+      new_workflow_id = std::move(id_queue.front());
       id_queue.pop_front();
       workflow = std::move(workflow_queue.front());
       workflow_queue.pop_front();
 
       // Add workflow id into the ongoing task map
-      ongoing_task_map[workflow_id] = worker_id;
+      ongoing_task_map[new_workflow_id] = worker_id;
+    } else {
+      // workflow done, expose result end recursive function
+      _sig.set_value(result);
+      return;
     }
   }    // Unlock scheduler metadata
 
   if (queue) {
     // Start the next workflow
-    result_t result = workflow(workflow_id);
-
-    {    // Lock scheduler metadata
-      std::lock_guard<std::mutex> guard(metadata_mutex);
-
-      // Remove workflow id from the ongoing task map
-      ongoing_task_map.erase(workflow_id);
-
-      // Add workflow id to finished task
-      finished_task_map[workflow_id] = result;
-    }    // Unlock scheduler metadata
-
-    // workflow done, expose result
-    _sig.set_value(result);
+    result_t new_result = workflow(new_workflow_id);
 
     // Start recursive callback
-    execution_ending_cb(worker_id, _sig);
+    execution_ending_cb(new_workflow_id, _sig, new_result);
   }
 }
 
@@ -223,34 +210,43 @@ Workflow::Status Scheduler::add_workflow(
   const std::string & workflow_id,
   WorkflowT workflow)
 {
-  // Check if the workflow_id exist in history
+  // Doesn't allow thread exit, during function call
   {   // Lock scheduler metadata
     std::lock_guard<std::mutex> guard(impl_->metadata_mutex);
+
+    // Check if the workflow_id exist in history
     if (impl_->finished_task_map.find(workflow_id) !=
       impl_->finished_task_map.end())
     {
       return Workflow::Status::INVALID;
     }
-  }   // Unlock scheduler metadata
 
-  impl_->stop_finished_worker();
-
-  int worker_id = impl_->get_available_worker();
-
-  if (worker_id == -1) {
-    // Check if task is already in queue
-    // TODO(anyone): better way to check queue
-    for (auto & queue_id : impl_->id_queue) {
-      if (queue_id == workflow_id) {
-        return Workflow::Status::INVALID;
-      }
+    // Check if the workflow_id is already on-going
+    if (impl_->ongoing_task_map.find(workflow_id) !=
+      impl_->ongoing_task_map.end())
+    {
+      return Workflow::Status::INVALID;
     }
-    impl_->add_queue(workflow, workflow_id);
-    return Workflow::Status::QUEUED;
-  } else {
-    impl_->start_worker(worker_id, workflow, std::move(workflow_id));
-    return Workflow::Status::ONGOING;
-  }
+
+    impl_->stop_finished_worker();
+
+    int worker_id = impl_->get_available_worker();
+
+    if (worker_id == -1) {
+      // Check if task is already in queue
+      // TODO(anyone): better way to check queue
+      for (auto & queue_id : impl_->id_queue) {
+        if (queue_id == workflow_id) {
+          return Workflow::Status::INVALID;
+        }
+      }
+      impl_->add_queue(workflow, workflow_id);
+      return Workflow::Status::QUEUED;
+    } else {
+      impl_->start_worker(worker_id, workflow, std::move(workflow_id));
+      return Workflow::Status::ONGOING;
+    }
+  }   // Unlock scheduler metadata
 }
 
 Workflow::Status Scheduler::cancel_workflow(
@@ -307,6 +303,17 @@ Workflow::Status Scheduler::wait_till_complete(
     case Workflow::Status::ONGOING:
       result =
         impl_->workers[impl_->ongoing_task_map[workflow_id]].execution_future.get();
+      break;
+    case Workflow::Status::QUEUED:
+      // Highly inefficient or even dirty waiting
+      // TODO(anyone): optimize the wait here
+      while (get_status(workflow_id) == Workflow::Status::QUEUED) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      }
+      if (get_status(workflow_id) == Workflow::Status::ONGOING) {
+        result =
+          impl_->workers[impl_->ongoing_task_map[workflow_id]].execution_future.get();
+      }
       break;
     default:
       return Workflow::Status::INVALID;
