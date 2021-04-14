@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SUCTION_GRIPPER_H_
-#define SUCTION_GRIPPER_H_
+#ifndef SUCTION_GRIPPER_HPP_
+#define SUCTION_GRIPPER_HPP_
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -70,9 +70,9 @@
 #include <future>
 
 // EMD libraries
-#include "pcl_functions.h"
-#include "fcl_functions.h"
-#include "end_effector.h"
+#include "pcl_functions.hpp"
+#include "fcl_functions.hpp"
+#include "end_effector.hpp"
 
 
 /*! \brief Struct for a single suction cup */
@@ -271,4 +271,4 @@ float max_center_dist;
     std::shared_ptr < GraspObject > object);
 };
 
-#endif  // SUCTION_GRIPPER_H_
+#endif  // SUCTION_GRIPPER_HPP_

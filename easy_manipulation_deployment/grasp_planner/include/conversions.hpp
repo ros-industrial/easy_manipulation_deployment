@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OCTOMAP_ROS_CONVERSIONS_H  // NOLINT
-#define OCTOMAP_ROS_CONVERSIONS_H  // NOLINT
+#ifndef OCTOMAP_ROS_CONVERSIONS_HPP_  // NOLINT
+#define OCTOMAP_ROS_CONVERSIONS_HPP_  // NOLINT
 
 #include <octomap/octomap.h>
 
@@ -165,4 +165,4 @@ namespace octomap {
   }
 }  // namespace octomap
 
-#endif // OCTOMAP_ROS_CONVERSIONS_H NOLINT
+#endif // OCTOMAP_ROS_CONVERSIONS_HPP_ NOLINT

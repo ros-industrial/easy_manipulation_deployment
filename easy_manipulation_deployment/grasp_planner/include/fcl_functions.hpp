@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef FCL_FUNCTIONS_H_
-#define FCL_FUNCTIONS_H_
+#ifndef FCL_FUNCTIONS_HPP_
+#define FCL_FUNCTIONS_HPP_
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -220,4 +220,4 @@ namespace FCLFunctions
 
 }  // namespace FCLFunctions
 
-#endif  // FCL_FUNCTIONS_H_
+#endif  // FCL_FUNCTIONS_HPP_

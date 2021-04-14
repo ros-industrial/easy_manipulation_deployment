@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "suction_gripper.h"
+#include "suction_gripper.hpp"
 #define PI 3.14159265
 
 SuctionGripper::SuctionGripper(

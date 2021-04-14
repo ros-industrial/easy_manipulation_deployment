@@ -15,7 +15,7 @@
 
 
 // Main PCL files
-#include "finger_gripper.h"
+#include "finger_gripper.hpp"
 
 FingerGripper::FingerGripper(
   std::string id_,

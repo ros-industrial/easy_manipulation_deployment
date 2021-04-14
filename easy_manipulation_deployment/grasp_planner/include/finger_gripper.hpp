@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef FINGER_GRIPPER_H_
-#define FINGER_GRIPPER_H_
+#ifndef FINGER_GRIPPER_HPP
+#define FINGER_GRIPPER_HPP
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -59,9 +59,9 @@
 #include "fcl/geometry/shape/sphere.h"
 
 // Custom Libraries
-#include "pcl_functions.h"
-#include "fcl_functions.h"
-#include "end_effector.h"
+#include "pcl_functions.hpp"
+#include "fcl_functions.hpp"
+#include "end_effector.hpp"
 
 
 struct singleFinger
@@ -310,4 +310,4 @@ public:
   std::string getID() {return id;}
 };
 
-#endif  // FINGER_GRIPPER_H_
+#endif  // FINGER_GRIPPER_HPP_

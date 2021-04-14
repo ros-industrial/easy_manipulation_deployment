@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "grasp_object.h"
+#include "grasp_object.hpp"
 
 // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_cloud_finger1;
 
