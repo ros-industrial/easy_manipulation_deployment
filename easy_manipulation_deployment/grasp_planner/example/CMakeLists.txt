@@ -2,6 +2,10 @@ add_executable(demo_node src/demo_node.cpp)
 
 target_link_libraries(demo_node
   grasp_planning_interface
+  ${PCL_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
+  ${FCL_LIBRARIES}
+  ccd
 )
 
 ament_target_dependencies(demo_node
@@ -10,7 +14,6 @@ ament_target_dependencies(demo_node
 
 install(TARGETS
   demo_node
-  fake_grasp_pose_publisher
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )

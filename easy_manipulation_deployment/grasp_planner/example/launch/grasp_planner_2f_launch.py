@@ -21,12 +21,12 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # ld = LaunchDescription()
-    config = get_package_share_directory('grasp_planner') + "/config/params_2f.yaml"
+    config = get_package_share_directory('grasp_planner') + "/example/config/params_2f.yaml"
     print(config)
     node = Node(
         package='grasp_planner',
-        name='pcl_node',
-        executable='pcl_test_node',
+        name='grasp_planning_node',
+        executable='demo_node',
         output='screen',
         # prefix=['gdb -ex=r --args'],
         # prefix=['valgrind --leak-check=full'],

@@ -25,8 +25,8 @@ def generate_launch_description():
     print(config)
     node = Node(
         package='grasp_planner',
-        name='pcl_node',
-        executable='pcl_test_node',
+        name='grasp_planning_node',
+        executable='demo_node',
         output='screen',
         # prefix=['gdb -ex=r --args'],
         # prefix=['valgrind --leak-check=full'],

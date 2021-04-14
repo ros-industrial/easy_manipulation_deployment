@@ -1,4 +1,4 @@
-pcl_node:
+grasp_planning_node:
   ros__parameters:
     perception_topic: "/camera/pointcloud"
     camera_frame: "camera_color_optical_frame"
@@ -12,15 +12,15 @@ pcl_node:
       min_cluster_size: 750
       cloud_normal_radius: 0.03
     end_effectors:
-      end_effector_names: [robotiq_2f]
-      robotiq_2f:
+      end_effector_names: [robotiq_3f]
+      robotiq_3f:
         type: finger
-        num_fingers_side_1: 1
+        num_fingers_side_1: 2
         num_fingers_side_2: 1
-        distance_between_fingers_1: 0.0
-        distance_between_fingers_2: 0.0
-        finger_thickness: 0.02
-        gripper_stroke: 0.085
+        distance_between_fingers_1: 0.06
+        distance_between_fingers_2: 0.05
+        finger_thickness: 0.01
+        gripper_stroke: 0.15
         grasp_planning_params:
           grasp_plane_dist_limit: 0.007
           voxel_size: 0.01

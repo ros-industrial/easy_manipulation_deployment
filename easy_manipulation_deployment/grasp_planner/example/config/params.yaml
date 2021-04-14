@@ -1,4 +1,4 @@
-pcl_node:
+grasp_planning_node:
   ros__parameters:
     perception_topic: "/camera/pointcloud"
     camera_frame: "camera_color_optical_frame"

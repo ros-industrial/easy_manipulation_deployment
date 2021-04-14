@@ -90,6 +90,9 @@ ament_export_libraries(
   grasp_planning_interface
 )
 
+add_subdirectory(
+  example
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
