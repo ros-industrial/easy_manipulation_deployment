@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include "./grasp_object.hpp"
+#include "grasp_planner/grasp_object.hpp"
 
 
 class EndEffector

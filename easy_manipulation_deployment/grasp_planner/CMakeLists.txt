@@ -53,7 +53,7 @@ include_directories(
 
 add_library(grasp_planning_interface
   SHARED
-  include/grasp_scene.cpp
+  src/grasp_scene.cpp
 
 )
 

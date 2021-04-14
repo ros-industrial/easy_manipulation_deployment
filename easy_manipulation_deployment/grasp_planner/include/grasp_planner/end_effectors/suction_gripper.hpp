@@ -70,9 +70,9 @@
 #include <future>
 
 // EMD libraries
-#include "pcl_functions.hpp"
-#include "fcl_functions.hpp"
-#include "end_effector.hpp"
+#include "grasp_planner/common/pcl_functions.hpp"
+#include "grasp_planner/common/fcl_functions.hpp"
+#include "grasp_planner/end_effectors/end_effector.hpp"
 
 
 /*! \brief Struct for a single suction cup */

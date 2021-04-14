@@ -15,7 +15,7 @@
 
 
 // Main PCL files
-#include "finger_gripper.hpp"
+#include "grasp_planner/end_effectors/finger_gripper.hpp"
 
 FingerGripper::FingerGripper(
   std::string id_,

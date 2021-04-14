@@ -60,7 +60,7 @@
 #include <emd_msgs/msg/grasp_target.hpp>  // NOLINT
 
 // EMD Libraries
-#include "pcl_functions.hpp"
+#include "grasp_planner/common/pcl_functions.hpp"
 
 
 struct GraspContacts

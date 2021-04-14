@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "grasp_scene.hpp"
+#include "grasp_planner/grasp_scene.hpp"
 
 namespace uuid
 {

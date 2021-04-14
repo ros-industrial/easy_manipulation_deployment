@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include "rclcpp/rclcpp.hpp"
-#include "grasp_scene.cpp"
+#include "grasp_planner/grasp_scene.hpp"
 
 int main(int argc, char * argv[])
 {

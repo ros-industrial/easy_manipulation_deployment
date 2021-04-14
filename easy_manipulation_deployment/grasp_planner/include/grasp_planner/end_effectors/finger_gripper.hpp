@@ -58,10 +58,10 @@
 #include <fcl/narrowphase/collision.h>  //NOLINT
 #include "fcl/geometry/shape/sphere.h"
 
-// Custom Libraries
-#include "pcl_functions.hpp"
-#include "fcl_functions.hpp"
-#include "end_effector.hpp"
+// EMD libraries
+#include "grasp_planner/common/pcl_functions.hpp"
+#include "grasp_planner/common/fcl_functions.hpp"
+#include "grasp_planner/end_effectors/end_effector.hpp"
 
 
 struct singleFinger

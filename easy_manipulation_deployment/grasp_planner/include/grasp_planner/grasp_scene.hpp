@@ -56,10 +56,10 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Custom Libraries
-#include "finger_gripper.cpp"
-#include "suction_gripper.cpp"
-#include "grasp_object.cpp"
-#include "conversions.hpp"
+#include "grasp_planner/end_effectors/finger_gripper.hpp"
+#include "grasp_planner/end_effectors/suction_gripper.hpp"
+#include "grasp_planner/grasp_object.hpp"
+#include "grasp_planner/common/conversions.hpp"
 
 
 class GraspScene: public rclcpp::Node
