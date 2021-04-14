@@ -42,9 +42,49 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(cv_bridge REQUIRED) # Delete later
 
-#add_library(PclFunctions
-#  include/pcl_functions.h
-#)
+include_directories(
+  PUBLIC
+  include
+)
+
+add_library(grasp_planning_interface
+  SHARED
+  include/grasp_scene.cpp
+
+)
+
+ament_target_dependencies(grasp_planning_interface
+        tf2
+        rclcpp
+        emd_msgs
+        epd_msgs
+        sensor_msgs
+        geometry_msgs
+        shape_msgs
+        tf2_ros
+        message_filters
+        cv_bridge #temp
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS
+  grasp_planning_interface
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib)
+
+ament_export_include_directories(
+  include
+)
+
+ament_export_libraries(
+  grasp_planning_interface
+)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GraspPose.msg"
@@ -114,6 +154,4 @@ if(BUILD_TESTING)
   target_link_libraries(grasptest ${GTEST_LIBRARIES} ${Boost_LIBRARIES})
   ament_export_dependencies(rosidl_default_runtime)
 endif()
-
-
 ament_package()
