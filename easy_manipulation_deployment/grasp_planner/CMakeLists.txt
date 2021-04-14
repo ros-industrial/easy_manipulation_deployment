@@ -45,6 +45,10 @@ find_package(cv_bridge REQUIRED) # Delete later
 include_directories(
   PUBLIC
   include
+  msg
+  ${PCL_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
+  ${LIBFCL_INCLUDE_DIRS}
 )
 
 add_library(grasp_planning_interface
@@ -86,11 +90,37 @@ ament_export_libraries(
   grasp_planning_interface
 )
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/GraspPose.msg"
-  DEPENDENCIES builtin_interfaces geometry_msgs std_msgs shape_msgs sensor_msgs
-)
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # uncomment the line when a copyright and license is not present in all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+
+  ament_add_gtest(grasptest test/init_tests.cpp)
+  ament_target_dependencies(grasptest ament_index_cpp)
+  target_link_libraries(grasptest ${Boost_LIBRARIES})
+
+  add_custom_target(gcov
+    COMMAND mkdir -p coverage
+    COMMAND ${CMAKE_MAKE_PROGRAM} test
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  add_custom_command(TARGET gcov
+    COMMAND echo "=================== GCOV ===================="
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
+        | grep -A 5 "src/grasp_planning.cpp" > CoverageSummary.tmp
+    COMMAND cat CoverageSummary.tmp
+    COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage)
+
+  target_link_libraries(grasptest ${GTEST_LIBRARIES} ${Boost_LIBRARIES})
+  ament_export_dependencies(rosidl_default_runtime)
+endif()
+
+
+if(FALSE) # fake a block comment
 add_executable(pcl_test_node src/pcl_test.cpp)
 include_directories(include msg ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${LIBFCL_INCLUDE_DIRS})
 add_definitions( ${PCL_DEFINITIONS} )
@@ -125,33 +155,5 @@ install(DIRECTORY
   test
   DESTINATION share/${PROJECT_NAME}
 )
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  find_package(ament_cmake_gtest REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-
-  ament_add_gtest(grasptest test/init_tests.cpp)
-  ament_target_dependencies(grasptest ament_index_cpp)
-  target_link_libraries(grasptest ${Boost_LIBRARIES})
-  rosidl_target_interfaces(grasptest ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-  add_custom_target(gcov
-    COMMAND mkdir -p coverage
-    COMMAND ${CMAKE_MAKE_PROGRAM} test
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  add_custom_command(TARGET gcov
-    COMMAND echo "=================== GCOV ===================="
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
-        | grep -A 5 "src/grasp_planning.cpp" > CoverageSummary.tmp
-    COMMAND cat CoverageSummary.tmp
-    COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage)
-
-  target_link_libraries(grasptest ${GTEST_LIBRARIES} ${Boost_LIBRARIES})
-  ament_export_dependencies(rosidl_default_runtime)
 endif()
 ament_package()
