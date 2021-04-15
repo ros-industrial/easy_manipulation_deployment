@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GRASP_EXECUTION__MOVEIT2__DEFAULT_EXECUTOR_HPP_
-#define GRASP_EXECUTION__MOVEIT2__DEFAULT_EXECUTOR_HPP_
+#ifndef GRASP_EXECUTION__MOVEIT2__EXECUTOR__DEFAULT_EXECUTOR_HPP_
+#define GRASP_EXECUTION__MOVEIT2__EXECUTOR__DEFAULT_EXECUTOR_HPP_
 
 #include <string>
 
@@ -50,4 +50,4 @@ private:
 
 }  // namespace grasp_execution
 
-#endif  // GRASP_EXECUTION__MOVEIT2__DEFAULT_EXECUTOR_HPP_
+#endif  // GRASP_EXECUTION__MOVEIT2__EXECUTOR__DEFAULT_EXECUTOR_HPP_

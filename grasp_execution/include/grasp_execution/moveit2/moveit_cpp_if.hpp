@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GRASP_EXECUTION__MOVEIT_CPP_IF_HPP_
-#define GRASP_EXECUTION__MOVEIT_CPP_IF_HPP_
+#ifndef GRASP_EXECUTION__MOVEIT2__MOVEIT_CPP_IF_HPP_
+#define GRASP_EXECUTION__MOVEIT2__MOVEIT_CPP_IF_HPP_
 
 #include <deque>
 #include <memory>
@@ -199,4 +199,4 @@ protected:
 
 }  // namespace grasp_execution
 
-#endif  // GRASP_EXECUTION__MOVEIT_CPP_IF_HPP_
+#endif  // GRASP_EXECUTION__MOVEIT2__MOVEIT_CPP_IF_HPP_

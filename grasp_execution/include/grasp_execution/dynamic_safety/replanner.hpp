@@ -15,6 +15,7 @@
 #ifndef GRASP_EXECUTION__DYNAMIC_SAFETY__REPLANNER_HPP_
 #define GRASP_EXECUTION__DYNAMIC_SAFETY__REPLANNER_HPP_
 
+#include <memory>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
@@ -49,17 +50,20 @@ public:
   void update(
     const sensor_msgs::msg::JointState::SharedPtr & msg);
 
-  bool started() const {
+  bool started() const
+  {
     return static_cast<bool>(started_);
   }
 
-  bool get_result() const {
+  bool get_result() const
+  {
     return static_cast<bool>(result_);
   }
 
   void reset();
 
-  const robot_trajectory::RobotTrajectoryPtr & get_trajectory() const {
+  const robot_trajectory::RobotTrajectoryPtr & get_trajectory() const
+  {
     return current_traj_;
   }
 

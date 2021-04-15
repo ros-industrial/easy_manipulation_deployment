@@ -15,6 +15,9 @@
 #ifndef GRASP_EXECUTION__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
 #define GRASP_EXECUTION__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
 
+#include <memory>
+#include <vector>
+
 #include "grasp_execution/utils.hpp"
 #include "grasp_execution/dynamic_safety/safety_zone.hpp"
 #include "grasp_execution/dynamic_safety/collision_checker.hpp"
@@ -114,7 +117,7 @@ private:
   std::promise<void> sig_;
   std::future<void> future_;
 
-  core::TimeProfiler<>* pf_;
+  core::TimeProfiler<> * pf_;
 };
 
 }  // namespace dynamic_safety
