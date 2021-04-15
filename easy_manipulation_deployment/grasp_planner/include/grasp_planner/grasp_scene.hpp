@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GRASP_SCENE_HPP_
-#define GRASP_SCENE_HPP_
+#ifndef GRASP_PLANNER__GRASP_SCENE_HPP_
+#define GRASP_PLANNER__GRASP_SCENE_HPP_
 
 // Main PCL files
 #include <pcl/point_types.h>
@@ -60,6 +60,8 @@
 #include "grasp_planner/end_effectors/suction_gripper.hpp"
 #include "grasp_planner/grasp_object.hpp"
 #include "grasp_planner/common/conversions.hpp"
+#include "grasp_planner/common/pcl_functions.hpp"
+#include "grasp_planner/common/fcl_functions.hpp"
 
 
 class GraspScene: public rclcpp::Node
@@ -235,4 +237,4 @@ public:
   ~GraspScene();
 };
 
-#endif  // GRASP_SCENE_HPP_
+#endif  // GRASP_PLANNER__GRASP_SCENE_HPP_

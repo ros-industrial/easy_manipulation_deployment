@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef END_EFFECTOR_HPP_
-#define END_EFFECTOR_HPP_
+#ifndef GRASP_PLANNER__END_EFFECTORS__END_EFFECTOR_HPP_
+#define GRASP_PLANNER__END_EFFECTORS__END_EFFECTOR_HPP_
 
 // For Visualization
 #include <pcl/visualization/cloud_viewer.h>
@@ -42,4 +42,4 @@ public:
 protected:
   std::string id;
 };
-#endif  // END_EFFECTOR_HPP_
+#endif  // GRASP_PLANNER__END_EFFECTORS__END_EFFECTOR_HPP_

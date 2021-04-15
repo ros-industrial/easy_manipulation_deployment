@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GRASP_OBJECT_HPP_
-#define GRASP_OBJECT_HPP_
+#ifndef GRASP_PLANNER__GRASP__OBJECT_HPP_
+#define GRASP_PLANNER__GRASP__OBJECT_HPP_
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -131,4 +131,4 @@ public:
   geometry_msgs::msg::PoseStamped getObjectPose(std::string pose_frame);
 };
 
-#endif  // GRASP_OBJECT_HPP_
+#endif  // GRASP_PLANNER__GRASP_OBJECT_HPP_

@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SUCTION_GRIPPER_HPP_
-#define SUCTION_GRIPPER_HPP_
+#ifndef GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_
+#define GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -271,4 +271,4 @@ float max_center_dist;
     std::shared_ptr < GraspObject > object);
 };
 
-#endif  // SUCTION_GRIPPER_HPP_
+#endif  // GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_

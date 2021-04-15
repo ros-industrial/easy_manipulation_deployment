@@ -51,9 +51,17 @@ include_directories(
   ${LIBFCL_INCLUDE_DIRS}
 )
 
+add_definitions( ${PCL_DEFINITIONS} )
+link_directories( ${PCL_LIBRARY_DIRS} ${FCL_LIBRARY_DIRS})
+
 add_library(grasp_planning_interface
   SHARED
   src/grasp_scene.cpp
+  src/grasp_object.cpp
+  src/end_effectors/finger_gripper.cpp
+  src/end_effectors/suction_gripper.cpp
+  src/common/pcl_functions.cpp
+  src/common/fcl_functions.cpp
 
 )
 

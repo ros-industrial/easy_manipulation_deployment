@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef FINGER_GRIPPER_HPP_
-#define FINGER_GRIPPER_HPP_
+#ifndef GRASP_PLANNER__END_EFFECTORS__FINGER_GRIPPER_HPP_
+#define GRASP_PLANNER__END_EFFECTORS__FINGER_GRIPPER_HPP_
 
 // Main PCL files
 #include <pcl/io/pcd_io.h>
@@ -24,7 +24,7 @@
 #include <pcl/common/eigen.h>
 #include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
-
+#include <pcl/sample_consensus/sac_model_plane.h>
 
 // For Visualization
 #include <pcl/visualization/cloud_viewer.h>
@@ -310,4 +310,4 @@ public:
   std::string getID() {return id;}
 };
 
-#endif  // FINGER_GRIPPER_HPP_
+#endif  // GRASP_PLANNER__END_EFFECTORS__FINGER_GRIPPER_HPP_
