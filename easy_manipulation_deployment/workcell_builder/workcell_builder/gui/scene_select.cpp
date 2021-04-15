@@ -78,7 +78,6 @@ void SceneSelect::on_add_scene_clicked()
   if (scene_window.success) {
     boost::filesystem::current_path(scenes_path);
     workcell.scene_vector.push_back(scene_window.scene);
-    int temp_index = workcell.scene_vector.size() - 1;
     generate_scene_package(scenes_path, scene_window.scene.name, workcell.ros_ver);
     refresh_scenes(workcell.scene_vector.size() - 1);
   }

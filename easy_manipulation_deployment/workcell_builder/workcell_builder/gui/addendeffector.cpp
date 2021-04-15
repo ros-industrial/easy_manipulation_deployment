@@ -71,7 +71,6 @@ int AddEndEffector::LoadAvailableEE(Robot robot)
           for (auto & filepath_model :
             boost::filesystem::directory_iterator(boost::filesystem::current_path()))
           {
-            bool is_model = false;
             bool is_moveit_config = false;
             bool is_description = false;
             std::string temp_model;
@@ -85,7 +84,6 @@ int AddEndEffector::LoadAvailableEE(Robot robot)
                 char_count++;
                 if (char_count == 11) {
                   if (temp_model.compare("description") == 0) {
-                    is_model = true;
                     is_description = true;
                   }
                 }
