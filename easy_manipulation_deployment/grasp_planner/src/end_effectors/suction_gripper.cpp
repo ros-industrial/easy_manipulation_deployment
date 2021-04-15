@@ -111,6 +111,7 @@ void SuctionGripper::planGrasps(
   std::shared_ptr<fcl::CollisionObject<float>> world_collision_object,
   pcl::visualization::PCLVisualizer::Ptr viewer)
 {
+  UNUSED(world_collision_object);
   pcl::PointXYZ object_center;
   object_center.x = object->centerpoint(0);
   object_center.y = object->centerpoint(1);
@@ -160,6 +161,7 @@ void SuctionGripper::getAllPossibleGrasps(
     pcl::visualization::PCLVisualizer::Ptr viewer
     ) -> void
     {
+      UNUSED(viewer);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal(
