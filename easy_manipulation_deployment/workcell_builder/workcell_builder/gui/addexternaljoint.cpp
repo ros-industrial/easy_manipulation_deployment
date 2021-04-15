@@ -281,7 +281,7 @@ void AddExternalJoint::DisableAxis()
   ui->axis_y_2->setDisabled(true);
   ui->axis_z_2->setDisabled(true);
   ui->axis_label_2->setDisabled(true);
-  ui->includeaxis_2->setDisabled(true);
+  //ui->includeaxis_2->setDisabled(true);
   ui->axis_position_label_2->setDisabled(true);
 }
 
