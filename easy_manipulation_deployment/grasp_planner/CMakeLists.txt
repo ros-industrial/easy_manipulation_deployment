@@ -48,11 +48,10 @@ include_directories(
   msg
   ${PCL_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
-  ${LIBFCL_INCLUDE_DIRS}
 )
 
 add_definitions( ${PCL_DEFINITIONS} )
-link_directories( ${PCL_LIBRARY_DIRS} ${FCL_LIBRARY_DIRS})
+link_directories( ${PCL_LIBRARY_DIRS} )
 
 add_library(grasp_planning_interface
   SHARED
@@ -76,6 +75,10 @@ ament_target_dependencies(grasp_planning_interface
         tf2_ros
         message_filters
         cv_bridge #temp
+)
+
+target_link_libraries(grasp_planning_interface
+  ${FCL_LIBRARIES}
 )
 
 install(
