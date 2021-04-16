@@ -14,6 +14,5 @@ This section presents a highly detailed end to end example of a pick and place m
    
    workcell_builder_example
    grasp_planner_example
-   grasp_validator_example
    grasp_execution_example
    

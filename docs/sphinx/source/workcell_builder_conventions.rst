@@ -7,7 +7,9 @@
 
 Conventions
 ========================================================
-## Naming Conventions
+
+Naming Conventions
+******************
 
 Following a standardized naming convention is highly recommended to avoid any issues with generating the workspace.
 

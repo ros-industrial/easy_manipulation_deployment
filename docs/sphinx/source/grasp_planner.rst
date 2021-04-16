@@ -59,5 +59,4 @@ This ROS2 package presents a solution that requires no training, no labelling an
    
    grasp_planner_before
    grasp_planner_run
-   grasp_validator
 

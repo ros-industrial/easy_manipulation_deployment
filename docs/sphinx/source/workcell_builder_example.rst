@@ -20,6 +20,7 @@ In this example we will be creating a simple robotic workcell using the UR5 and 
    workcell_builder_example_manipulator
    workcell_builder_example_ee
    workcell_builder_example_object
+   workcell_builder_example_load_object
    workcell_builder_example_extj
    workcell_builder_example_files
    workcell_builder_example_check_scene

@@ -6,20 +6,22 @@
 .. _workcell_builder_example_camera:
 
 Adding a camera to the scene
------------------------------------
+----------------------------
 
-For manipulation systems with cameras, you would need to have a representation of the camera in the scene. The current workcell builder version **does not support**  camera addition via the gui, but in this tutorial we will teach you how to add a camera to the scene. 
+For manipulation systems with cameras, you would need to have a representation of the camera in the scene. The current workcell builder version **does not support**  camera addition via the gui, but in this tutorial we will teach you how to add a camera to the scene.  
 
 For this example, we will adding the **Intel Realsense D415** depth camera in the scene.
 
 Downloading Camera Description Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+**Note that the default easy_manipulation_deployment package includes the intel realsense camera in the assets/environment/realsense2_description directory, but this portion provides a step by step guide on replicating it for other cameras. If you are planning to use what was provided, skip to the next step, "Add the camera to the scene"**
+
 In the directory :code:`/workcell_ws/src/assets/environment/` , download the realsense repository
 
 .. code-block:: bash
 
-   git clone https://github.com/IntelRealSense/realsense-ros.git -b eloquent
+   git clone https://github.com/IntelRealSense/realsense-ros.git -b foxy
 
 Only keep the :code:`realsense2_description` folder. Your :code:`/workcell_ws/src/assets/environment/` folder should be as shown: 
 
@@ -47,11 +49,11 @@ Open up the urdf file in :code:`/workcell_ws/src/scenes/new_scene/urdf/scene.urd
 
 .. code-block:: bash
 
-   <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
-   <xacro:arg name="use_nominal_extrinsics" default="true" />
-   <xacro:sensor_d415 parent="table_" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
-	<origin xyz="-0.5 0.2 0.46" rpy="0 1.57079506 0"/>
-   </xacro:sensor_d415>
+      <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
+         <xacro:arg name="use_nominal_extrinsics" default="true" />
+         <xacro:sensor_d415 parent="table_" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+          <origin xyz="-0.58 0.225 0.65" rpy="3.14159 1.57079506 0"/>
+      </xacro:sensor_d415>
 
 Now, rebuild the package and launch the demo visualization
 
@@ -80,25 +82,16 @@ First we need to check which link is the child link when connecting the camera t
 
 From the URDF we can see that the link that is connected to the external scene is :code:`${name}_bottom_screw_frame`. 
 
-Next, We will launch RViz to check the orientation of this link. **Note that for this step, you will need to be in ROS1, as the current launch files for realsense are in ROS1 as well.**. To prevent confusion, we will create a new workspace just to check the orientation Note that this example uses ROS Noetic. To install Noetic, follow the `installation instructions <http://wiki.ros.org/noetic/Installation>`_ (If you face this error during your :code:`catkin build` command : :code:`catkin: command not found` , try to do :code:`sudo apt-get install python3-osrf-pycommon python3-catkin-tools` .
+Next, We will launch RViz to check the orientation of this link.
 
 .. code-block:: bash
 
-   mkdir -p ~/realsense_test_ws/src
+   ros2 launch realsense2_description view_model.launch.py model:=test_d415_camera.urdf.xacro
 
-   cd ~/realsense_test_ws/src
 
-   git clone https://github.com/IntelRealSense/realsense-ros.git
-   
-   cd ~/realsense_test_ws
-   
-   source /opt/ros/noetic/setup.bash
-   
-   catkin build
-   
-   source devel/setup.bash
-   
-   roslaunch realsense2_description view_d415_model.launch
+On the RViz GUI left panel, in order to see the frame, make sure to only check that link, and also increase the Marker Scale to about 0.5.
+
+.. image:: ./images/example/example_realsense_rviz.png
 
 For some cameras, the link representing the model may not be in the same orientation as the actual camera frame the perception system references . This can be shown in RViz,
 
@@ -119,7 +112,7 @@ To do so, we need to add a link in this orientation in the URDF. In the file :co
     	<origin xyz="0 0 0" rpy="1.57079506 0 1.57079506"/>
     </joint>
 
-This addes a new frame :code:`camera_frame` that will be the frame in which the object is detected, and the frame that will be transformed to the world frame during the grasp execution phase of the pipeline.
+This adds a new frame :code:`camera_frame` that will be the frame in which the object is detected, and the frame that will be transformed to the world frame during the grasp execution phase of the pipeline.
 
 Now that we have the main scene set up, we can move on to the grasp planner: :ref:`grasp_planner_example`
 

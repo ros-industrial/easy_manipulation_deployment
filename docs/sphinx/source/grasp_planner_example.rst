@@ -1,104 +1,135 @@
-.. easy_manipulation_deployment documentation master file, created by
-   sphinx-quickstart on Thu Oct 22 11:03:35 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-.. _grasp_planner_example:
-
 Grasp Planner Example
-========================================================
+=====================
 
-In this part of the tutorial we will reference the scene that we have generated in the :ref:`workcell_builder_example`
+In this part of the tutorial we will reference the scene we have generated in the :ref:'Workcell Builder Example'
 
-If you currently do not have a working perception system, you can still test out the package using a ROSbag located in :code:`/workcell_ws/src/easy_manipulation_deployment/grasp_planner/rosbag/perception_example.zip`
+Currently, perception data inputs for the Grasp Planner only works with:
 
-The perception rosbag is an simple box as shown below.
+    #. /pointcloud`Pointcloud <https://en.wikipedia.org/wiki/Point_cloud>`_ 
+    #. `Easy Perception Deployment <https://github.com/ros-industrial/easy_perception_deployment>`_ (EPD)
 
-.. image:: ./images/example/example_object.png
+**Do take note that the topics currently have to be named /camera/pointcloud for Pointcloud** or
+**/processor/epd_localize_output for EPD**
+ 
+If you currently do not have a working perception system, you can still test out the package using either the epd_rosbag or pointcloud_rosbag located in *PATH TO ROSBAG folder TO BE WRITTEN* 
+
+The rosbags are using the stream of a simple tea box as shown below.
+
+.. image:: ./images/example/example_pointcloud_picture.png
+
+.. note::
+        Prority is given to `Easy Perception Deployment <https://github.com/ros-industrial/easy_perception_deployment>`_ data if both `Pointcloud <https://en.wikipedia.org/wiki/Point_cloud>`_ and `Easy Perception Deployment <https://github.com/ros-industrial/easy_perception_deployment>`_  are running simultaneously.
+
 
 
 Set up end effector parameters
---------------------------------
-
-The end effector we are currently using is the Robotiq 2F-85 gripper, thus we need to set the configuration files before running the grasp planner. In the configuration file :code:`/workcell_ws/src/easy_manipulation_deployment/grasp_planner/config/attributes.yaml` , replace the contents with the following: 
-
-.. code-block:: bash
-
-   end_effector:
-     type: finger
-     attributes:
-       fingers: 2
-       distance_between_fingers: 100
-       longest_gripper_dim: 25
-       table_height: 450
-   parameters:
-     min_zero_angle: 0.01
-     min_height_diff_to_grip: 5
-     min_gdi_diff_for_comparison: 5
-
-
-note that the parameters like :code:`table_height` is specific to this current ROSbag, and should be changed accordingly for your own set up. more information about the other parameters, check out :ref:`Grasp Planner Configuration` 
-
-
-Running the grasp planner
 ------------------------------
 
-For this part of the example you need 2 terminals. 
+The current version of Grasp Planner is able support End-effectors for both multiple suction arrays and multiple fingered grippers.
 
-In Terminal 1:
+For the example, we will utilize the **2-Finger gripper** in line with the End-Effector used for the scene in :ref:`workcell_builder_example`
+
+The configuration files need to be set according to the type of End-effector that is being used.
+In the configuration file *PATH TO CONFIG FILE*, replace the contents with the following based of the desired end_effector:
+
+2-Finger gripper
+################
+.. code-block:: bash
+
+    end_effectors:
+      end_effector_names: [robotiq_2f]
+      robotiq_2f:
+        type: finger
+        num_fingers_side_1: 1
+        num_fingers_side_2: 1
+        distance_between_fingers_1: 0.0
+        distance_between_fingers_2: 0.0
+        finger_thickness: 0.02
+        gripper_stroke: 0.085
+        grasp_planning_params:
+          grasp_plane_dist_limit: 0.007
+          voxel_size: 0.01
+          grasp_rank_weight_1: 1.5
+          grasp_rank_weight_2: 1.0
+          world_x_angle_threshold: 0.5
+          world_y_angle_threshold: 0.5
+          world_z_angle_threshold: 0.25
+
+Running the Grasp Planner
+-------------------------
+
+This part of the example requires 2 terminals. We will be running the epd_rosbag for the example.
+
+*In terminal 1:* (Grasp Planner Terminal)
 
 .. code-block:: bash
 
-   cd ~/workcell_ws
+    source /opt/ros/foxy/setup.bash
+    
+    source PATH_TO_MOVEIT_WS/install/setup.bash
+    
+    cd PATH_TO_EMD_WS/
+    
+    colcon build 
+    
+    source install/setup.bash
+    
+    ros2 launch grasp_planner grasp_planner_launch.py 
 
-   source /opt/ros/foxy/setup.bash
 
-   colcon build
+Once successfully launched, :code:`waiting...` should be seen Terminal 1 and a seperate screen :code:`Cloud viewer` will pop out. 
 
-   source install/setup.bash
-
-   ros2 run grasp_planning grasp_planning_node
-   
-You should then see the output in terminal 1: 
-
-.. code-block:: bash
-
-   [easy_manipulation_deployment][Grasp Planner] Waiting for topic....
-
-In Terminal 2:
-
-.. code-block:: bash
-
-   cd ~/workcell_ws
-
-   source /opt/ros/foxy/setup.bash
-
-   colcon build
-
-   source install/setup.bash
-
-   ros2 bag play src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3
-   
-You should then see the output in terminal 2: 
+.. note::
+    Take note that Grasp Execution should be launched first as the Grasp Planner requires the frame :code:`camera_color_optical_frame` to be present.
+    If not the following will be shown on Terminal 1:
 
 .. code-block:: bash
 
-   [INFO] [1610531624.795616932] [rosbag2_storage]: Opened database 'src/easy_manipulation_deployment/grasp_planner/rosbag/perception_simulator/perception_simulator/perception_simulator.db3' for READ_ONLY.
-   
-In Terminal 1, you should then see the following
+    [pcl_test_node-1] [INFO] [1617252094.561454528] [pcl_node]: Message Filter dropping message: frame 'camera_color_optical_frame' at time 0.000 for reason 'Unknown'
+
+
+
+
+*In terminal 2:* (Rosbag/Perception stream Terminal)
 
 .. code-block:: bash
 
-   [easy_manipulation_deployment][Grasp Planner] Objects Detected!
-   [easy_manipulation_deployment][Grasp Planner] Gripper Type Detected: finger
+    source /opt/ros/foxy/setup.bash    
+    
+    cd PATH_TO_EMD_WS/
+    
+    source install/setup.bash
+    
+    cd PATH_TO_CAMERA/EPD_ROSBAG
+    
+    ros2 bag play epd_rosbag.db3
 
-If a valid grasp is found, the grasp planner will also show the grasp quality of the grasp selected
+.. note:: 
+    This step uses the rosbag as an example, you can provide your own stream of pointcloud/EPD data. 
+
+Once successfully launched, the output should be as shown below on Terminal 2.
 
 .. code-block:: bash
 
-   [easy_manipulation_deployment][Grasp Planner] Best Grasp found! GDI Score: 2941
+    [INFO] [1617251978.247342106] [rosbag2_storage]: Opened database 'epd_rosbag.db3' for READ_ONLY.
 
-The grasp planner will now be publishing the grasp poses for the object to be used in the :code:`grasp_execution` stage of the manipulation pipeline. 
 
-Next we will look at how to visually check these grasp poses before running the grasp execution: :ref:`grasp_validator_example` 
+Viewing grasping results on Cloud viewer
+----------------------------------------
+
+The :code:`Cloud viewer` window will then load the frame of the perception input data as shown below:
+
+.. image:: ./images/example/example_epd_pointcloud.png 
+
+
+Click on the :code:`Cloud viewer` window and press :code:`Q`. The Grasp Planner will then process the pointcloud data, showing the Bounding Box of 
+the object/objects in the :code:`Cloud viewer` window,
+
+.. image:: ./images/example/example_epd_bounding_box.png 
+
+Continue to press :code:`Q` to visualize all of the possible grasps on the object.
+
+.. image:: ./images/example/example_epd_grasps_balls.png
+
+The grasps are ranked based off the quality of their grasps. The pose and orientation of the top ranked grasp will then be published for :ref:`grasp_execution_example`
 

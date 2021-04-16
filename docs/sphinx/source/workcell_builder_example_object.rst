@@ -8,6 +8,9 @@
 Adding an Object
 -----------------
 
+**This portion of the tutorial is to provide a guide on how to add a new object using the STL files. if you are planning on just using the existing table package created for you, skip to:** :ref:`workcell_builder_example_load_object`
+
+
 Next, we will create an Environment Object, the table. Click :code:`Add Object` 
 
 In the :code:`Object Name`, give your object a name, i.e *table*. 

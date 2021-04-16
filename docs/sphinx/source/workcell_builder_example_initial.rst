@@ -7,6 +7,7 @@
 
 Before running the GUI
 =========================
+**The following instructions provides an example of how you can incorporate new robots and end effector ROS1 packages into this package. There are currently a few robots and end-effectors included in the package, so if you do not need to add any more of these packages, skip forward to :** :ref:`workcell_builder_example_gui`
 
 Downloading Robot and End effector resources
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -162,7 +163,9 @@ In the :code:`/assets/robots/ur5_moveit_config/package.xml`, replace the content
      </export>
    </package>
 
-In the :code:`/assets/end_effectors/robotiq_85_description/CMakeLists.txt`, replace the contents with the following: 
+**Robotiq End Effector**
+
+In the :code:`/assets/end_effectors/robotiq_85_gripper/robotiq_85_description/CMakeLists.txt`, replace the contents with the following: 
 
 .. code-block:: bash
 
@@ -174,7 +177,7 @@ In the :code:`/assets/end_effectors/robotiq_85_description/CMakeLists.txt`, repl
    install(DIRECTORY urdf DESTINATION "share/${PROJECT_NAME}")
    ament_package()
 
-In the :code:`/assets/end_effectors/robotiq_85_description/package.xml`, replace the contents with the following: 
+In the :code:`/assets/end_effectors/robotiq_85_gripper/robotiq_85_description/package.xml`, replace the contents with the following: 
 
 .. code-block:: bash
 
@@ -198,7 +201,7 @@ In the :code:`/assets/end_effectors/robotiq_85_description/package.xml`, replace
      </export>
    </package>
 
-In the :code:`/assets/end_effectors/robotiq_85_moveit_config/CMakeLists.txt`, replace the contents with the following: 
+In the :code:`/assets/end_effectors/robotiq_85_gripper/robotiq_85_moveit_config/CMakeLists.txt`, replace the contents with the following: 
 
 .. code-block:: bash
 
@@ -249,7 +252,7 @@ Xacro-ize the SRDFs
 
 As this workcell builder aims to create links between the manipulator and end effector, the semantic descriptions need to be accessible as macros. 
 
-In the :code:`/assets/end_effectors/robotiq_85_moveit_config/config` folder, make a copy of :code:`robotiq_85_gripper.srdf` and rename it :code:`robotiq_85_gripper.srdf.xacro` . in this file, add the xacro tags :code:`<xacro:macro name="robotiq_85">` and :code:`
+In the :code:`/assets/end_effectors/robotiq_85_gripper/robotiq_85_moveit_config/config` folder, make a copy of :code:`robotiq_85_gripper.srdf` and rename it :code:`robotiq_85_gripper.srdf.xacro` . in this file, add the xacro tags :code:`<xacro:macro name="robotiq_85">` and :code:`
 </xacro:macro>` to the start and end of the file, as well as adding the XML NameSpace :code:`<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robotiq_85_gripper">` 
 
 Your :code:`robotiq_85_gripper.srdf.xacro` file should be as shown
@@ -271,7 +274,7 @@ Your :code:`robotiq_85_gripper.srdf.xacro` file should be as shown
    </xacro:macro>
    </robot>
    
-In the :code:`/assets/end_effectors/ur5_moveit_config/config` folder, make a copy of :code:`ur5.srdf` and rename it :code:`ur5.srdf.xacro` . in this file, add the xacro tags :code:`<xacro:macro name="ur5">` and :code:`
+In the :code:`/assets/end_effectors/robotiq_85_gripper/ur5_moveit_config/config` folder, make a copy of :code:`ur5.srdf` and rename it :code:`ur5.srdf.xacro` . in this file, add the xacro tags :code:`<xacro:macro name="ur5">` and :code:`
 </xacro:macro>` to the start and end of the file, as well as adding the XML NameSpace :code:`<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5">` 
 
 Your :code:`ur5.srdf.xacro` file should be as shown

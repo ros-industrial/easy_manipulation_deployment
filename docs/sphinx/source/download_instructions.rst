@@ -45,7 +45,7 @@ Build and Install easy_manipulation_deployment
 
    cd ~/workcell_ws/src
 
-   git clone https://gitlab.com/ROSI-AP/rosi-ap_rect/easy_manipulation_deployment.git -b glenn_devel
+   git clone https://github.com/ros-industrial/easy_manipulation_deployment.git
    
    mv easy_manipulation_deployment/assets/ .
 
@@ -73,7 +73,7 @@ Installing only the Workcell Builder
 
    cd ~/workcell_ws/src
 
-   git clone https://gitlab.com/ROSI-AP/rosi-ap_rect/easy_manipulation_deployment.git -b glenn_devel
+   git clone https://github.com/ros-industrial/easy_manipulation_deployment.git
    
    mv easy_manipulation_deployment/assets/ .
 
@@ -101,7 +101,7 @@ Installing only the Grasp Planner
 
    cd ~/workcell_ws/src
 
-   git clone https://gitlab.com/ROSI-AP/rosi-ap_rect/easy_manipulation_deployment.git -b glenn_devel
+   git clone https://github.com/ros-industrial/easy_manipulation_deployment.git
 
    find ./easy_manipulation_deployment -mindepth 1 ! -regex '^./easy_manipulation_deployment/grasp_planner\(/.*\)?' ! -regex '^./easy_manipulation_deployment/custom_msgs\(/.*\)?' -delete
 
