@@ -12,15 +12,15 @@ Loading an Object
 
 In the main scene window, click on the load object button
 
-.. image:: ./images/example/example_load_button.png
+.. image:: ../../images/example/example_load_button.png
 
 Select the table object package and leave the name as "table". Click the OK button.
 
-.. image:: ./images/example/example_load_window.png
+.. image:: ../../images/example/example_load_window.png
 
 If the object is successfully loaded, your "Environment objects" field should be displayed as shown.
 
-.. image:: ./images/example/example_object_loaded.png
+.. image:: ../../images/example/example_object_loaded.png
 
 Next step: :ref:`workcell_builder_example_extj`
 

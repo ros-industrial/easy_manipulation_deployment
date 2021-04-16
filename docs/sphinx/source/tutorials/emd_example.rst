@@ -5,14 +5,15 @@
 
 .. _easy_manipulation_deployment_example:
 
-Step-By-Step Tutorial
-==========================
+Step-By-Step Tutorials
+======================
 This section presents a highly detailed end to end example of a pick and place manipulation pipeline using the easy_manipulation_deployment package. If you want general information about the packages, you can look at the other sections of the documentation. **It is recommended, if you follow this tutorial, to follow it throughout** to reduce any errors stemming from partial actions. 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    
-   workcell_builder_example
-   grasp_planner_example
-   grasp_execution_example
+   workcell_builder_example/workcell_builder_example
+   grasp_execution_example/grasp_execution_example
+   grasp_planner_example/grasp_planner_example
+   
    

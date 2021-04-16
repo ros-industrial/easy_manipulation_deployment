@@ -17,7 +17,7 @@ Traditionally, grasp pose generation is done through using convolutional neural 
 
 
 
-.. image:: ./images/cornell_grasp_display.jpeg
+.. image:: ../../images/cornell_grasp_display.jpeg
    :align: center
 
 3. Training of new types of grippers require **manual labelling** of new datasets (labour intensive).
@@ -25,23 +25,23 @@ Traditionally, grasp pose generation is done through using convolutional neural 
 
 This ROS2 package presents a solution that requires no training, no labelling and little computational power to generate a 3 + 1 DOF grasp poses. The modular design of this package also allows for expansion into other gripper types. Current support for this package includes **2 finger gripper and single suction cup gripper**.
 
-.. |original1| image:: ./images/original_1.jpg   
+.. |original1| image:: ../../images/original_1.jpg   
    :scale: 10%
    :align: middle
-.. |finger1| image:: ./images/finger_2_1_grasp.png
+.. |finger1| image:: ../../images/finger_2_1_grasp.png
    :scale: 10%
    :align: middle
-.. |suction1| image:: ./images/suction_1_1_1_grasp.png
+.. |suction1| image:: ../../images/suction_1_1_1_grasp.png
    :scale: 10%
    :align: middle
    
-.. |original2| image:: ./images/original_2.png   
+.. |original2| image:: ../../images/original_2.png   
    :scale: 20%
    :align: middle
-.. |finger2| image:: ./images/finger_2_2_grasp.png
+.. |finger2| image:: ../../images/finger_2_2_grasp.png
    :scale: 10%
    :align: middle
-.. |suction2| image:: ./images/suction_1_1_2_grasp.png
+.. |suction2| image:: ../../images/suction_1_1_2_grasp.png
    :scale: 10%
    :align: middle
 

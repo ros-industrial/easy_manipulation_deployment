@@ -15,7 +15,7 @@ It is (Highly) recommended to select the same workspace location as the workspac
 
 From the main window, choose your workspace location. Ensure that the folder selected is the **main workspace folder**, i.e catkin_ws or colcon_ws
 
-.. image:: ./images/workcell_loaded.png
+.. image:: ../../images/workcell_loaded.png
    :scale: 100%
    :align: center
 

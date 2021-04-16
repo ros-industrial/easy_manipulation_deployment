@@ -17,7 +17,7 @@ To load a yaml file into the GUI, you need to ensure that the **scene folder** i
 
 If the scene can be found, it will be available to be clicked to be edited.
 
-.. image:: ./images/multiple_scenes.png
+.. image:: ../../images/multiple_scenes.png
    :scale: 75%
    :align: center
 

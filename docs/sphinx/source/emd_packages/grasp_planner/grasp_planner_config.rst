@@ -17,7 +17,7 @@ Finger Gripper
 ^^^^^^^^^^^^^^^^^^
 
 
-.. image:: ./images/finger_yaml.png
+.. image:: ../../images/finger_yaml.png
 
 
 **fingers** 
@@ -53,7 +53,7 @@ Suction Gripper
 ^^^^^^^^^^^^^^^^^^
 
 
-.. image:: ./images/suction_yaml.png
+.. image:: ../../images/suction_yaml.png
 
 
 **length_cups**

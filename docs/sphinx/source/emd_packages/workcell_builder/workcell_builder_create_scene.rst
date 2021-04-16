@@ -12,7 +12,7 @@ Create A Scene
     :depth: 3
 
 
-.. image:: ./images/no_scene.png
+.. image:: ../../images/no_scene.png
    :scale: 75%
    :align: center
 
@@ -22,7 +22,7 @@ If there are currently no scenes in the "scenes" folder, you need need to add a 
 
 You should be shown the window below, which is the start of scene creation. 
 
-.. image:: ./images/new_scene.png
+.. image:: ../../images/new_scene.png
    :scale: 75%
    :align: center
 
@@ -40,7 +40,7 @@ If the error " No robot is detected in the workcell folder" is seen in the Robot
 
 Otherwise, you will see the window below
 
-.. image:: ./images/load_robot.png
+.. image:: ../../images/load_robot.png
    :scale: 75%
    :align: center
 
@@ -75,7 +75,7 @@ If the error " No end effector is detected in the workcell folder" is seen in th
 
 Otherwise, you will see the window below
 
-.. image:: ./images/load_ee.png
+.. image:: ../../images/load_ee.png
    :scale: 75%
    :align: center
 

@@ -40,7 +40,7 @@ In :code:`/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro`, add the foll
 
 This link, :code:`ee_palm` represents the point of contact with respect to the grasp object. 
 
-.. image:: ./images/example/example_ee_palm.png
+.. image:: ../../images/example/example_ee_palm.png
    :scale: 75%
    :align: center
 
@@ -83,7 +83,7 @@ Next, launch the grasp execution component.
 
 You should then see rviz launch and the scene.
 
-.. image:: ./images/example/example_execution_launched.png
+.. image:: ../../images/example/example_execution_launched.png
 
 Terminal 2: Grasp Planner
 ----------------------------

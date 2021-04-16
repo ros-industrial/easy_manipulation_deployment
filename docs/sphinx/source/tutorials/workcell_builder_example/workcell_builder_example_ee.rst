@@ -8,7 +8,7 @@
 Adding an end effector
 =============================
 
-.. image:: ./images/example/example_robot_loaded.png
+.. image:: ../../images/example/example_robot_loaded.png
 
 In the scene creation window, check the :code:`Include End Effector` and click :code:`Add End Effector`
 

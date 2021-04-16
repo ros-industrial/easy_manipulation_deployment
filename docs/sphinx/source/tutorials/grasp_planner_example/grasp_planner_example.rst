@@ -15,7 +15,7 @@ If you currently do not have a working perception system, you can still test out
 
 The rosbags are using the stream of a simple tea box as shown below.
 
-.. image:: ./images/example/example_pointcloud_picture.png
+.. image:: ../../images/example/example_pointcloud_picture.png
 
 .. note::
         Prority is given to `Easy Perception Deployment <https://github.com/ros-industrial/easy_perception_deployment>`_ data if both `Pointcloud <https://en.wikipedia.org/wiki/Point_cloud>`_ and `Easy Perception Deployment <https://github.com/ros-industrial/easy_perception_deployment>`_  are running simultaneously.
@@ -119,17 +119,17 @@ Viewing grasping results on Cloud viewer
 
 The :code:`Cloud viewer` window will then load the frame of the perception input data as shown below:
 
-.. image:: ./images/example/example_epd_pointcloud.png 
+.. image:: ../../images/example/example_epd_pointcloud.png 
 
 
 Click on the :code:`Cloud viewer` window and press :code:`Q`. The Grasp Planner will then process the pointcloud data, showing the Bounding Box of 
 the object/objects in the :code:`Cloud viewer` window,
 
-.. image:: ./images/example/example_epd_bounding_box.png 
+.. image:: ../../images/example/example_epd_bounding_box.png 
 
 Continue to press :code:`Q` to visualize all of the possible grasps on the object.
 
-.. image:: ./images/example/example_epd_grasps_balls.png
+.. image:: ../../images/example/example_epd_grasps_balls.png
 
 The grasps are ranked based off the quality of their grasps. The pose and orientation of the top ranked grasp will then be published for :ref:`grasp_execution_example`
 

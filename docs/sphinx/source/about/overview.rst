@@ -6,14 +6,14 @@
 .. _Overview:
 
 Overview
-========================================================
+========
 
 Manipulation Pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To preserve the modularity of this package, the manipulation pipeline can be broken down into three main aspects, each of which can function separately, or together as an end to end pipeline. Each component has its own documentation and tutorials which are linked in the headers.
 
-.. image:: ./images/emd_diagram.png
+.. image:: ../images/emd_diagram.png
    :scale: 50%
    :align: center
 

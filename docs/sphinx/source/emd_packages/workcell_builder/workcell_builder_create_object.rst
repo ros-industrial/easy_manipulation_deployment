@@ -13,7 +13,7 @@ Create an object
 
 An environment object can be used to create a visual representation of an object in a real robotic workcell, or additionally to act as a collision object to be taken into account during path planning
 
-.. image:: ./images/new_object.png
+.. image:: ../../images/new_object.png
    :scale: 75%
    :align: center
 
@@ -32,7 +32,7 @@ Adding Visual Component
 
 The visual properties of the link. This element specifies the shape of the object (box, cylinder, etc.) for visualization purposes. 
 
-.. image:: ./images/new_visual.png
+.. image:: ../../images/new_visual.png
    :scale: 75%
    :align: center
 
@@ -41,7 +41,7 @@ Adding Inertial Component
 
 This window allows you to add the inertial properties of the link. This aspect is __optional__ and will default to zero mass and zero inertia  if it is not specified.
 
-.. image:: ./images/new_inertia.png
+.. image:: ../../images/new_inertia.png
    :scale: 75%
    :align: center
    
@@ -63,7 +63,7 @@ Adding Collision Component
 
 This allows you to describe the collision properties of the link. **To reduce computation time, simpler collision models can be used to describe the object compared to the visual components**
 
-.. image:: ./images/new_collision.png
+.. image:: ../../images/new_collision.png
    :scale: 75%
    :align: center
 
@@ -74,7 +74,7 @@ To find out more about each component, `Check out this link that described the v
 
 **Note that as of this current implementation, only simple joint attributes are included. Other attributes like calibration, dynamics, limits, mimic, safety_controller, will be added in future iterations**
 
-.. image:: ./images/new_joint.png
+.. image:: ../../images/new_joint.png
    :scale: 75%
    :align: center
 
@@ -110,13 +110,13 @@ Note that there are many different origin sources for the Visual, Collision, Ine
 
 To find out where this reference frame is, we need to look at the **joint origin** . The following example shows, generally, how the joint origin relates to the link origin. 
 
-.. image:: ./images/link_joint1.png
+.. image:: ../../images/link_joint1.png
    :scale: 75%
    :align: center
 
 This configuration shows a :code:`link` connected to the :code:`base_link` with a joint origin of :code:`0,0,0` and the visual mesh of :code:`link` has an origin of :code:`0,0,1`. As you can see, :code:`link`'s tf is at the :code:`0,0,0` of :code:`base_link`, while the **visual** component of :code:`link` is at :code:`0,0,1` from the **tf** of :code:`link`
 
-.. image:: ./images/link_joint2.png
+.. image:: ../../images/link_joint2.png
    :scale: 75%
    :align: center
 

@@ -22,23 +22,23 @@ Create visual component of link
 
 Give your link a name, e.g "table". In order to visualize the object, you need to have a link with a visual component. Check :code:`Enable Viusal` and click :code:`Create Visual`
 
-.. image:: ./images/example/example_add_visual.png
+.. image:: ../../images/example/example_add_visual.png
 
 For this example, we will use an stl file. Select :code:`Using STL` and click :code:`Load File` . Select the location of your stl file. For this example, the :code:`table.stl` file will be located at :code:`/workcell_ws/src/easy_manipulation_deployment/workcell_builder/examples/resources/` . The stl file is currently too big, so we shall resize it by a factor of 0.001 on all axes (X, Y, Z)
 
-.. image:: ./images/example/example_visual_geometry.png
+.. image:: ../../images/example/example_visual_geometry.png
 
 The table in this example will also be at the origin of the workcell world, so we will leave the origin unchecked.
 
-.. image:: ./images/example/example_visual_origin.png
+.. image:: ../../images/example/example_visual_origin.png
 
 The workcell table we have is slightly grey. Uncheck the :code:`Include Material` , toggle to :code:`Using color` and enter the following numbers into the RGBA fields. Name the material "aluminum".
 
-.. image:: ./images/example/example_visual_material.png
+.. image:: ../../images/example/example_visual_material.png
 
 Your final visual_link window should look like this:
 
-.. image:: ./images/example/example_visual_filled.png
+.. image:: ../../images/example/example_visual_filled.png
 
 Click ok. 
 
@@ -47,21 +47,21 @@ Create Collision component of link
 
 Next, if you want this table object to be accounted for as a collision object, you need to add a collision component. Check :code:`Enable Collision` and click :code:`Create Collision`
 
-.. image:: ./images/example/example_newlink_visualfilled.png
+.. image:: ../../images/example/example_newlink_visualfilled.png
 
 The steps to filling up this window is identical to adding visual component, where you add in the geometry. Similar to the visual component, you want your collision component to be in the shape of the table as well, hence we use the same stl as before. 
 
 Your final collision_link window should look like this:
 
-.. image:: ./images/example/example_collision_filled.png
+.. image:: ../../images/example/example_collision_filled.png
 
 For this example, we do not require an inertial component so we will skip that option. Your final new link window should look like the following
 
-.. image:: ./images/example/example_new_link_done.png
+.. image:: ../../images/example/example_new_link_done.png
 
 Click Ok. Your link should now be displayed in the link window. 
 
-.. image:: ./images/example/example_link_table.png
+.. image:: ../../images/example/example_link_table.png
 
 As this is a relatively simple environment object, there is only one link needed, and hence no internal joints need to be declared. 
 
@@ -78,7 +78,7 @@ Make sure to name your object as well. We can simply name it *table*
 Your final :code:`Add New Environmental Object` window should look like this:
 
 
-.. image:: ./images/example/example_obj_done.png
+.. image:: ../../images/example/example_obj_done.png
 
 
 Click :code:`confirm`

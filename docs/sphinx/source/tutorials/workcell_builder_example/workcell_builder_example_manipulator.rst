@@ -21,11 +21,11 @@ In the :code:`Robot End Effector Link` field, choose :code:`ee_link`
 
 Since we want the robot to be at the origin point of the world, we can leave the origin field unchecked. Your final window should look like this:
 
-.. image:: ./images/example/example_load_robot.png
+.. image:: ../../images/example/example_load_robot.png
 
 
 After clicking :code:`Ok`, you returning to the scene creation window, there should be a confirmation that the robot is loaded and the option to include an end effector 
 
-.. image:: ./images/example/example_robot_loaded.png
+.. image:: ../../images/example/example_robot_loaded.png
 
 Next step: :ref:`workcell_builder_example_ee`

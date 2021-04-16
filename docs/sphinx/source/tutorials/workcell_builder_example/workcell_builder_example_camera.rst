@@ -25,7 +25,7 @@ In the directory :code:`/workcell_ws/src/assets/environment/` , download the rea
 
 Only keep the :code:`realsense2_description` folder. Your :code:`/workcell_ws/src/assets/environment/` folder should be as shown: 
 
-.. image:: ./images/example/example_realsense_folder.png
+.. image:: ../../images/example/example_realsense_folder.png
 
 Next, build your package again to make sure that the realsense package builds correctly. 
 
@@ -71,14 +71,14 @@ Now, rebuild the package and launch the demo visualization
    
 you should see the camera in scene.
 
-.. image:: ./images/example/example_d415_rviz.png
+.. image:: ../../images/example/example_d415_rviz.png
 
 Checking camera frame reference
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First we need to check which link is the child link when connecting the camera to the xacro. This can be found in :code:`/workcell_ws/src/assets/environment/realsense2_description/urdf/_d415.urdf.xacro`
 
-.. image:: ./images/example/example_d415_link.png
+.. image:: ../../images/example/example_d415_link.png
 
 From the URDF we can see that the link that is connected to the external scene is :code:`${name}_bottom_screw_frame`. 
 
@@ -91,15 +91,15 @@ Next, We will launch RViz to check the orientation of this link.
 
 On the RViz GUI left panel, in order to see the frame, make sure to only check that link, and also increase the Marker Scale to about 0.5.
 
-.. image:: ./images/example/example_realsense_rviz.png
+.. image:: ../../images/example/example_realsense_rviz.png
 
 For some cameras, the link representing the model may not be in the same orientation as the actual camera frame the perception system references . This can be shown in RViz,
 
-.. image:: ./images/example/example_d415_screw_frame.png
+.. image:: ../../images/example/example_d415_screw_frame.png
 
 This is how we are currently referencing the camera in the scene. However, based off the perception system we are using (easy_perception_system), the actual camera frame is supposed to be as shown below.
 
-.. image:: ./images/example/example_d415_actual_frame.png
+.. image:: ../../images/example/example_d415_actual_frame.png
 
 To do so, we need to add a link in this orientation in the URDF. In the file :code:`/workcell_ws/src/scenes/new_scene/urdf/scene.urdf.xacro` add the following lines under the declaration of the camera object: 
 
@@ -114,6 +114,6 @@ To do so, we need to add a link in this orientation in the URDF. In the file :co
 
 This adds a new frame :code:`camera_frame` that will be the frame in which the object is detected, and the frame that will be transformed to the world frame during the grasp execution phase of the pipeline.
 
-Now that we have the main scene set up, we can move on to the grasp planner: :ref:`grasp_planner_example`
+Now that we have the main scene set up, we can move on to the grasp planner: :ref:`grasp_planner_example <grasp_planner_example>`
 
 

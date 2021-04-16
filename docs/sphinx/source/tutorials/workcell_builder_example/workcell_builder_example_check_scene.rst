@@ -25,6 +25,6 @@ Next, to check if the scene is properly created, we will try running the package
 
 RViz should be launched, and you should see your workspace in the simulation.
 
-.. image:: ./images/example/example_generated_sim.png
+.. image:: ../../images/example/example_generated_sim.png
 
 Now we have a simulated set up of the scene. However, typically a manipulation system would need some form of perception system, which will be addresed next: Next step: :ref:`workcell_builder_example_camera` 

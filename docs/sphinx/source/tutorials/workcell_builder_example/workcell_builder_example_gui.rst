@@ -14,19 +14,19 @@ Starting the Workcell Builder
    
    workcell_builder
 
-.. image:: ./images/example/example_main_window.png
+.. image:: ../../images/example/example_main_window.png
 
 Set the ROS version and Distro to ROS2 Foxy. Next, click :code:`Choose workspace location` and select the filepath to :code:`workcell_ws` . You should see a green confirmation message that the workcell is loaded. 
 
 
-.. image:: ./images/example/example_workcell_loaded.png
+.. image:: ../../images/example/example_workcell_loaded.png
 
 Click :code:`Next`. you will then see the scene selection screen. Click on :code:`New Scene`. 
 
-.. image:: ./images/example/example_scene_select.png
+.. image:: ../../images/example/example_scene_select.png
 
 
-.. image:: ./images/example/example_new_scene.png
+.. image:: ../../images/example/example_new_scene.png
 
 
 

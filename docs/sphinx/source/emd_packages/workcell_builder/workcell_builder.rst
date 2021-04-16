@@ -10,7 +10,7 @@ Workcell Builder
 
 This ROS package provides an easy to use Graphical User Interface for generation of a robotic workcell in RViz which serves as the first step in the pipeline for a pick and place task
 
-.. image:: ./images/suction.png
+.. image:: ../../images/suction.png
 
 .. toctree::
    :maxdepth: 5

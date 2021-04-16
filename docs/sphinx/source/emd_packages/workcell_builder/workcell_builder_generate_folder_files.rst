@@ -13,19 +13,19 @@ The next step after creating a scene is to generate the relevant files and folde
 Generating yaml files
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: ./images/generate_yaml.png
+.. image:: ../../images/generate_yaml.png
    :scale: 75%
    :align: center
 
 To generate this scene, click on the "Generate yaml for scene" button. An `environment.yaml` yaml file will be created in the src/scenes/<scene_name> folder
 
-.. image:: ./images/yaml.png
+.. image:: ../../images/yaml.png
    :scale: 75%
    :align: center
 
 This file is an easy to read textual representation of the scene. This file is important and required to properly generate the workcell. This is also important for reloading a scene into the GUI for editing. It is possible to do these changes via the YAML file directly rather than the GUI. **However, do note that errors may arise if you do not follow the proper YAML format.**
 
-.. image:: ./images/generated_yaml.png
+.. image:: ../../images/generated_yaml.png
    :scale: 75%
    :align: center
 
@@ -36,7 +36,7 @@ Other Files (General)
 
 Click the Generate Files from yaml button to generate the actual required components to build the simulation
 
-.. image:: ./images/generate_folders.png
+.. image:: ../../images/generate_folders.png
    :scale: 75%
    :align: center
 
@@ -79,7 +79,7 @@ This file is located in the scenes/<scene_name>/launch/ folder. This file serves
 
 Once done, you will see the following screen. You can then exit the GUI
 
-.. image:: ./images/generated_folders.png
+.. image:: ../../images/generated_folders.png
    :scale: 75%
    :align: center
    
