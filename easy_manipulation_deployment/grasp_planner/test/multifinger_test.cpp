@@ -76,13 +76,37 @@ TEST_F(MultiFingerTest, FingerStrokeNeg)
 {
 }
 
-TEST_F(MultiFingerTest, GetCuttingPlanesCheckPlanes)
+TEST_F(MultiFingerTest, AddPlaneTestInside1)
+{
+}
+
+TEST_F(MultiFingerTest, AddPlaneTestInside2)
+{
+}
+
+TEST_F(MultiFingerTest, AddPlaneTestInsideBoth)
 {
 }
 
 
-TEST_F(MultiFingerTest, GetCuttingPlanesCheckPlanes)
+TEST_F(MultiFingerTest, CheckPlaneExistsTest)
 {
 }
 
 
+TEST_F(MultiFingerTest, GetCenterCuttingPlaneCheck)
+{
+}
+
+
+TEST_F(MultiFingerTest, GetCuttingPlaneBothOdd)
+{
+}
+
+TEST_F(MultiFingerTest, GetCuttingPlaneBothEven)
+{
+}
+
+TEST_F(MultiFingerTest, GetCuttingPlaneOddEven)
+{
+}
