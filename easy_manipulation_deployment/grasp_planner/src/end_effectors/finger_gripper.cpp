@@ -16,6 +16,7 @@
 
 // Main PCL files
 #include "grasp_planner/end_effectors/finger_gripper.hpp"
+static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
 
 FingerGripper::FingerGripper(
   std::string id_,
@@ -49,6 +50,23 @@ FingerGripper::FingerGripper(
   worldYAngleThreshold(worldYAngleThreshold_),
   worldZAngleThreshold(worldZAngleThreshold_)
 {
+  if(num_fingers_side_1_ <= 0 || num_fingers_side_1_ <= 0){
+    RCLCPP_ERROR(LOGGER, "Each side needs to have a minimum of 1 finger");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  if(finger_thickness <= 0){
+    RCLCPP_ERROR(LOGGER, "Finger thickness needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  if(gripper_stroke <= 0){
+    RCLCPP_ERROR(LOGGER, "Gripper stroke needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  if(finger_thickness > distance_between_fingers_1 ||
+    finger_thickness > distance_between_fingers_2){
+    RCLCPP_ERROR(LOGGER, "Finger thickness is too large, will collide with adjacent fingers");
+    throw std::invalid_argument("Invalid value for field.");
+  }
   this->num_fingers_total = this->num_fingers_side_1 + this->num_fingers_side_2;
 }
 

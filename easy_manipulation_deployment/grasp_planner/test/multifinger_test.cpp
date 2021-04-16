@@ -48,6 +48,39 @@ public:
 
 TEST_F(MultiFingerTest, FingerSidesZero)
 {
+  std::string id = "test_gripper";
+  int num_fingers_side_1 =  ;
+  int num_fingers_side_2 =  ;
+  float distance_between_fingers_1 =  ;
+  float distance_between_fingers_2 =  ;
+  float finger_thickness =  ;
+  float gripper_stroke =  ;
+  float voxel_size =  ;
+  float grasp_quality_weight1 =  ;
+  float grasp_quality_weight2 =  ;
+  float grasp_plane_dist_limit =  ;
+  float cloud_normal_radius =  ;
+  float worldXAngleThreshold =  ;
+  float worldYAngleThreshold =  ;
+  float worldZAngleThreshold =  ;
+
+  FingerGripper gripper()
+  FingerGripper::FingerGripper(
+  std::string id_,
+  const int num_fingers_side_1_,
+  const int num_fingers_side_2_,
+  const float distance_between_fingers_1_,
+  const float distance_between_fingers_2_,
+  const float finger_thickness_,
+  const float gripper_stroke_,
+  const float voxel_size_,
+  const float grasp_quality_weight1_,
+  const float grasp_quality_weight2_,
+  const float grasp_plane_dist_limit_,
+  const float cloud_normal_radius_,
+  const float worldXAngleThreshold_,
+  const float worldYAngleThreshold_,
+  const float worldZAngleThreshold_)
 }
 
 TEST_F(MultiFingerTest, ThicknessMoreThanSpacing)

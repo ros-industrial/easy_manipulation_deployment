@@ -63,6 +63,7 @@
 #include "grasp_planner/common/pcl_functions.hpp"
 #include "grasp_planner/common/fcl_functions.hpp"
 
+static const rclcpp::Logger & LOGGER = rclcpp::get_logger("GraspScene");
 
 class GraspScene: public rclcpp::Node
 {
@@ -228,7 +229,7 @@ public:
       std::bind(
         &GraspScene::planning_init_epd, this,
         std::placeholders::_1));
-    std::cout << " waiting... " << std::endl;
+    RCLCPP_INFO(LOGGER, "waiting....");
 
     // cloud_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
     // this->get_parameter("perception_topic").as_string(),
