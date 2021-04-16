@@ -14,80 +14,105 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "grasp_object.h"
-class MultiFingerTest : public testing::Test
-{
-public:
-  std::shared_ptr<GraspObject> object;
-  MultiFingerTest()
-  {}
-  void SetUp(void)
-  {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    float length = 0.05;
-    float breadth = 0.01;
-    float height = 0.02;
-
-    for (float length_ = 0.0; length_ < length; length_ += 0.001) {
-      for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.001) {
-        for (float height_ = 0.0; height_ < height; height_ += 0.001) {
-          pcl::PointXYZRGB temp_point(length_, breadth_, height_);
-          rectangle_cloud->points.push_back(temp_point);
-        }
-      }
-    }
-    Eigen::Vector4f centroid;
-    pcl::compute3DCentroid(*rectangle_cloud, centroid);
-    GraspObject object_("camera_frame", rectangle_cloud, centroid);
-    object = std::make_shared<GraspObject>(object_);
-  }
-  void TearDown(void)
-  {
-  }
-}
+#include "multifinger_test.hpp"
 
 TEST_F(MultiFingerTest, FingerSidesZero)
 {
   std::string id = "test_gripper";
-  int num_fingers_side_1 =  ;
-  int num_fingers_side_2 =  ;
-  float distance_between_fingers_1 =  ;
-  float distance_between_fingers_2 =  ;
-  float finger_thickness =  ;
-  float gripper_stroke =  ;
-  float voxel_size =  ;
-  float grasp_quality_weight1 =  ;
-  float grasp_quality_weight2 =  ;
-  float grasp_plane_dist_limit =  ;
-  float cloud_normal_radius =  ;
-  float worldXAngleThreshold =  ;
-  float worldYAngleThreshold =  ;
-  float worldZAngleThreshold =  ;
+  int num_fingers_side_1 = 0 ;
+  int num_fingers_side_2 = 0 ;
+  float distance_between_fingers_1 = 0.02 ;
+  float distance_between_fingers_2 = 0.02 ;
+  float finger_thickness = 0.02 ;
+  float gripper_stroke = 0.085 ;
+  float voxel_size = 0.01 ;
+  float grasp_quality_weight1 = 1.5 ;
+  float grasp_quality_weight2 = 1.0 ;
+  float grasp_plane_dist_limit = 0.007 ;
+  float cloud_normal_radius = 0.03 ;
+  float worldXAngleThreshold = 0.5 ;
+  float worldYAngleThreshold = 0.5 ;
+  float worldZAngleThreshold = 0.25 ;
 
-  FingerGripper gripper()
-  FingerGripper::FingerGripper(
-  std::string id_,
-  const int num_fingers_side_1_,
-  const int num_fingers_side_2_,
-  const float distance_between_fingers_1_,
-  const float distance_between_fingers_2_,
-  const float finger_thickness_,
-  const float gripper_stroke_,
-  const float voxel_size_,
-  const float grasp_quality_weight1_,
-  const float grasp_quality_weight2_,
-  const float grasp_plane_dist_limit_,
-  const float cloud_normal_radius_,
-  const float worldXAngleThreshold_,
-  const float worldYAngleThreshold_,
-  const float worldZAngleThreshold_)
+  
+    ASSERT_THROW(FingerGripper gripper(
+      id,
+      num_fingers_side_1,
+      num_fingers_side_2,
+      distance_between_fingers_1,
+      distance_between_fingers_2,
+      finger_thickness,
+      gripper_stroke,
+      voxel_size,
+      grasp_quality_weight1,
+      grasp_quality_weight2,
+      grasp_plane_dist_limit,
+      cloud_normal_radius,
+      worldXAngleThreshold,
+      worldYAngleThreshold,
+      worldZAngleThreshold), std::invalid_argument);
+
+    num_fingers_side_1 = 1 ;
+    num_fingers_side_2 = 0;
+    ASSERT_THROW(FingerGripper gripper(
+      id,
+      num_fingers_side_1,
+      num_fingers_side_2,
+      distance_between_fingers_1,
+      distance_between_fingers_2,
+      finger_thickness,
+      gripper_stroke,
+      voxel_size,
+      grasp_quality_weight1,
+      grasp_quality_weight2,
+      grasp_plane_dist_limit,
+      cloud_normal_radius,
+      worldXAngleThreshold,
+      worldYAngleThreshold,
+      worldZAngleThreshold), std::invalid_argument);
+
+    num_fingers_side_1 = 0;
+    num_fingers_side_2 = 1;
+
+    ASSERT_THROW(FingerGripper gripper(
+      id,
+      num_fingers_side_1,
+      num_fingers_side_2,
+      distance_between_fingers_1,
+      distance_between_fingers_2,
+      finger_thickness,
+      gripper_stroke,
+      voxel_size,
+      grasp_quality_weight1,
+      grasp_quality_weight2,
+      grasp_plane_dist_limit,
+      cloud_normal_radius,
+      worldXAngleThreshold,
+      worldYAngleThreshold,
+      worldZAngleThreshold), std::invalid_argument);
+
+    num_fingers_side_1 = 1;
+    num_fingers_side_2 = 1;
+    ASSERT_THROW(FingerGripper gripper(
+      id,
+      num_fingers_side_1,
+      num_fingers_side_2,
+      distance_between_fingers_1,
+      distance_between_fingers_2,
+      finger_thickness,
+      gripper_stroke,
+      voxel_size,
+      grasp_quality_weight1,
+      grasp_quality_weight2,
+      grasp_plane_dist_limit,
+      cloud_normal_radius,
+      worldXAngleThreshold,
+      worldYAngleThreshold,
+      worldZAngleThreshold), std::invalid_argument);
+
 }
 
 TEST_F(MultiFingerTest, ThicknessMoreThanSpacing)
-{
-}
-
-TEST_F(MultiFingerTest, FingerSidesNeg)
 {
 }
 

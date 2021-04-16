@@ -112,7 +112,12 @@ if(BUILD_TESTING)
 
   ament_add_gtest(grasptest test/init_tests.cpp)
   ament_target_dependencies(grasptest ament_index_cpp)
-  target_link_libraries(grasptest ${Boost_LIBRARIES})
+  target_link_libraries(grasptest 
+  grasp_planning_interface
+  ${PCL_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
+  ${FCL_LIBRARIES}
+  ccd)
 
   add_custom_target(gcov
     COMMAND mkdir -p coverage

@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-// #include "planning_function_test.cpp"
+#include "multifinger_test.cpp"
 // #include "ee_config_test.cpp"
 // #include "msg_test.cpp"
 // #include "grasp_test.cpp"
