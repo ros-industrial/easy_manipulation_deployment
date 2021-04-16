@@ -46,6 +46,43 @@ public:
   }
 }
 
-TEST_F(MultiFingerTest, Check_Variables)
+TEST_F(MultiFingerTest, FingerSidesZero)
 {
 }
+
+TEST_F(MultiFingerTest, ThicknessMoreThanSpacing)
+{
+}
+
+TEST_F(MultiFingerTest, FingerSidesNeg)
+{
+}
+
+TEST_F(MultiFingerTest, FingerSidesNeg)
+{
+}
+
+TEST_F(MultiFingerTest, FingerThicknessZero)
+{
+}
+TEST_F(MultiFingerTest, FingerThicknessNeg)
+{
+}
+
+TEST_F(MultiFingerTest, FingerStrokeZero)
+{
+}
+TEST_F(MultiFingerTest, FingerStrokeNeg)
+{
+}
+
+TEST_F(MultiFingerTest, GetCuttingPlanesCheckPlanes)
+{
+}
+
+
+TEST_F(MultiFingerTest, GetCuttingPlanesCheckPlanes)
+{
+}
+
+

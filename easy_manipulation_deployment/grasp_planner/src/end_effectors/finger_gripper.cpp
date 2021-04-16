@@ -58,6 +58,7 @@ void FingerGripper::planGrasps(
   std::shared_ptr<fcl::CollisionObject<float>> world_collision_object,
   pcl::visualization::PCLVisualizer::Ptr viewer)
 {
+  getCenterCuttingPlane(object);
   std::cout << "getCuttingPlanes" << std::endl;
   getCuttingPlanes(object);
   std::cout << "getGraspCloud" << std::endl;
@@ -109,13 +110,12 @@ void FingerGripper::planGrasps(
   std::cout << "outside getallranks functions" << std::endl;
 }
 
-
 /***************************************************************************//**
- * Function to create cutting planes along the object. each cutting plane represents
- * the planar contact area for two fingers. For multi-fingered gripper, multiple planes are created,
+ * Function find the plane that cuts the center of the Grasp Object
  * @param object grasp object
  ******************************************************************************/
-void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
+
+void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> object)
 {
   /*! \brief First we find the vector representing the major axis of the object */
   pcl::PointXYZ gradient_vector = pcl::PointXYZ(
@@ -135,7 +135,15 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
 
   this->center_cutting_plane = grasp_plane_vector;
   this->center_cutting_plane_normal = grasp_plane_normal_;
+}
 
+/***************************************************************************//**
+ * Function to create cutting planes along the object. each cutting plane represents
+ * the planar contact area for two fingers. For multi-fingered gripper, multiple planes are created,
+ * @param object grasp object
+ ******************************************************************************/
+void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
+{
   bool side_1_even = this->num_fingers_side_1 % 2 == 0;
   bool side_2_even = this->num_fingers_side_2 % 2 == 0;
   bool both_sides_even = (side_1_even && side_2_even);
@@ -172,7 +180,7 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
   if (both_sides_even || both_sides_odd) {
     // std::cout << "Both sides even or odd" << std::endl;
     if (this->distance_between_fingers_1 == this->distance_between_fingers_2) {
-      addCuttingPlanesEqualAligned(object->centerpoint, grasp_plane_vector, both_sides_even);
+      addCuttingPlanesEqualAligned(object->centerpoint, this->center_cutting_plane, both_sides_even);
     } else {
       float initial_gap_1 =
         (both_sides_even ? this->distance_between_fingers_1 / 2 : this->distance_between_fingers_1);
@@ -182,7 +190,7 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
       int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
       int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
       addCuttingPlanes(
-        object->centerpoint, grasp_plane_vector, num_itr_1, num_itr_2, initial_gap_1,
+        object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
         initial_gap_2);
     }
 
@@ -198,7 +206,7 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
     float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (is_even_fingers_1 ? 1 : 0));
     float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (is_even_fingers_2 ? 1 : 0));
     addCuttingPlanes(
-      object->centerpoint, grasp_plane_vector, num_itr_1, num_itr_2, initial_gap_1,
+      object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
       initial_gap_2);
   }
   /*! \brief Create cutting planes for side 1 */

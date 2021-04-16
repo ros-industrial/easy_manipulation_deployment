@@ -251,6 +251,7 @@ public:
   bool getInitialSamplePoints(const std::shared_ptr < GraspObject > object);
   void getInitialSampleCloud(const std::shared_ptr < GraspObject > object);
   void getGraspCloud(const std::shared_ptr < GraspObject > object);
+  void getCenterCuttingPlane(const std::shared_ptr<GraspObject> object);
   void getCuttingPlanes(const std::shared_ptr < GraspObject > object);
   void voxelizeSampleCloud();
   void getBestGrasps(
