@@ -28,7 +28,7 @@ GraspObject::GraspObject(
   cloud_normal(new pcl::PointCloud<pcl::PointNormal>())
 {
   cloud = cloud_;
-  centerpoint_ = centerpoint;
+  centerpoint = centerpoint_;
   max_grasp_samples = 1;
   this->grasp_target.target_type = "unknown_object";
 }
@@ -43,7 +43,7 @@ GraspObject::GraspObject(
   cloud_normal(new pcl::PointCloud<pcl::PointNormal>())
 {
   cloud = cloud_;
-  centerpoint_ = centerpoint;
+  centerpoint = centerpoint_;
   max_grasp_samples = 1;
   grasp_target.target_type = object_name_;
 }
