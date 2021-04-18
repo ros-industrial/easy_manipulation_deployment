@@ -50,7 +50,7 @@ FingerGripper::FingerGripper(
   worldYAngleThreshold(worldYAngleThreshold_),
   worldZAngleThreshold(worldZAngleThreshold_)
 {
-  if(num_fingers_side_1_ <= 0 || num_fingers_side_1_ <= 0){
+  if(num_fingers_side_1_ <= 0 || num_fingers_side_2_ <= 0){
     RCLCPP_ERROR(LOGGER, "Each side needs to have a minimum of 1 finger");
     throw std::invalid_argument("Invalid value for field.");
   }
@@ -280,26 +280,17 @@ void FingerGripper::addCuttingPlanesEqualAligned(
 
     } else {
       if (min_fingers > 0) {  // Plane still contains fingers on both side
-        // std::cout << "Both sides have fingers on this plane" << std::endl;
         addPlane(gap, centerpoint, plane_vector, true, true);
       } else {  // Plane only contains fingers on the side with more fingers
         if (side_1_max) {
-          // std::cout << "Side 1 have more fingers on this plane" << std::endl;
           addPlane(gap, centerpoint, plane_vector, true, false);
         } else {
-          // std::cout << "Side 2 have more fingers on this plane" << std::endl;
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
       addPlane(gap, centerpoint, plane_vector, false, true);
     }
-    // std::cout << "gap: " << gap << std::endl;
-
     min_fingers--;
-    // std::cout << "cutting_plane_distances" << this->cutting_plane_distances.size() << std::endl;
-    // std::cout << "grasp_samples" << this->grasp_samples.size() << std::endl;
-    // std::cout << "plane_1_index" << this->plane_1_index.size() << std::endl;
-    // std::cout << "plane_2_index" << this->plane_2_index.size() << std::endl;
   }
 }
 

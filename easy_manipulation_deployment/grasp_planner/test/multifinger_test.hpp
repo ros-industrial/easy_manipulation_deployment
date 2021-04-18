@@ -25,6 +25,31 @@ class MultiFingerTest : public ::testing::Test
 {
 public:
   std::shared_ptr<GraspObject> object;
+  std::string id;
+  int num_fingers_side_1;
+  int num_fingers_side_2;
+  float distance_between_fingers_1;
+  float distance_between_fingers_2;
+  float finger_thickness;
+  float gripper_stroke;
+  float voxel_size;
+  float grasp_quality_weight1;
+  float grasp_quality_weight2;
+  float grasp_plane_dist_limit;
+  float cloud_normal_radius;
+  float worldXAngleThreshold;
+  float worldYAngleThreshold;
+  float worldZAngleThreshold;
+
+  std::shared_ptr<FingerGripper> gripper;
+
+  pcl::visualization::PCLVisualizer::Ptr viewer;
+  
+  MultiFingerTest();
+  void ResetVariables();
+  void LoadGripper();
+  
+
 
   void SetUp(void)
   {
@@ -41,10 +66,12 @@ public:
         }
       }
     }
+
     Eigen::Vector4f centroid;
     pcl::compute3DCentroid(*rectangle_cloud, centroid);
     GraspObject object_("camera_frame", rectangle_cloud, centroid);
     object = std::make_shared<GraspObject>(object_);
+    object->get_object_bb();
   }
   void TearDown(void)
   {
