@@ -364,10 +364,10 @@ void GraspScene::EPDCreateWorldCollisionObject(
     this->ptFilter_Llimit_z);
   PCLFunctions::removeStatisticalOutlier(scene_cloud, 1.0);
 
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_r(scene_cloud, 255, 0, 0);
-  viewer->addPointCloud<pcl::PointXYZRGB>(scene_cloud, rgb_r, "rectangle_cloud");
-  viewer->spin();
-  viewer->close();
+  // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_r(scene_cloud, 255, 0, 0);
+  // viewer->addPointCloud<pcl::PointXYZRGB>(scene_cloud, rgb_r, "rectangle_cloud");
+  // viewer->spin();
+  // viewer->close();
 
 
   geometry_msgs::msg::TransformStamped sensorToWorldTf =

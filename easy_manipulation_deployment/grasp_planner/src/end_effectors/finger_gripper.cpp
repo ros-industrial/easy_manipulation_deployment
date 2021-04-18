@@ -107,25 +107,22 @@ void FingerGripper::planGrasps(
   }
 
   this->sorted_gripper_configs = getAllRanks(valid_open_gripper_configs, grasp_method);
-  std::cout << "grasp_samples size: " << this->grasp_samples.size() << std::endl;
-  for (auto grasp_sample : this->grasp_samples) {
-    viewer->addPointCloud<pcl::PointNormal>(grasp_sample->grasp_plane_ncloud, "normals");
-    // viewer->addPlane(*(grasp_sample->plane), "cenerplane", 0);
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_1(
-      grasp_sample->sample_side_1->finger_cloud, 255, 0, 0);
-    viewer->addPointCloud<pcl::PointXYZRGB>(
-      grasp_sample->sample_side_1->finger_cloud, rgb_1,
-      "finger1");
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_2(
-      grasp_sample->sample_side_2->finger_cloud, 255, 0, 0);
-    viewer->addPointCloud<pcl::PointXYZRGB>(
-      grasp_sample->sample_side_2->finger_cloud, rgb_2,
-      "finger2");
-    viewer->spin();
-    viewer->close();
-  }
-
-  std::cout << "outside getallranks functions" << std::endl;
+  // std::cout << "grasp_samples size: " << this->grasp_samples.size() << std::endl;
+  // for (auto grasp_sample : this->grasp_samples) {
+  //   viewer->addPointCloud<pcl::PointNormal>(grasp_sample->grasp_plane_ncloud, "normals");
+  //   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_1(
+  //     grasp_sample->sample_side_1->finger_cloud, 255, 0, 0);
+  //   viewer->addPointCloud<pcl::PointXYZRGB>(
+  //     grasp_sample->sample_side_1->finger_cloud, rgb_1,
+  //     "finger1");
+  //   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb_2(
+  //     grasp_sample->sample_side_2->finger_cloud, 255, 0, 0);
+  //   viewer->addPointCloud<pcl::PointXYZRGB>(
+  //     grasp_sample->sample_side_2->finger_cloud, rgb_2,
+  //     "finger2");
+  //   viewer->spin();
+  //   viewer->close();
+  // }
 }
 
 /***************************************************************************//**
