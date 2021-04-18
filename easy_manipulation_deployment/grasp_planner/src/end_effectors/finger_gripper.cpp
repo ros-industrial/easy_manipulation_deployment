@@ -261,6 +261,7 @@ void FingerGripper::addCuttingPlanesEqualAligned(
   int max_fingers = (side_1_max ? this->num_fingers_side_1 : this->num_fingers_side_2);
   int min_fingers = (side_1_max ? this->num_fingers_side_2 : this->num_fingers_side_1);
   int num_itr = (max_fingers == 1 ? 0 : floor(max_fingers / 2) + 1);
+  int curr_min_size = (side_1_max ? this->plane_2_index.size() : this->plane_1_index.size());
   for (int row = 0, updown_toggle = 1; row < num_itr; row += updown_toggle ^= 1) {
     // for(int row = 0, updown_toggle = 0; row < num_itr; row += updown_toggle ^=1)
     float gap;
@@ -288,8 +289,9 @@ void FingerGripper::addCuttingPlanesEqualAligned(
       // }
 
     } else {
-      if (min_fingers > 0) {  // Plane still contains fingers on both side
+      if (curr_min_size < min_fingers) {  // Plane still contains fingers on both side
         addPlane(gap, centerpoint, plane_vector, true, true);
+        curr_min_size++;
       } else {  // Plane only contains fingers on the side with more fingers
         if (side_1_max) {
           addPlane(gap, centerpoint, plane_vector, true, false);
@@ -297,9 +299,7 @@ void FingerGripper::addCuttingPlanesEqualAligned(
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
-      //addPlane(gap, centerpoint, plane_vector, false, true);
     }
-    min_fingers--;
   }
 }
 
