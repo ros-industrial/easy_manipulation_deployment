@@ -297,7 +297,7 @@ void FingerGripper::addCuttingPlanesEqualAligned(
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
-      addPlane(gap, centerpoint, plane_vector, false, true);
+      //addPlane(gap, centerpoint, plane_vector, false, true);
     }
     min_fingers--;
   }
