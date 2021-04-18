@@ -173,19 +173,28 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
   if (!side_1_even || !side_2_even) {
     pcl::ModelCoefficients::Ptr center_plane(new pcl::ModelCoefficients);
 
-    graspPlaneSample grasp_sample;
-    grasp_sample.plane_index = 0;
-    grasp_sample.dist_to_center_plane = 0;
-    grasp_sample.plane->values.resize(4);
-    grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = this->center_cutting_plane(0);
-    grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = this->center_cutting_plane(1);
-    grasp_sample.plane_eigen(2) = grasp_sample.plane->values[2] = this->center_cutting_plane(2);
-    grasp_sample.plane_eigen(3) = grasp_sample.plane->values[3] = this->center_cutting_plane(3);
+    // graspPlaneSample grasp_sample;
+    // grasp_sample.plane_index = 0;
+    // grasp_sample.dist_to_center_plane = 0;
+    // grasp_sample.plane->values.resize(4);
+    // grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = this->center_cutting_plane(0);
+    // grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = this->center_cutting_plane(1);
+    // grasp_sample.plane_eigen(2) = grasp_sample.plane->values[2] = this->center_cutting_plane(2);
+    // grasp_sample.plane_eigen(3) = grasp_sample.plane->values[3] = this->center_cutting_plane(3);
+    // this->grasp_samples.push_back(std::make_shared<graspPlaneSample>(grasp_sample));
 
-    this->grasp_samples.push_back(std::make_shared<graspPlaneSample>(grasp_sample));
+    Eigen::Vector3f centerpoint3f(
+      object->centerpoint(0),
+      object->centerpoint(1),
+      object->centerpoint(2));
+    
+    this->grasp_samples.push_back(
+      generateGraspSamples(
+        this->center_cutting_plane,
+        centerpoint3f,
+        0));
+
     this->cutting_plane_distances.push_back(0);
-
-
     if (!side_1_even) {
       this->plane_1_index.push_back(0);
     }
@@ -376,21 +385,28 @@ void FingerGripper::addPlane(
   Eigen::Vector3f point_on_plane(centerpoint(0) + dist * plane_normal_norm(0), centerpoint(
       1) + dist * plane_normal_norm(1), centerpoint(2) + dist * plane_normal_norm(2));
 
-  graspPlaneSample grasp_sample;
-  grasp_sample.plane->values.resize(4);
-  grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = plane_vector(0);
-  grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = plane_vector(1);
-  grasp_sample.plane_eigen(2) = grasp_sample.plane->values[2] = plane_vector(2);
-  grasp_sample.plane_eigen(3) = grasp_sample.plane->values[3] =
-    -((plane_vector(0) * point_on_plane(0)) + (plane_vector(1) * point_on_plane(1)) +
-    (plane_vector(2) * point_on_plane(2)));
-
+  
   static std::mutex mutex;
   std::lock_guard<std::mutex> lock(mutex);
   int curr_index = this->grasp_samples.size();
-  grasp_sample.plane_index = curr_index;
   this->cutting_plane_distances.push_back(dist);
-  this->grasp_samples.push_back(std::make_shared<graspPlaneSample>(grasp_sample));
+
+  // graspPlaneSample grasp_sample;
+  // grasp_sample.plane->values.resize(4);
+  // grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = plane_vector(0);
+  // grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = plane_vector(1);
+  // grasp_sample.plane_eigen(2) = grasp_sample.plane->values[2] = plane_vector(2);
+  // grasp_sample.plane_eigen(3) = grasp_sample.plane->values[3] =
+  //   -((plane_vector(0) * point_on_plane(0)) + (plane_vector(1) * point_on_plane(1)) +
+  //   (plane_vector(2) * point_on_plane(2)));
+  // grasp_sample.plane_index = curr_index;
+
+  this->grasp_samples.push_back(
+      generateGraspSamples(
+      plane_vector,
+      point_on_plane,
+      curr_index));
+
   if (inside_1) {
     this->plane_1_index.push_back(curr_index);
   }
@@ -1388,6 +1404,22 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
   // std::cout << "getAllRanks" << std::endl;
 }
 
+std::shared_ptr < graspPlaneSample > FingerGripper::generateGraspSamples(
+  Eigen::Vector4f plane_vector,
+  Eigen::Vector3f point_on_plane,
+  int plane_index)
+{
+  graspPlaneSample grasp_sample;
+  grasp_sample.plane_index = plane_index;
+  grasp_sample.plane->values.resize(4);
+  grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = plane_vector(0);
+  grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = plane_vector(1);
+  grasp_sample.plane_eigen(2) = grasp_sample.plane->values[2] = plane_vector(2);
+  grasp_sample.plane_eigen(3) = grasp_sample.plane->values[3] =
+    -((plane_vector(0) * point_on_plane(0)) + (plane_vector(1) * point_on_plane(1)) +
+    (plane_vector(2) * point_on_plane(2)));
+  return(std::make_shared<graspPlaneSample>(grasp_sample));  
+}
 
 // void FingerGripper::getBestGrasps(std::shared_ptr<GraspObject> object,
 //   emd_msgs::msg::GraspMethod *grasp_method,

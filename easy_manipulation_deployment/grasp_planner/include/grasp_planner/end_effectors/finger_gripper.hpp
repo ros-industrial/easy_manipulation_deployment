@@ -308,6 +308,10 @@ public:
   std::vector < std::shared_ptr < multiFingerGripper >> getAllRanks(
     std::vector < std::shared_ptr < multiFingerGripper >> input_vector,
     emd_msgs::msg::GraspMethod * grasp_method);
+  std::shared_ptr < graspPlaneSample > generateGraspSamples(
+    Eigen::Vector4f plane_vector,
+    Eigen::Vector3f point_on_plane,
+    int plane_index);
   std::string getID() {return id;}
 };
 
