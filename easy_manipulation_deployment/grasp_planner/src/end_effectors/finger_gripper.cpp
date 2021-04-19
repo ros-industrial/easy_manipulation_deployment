@@ -209,6 +209,7 @@ void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> obj
       generateGraspSamples(
         this->center_cutting_plane,
         centerpoint3f,
+        0,
         0));
 
     this->cutting_plane_distances.push_back(0);
@@ -443,6 +444,7 @@ void FingerGripper::addPlane(
       generateGraspSamples(
       plane_vector,
       point_on_plane,
+      dist,
       curr_index));
 
   if (inside_1) {
@@ -1444,10 +1446,12 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
 std::shared_ptr < graspPlaneSample > FingerGripper::generateGraspSamples(
   Eigen::Vector4f plane_vector,
   Eigen::Vector3f point_on_plane,
+  float dist_to_center_plane,
   int plane_index)
 {
   graspPlaneSample grasp_sample;
   grasp_sample.plane_index = plane_index;
+  grasp_sample.dist_to_center_plane = dist_to_center_plane;
   grasp_sample.plane->values.resize(4);
   grasp_sample.plane_eigen(0) = grasp_sample.plane->values[0] = plane_vector(0);
   grasp_sample.plane_eigen(1) = grasp_sample.plane->values[1] = plane_vector(1);

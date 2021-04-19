@@ -756,3 +756,25 @@ TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
   EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[5], 0.00001);
   EXPECT_NEAR(0.02, gripper->cutting_plane_distances[6], 0.00001);
 }
+
+TEST_F(MultiFingerTest, GetGraspCloudTest)
+{
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.02;
+
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+
+  ASSERT_EQ(5, static_cast<int>(gripper->grasp_samples.size()));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->plane_intersects_object));
+  EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[1]->plane_intersects_object));
+  EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[2]->plane_intersects_object));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[3]->plane_intersects_object));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[4]->plane_intersects_object));
+
+}

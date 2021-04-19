@@ -311,6 +311,7 @@ public:
   std::shared_ptr < graspPlaneSample > generateGraspSamples(
     Eigen::Vector4f plane_vector,
     Eigen::Vector3f point_on_plane,
+    float dist_to_center_plane,
     int plane_index);
   std::string getID() {return id;}
 };
