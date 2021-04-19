@@ -1013,7 +1013,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     pcl::PointNormal finger_2_point;
     finger_2_point.x = finger_2_temp(0);
     finger_2_point.y = finger_2_temp(1);
-    finger_2_point.z = finger_2_temp(3);
+    finger_2_point.z = finger_2_temp(2);
 
     pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
     int K = 1;
