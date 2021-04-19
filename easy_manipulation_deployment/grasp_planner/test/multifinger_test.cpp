@@ -24,8 +24,8 @@ MultiFingerTest::MultiFingerTest()
 void MultiFingerTest::ResetVariables()
 {
   id = "test_gripper";
-  num_fingers_side_1 = 1;
-  num_fingers_side_2 = 1;
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 2;
   distance_between_fingers_1 = 0.02;
   distance_between_fingers_2 = 0.02;
   finger_thickness = 0.01;
@@ -81,6 +81,8 @@ TEST_F(MultiFingerTest, FingerSidesZero)
 
   num_fingers_side_1 = 1;
   num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0;
   EXPECT_NO_THROW(LoadGripper());
 
 }
@@ -99,7 +101,35 @@ TEST_F(MultiFingerTest, FingerSidesNeg)
   num_fingers_side_1 = 1;
   num_fingers_side_2 = -1;
   EXPECT_THROW(LoadGripper(), std::invalid_argument);
+}
 
+TEST_F(MultiFingerTest, Side1MultipleZeroSpacing)
+{
+  ResetVariables();
+  num_fingers_side_1 = 2 ;
+  num_fingers_side_2 = 1 ;
+  distance_between_fingers_1 = 0.02 ;
+  distance_between_fingers_2 = 0;
+  finger_thickness = 0.023 ;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+}
+
+TEST_F(MultiFingerTest, Side2MultipleZeroSpacing)
+{
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 4 ;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0.03;
+  finger_thickness = 0.04;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+}
+
+TEST_F(MultiFingerTest, BothSidesMultipleZeroSpacing)
+{
+  ResetVariables();
+  finger_thickness = 0.04;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
 }
 
 TEST_F(MultiFingerTest, ThicknessMoreThanSpacing)
@@ -284,6 +314,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
   ResetVariables();
   num_fingers_side_1 = 3 ;
   num_fingers_side_2 = 1 ;
+  distance_between_fingers_2 = 0;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->addCuttingPlanesEqualAligned(object->centerpoint, gripper->center_cutting_plane, false);
@@ -333,6 +364,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersOddEven)
   ResetVariables();
   num_fingers_side_1 = 1 ;
   num_fingers_side_2 = 2 ;
+  distance_between_fingers_1 = 0;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->addCuttingPlanes(object->centerpoint, gripper->center_cutting_plane, 0, 1, 0, 0.01);
