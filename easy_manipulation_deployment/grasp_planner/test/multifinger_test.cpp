@@ -63,6 +63,55 @@ void MultiFingerTest::LoadGripper()
     gripper = std::make_shared<FingerGripper>(gripper_);
 }
 
+void MultiFingerTest::GenerateObjectHorizontal()
+{
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+  float length = 0.05;
+  float breadth = 0.01;
+  float height = 0.02;
+
+  for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
+    for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
+      for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
+        pcl::PointXYZRGB temp_point(length_, breadth_, height_);
+        rectangle_cloud->points.push_back(temp_point);
+      }
+    }
+  }
+  Eigen::Vector4f centroid;
+  pcl::compute3DCentroid(*rectangle_cloud, centroid);
+  GraspObject object_("camera_frame", rectangle_cloud, centroid);
+  object = std::make_shared<GraspObject>(object_);
+  PCLFunctions::computeCloudNormal(object->cloud, object->cloud_normal, 0.03);
+  object->get_object_bb();
+  object->get_object_world_angles();
+}
+
+void MultiFingerTest::GenerateObjectVertical()
+{
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+  float length = 0.01;
+  float breadth = 0.05;
+  float height = 0.02;
+
+  for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
+    for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
+      for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
+        pcl::PointXYZRGB temp_point(length_, breadth_, height_);
+        rectangle_cloud->points.push_back(temp_point);
+      }
+    }
+  }
+  Eigen::Vector4f centroid;
+  pcl::compute3DCentroid(*rectangle_cloud, centroid);
+  GraspObject object_("camera_frame", rectangle_cloud, centroid);
+  object = std::make_shared<GraspObject>(object_);
+  PCLFunctions::computeCloudNormal(object->cloud, object->cloud_normal, 0.03);
+  object->get_object_bb();
+  object->get_object_world_angles();
+}
+
+
 TEST_F(MultiFingerTest, FingerSidesZero)
 {
   ResetVariables();
@@ -264,6 +313,7 @@ TEST_F(MultiFingerTest, CheckPlaneExistsTest)
 
 TEST_F(MultiFingerTest, GetCenterCuttingPlaneCheck)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
@@ -311,6 +361,7 @@ TEST_F(MultiFingerTest, generateGraspSamplesTest)
 
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3 ;
   num_fingers_side_2 = 1 ;
@@ -332,6 +383,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
 
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedEven)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 2 ;
   num_fingers_side_2 = 4 ;
@@ -360,7 +412,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedEven)
 
 TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersOddEven)
 {
-  std::cout << "addCuttingPlanesSameDistDiffFingersOddEven" << std::endl;
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 1 ;
   num_fingers_side_2 = 2 ;
@@ -381,7 +433,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersOddEven)
 
 TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersEvenOdd)
 {
-  std::cout << "addCuttingPlanesSameDistDiffFingersEvenOdd" << std::endl;
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 2 ;
   num_fingers_side_2 = 5 ;
@@ -411,7 +463,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersEvenOdd)
 
 TEST_F(MultiFingerTest, addCuttingPlanesDiffDistDiffFingersOddEven)
 {
-  std::cout << "addCuttingPlanesDiffDistDiffFingersOddEven" << std::endl;
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3 ;
   num_fingers_side_2 = 4 ;
@@ -440,7 +492,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesDiffDistDiffFingersOddEven)
 
 TEST_F(MultiFingerTest, addCuttingPlanesDiffDistDiffFingersEvenOdd)
 {
-  std::cout << "addCuttingPlanesDiffDistDiffFingersOddEven" << std::endl;
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 4 ;
   num_fingers_side_2 = 5 ;
@@ -474,6 +526,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesDiffDistDiffFingersEvenOdd)
 
 TEST_F(MultiFingerTest, addCuttingPlanesDiffDistBothEven)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 4 ;
   num_fingers_side_2 = 2 ;
@@ -502,6 +555,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesDiffDistBothEven)
 
 TEST_F(MultiFingerTest, addCuttingPlanesDiffDistBothOdd)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3 ;
   num_fingers_side_2 = 5 ;
@@ -536,6 +590,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesDiffDistBothOdd)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothOdd)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 5;
   num_fingers_side_2 = 3;
@@ -565,6 +620,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneBothOdd)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothOddDiffDist)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3;
   num_fingers_side_2 = 5;
@@ -600,6 +656,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneBothOddDiffDist)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothEven)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 2;
   num_fingers_side_2 = 4;
@@ -628,6 +685,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneBothEven)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothEvenDiffDist)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 4;
   num_fingers_side_2 = 6;
@@ -667,6 +725,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneBothEvenDiffDist)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneOddEven)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3;
   num_fingers_side_2 = 2;
@@ -692,6 +751,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneOddEven)
 }
 TEST_F(MultiFingerTest, GetCuttingPlaneOddEvenDiffDist)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 5;
   num_fingers_side_2 = 4;
@@ -726,6 +786,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneOddEvenDiffDist)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOdd)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 2;
   num_fingers_side_2 = 5;
@@ -757,6 +818,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneEvenOdd)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 4;
   num_fingers_side_2 = 3;
@@ -791,6 +853,7 @@ TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
 
 TEST_F(MultiFingerTest, GetGraspCloudTest)
 {
+  GenerateObjectHorizontal();
   ResetVariables();
   num_fingers_side_1 = 3;
   num_fingers_side_2 = 2;
@@ -808,5 +871,26 @@ TEST_F(MultiFingerTest, GetGraspCloudTest)
   EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[2]->plane_intersects_object));
   EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[3]->plane_intersects_object));
   EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[4]->plane_intersects_object));
+}
 
+TEST_F(MultiFingerTest, InitialSamplePointsTest)
+{
+  GenerateObjectHorizontal();
+  ResetVariables();
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+}
+
+TEST_F(MultiFingerTest, InitialSamplePointsTest1)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
 }

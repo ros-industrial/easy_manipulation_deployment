@@ -49,31 +49,33 @@ public:
   MultiFingerTest();
   void ResetVariables();
   void LoadGripper();
+  void GenerateObjectHorizontal();
+  void GenerateObjectVertical();
   
 
 
   void SetUp(void)
   {
     std::cout << "Setup" << std::endl;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    float length = 0.05;
-    float breadth = 0.01;
-    float height = 0.02;
+    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    // float length = 0.05;
+    // float breadth = 0.01;
+    // float height = 0.02;
 
-    for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
-      for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
-        for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
-          pcl::PointXYZRGB temp_point(length_, breadth_, height_);
-          rectangle_cloud->points.push_back(temp_point);
-        }
-      }
-    }
-    Eigen::Vector4f centroid;
-    pcl::compute3DCentroid(*rectangle_cloud, centroid);
-    GraspObject object_("camera_frame", rectangle_cloud, centroid);
-    object = std::make_shared<GraspObject>(object_);
-    PCLFunctions::computeCloudNormal(object->cloud, object->cloud_normal, 0.03);
-    object->get_object_bb();
+    // for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
+    //   for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
+    //     for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
+    //       pcl::PointXYZRGB temp_point(length_, breadth_, height_);
+    //       rectangle_cloud->points.push_back(temp_point);
+    //     }
+    //   }
+    // }
+    // Eigen::Vector4f centroid;
+    // pcl::compute3DCentroid(*rectangle_cloud, centroid);
+    // GraspObject object_("camera_frame", rectangle_cloud, centroid);
+    // object = std::make_shared<GraspObject>(object_);
+    // PCLFunctions::computeCloudNormal(object->cloud, object->cloud_normal, 0.03);
+    // object->get_object_bb();
   }
   void TearDown(void)
   {

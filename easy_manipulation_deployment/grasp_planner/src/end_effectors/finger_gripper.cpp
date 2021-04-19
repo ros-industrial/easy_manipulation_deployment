@@ -494,7 +494,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
 {
   // Object in the X axis
   if (object->objectWorldCosX > this->worldXAngleThreshold) {
-    // std::cout << "It is oriented with the X axis\n";
+    std::cout << "It is oriented with the X axis\n";
     for (auto & sample : this->grasp_samples) {
       // for(auto sample : this->grasp_samples)
       int first_point_index, second_point_index;
@@ -517,7 +517,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
       }
     }
   } else {  // Object in the Y axis
-    // std::cout << "It is oriented with the Y axis\n";
+    std::cout << "It is oriented with the Y axis\n";
     for (auto & sample : this->grasp_samples) {
       int first_point_index, second_point_index;
       float minX = std::numeric_limits<float>::max();
