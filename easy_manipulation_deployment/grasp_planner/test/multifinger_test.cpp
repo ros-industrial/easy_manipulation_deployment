@@ -42,6 +42,8 @@ void MultiFingerTest::ResetVariables()
 
 void MultiFingerTest::LoadGripper()
 {
+  std::cout << " Side 1 num: " << num_fingers_side_1 << std::endl;
+  std::cout << " Side 2 num: " << num_fingers_side_2 << std::endl;
   FingerGripper gripper_(
     id,
     num_fingers_side_1,
@@ -532,59 +534,202 @@ TEST_F(MultiFingerTest, GetCuttingPlaneBothOdd)
 TEST_F(MultiFingerTest, GetCuttingPlaneBothOddDiffDist)
 {
   ResetVariables();
-  num_fingers_side_1 = 1;
-  num_fingers_side_2 = 3;
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 5;
   distance_between_fingers_1 = 0.02;
-  distance_between_fingers_2 = 0.02;
+  distance_between_fingers_2 = 0.03;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+
+  ASSERT_EQ(3, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(5, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+
+
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  EXPECT_EQ(3, gripper->plane_2_index[1]);
+  EXPECT_EQ(4, gripper->plane_2_index[2]);
+  EXPECT_EQ(5, gripper->plane_2_index[3]);
+  EXPECT_EQ(6, gripper->plane_2_index[4]);
+
+  ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(-0.03, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(0.03, gripper->cutting_plane_distances[4], 0.00001);
+  EXPECT_NEAR(-0.06, gripper->cutting_plane_distances[5], 0.00001);
+  EXPECT_NEAR(0.06, gripper->cutting_plane_distances[6], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothEven)
 {
   ResetVariables();
   num_fingers_side_1 = 2;
-  num_fingers_side_2 = 2;
+  num_fingers_side_2 = 4;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  
+  ASSERT_EQ(2, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(4, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+
+
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  EXPECT_EQ(1, gripper->plane_2_index[1]);
+  EXPECT_EQ(2, gripper->plane_2_index[2]);
+  EXPECT_EQ(3, gripper->plane_2_index[3]);
+
+  ASSERT_EQ(4, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[0], 0.00001);
+  EXPECT_NEAR(0.01, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(-0.03, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(0.03, gripper->cutting_plane_distances[3], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothEvenDiffDist)
 {
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 6;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0.04;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
   
+  ASSERT_EQ(4, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(6, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+  EXPECT_EQ(3, gripper->plane_1_index[3]);
+
+  EXPECT_EQ(4, gripper->plane_2_index[0]);
+  EXPECT_EQ(5, gripper->plane_2_index[1]);
+  EXPECT_EQ(6, gripper->plane_2_index[2]);
+  EXPECT_EQ(7, gripper->plane_2_index[3]);
+  EXPECT_EQ(8, gripper->plane_2_index[4]);
+  EXPECT_EQ(9, gripper->plane_2_index[5]);
+
+  ASSERT_EQ(10, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_NEAR(-0.005, gripper->cutting_plane_distances[0], 0.00001);
+  EXPECT_NEAR(0.005, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(-0.015, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(0.015, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[4], 0.00001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[5], 0.00001);
+  EXPECT_NEAR(-0.06, gripper->cutting_plane_distances[6], 0.00001);
+  EXPECT_NEAR(0.06, gripper->cutting_plane_distances[7], 0.00001);
+  EXPECT_NEAR(-0.10, gripper->cutting_plane_distances[8], 0.00001);
+  EXPECT_NEAR(0.10, gripper->cutting_plane_distances[9], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneOddEven)
 {
   ResetVariables();
-  num_fingers_side_1 = 1;
+  num_fingers_side_1 = 3;
   num_fingers_side_2 = 2;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_EQ(3, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(2, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+
+  EXPECT_EQ(3, gripper->plane_2_index[0]);
+  EXPECT_EQ(4, gripper->plane_2_index[1]);
+
+  ASSERT_EQ(5, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(0.01, gripper->cutting_plane_distances[4], 0.00001);  
 }
 TEST_F(MultiFingerTest, GetCuttingPlaneOddEvenDiffDist)
 {
   ResetVariables();
-  num_fingers_side_1 = 4;
-  num_fingers_side_2 = 3;
+  num_fingers_side_1 = 5;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0.03;
+  distance_between_fingers_2 = 0.02;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_EQ(5, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(4, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+  EXPECT_EQ(3, gripper->plane_1_index[3]);
+  EXPECT_EQ(4, gripper->plane_1_index[4]);
+
+  EXPECT_EQ(5, gripper->plane_2_index[0]);
+  EXPECT_EQ(6, gripper->plane_2_index[1]);
+  EXPECT_EQ(1, gripper->plane_2_index[2]);
+  EXPECT_EQ(2, gripper->plane_2_index[3]);
+
+  ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.03, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.03, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(-0.06, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(0.06, gripper->cutting_plane_distances[4], 0.00001);
+  EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[5], 0.00001);
+  EXPECT_NEAR(0.01, gripper->cutting_plane_distances[6], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOdd)
 {
-  ResetVariables();
-  num_fingers_side_1 = 4;
-  num_fingers_side_2 = 3;
-  ASSERT_NO_THROW(LoadGripper());
-  gripper->getCenterCuttingPlane(object);
+  // ResetVariables();
+  // num_fingers_side_1 = 2;
+  // num_fingers_side_2 = 5;
+
+  // ASSERT_NO_THROW(LoadGripper());
+  // gripper->getCenterCuttingPlane(object);
+  // gripper->getCuttingPlanes(object);
+  // ASSERT_EQ(5, static_cast<int>(gripper->plane_1_index.size()));
+  // ASSERT_EQ(4, static_cast<int>(gripper->plane_2_index.size()));
+
+  // EXPECT_EQ(0, gripper->plane_1_index[0]);
+  // EXPECT_EQ(1, gripper->plane_1_index[1]);
+  // EXPECT_EQ(2, gripper->plane_1_index[2]);
+  // EXPECT_EQ(3, gripper->plane_1_index[3]);
+  // EXPECT_EQ(4, gripper->plane_1_index[4]);
+
+  // EXPECT_EQ(5, gripper->plane_2_index[0]);
+  // EXPECT_EQ(6, gripper->plane_2_index[1]);
+  // EXPECT_EQ(1, gripper->plane_2_index[2]);
+  // EXPECT_EQ(2, gripper->plane_2_index[3]);
+
+  // ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
+  // EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  // EXPECT_NEAR(-0.03, gripper->cutting_plane_distances[1], 0.00001);
+  // EXPECT_NEAR(0.03, gripper->cutting_plane_distances[2], 0.00001);
+  // EXPECT_NEAR(-0.06, gripper->cutting_plane_distances[3], 0.00001);
+  // EXPECT_NEAR(0.06, gripper->cutting_plane_distances[4], 0.00001);
+  // EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[5], 0.00001);
+  // EXPECT_NEAR(0.01, gripper->cutting_plane_distances[6], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
 {
-  ResetVariables();
-  num_fingers_side_1 = 4;
-  num_fingers_side_2 = 3;
-  ASSERT_NO_THROW(LoadGripper());
-  gripper->getCenterCuttingPlane(object);
+  // ResetVariables();
+  // num_fingers_side_1 = 4;
+  // num_fingers_side_2 = 3;
+  // ASSERT_NO_THROW(LoadGripper());
+  // gripper->getCenterCuttingPlane(object);
 }

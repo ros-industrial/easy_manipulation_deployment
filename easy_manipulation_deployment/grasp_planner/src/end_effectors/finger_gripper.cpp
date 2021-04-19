@@ -225,8 +225,8 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
     bool is_even_fingers_1 = this->num_fingers_side_1 % 2 == 0;
     bool is_even_fingers_2 = this->num_fingers_side_2 % 2 == 0;
 
-    int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2) + 1);
-    int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2) + 1);
+    int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
+    int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
 
     float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (is_even_fingers_1 ? 1 : 0));
     float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (is_even_fingers_2 ? 1 : 0));

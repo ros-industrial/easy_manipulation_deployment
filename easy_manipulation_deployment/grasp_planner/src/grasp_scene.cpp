@@ -65,7 +65,6 @@ void GraspScene::planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::C
     this->get_parameter("camera_frame").as_string(),
     static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()));
   loadEndEffectors();
-
   // PCLFunctions::viewerAddRGBCloud(cloud, "original_cloud", viewer);
 
   // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb (

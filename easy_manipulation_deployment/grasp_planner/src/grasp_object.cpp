@@ -46,6 +46,7 @@ GraspObject::GraspObject(
   centerpoint = centerpoint_;
   max_grasp_samples = 1;
   grasp_target.target_type = object_name_;
+  
 }
 
 void GraspObject::add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer)
