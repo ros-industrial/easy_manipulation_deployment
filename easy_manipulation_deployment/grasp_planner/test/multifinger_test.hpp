@@ -43,7 +43,7 @@ public:
 
   std::shared_ptr<FingerGripper> gripper;
 
-  pcl::visualization::PCLVisualizer::Ptr viewer;
+  //pcl::visualization::PCLVisualizer::Ptr viewer;
   
   MultiFingerTest();
   void ResetVariables();

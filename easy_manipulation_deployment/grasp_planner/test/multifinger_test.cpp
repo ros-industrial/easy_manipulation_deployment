@@ -17,27 +17,27 @@
 #include "multifinger_test.hpp"
 
 MultiFingerTest::MultiFingerTest()
-: viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
+//: viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
 {
   ResetVariables();
 }
 void MultiFingerTest::ResetVariables()
 {
   id = "test_gripper";
-  num_fingers_side_1 = 1 ;
-  num_fingers_side_2 = 1 ;
-  distance_between_fingers_1 = 0.02 ;
-  distance_between_fingers_2 = 0.02 ;
-  finger_thickness = 0.01 ;
-  gripper_stroke = 0.085 ;
-  voxel_size = 0.01 ;
-  grasp_quality_weight1 = 1.5 ;
-  grasp_quality_weight2 = 1.0 ;
-  grasp_plane_dist_limit = 0.007 ;
-  cloud_normal_radius = 0.03 ;
-  worldXAngleThreshold = 0.5 ;
-  worldYAngleThreshold = 0.5 ;
-  worldZAngleThreshold = 0.25 ;
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.02;
+  finger_thickness = 0.01;
+  gripper_stroke = 0.085;
+  voxel_size = 0.01;
+  grasp_quality_weight1 = 1.5;
+  grasp_quality_weight2 = 1.0;
+  grasp_plane_dist_limit = 0.007;
+  cloud_normal_radius = 0.03;
+  worldXAngleThreshold = 0.5;
+  worldYAngleThreshold = 0.5;
+  worldZAngleThreshold = 0.25;
 }
 
 void MultiFingerTest::LoadGripper()
@@ -285,31 +285,38 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->addCuttingPlanesEqualAligned(object->centerpoint, gripper->center_cutting_plane, false);
-  std::cout << "plane1 index size: " << gripper->plane_1_index.size() << std::endl;
-  for(auto p1 : gripper->plane_1_index){
-    std::cout << "P1 indexes: " << p1 << std::endl;
-  }
-  
-  std::cout << "plane2 index size: " << gripper->plane_2_index.size() << std::endl;
-  for(auto p2 : gripper->plane_2_index){
-    std::cout << "P2 indexes: " << p2 << std::endl;
-  }
-
-  std::cout << "grasp_samples size: " << gripper->grasp_samples.size() << std::endl;
-  std::cout << "cutting plane distances size: " << gripper->cutting_plane_distances.size() << std::endl;
-  for(auto distance : gripper->cutting_plane_distances){
-    std::cout << "Distance: " << distance << std::endl;
-  }
+  ASSERT_EQ(3, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(1, static_cast<int>(gripper->plane_2_index.size()));
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  ASSERT_EQ(3, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[1], 0.0001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[2], 0.0001);
 }
 
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedEven)
 {
   ResetVariables();
-  num_fingers_side_1 = 3 ;
-  num_fingers_side_2 = 1 ;
+  num_fingers_side_1 = 2 ;
+  num_fingers_side_2 = 4 ;
+  distance_between_fingers_1 = 0.03;
+  distance_between_fingers_2 = 0.03;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->addCuttingPlanesEqualAligned(object->centerpoint, gripper->center_cutting_plane, true);
+  ASSERT_EQ(2, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(4, static_cast<int>(gripper->plane_2_index.size()));
+  EXPECT_EQ(0, gripper->plane_1_index[0]);
+  EXPECT_EQ(1, gripper->plane_1_index[1]);
+  EXPECT_EQ(2, gripper->plane_1_index[2]);
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  ASSERT_EQ(3, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[1], 0.0001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[2], 0.0001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneBothOdd)
