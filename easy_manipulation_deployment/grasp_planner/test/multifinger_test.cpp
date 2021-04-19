@@ -694,42 +694,65 @@ TEST_F(MultiFingerTest, GetCuttingPlaneOddEvenDiffDist)
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOdd)
 {
-  // ResetVariables();
-  // num_fingers_side_1 = 2;
-  // num_fingers_side_2 = 5;
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 5;
 
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // ASSERT_EQ(5, static_cast<int>(gripper->plane_1_index.size()));
-  // ASSERT_EQ(4, static_cast<int>(gripper->plane_2_index.size()));
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_EQ(2, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(5, static_cast<int>(gripper->plane_2_index.size()));
 
-  // EXPECT_EQ(0, gripper->plane_1_index[0]);
-  // EXPECT_EQ(1, gripper->plane_1_index[1]);
-  // EXPECT_EQ(2, gripper->plane_1_index[2]);
-  // EXPECT_EQ(3, gripper->plane_1_index[3]);
-  // EXPECT_EQ(4, gripper->plane_1_index[4]);
+  EXPECT_EQ(1, gripper->plane_1_index[0]);
+  EXPECT_EQ(2, gripper->plane_1_index[1]);
 
-  // EXPECT_EQ(5, gripper->plane_2_index[0]);
-  // EXPECT_EQ(6, gripper->plane_2_index[1]);
-  // EXPECT_EQ(1, gripper->plane_2_index[2]);
-  // EXPECT_EQ(2, gripper->plane_2_index[3]);
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  EXPECT_EQ(3, gripper->plane_2_index[1]);
+  EXPECT_EQ(4, gripper->plane_2_index[2]);
+  EXPECT_EQ(5, gripper->plane_2_index[3]);
+  EXPECT_EQ(6, gripper->plane_2_index[4]);
 
-  // ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
-  // EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
-  // EXPECT_NEAR(-0.03, gripper->cutting_plane_distances[1], 0.00001);
-  // EXPECT_NEAR(0.03, gripper->cutting_plane_distances[2], 0.00001);
-  // EXPECT_NEAR(-0.06, gripper->cutting_plane_distances[3], 0.00001);
-  // EXPECT_NEAR(0.06, gripper->cutting_plane_distances[4], 0.00001);
-  // EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[5], 0.00001);
-  // EXPECT_NEAR(0.01, gripper->cutting_plane_distances[6], 0.00001);
+  ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.01, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[4], 0.00001);
+  EXPECT_NEAR(-0.04, gripper->cutting_plane_distances[5], 0.00001);
+  EXPECT_NEAR(0.04, gripper->cutting_plane_distances[6], 0.00001);
 }
 
 TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
 {
-  // ResetVariables();
-  // num_fingers_side_1 = 4;
-  // num_fingers_side_2 = 3;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 3;
+  distance_between_fingers_1 = 0.05;
+  distance_between_fingers_2 = 0.02;
+
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_EQ(4, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(3, static_cast<int>(gripper->plane_2_index.size()));
+
+  EXPECT_EQ(1, gripper->plane_1_index[0]);
+  EXPECT_EQ(2, gripper->plane_1_index[1]);
+  EXPECT_EQ(3, gripper->plane_1_index[2]);
+  EXPECT_EQ(4, gripper->plane_1_index[3]);
+
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  EXPECT_EQ(5, gripper->plane_2_index[1]);
+  EXPECT_EQ(6, gripper->plane_2_index[2]);
+
+
+  ASSERT_EQ(7, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.025, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.025, gripper->cutting_plane_distances[2], 0.00001);
+  EXPECT_NEAR(-0.075, gripper->cutting_plane_distances[3], 0.00001);
+  EXPECT_NEAR(0.075, gripper->cutting_plane_distances[4], 0.00001);
+  EXPECT_NEAR(-0.02, gripper->cutting_plane_distances[5], 0.00001);
+  EXPECT_NEAR(0.02, gripper->cutting_plane_distances[6], 0.00001);
 }
