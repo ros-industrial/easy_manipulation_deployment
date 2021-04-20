@@ -522,23 +522,27 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
       int first_point_index, second_point_index;
       float minX = std::numeric_limits<float>::max();
       float maxX = -std::numeric_limits<float>::min();
-      for (size_t i = 0; i < sample->grasp_plane_ncloud->points.size(); ++i) {
-        if (sample->grasp_plane_ncloud->points[i].x < minX) {
-          minX = sample->grasp_plane_ncloud->points[i].x;
-          first_point_index = i;
+      if (sample->plane_intersects_object) {
+        for (size_t i = 0; i < sample->grasp_plane_ncloud->points.size(); ++i) {
+          if (sample->grasp_plane_ncloud->points[i].x < minX) {
+            minX = sample->grasp_plane_ncloud->points[i].x;
+            first_point_index = i;
+          }
+          if (sample->grasp_plane_ncloud->points[i].x > maxX) {
+            maxX = sample->grasp_plane_ncloud->points[i].x;
+            second_point_index = i;
+          }
         }
-        if (sample->grasp_plane_ncloud->points[i].x > maxX) {
-          maxX = sample->grasp_plane_ncloud->points[i].x;
-          second_point_index = i;
-        }
+        sample->sample_side_1->start_index = first_point_index;
+        sample->sample_side_2->start_index = second_point_index;
       }
 
-      fingerCloudSample sample_1;
-      sample_1.start_index = first_point_index;
-      fingerCloudSample sample_2;
-      sample_2.start_index = second_point_index;
-      sample->sample_side_1 = std::make_shared<fingerCloudSample>(sample_1);
-      sample->sample_side_2 = std::make_shared<fingerCloudSample>(sample_2);
+      // fingerCloudSample sample_1;
+      // sample_1.start_index = first_point_index;
+      // fingerCloudSample sample_2;
+      // sample_2.start_index = second_point_index;
+      // sample->sample_side_1 = std::make_shared<fingerCloudSample>(sample_1);
+      // sample->sample_side_2 = std::make_shared<fingerCloudSample>(sample_2);
     }
   }
   return true;
