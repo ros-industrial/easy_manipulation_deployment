@@ -138,6 +138,7 @@ struct fingerCloudSample
     centroid_dist_max = std::numeric_limits < float > ::min();
     grasp_plane_dist_min = curvature_min = centroid_dist_min;
     grasp_plane_dist_max = curvature_max = centroid_dist_max;
+    start_index = -1;
   }
 };
 
