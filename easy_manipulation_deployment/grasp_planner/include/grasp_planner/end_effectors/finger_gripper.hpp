@@ -251,7 +251,7 @@ public:
     const float worldZAngleThreshold_);
   bool getInitialSamplePoints(const std::shared_ptr < GraspObject > object);
   void getInitialSampleCloud(const std::shared_ptr < GraspObject > object);
-  void getGraspCloud(const std::shared_ptr < GraspObject > object);
+  bool getGraspCloud(const std::shared_ptr < GraspObject > object);
   void getCenterCuttingPlane(const std::shared_ptr<GraspObject> object);
   void getCuttingPlanes(const std::shared_ptr < GraspObject > object);
   void voxelizeSampleCloud();

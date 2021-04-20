@@ -112,7 +112,11 @@ void FingerGripper::planGrasps(
   std::cout << "getCuttingPlanes" << std::endl;
   getCuttingPlanes(object);
   std::cout << "getGraspCloud" << std::endl;
-  getGraspCloud(object);
+  if (!this->getGraspCloud(object)) {
+    RCLCPP_ERROR(LOGGER, "Grasping Planes do not intersect with object. Off center grasp is needed. Please change gripper");
+    this->resetVariables();
+    return;
+  }
 
   std::cout << "getInitialSamplePoints" << std::endl;
   if (!this->getInitialSamplePoints(object)) {
@@ -460,8 +464,9 @@ void FingerGripper::addPlane(
  * grasp_plane_dist_limit. This create a strip of point cloud about the grasp plane.
  * @param object grasp object
  ******************************************************************************/
-void FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> object)
-{
+bool FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> object)
+{ 
+  bool at_least_one_plane_intersect = false;
   pcl::SampleConsensusModelPlane<pcl::PointNormal>::Ptr planeSAC(
     new pcl::SampleConsensusModelPlane<pcl::PointNormal>(
       object->cloud_normal));
@@ -479,10 +484,12 @@ void FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> object)
 
     if (sample->grasp_plane_ncloud->points.size() > 0) {
       sample->plane_intersects_object = true;
+      at_least_one_plane_intersect = true;
     } else {
       sample->plane_intersects_object = false;
     }
   }
+  return at_least_one_plane_intersect;
 }
 
 /***************************************************************************//**

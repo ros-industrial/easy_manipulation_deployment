@@ -885,8 +885,8 @@ TEST_F(MultiFingerTest, InitialSamplePointsTestHorizontal)
   gripper->getCenterCuttingPlane(object);
   gripper->getCuttingPlanes(object);
   gripper->getGraspCloud(object);
-  gripper->getInitialSamplePoints(object);
 
+  ASSERT_TRUE(gripper->getInitialSamplePoints(object));
   EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_1->start_index >= 0);
   EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_2->start_index >= 0);
 
@@ -902,6 +902,24 @@ TEST_F(MultiFingerTest, InitialSamplePointsTestHorizontal)
   EXPECT_TRUE(gripper->grasp_samples[4]->sample_side_1->start_index >= 0);
   EXPECT_TRUE(gripper->grasp_samples[4]->sample_side_2->start_index >= 0);
 }
+
+TEST_F(MultiFingerTest, InitialSamplePointsTestOffCenterGrasp)
+{
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.1;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+
+  EXPECT_FALSE(gripper->getInitialSamplePoints(object));
+
+}
+
 
 TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
 {
@@ -934,13 +952,6 @@ TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
   EXPECT_FALSE(gripper->grasp_samples[4]->sample_side_1->start_index >= 0);
   EXPECT_FALSE(gripper->grasp_samples[4]->sample_side_2->start_index >= 0);
 
-  std::cout << "Plane intersect? " << gripper->grasp_samples[4]-> plane_intersects_object << std::endl;
-  std::cout << "Index 1: " << gripper->grasp_samples[4]->sample_side_1->start_index << std::endl;
-  std::cout << "Index 2: " << gripper->grasp_samples[4]->sample_side_2->start_index << std::endl;
-
-  std::cout << "Plane intersect? " << gripper->grasp_samples[5]-> plane_intersects_object << std::endl;
-  std::cout << "Index 1: " << gripper->grasp_samples[5]->sample_side_1->start_index << std::endl;
-  std::cout << "Index 2: " << gripper->grasp_samples[5]->sample_side_2->start_index << std::endl;
   EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_1->start_index >= 0);
   EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_2->start_index >= 0);
 }
