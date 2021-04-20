@@ -260,6 +260,11 @@ public:
     emd_msgs::msg::GraspMethod * grasp_method,
     const std::shared_ptr < fcl::CollisionObject < float >> world_collision_object);
   void getMaxMinValues(std::shared_ptr < GraspObject > object);
+  void updateMaxMinAttributes(
+    std::shared_ptr < fingerCloudSample > &sample,
+    float centroid_distance,
+    float grasp_plane_distance,
+    float curvature);
   void getGraspPose(
     std::shared_ptr < multiFingerGripper > gripper,
     const std::shared_ptr < GraspObject > object);

@@ -1100,25 +1100,25 @@ void FingerGripper::getMaxMinValues(std::shared_ptr<GraspObject> object)
         centroid_distance = pcl::geometry::distance(point, centroid_point);
         grasp_plane_distance = PCLFunctions::pointToPlane(sample->plane_eigen, point);
         curvature = point.curvature;
-
-        if (curvature < sample->sample_side_1->curvature_min) {
-          sample->sample_side_1->curvature_min = curvature;
-        }
-        if (curvature > sample->sample_side_1->curvature_max) {
-          sample->sample_side_1->curvature_max = curvature;
-        }
-        if (centroid_distance < sample->sample_side_1->centroid_dist_min) {
-          sample->sample_side_1->centroid_dist_min = centroid_distance;
-        }
-        if (centroid_distance > sample->sample_side_1->centroid_dist_max) {
-          sample->sample_side_1->centroid_dist_max = centroid_distance;
-        }
-        if (grasp_plane_distance < sample->sample_side_1->grasp_plane_dist_min) {
-          sample->sample_side_1->grasp_plane_dist_min = grasp_plane_distance;
-        }
-        if (grasp_plane_distance > sample->sample_side_1->grasp_plane_dist_max) {
-          sample->sample_side_1->grasp_plane_dist_max = grasp_plane_distance;
-        }
+        updateMaxMinAttributes(sample->sample_side_2, centroid_distance, grasp_plane_distance, curvature);
+        // if (curvature < sample->sample_side_1->curvature_min) {
+        //   sample->sample_side_1->curvature_min = curvature;
+        // }
+        // if (curvature > sample->sample_side_1->curvature_max) {
+        //   sample->sample_side_1->curvature_max = curvature;
+        // }
+        // if (centroid_distance < sample->sample_side_1->centroid_dist_min) {
+        //   sample->sample_side_1->centroid_dist_min = centroid_distance;
+        // }
+        // if (centroid_distance > sample->sample_side_1->centroid_dist_max) {
+        //   sample->sample_side_1->centroid_dist_max = centroid_distance;
+        // }
+        // if (grasp_plane_distance < sample->sample_side_1->grasp_plane_dist_min) {
+        //   sample->sample_side_1->grasp_plane_dist_min = grasp_plane_distance;
+        // }
+        // if (grasp_plane_distance > sample->sample_side_1->grasp_plane_dist_max) {
+        //   sample->sample_side_1->grasp_plane_dist_max = grasp_plane_distance;
+        // }
       }
 
       for (auto & point : sample->sample_side_2->finger_nvoxel->points) {
@@ -1127,27 +1127,53 @@ void FingerGripper::getMaxMinValues(std::shared_ptr<GraspObject> object)
         grasp_plane_distance = PCLFunctions::pointToPlane(sample->plane_eigen, point);
         curvature = point.curvature;
 
-        if (curvature < sample->sample_side_2->curvature_min) {
-          sample->sample_side_2->curvature_min = curvature;
-        }
-        if (curvature > sample->sample_side_2->curvature_max) {
-          sample->sample_side_2->curvature_max = curvature;
-        }
-        if (centroid_distance < sample->sample_side_2->centroid_dist_min) {
-          sample->sample_side_2->centroid_dist_min = centroid_distance;
-        }
-        if (centroid_distance > sample->sample_side_2->centroid_dist_max) {
-          sample->sample_side_2->centroid_dist_max = centroid_distance;
-        }
-        if (grasp_plane_distance < sample->sample_side_2->grasp_plane_dist_min) {
-          sample->sample_side_2->grasp_plane_dist_min = grasp_plane_distance;
-        }
-        if (grasp_plane_distance > sample->sample_side_2->grasp_plane_dist_max) {
-          sample->sample_side_2->grasp_plane_dist_max = grasp_plane_distance;
-        }
+        updateMaxMinAttributes(sample->sample_side_2, centroid_distance, grasp_plane_distance, curvature);
+        // if (curvature < sample->sample_side_2->curvature_min) {
+        //   sample->sample_side_2->curvature_min = curvature;
+        // }
+        // if (curvature > sample->sample_side_2->curvature_max) {
+        //   sample->sample_side_2->curvature_max = curvature;
+        // }
+        // if (centroid_distance < sample->sample_side_2->centroid_dist_min) {
+        //   sample->sample_side_2->centroid_dist_min = centroid_distance;
+        // }
+        // if (centroid_distance > sample->sample_side_2->centroid_dist_max) {
+        //   sample->sample_side_2->centroid_dist_max = centroid_distance;
+        // }
+        // if (grasp_plane_distance < sample->sample_side_2->grasp_plane_dist_min) {
+        //   sample->sample_side_2->grasp_plane_dist_min = grasp_plane_distance;
+        // }
+        // if (grasp_plane_distance > sample->sample_side_2->grasp_plane_dist_max) {
+        //   sample->sample_side_2->grasp_plane_dist_max = grasp_plane_distance;
+        // }
       }
     }
     counter++;
+  }
+}
+void FingerGripper::updateMaxMinAttributes(
+    std::shared_ptr < fingerCloudSample > &sample,
+    float centroid_distance,
+    float grasp_plane_distance,
+    float curvature)
+{
+  if (curvature < sample->curvature_min) {
+    sample->curvature_min = curvature;
+  }
+  if (curvature > sample->curvature_max) {
+    sample->curvature_max = curvature;
+  }
+  if (centroid_distance < sample->centroid_dist_min) {
+    sample->centroid_dist_min = centroid_distance;
+  }
+  if (centroid_distance > sample->centroid_dist_max) {
+    sample->centroid_dist_max = centroid_distance;
+  }
+  if (grasp_plane_distance < sample->grasp_plane_dist_min) {
+    sample->grasp_plane_dist_min = grasp_plane_distance;
+  }
+  if (grasp_plane_distance > sample->grasp_plane_dist_max) {
+    sample->grasp_plane_dist_max = grasp_plane_distance;
   }
 }
 
