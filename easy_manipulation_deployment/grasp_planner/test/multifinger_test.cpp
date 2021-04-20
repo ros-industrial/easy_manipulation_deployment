@@ -937,3 +937,120 @@ TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
   EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_1->start_index >= 0);
   EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_2->start_index >= 0);
 }
+
+TEST_F(MultiFingerTest, GetInitialSampleCloudTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  
+  ASSERT_EQ(3, static_cast<int>(gripper->grasp_samples.size()));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->sample_side_1->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->sample_side_2->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->sample_side_1->
+    finger_ncloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->sample_side_2->
+    finger_ncloud->points.size()) > 0);
+
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[1]->sample_side_1->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[1]->sample_side_2->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[1]->sample_side_1->
+    finger_ncloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[1]->sample_side_2->
+    finger_ncloud->points.size()) > 0);
+
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[2]->sample_side_1->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[2]->sample_side_2->
+    finger_cloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[2]->sample_side_1->
+    finger_ncloud->points.size()) > 0);
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[2]->sample_side_2->
+    finger_ncloud->points.size()) > 0);
+}
+
+TEST_F(MultiFingerTest, VoxelizeSampleCloudTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  
+  ASSERT_EQ(3, static_cast<int>(gripper->grasp_samples.size()));
+  int ncloud_side1_0 = static_cast<int>(gripper->grasp_samples[0]->sample_side_1->
+    finger_cloud->points.size());
+  int ncloud_side1_1 = static_cast<int>(gripper->grasp_samples[1]->sample_side_1->
+    finger_cloud->points.size());
+  int ncloud_side1_2 = static_cast<int>(gripper->grasp_samples[2]->sample_side_1->
+    finger_cloud->points.size());
+    
+  int ncloud_side2_0 = static_cast<int>(gripper->grasp_samples[0]->sample_side_2->
+    finger_cloud->points.size());
+  int ncloud_side2_1 = static_cast<int>(gripper->grasp_samples[1]->sample_side_2->
+    finger_cloud->points.size());
+  int ncloud_side2_2 = static_cast<int>(gripper->grasp_samples[2]->sample_side_2->
+    finger_cloud->points.size());
+
+  int nvoxel_side1_0 = static_cast<int>(gripper->grasp_samples[0]->sample_side_1->
+    finger_nvoxel->points.size());
+  int nvoxel_side1_1 = static_cast<int>(gripper->grasp_samples[1]->sample_side_1->
+    finger_nvoxel->points.size());
+  int nvoxel_side1_2 = static_cast<int>(gripper->grasp_samples[2]->sample_side_1->
+    finger_nvoxel->points.size());
+
+  int nvoxel_side2_0 = static_cast<int>(gripper->grasp_samples[0]->sample_side_2->
+    finger_nvoxel->points.size());
+  int nvoxel_side2_1 = static_cast<int>(gripper->grasp_samples[1]->sample_side_2->
+    finger_nvoxel->points.size());
+  int nvoxel_side2_2 = static_cast<int>(gripper->grasp_samples[2]->sample_side_2->
+    finger_nvoxel->points.size());
+  
+
+  EXPECT_TRUE(ncloud_side1_0 > nvoxel_side1_0);
+  EXPECT_TRUE(ncloud_side2_0 > nvoxel_side2_0);
+  EXPECT_TRUE(ncloud_side1_1 > nvoxel_side1_1);
+  EXPECT_TRUE(ncloud_side2_1 > nvoxel_side2_1);
+  EXPECT_TRUE(ncloud_side1_2 > nvoxel_side1_2);
+  EXPECT_TRUE(ncloud_side2_2 > nvoxel_side2_2);
+}
+
+TEST_F(MultiFingerTest, UpdateMaxAttributesTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+}
