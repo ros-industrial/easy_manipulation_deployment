@@ -903,24 +903,6 @@ TEST_F(MultiFingerTest, InitialSamplePointsTestHorizontal)
   EXPECT_TRUE(gripper->grasp_samples[4]->sample_side_2->start_index >= 0);
 }
 
-TEST_F(MultiFingerTest, InitialSamplePointsTestOffCenterGrasp)
-{
-  GenerateObjectHorizontal();
-  ResetVariables();
-  num_fingers_side_1 = 3;
-  num_fingers_side_2 = 2;
-  distance_between_fingers_1 = 0.06;
-  distance_between_fingers_2 = 0.1;
-  ASSERT_NO_THROW(LoadGripper());
-  gripper->getCenterCuttingPlane(object);
-  gripper->getCuttingPlanes(object);
-  gripper->getGraspCloud(object);
-
-  EXPECT_FALSE(gripper->getInitialSamplePoints(object));
-
-}
-
-
 TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
 {
   GenerateObjectVertical();
