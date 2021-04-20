@@ -866,14 +866,14 @@ TEST_F(MultiFingerTest, GetGraspCloudTest)
   gripper->getGraspCloud(object);
 
   ASSERT_EQ(5, static_cast<int>(gripper->grasp_samples.size()));
-  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[0]->plane_intersects_object));
+  EXPECT_TRUE(gripper->grasp_samples[0]->plane_intersects_object);
   EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[1]->plane_intersects_object));
   EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[2]->plane_intersects_object));
   EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[3]->plane_intersects_object));
   EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[4]->plane_intersects_object));
 }
 
-TEST_F(MultiFingerTest, InitialSamplePointsTest)
+TEST_F(MultiFingerTest, InitialSamplePointsTestHorizontal)
 {
   GenerateObjectHorizontal();
   ResetVariables();
@@ -886,16 +886,61 @@ TEST_F(MultiFingerTest, InitialSamplePointsTest)
   gripper->getCuttingPlanes(object);
   gripper->getGraspCloud(object);
   gripper->getInitialSamplePoints(object);
-  
+
+  EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_2->start_index >= 0);
+
+  EXPECT_FALSE(gripper->grasp_samples[1]->sample_side_1->start_index >= 0);
+  EXPECT_FALSE(gripper->grasp_samples[1]->sample_side_2->start_index >= 0);
+
+  EXPECT_FALSE(gripper->grasp_samples[2]->sample_side_1->start_index >= 0);
+  EXPECT_FALSE(gripper->grasp_samples[2]->sample_side_2->start_index >= 0);
+
+  EXPECT_TRUE(gripper->grasp_samples[3]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[3]->sample_side_2->start_index >= 0);
+
+  EXPECT_TRUE(gripper->grasp_samples[4]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[4]->sample_side_2->start_index >= 0);
 }
 
-TEST_F(MultiFingerTest, InitialSamplePointsTest1)
+TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
 {
   GenerateObjectVertical();
   ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0.04;
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->getCuttingPlanes(object);
   gripper->getGraspCloud(object);
   gripper->getInitialSamplePoints(object);
+
+  ASSERT_EQ(6, static_cast<int>(gripper->grasp_samples.size()));
+
+  EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[0]->sample_side_2->start_index >= 0);
+
+  EXPECT_TRUE(gripper->grasp_samples[1]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[1]->sample_side_2->start_index >= 0);
+
+  EXPECT_TRUE(gripper->grasp_samples[2]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[2]->sample_side_2->start_index >= 0);
+
+  EXPECT_TRUE(gripper->grasp_samples[3]->sample_side_1->start_index >= 0);
+  EXPECT_TRUE(gripper->grasp_samples[3]->sample_side_2->start_index >= 0);
+
+  EXPECT_FALSE(gripper->grasp_samples[4]->sample_side_1->start_index >= 0);
+  EXPECT_FALSE(gripper->grasp_samples[4]->sample_side_2->start_index >= 0);
+
+  std::cout << "Plane intersect? " << gripper->grasp_samples[4]-> plane_intersects_object << std::endl;
+  std::cout << "Index 1: " << gripper->grasp_samples[4]->sample_side_1->start_index << std::endl;
+  std::cout << "Index 2: " << gripper->grasp_samples[4]->sample_side_2->start_index << std::endl;
+
+  std::cout << "Plane intersect? " << gripper->grasp_samples[5]-> plane_intersects_object << std::endl;
+  std::cout << "Index 1: " << gripper->grasp_samples[5]->sample_side_1->start_index << std::endl;
+  std::cout << "Index 2: " << gripper->grasp_samples[5]->sample_side_2->start_index << std::endl;
+  EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_1->start_index >= 0);
+  EXPECT_FALSE(gripper->grasp_samples[5]->sample_side_2->start_index >= 0);
 }
