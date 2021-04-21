@@ -20,10 +20,13 @@
   <!--test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend-->
 
+  <build_depend>cv_bridge</build_depend>
   <build_depend>libccd-dev</build_depend>
   <build_depend>libfcl-dev</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
   <build_depend>builtin_interfaces</build_depend>
   <build_depend>rosidl_default_generators</build_depend>
+  <build_depend>tf2</build_depend>
   <exec_depend>builtin_interfaces</exec_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
