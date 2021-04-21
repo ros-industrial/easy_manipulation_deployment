@@ -14,6 +14,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
+find_package(moveit_core REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -38,6 +40,21 @@ ament_target_dependencies(grasp_execution_interface
   tf2
   tf2_ros
   tf2_geometry_msgs
+)
+
+add_library(dynamic_safety
+  SHARED
+  src/dynamic_safety/next_point_publisher.cpp
+  src/dynamic_safety/safety_zone.cpp
+  src/dynamic_safety/collision_checker.cpp
+  src/dynamic_safety/visualizer.cpp
+  src/dynamic_safety/dynamic_safety.cpp
+)
+
+ament_target_dependencies(dynamic_safety
+  moveit_core
+  moveit_ros_planning
+  rclcpp
 )
 
 add_library(moveit_cpp_grasp_execution_interface
@@ -71,6 +88,7 @@ install(
 install(
   TARGETS
   grasp_execution_interface
+  dynamic_safety
   moveit_cpp_grasp_execution_interface
   moveit_cpp_default_executor_plugin
   RUNTIME DESTINATION bin
@@ -112,6 +130,7 @@ ament_export_include_directories(
 )
 ament_export_libraries(
   grasp_execution_interface
+  dynamic_safety
   moveit_cpp_grasp_execution_interface
   moveit_cpp_default_executor_plugin
 )
