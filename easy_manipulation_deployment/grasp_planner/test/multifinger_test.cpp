@@ -1040,6 +1040,37 @@ TEST_F(MultiFingerTest, UpdateMaxAttributesTest)
 {
   GenerateObjectVertical();
   ResetVariables();
+  ASSERT_NO_THROW(LoadGripper());
+  std::shared_ptr<fingerCloudSample> sample(new fingerCloudSample);
+  gripper->updateMaxMinAttributes(sample, 0.1, 0.2, 0.3);
+  EXPECT_NEAR(0.1, sample->centroid_dist_min, 0.00001);
+  EXPECT_NEAR(0.1, sample->centroid_dist_max, 0.00001);
+  EXPECT_NEAR(0.2, sample->grasp_plane_dist_min, 0.00001);
+  EXPECT_NEAR(0.2, sample->grasp_plane_dist_max, 0.00001);
+  EXPECT_NEAR(0.3, sample->curvature_min, 0.00001);
+  EXPECT_NEAR(0.3, sample->curvature_max, 0.00001);
+
+  gripper->updateMaxMinAttributes(sample, 0.4, 0.1, 0.3);
+  EXPECT_NEAR(0.1, sample->centroid_dist_min, 0.00001);
+  EXPECT_NEAR(0.4, sample->centroid_dist_max, 0.00001);
+  EXPECT_NEAR(0.1, sample->grasp_plane_dist_min, 0.00001);
+  EXPECT_NEAR(0.2, sample->grasp_plane_dist_max, 0.00001);
+  EXPECT_NEAR(0.3, sample->curvature_min, 0.00001);
+  EXPECT_NEAR(0.3, sample->curvature_max, 0.00001);
+
+  gripper->updateMaxMinAttributes(sample, -0.2, 0.7, 1.4);
+  EXPECT_NEAR(-0.2, sample->centroid_dist_min, 0.00001);
+  EXPECT_NEAR(0.4, sample->centroid_dist_max, 0.00001);
+  EXPECT_NEAR(0.1, sample->grasp_plane_dist_min, 0.00001);
+  EXPECT_NEAR(0.7, sample->grasp_plane_dist_max, 0.00001);
+  EXPECT_NEAR(0.3, sample->curvature_min, 0.00001);
+  EXPECT_NEAR(1.4, sample->curvature_max, 0.00001);
+}
+
+TEST_F(MultiFingerTest, GetMaxMinValuesTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
   num_fingers_side_1 = 2;
   num_fingers_side_2 = 1;
   distance_between_fingers_1 = 0.01;
@@ -1051,6 +1082,148 @@ TEST_F(MultiFingerTest, UpdateMaxAttributesTest)
   gripper->getInitialSamplePoints(object);
   gripper->getInitialSampleCloud(object);
   gripper->voxelizeSampleCloud();
-  gripper->voxelizeSampleCloud();
+
+  pcl::PointNormal centroid_point{
+    object->centerpoint(0),
+    object->centerpoint(1),
+    object->centerpoint(2)};
+  std::vector<float> curvature_vec_1;
+  std::vector<float> grasp_plane_distance_vec_1;
+  std::vector<float> centroid_distance_vec_1;
+
+  std::vector<float> curvature_vec_2;
+  std::vector<float> grasp_plane_distance_vec_2;
+  std::vector<float> centroid_distance_vec_2;
   gripper->getMaxMinValues(object);
+  for (auto & sample : gripper->grasp_samples) {
+    if (sample->plane_intersects_object) {
+      for (auto & point : sample->sample_side_1->finger_nvoxel->points) {
+        curvature_vec_1.push_back(point.curvature);
+        centroid_distance_vec_1.push_back(
+          pcl::geometry::distance(point, centroid_point));
+        grasp_plane_distance_vec_1.push_back(
+          PCLFunctions::pointToPlane(sample->plane_eigen, point));
+      }
+
+      for (auto & point : sample->sample_side_2->finger_nvoxel->points) {
+        curvature_vec_2.push_back(point.curvature);
+        centroid_distance_vec_2.push_back(
+          pcl::geometry::distance(point, centroid_point));
+        grasp_plane_distance_vec_2.push_back(
+          PCLFunctions::pointToPlane(sample->plane_eigen, point));
+      }
+
+      EXPECT_NEAR(
+        grasp_plane_distance_vec_1[
+          std::distance(
+            grasp_plane_distance_vec_1.begin(),
+            std::min_element(grasp_plane_distance_vec_1.begin(),
+              grasp_plane_distance_vec_1.end()))],
+        sample->sample_side_1->grasp_plane_dist_min,
+        0.00001);
+      
+      EXPECT_NEAR(
+        curvature_vec_1[
+          std::distance(
+            curvature_vec_1.begin(),
+            std::min_element(curvature_vec_1.begin(), curvature_vec_1.end()))],
+        sample->sample_side_1->curvature_min,
+        0.00001);
+      
+      EXPECT_NEAR(
+        centroid_distance_vec_1[
+          std::distance(
+            centroid_distance_vec_1.begin(),
+            std::min_element(centroid_distance_vec_1.begin(),
+              centroid_distance_vec_1.end()))],
+        sample->sample_side_1->centroid_dist_min,
+        0.00001);
+
+      EXPECT_NEAR(
+        grasp_plane_distance_vec_2[
+          std::distance(
+            grasp_plane_distance_vec_2.begin(),
+            std::min_element(grasp_plane_distance_vec_2.begin(),
+              grasp_plane_distance_vec_2.end()))],
+        sample->sample_side_2->grasp_plane_dist_min,
+        0.00001);
+      
+      EXPECT_NEAR(
+        curvature_vec_2[
+          std::distance(
+            curvature_vec_2.begin(),
+            std::min_element(curvature_vec_2.begin(), curvature_vec_2.end()))],
+        sample->sample_side_2->curvature_min,
+        0.00001);
+      
+      EXPECT_NEAR(
+        centroid_distance_vec_2[
+          std::distance(
+            centroid_distance_vec_2.begin(),
+            std::min_element(centroid_distance_vec_2.begin(),
+              centroid_distance_vec_2.end()))],
+        sample->sample_side_2->centroid_dist_min,
+        0.00001);
+
+      EXPECT_NEAR(
+        grasp_plane_distance_vec_1[
+          std::distance(
+            grasp_plane_distance_vec_1.begin(),
+            std::max_element(grasp_plane_distance_vec_1.begin(),
+              grasp_plane_distance_vec_1.end()))],
+        sample->sample_side_1->grasp_plane_dist_max,
+        0.00001);
+      
+      EXPECT_NEAR(
+        curvature_vec_1[
+          std::distance(
+            curvature_vec_1.begin(),
+            std::max_element(curvature_vec_1.begin(), curvature_vec_1.end()))],
+        sample->sample_side_1->curvature_max,
+        0.00001);
+      
+      EXPECT_NEAR(
+        centroid_distance_vec_1[
+          std::distance(
+            centroid_distance_vec_1.begin(),
+            std::max_element(centroid_distance_vec_1.begin(),
+              centroid_distance_vec_1.end()))],
+        sample->sample_side_1->centroid_dist_max,
+        0.00001);
+
+      EXPECT_NEAR(
+        grasp_plane_distance_vec_2[
+          std::distance(
+            grasp_plane_distance_vec_2.begin(),
+            std::max_element(grasp_plane_distance_vec_2.begin(),
+              grasp_plane_distance_vec_2.end()))],
+        sample->sample_side_2->grasp_plane_dist_max,
+        0.00001);
+      
+      EXPECT_NEAR(
+        curvature_vec_2[
+          std::distance(
+            curvature_vec_2.begin(),
+            std::max_element(curvature_vec_2.begin(), curvature_vec_2.end()))],
+        sample->sample_side_2->curvature_max,
+        0.00001);
+      
+      EXPECT_NEAR(
+        centroid_distance_vec_2[
+          std::distance(
+            centroid_distance_vec_2.begin(),
+            std::max_element(centroid_distance_vec_2.begin(),
+              centroid_distance_vec_2.end()))],
+        sample->sample_side_2->centroid_dist_max,
+        0.00001);
+
+      curvature_vec_1.clear();
+      grasp_plane_distance_vec_1.clear();
+      centroid_distance_vec_1.clear();
+      curvature_vec_2.clear();
+      grasp_plane_distance_vec_2.clear();
+      centroid_distance_vec_2.clear();
+    }
+  }
+
 }
