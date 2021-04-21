@@ -20,9 +20,12 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/scheduler.hpp"
+#include "grasp_execution/core/scheduler.hpp"
 
 namespace grasp_execution
+{
+
+namespace core
 {
 
 class Scheduler::Impl
@@ -351,5 +354,7 @@ Workflow::Status Scheduler::get_status(
   // Cannot find workflow_id anywhere
   return Workflow::Status::INVALID;
 }
+
+}  // namespace core
 
 }  // namespace grasp_execution

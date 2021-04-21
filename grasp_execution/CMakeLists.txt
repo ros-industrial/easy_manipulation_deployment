@@ -27,9 +27,9 @@ include_directories(
 
 add_library(grasp_execution_interface
   SHARED
-  src/default_planning_action.cpp
+  src/action/default_planning_action.cpp
   src/grasp_execution.cpp
-  src/scheduler.cpp
+  src/core/scheduler.cpp
 )
 
 ament_target_dependencies(grasp_execution_interface
@@ -42,7 +42,7 @@ ament_target_dependencies(grasp_execution_interface
 
 add_library(moveit_cpp_grasp_execution_interface
   SHARED
-  src/moveit_cpp_if.cpp
+  src/moveit2/moveit_cpp_if.cpp
 )
 
 target_link_libraries(moveit_cpp_grasp_execution_interface
@@ -56,7 +56,7 @@ ament_target_dependencies(moveit_cpp_grasp_execution_interface
 # Default Executor plugin
 add_library(moveit_cpp_default_executor_plugin
   SHARED
-  src/moveit2/default_executor.cpp
+  src/moveit2/executor/default_executor.cpp
 )
 ament_target_dependencies(moveit_cpp_default_executor_plugin
   moveit_ros_planning_interface

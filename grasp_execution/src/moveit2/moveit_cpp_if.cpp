@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/moveit_cpp_if.hpp"
+#include "grasp_execution/moveit2/moveit_cpp_if.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -41,6 +41,9 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace grasp_execution
+{
+
+namespace moveit2
 {
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("grasp_execution");
@@ -143,24 +146,30 @@ bool MoveitCppGraspExecution::init(
           "Assuming [%s] is rigidly attached to end_link [%s]"
           MOVEIT_CONSOLE_COLOR_RESET, _ee_link.c_str(), link_names.back().c_str());
       }
-
-      // Initialize customized execution method
-      if (execution_method != "default" && !execution_method.empty()) {
-        auto customized_executor = std::unique_ptr<grasp_execution::moveit2::Executor>(
-          executor_loader_->createUnmanagedInstance(execution_type));
-        customized_executor->load(moveit_cpp_, controller_name);
-        arms_[planning_group].executors[execution_method] = std::move(customized_executor);
-      }
-
-      prompt_job_end(LOGGER, true);
-      return true;
     }
 
   } else {
-    RCLCPP_WARN(LOGGER, "Planning Group [%s] already exist", planning_group.c_str());
-    prompt_job_end(LOGGER, false);
-    return false;
+    RCLCPP_WARN(
+      LOGGER,
+      MOVEIT_CONSOLE_COLOR_YELLOW
+      "Planning Group [%s] already exist"
+      MOVEIT_CONSOLE_COLOR_RESET, planning_group.c_str());
   }
+
+  // Initialize customized execution method
+  if (execution_method != "default" && !execution_method.empty()) {
+    auto customized_executor = std::unique_ptr<grasp_execution::moveit2::Executor>(
+      executor_loader_->createUnmanagedInstance(execution_type));
+    customized_executor->load(moveit_cpp_, controller_name);
+    arms_[planning_group].executors[execution_method] = std::move(customized_executor);
+
+    RCLCPP_INFO(
+      LOGGER,
+      "Load non-default execution method [%s] with plugin [%s].",
+      execution_method.c_str(), execution_type.c_str());
+  }
+  prompt_job_end(LOGGER, true);
+  return true;
 }
 
 void MoveitCppGraspExecution::register_target_objects(
@@ -182,6 +191,9 @@ void MoveitCppGraspExecution::register_target_objects(
     temp_collision_object.id = target_id;
     temp_collision_object.header.frame_id =
       target.target_pose.header.frame_id;
+
+    temp_collision_object.primitives.clear();
+    temp_collision_object.primitive_poses.clear();
 
     temp_collision_object.primitives.push_back(target.target_shape);
     temp_collision_object.primitive_poses.push_back(target.target_pose.pose);
@@ -392,7 +404,7 @@ bool MoveitCppGraspExecution::move_to(
 
   // Hardset to try 5 times
   moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
-  int count = 0, max_tries = 5;
+  int count = 0, max_tries = 1;
 
   while (!plan_solution && count < max_tries) {
     arm.planner->setGoal(state);
@@ -787,10 +799,11 @@ bool MoveitCppGraspExecution::execute(
 
 bool MoveitCppGraspExecution::squash_and_execute(
   const std::string & group,
-  const std::string & method)
+  const std::string & method,
+  const double velocity)
 {
   auto & arm = arms_[group];
-  squash_trajectories(group);
+  squash_trajectories(group, velocity);
   for (auto & traj : arm.traj) {
     auto result = this->execute(traj, method);
     // this->print_trajectory_ros(LOGGER, traj);
@@ -804,6 +817,7 @@ bool MoveitCppGraspExecution::squash_and_execute(
 
 void MoveitCppGraspExecution::squash_trajectories(
   const std::string & planning_group,
+  const double velocity,
   int start_idx, int end_idx,
   bool time_parameterization)
 {
@@ -823,7 +837,7 @@ void MoveitCppGraspExecution::squash_trajectories(
       auto temp_traj = trajs[start_idx];
       bool validity;
       trajectory_processing::TimeOptimalTrajectoryGeneration time_op_param;
-      time_op_param.computeTimeStamps(*temp_traj, 1.0);
+      time_op_param.computeTimeStamps(*temp_traj, velocity);
 
       // TimeOptimization will cause waypoint to change
       // Thus we need to check the new trajectory collision validity
@@ -842,7 +856,7 @@ void MoveitCppGraspExecution::squash_trajectories(
           LOGGER, "\nStrategy 1 failed:<.\n"
           "Strategy 2: Good old IterativeParabolicTimeParameterization");
         trajectory_processing::IterativeParabolicTimeParameterization ip_time_param;
-        ip_time_param.computeTimeStamps(*trajs[start_idx], 1.0);
+        ip_time_param.computeTimeStamps(*trajs[start_idx], velocity);
       }
     }
   }
@@ -879,5 +893,7 @@ void MoveitCppGraspExecution::print_trajectory(
     _out << std::endl;
   }
 }
+
+}  // namespace moveit2
 
 }  // namespace grasp_execution

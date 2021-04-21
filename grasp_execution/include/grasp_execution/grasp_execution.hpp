@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/scheduler.hpp"
+#include "grasp_execution/core/scheduler.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
@@ -122,7 +122,8 @@ public:
 
   virtual bool squash_and_execute(
     const std::string & group,
-    const std::string & method = "default") = 0;
+    const std::string & method = "default",
+    const double velocity = 1.0) = 0;
 
   virtual void prompt_job_start(
     const std::string & job_id,
@@ -178,8 +179,8 @@ protected:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
-  Scheduler planning_scheduler;
-  Scheduler execution_scheduler;
+  core::Scheduler planning_scheduler;
+  core::Scheduler execution_scheduler;
 
 private:
   rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;

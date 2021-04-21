@@ -77,9 +77,12 @@ bool GraspExecutionInterface::default_plan_transport(
 
   tf2::toMsg(base_to_ee * ee_w_clearance, post_grasp_pose.pose);
 
-  bool result = cartesian_to(
-    planning_group,
-    {post_grasp_pose.pose}, ee_link, 0.01, 0, false);
+  bool result = move_to(
+    planning_group, post_grasp_pose, ee_link, false);
+
+  // bool result = cartesian_to(
+  //   planning_group,
+  //   {post_grasp_pose.pose}, ee_link, 0.01, 0, false);
 
   if (!result) {
     return false;

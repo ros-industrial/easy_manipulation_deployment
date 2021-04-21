@@ -16,11 +16,11 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "grasp_execution/scheduler.hpp"
+#include "grasp_execution/core/scheduler.hpp"
 
 TEST(TestScheduler, SingleThreaded) {
-  grasp_execution::Scheduler sch(1);
-  using sch_status = grasp_execution::Workflow::Status;
+  grasp_execution::core::Scheduler sch(1);
+  using sch_status = grasp_execution::core::Workflow::Status;
   std::vector<std::string> flags;
   auto test_workflow = [&flags](const std::string & id) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));

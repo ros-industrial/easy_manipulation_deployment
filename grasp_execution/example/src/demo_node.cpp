@@ -19,7 +19,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "grasp_execution/moveit_cpp_if.hpp"
+#include "grasp_execution/moveit2/moveit_cpp_if.hpp"
 #include "grasp_execution/utils.hpp"
 
 #include "moveit/macros/console_colors.h"
@@ -35,7 +35,7 @@ static const float CLEARANCE = 0.1;
 
 static const char GRASP_TASK_TOPIC[] = "grasp_request";
 
-class Demo : public MoveitCppGraspExecution
+class Demo : public moveit2::MoveitCppGraspExecution
 {
 public:
   explicit Demo(
@@ -72,14 +72,14 @@ public:
 
       // Check if workflow started properly
       switch (status) {
-        case Workflow::Status::ONGOING:
+        case core::Workflow::Status::ONGOING:
           RCLCPP_INFO(
             node_->get_logger(),
             MOVEIT_CONSOLE_COLOR_YELLOW
             "New job [%s] started!!"
             MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
           break;
-        case Workflow::Status::QUEUED:
+        case core::Workflow::Status::QUEUED:
           RCLCPP_INFO(
             node_->get_logger(),
             MOVEIT_CONSOLE_COLOR_YELLOW
@@ -87,7 +87,7 @@ public:
             "No available planning worker, new job in queue."
             MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
           break;
-        case Workflow::Status::INVALID:
+        case core::Workflow::Status::INVALID:
           RCLCPP_INFO(
             node_->get_logger(),
             MOVEIT_CONSOLE_COLOR_RED

@@ -62,8 +62,6 @@ struct JmgContext
   std::unordered_map<std::string, Executor::UniquePtr> executors;
 };
 
-}  // namespace moveit2
-
 class MoveitCppGraspExecution : public GraspExecutionInterface
 {
 public:
@@ -75,7 +73,7 @@ public:
 
   ~MoveitCppGraspExecution();
 
-  bool init(
+  virtual bool init(
     const std::string & planning_group,
     const std::string & _ee_link = "",
     const std::string & execution_method = "default",
@@ -165,11 +163,13 @@ public:
 
   bool squash_and_execute(
     const std::string & group,
-    const std::string & method = "default") override;
+    const std::string & method = "default",
+    const double velocity = 1.0) override;
 
 protected:
   void squash_trajectories(
     const std::string & planning_group,
+    const double velocity,
     int start_idx = 0, int end_idx = -1,
     bool time_parameterization = true);
 
@@ -194,6 +194,8 @@ protected:
   std::shared_ptr<pluginlib::ClassLoader<
       grasp_execution::moveit2::Executor>> executor_loader_;
 };
+
+}  // namespace moveit2
 
 }  // namespace grasp_execution
 

@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "grasp_execution/moveit2/default_executor.hpp"
+#include "grasp_execution/moveit2/executor/default_executor.hpp"
 
 namespace grasp_execution
 {
