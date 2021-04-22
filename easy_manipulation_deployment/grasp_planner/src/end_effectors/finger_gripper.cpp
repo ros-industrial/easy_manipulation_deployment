@@ -54,6 +54,39 @@ FingerGripper::FingerGripper(
     RCLCPP_ERROR(LOGGER, "Each side needs to have a minimum of 1 finger");
     throw std::invalid_argument("Invalid value for field.");
   }
+  if(num_fingers_side_1 == 1 || num_fingers_side_2 == 1){
+    if(num_fingers_side_1 == 1 && num_fingers_side_2 == 1){
+      if(distance_between_fingers_1 > 0.0 || distance_between_fingers_2 > 0.0){
+        RCLCPP_ERROR(LOGGER, "Distance_between_fingers should be 0 for both sides");
+        throw std::invalid_argument("Invalid value for field.");
+      }
+    }
+    if(num_fingers_side_1 == 1 && num_fingers_side_2 > 1){ 
+      if(distance_between_fingers_1 > 0.0){
+        RCLCPP_ERROR(LOGGER, "Distance_between_fingers should be 0 for Side 1");
+        throw std::invalid_argument("Invalid value for field.");
+      }
+      if(finger_thickness > distance_between_fingers_2){
+        RCLCPP_ERROR(LOGGER, "Finger thickness is too large, will collide with adjacent fingers on Side 2");
+        throw std::invalid_argument("Invalid value for field.");
+      }
+    }
+    if(num_fingers_side_2 == 1 && num_fingers_side_1 > 1){ 
+      if(distance_between_fingers_2 > 0.0){
+        RCLCPP_ERROR(LOGGER, "Distance_between_fingers should be 0 for Side 2");
+        throw std::invalid_argument("Invalid value for field.");
+      }
+      if(finger_thickness > distance_between_fingers_1){
+        RCLCPP_ERROR(LOGGER, "Finger thickness is too large, will collide with adjacent fingers on Side 1");
+        throw std::invalid_argument("Invalid value for field.");
+      }
+    }
+  }
+  else if(finger_thickness > distance_between_fingers_1 || finger_thickness > distance_between_fingers_2 ){
+    RCLCPP_ERROR(LOGGER, "Finger thickness is too large, will collide with adjacent fingers");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
   if(finger_thickness <= 0){
     RCLCPP_ERROR(LOGGER, "Finger thickness needs to be positive and non-zero");
     throw std::invalid_argument("Invalid value for field.");
@@ -62,9 +95,8 @@ FingerGripper::FingerGripper(
     RCLCPP_ERROR(LOGGER, "Gripper stroke needs to be positive and non-zero");
     throw std::invalid_argument("Invalid value for field.");
   }
-  if(finger_thickness > distance_between_fingers_1 ||
-    finger_thickness > distance_between_fingers_2){
-    RCLCPP_ERROR(LOGGER, "Finger thickness is too large, will collide with adjacent fingers");
+  if(gripper_stroke < finger_thickness){
+    RCLCPP_ERROR(LOGGER, "Gripper stroke needs larger than finger_thickness");
     throw std::invalid_argument("Invalid value for field.");
   }
   this->num_fingers_total = this->num_fingers_side_1 + this->num_fingers_side_2;
