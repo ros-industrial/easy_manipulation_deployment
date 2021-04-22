@@ -28,7 +28,7 @@ void MultiFingerTest::ResetVariables()
   num_fingers_side_2 = 1 ;
   distance_between_fingers_1 = 0.02 ;
   distance_between_fingers_2 = 0.02 ;
-  finger_thickness = 0.02 ;
+  finger_thickness = 0.01 ;
   gripper_stroke = 0.085 ;
   voxel_size = 0.01 ;
   grasp_quality_weight1 = 1.5 ;
@@ -263,6 +263,20 @@ TEST_F(MultiFingerTest, GetCenterCuttingPlaneCheck)
 
 }
 
+TEST_F(MultiFingerTest, generateGraspSamplesTest)
+{
+//   Eigen::Vector3f point3f(
+//   object->centerpoint(0),
+//   object->centerpoint(1),
+//   object->centerpoint(2));
+
+// this->grasp_samples.push_back(
+//   generateGraspSamples(
+//     this->center_cutting_plane,
+//     point3f,
+//     0));
+}
+
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
 {
   ResetVariables();
@@ -271,6 +285,21 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
   ASSERT_NO_THROW(LoadGripper());
   gripper->getCenterCuttingPlane(object);
   gripper->addCuttingPlanesEqualAligned(object->centerpoint, gripper->center_cutting_plane, false);
+  std::cout << "plane1 index size: " << gripper->plane_1_index.size() << std::endl;
+  for(auto p1 : gripper->plane_1_index){
+    std::cout << "P1 indexes: " << p1 << std::endl;
+  }
+  
+  std::cout << "plane2 index size: " << gripper->plane_2_index.size() << std::endl;
+  for(auto p2 : gripper->plane_2_index){
+    std::cout << "P2 indexes: " << p2 << std::endl;
+  }
+
+  std::cout << "grasp_samples size: " << gripper->grasp_samples.size() << std::endl;
+  std::cout << "cutting plane distances size: " << gripper->cutting_plane_distances.size() << std::endl;
+  for(auto distance : gripper->cutting_plane_distances){
+    std::cout << "Distance: " << distance << std::endl;
+  }
 }
 
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedEven)

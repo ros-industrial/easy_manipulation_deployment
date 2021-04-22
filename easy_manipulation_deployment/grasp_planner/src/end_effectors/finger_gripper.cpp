@@ -150,28 +150,16 @@ void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> obj
   Eigen::Vector4f grasp_plane_vector(a, b, c, d);
   Eigen::Vector3f grasp_plane_normal_(a, b, c);
 
-
   this->center_cutting_plane = grasp_plane_vector;
   this->center_cutting_plane_normal = grasp_plane_normal_;
-}
 
-/***************************************************************************//**
- * Function to create cutting planes along the object. each cutting plane represents
- * the planar contact area for two fingers. For multi-fingered gripper, multiple planes are created,
- * @param object grasp object
- ******************************************************************************/
-void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
-{
   bool side_1_even = this->num_fingers_side_1 % 2 == 0;
   bool side_2_even = this->num_fingers_side_2 % 2 == 0;
-  bool both_sides_even = (side_1_even && side_2_even);
-  bool both_sides_odd = (!side_1_even && !side_2_even);
 
   /*! \brief If any of the sides have odd numbered fingers,
   we include the center plane in consideration for that side. */
-
   if (!side_1_even || !side_2_even) {
-    pcl::ModelCoefficients::Ptr center_plane(new pcl::ModelCoefficients);
+    //pcl::ModelCoefficients::Ptr center_plane(new pcl::ModelCoefficients);
 
     // graspPlaneSample grasp_sample;
     // grasp_sample.plane_index = 0;
@@ -202,6 +190,19 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
       this->plane_2_index.push_back(0);
     }
   }
+}
+
+/***************************************************************************//**
+ * Function to create cutting planes along the object. each cutting plane represents
+ * the planar contact area for two fingers. For multi-fingered gripper, multiple planes are created,
+ * @param object grasp object
+ ******************************************************************************/
+void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
+{
+  bool side_1_even = this->num_fingers_side_1 % 2 == 0;
+  bool side_2_even = this->num_fingers_side_2 % 2 == 0;
+  bool both_sides_even = (side_1_even && side_2_even);
+  bool both_sides_odd = (!side_1_even && !side_2_even);
 
   /*! \brief If both sides are odd or both even, the spacing for planes is consistent */
   if (both_sides_even || both_sides_odd) {
@@ -262,13 +263,15 @@ void FingerGripper::addCuttingPlanesEqualAligned(
   int min_fingers = (side_1_max ? this->num_fingers_side_2 : this->num_fingers_side_1);
   int num_itr = (max_fingers == 1 ? 0 : floor(max_fingers / 2) + 1);
   int curr_min_size = (side_1_max ? this->plane_2_index.size() : this->plane_1_index.size());
+  std::cout << "max_fingers: " << max_fingers << std::endl;
+  std::cout << "min_fingers: " << min_fingers << std::endl;
   for (int row = 0, updown_toggle = 1; row < num_itr; row += updown_toggle ^= 1) {
     // for(int row = 0, updown_toggle = 0; row < num_itr; row += updown_toggle ^=1)
     float gap;
     gap =
       (updown_toggle ==
       0 ? 1 : -1) * (initial_gap + (row > 0 ? (row - 1) : 0) * this->distance_between_fingers_1);
-
+    // std::cout << "Gap: " << gap << std::endl;
     int plane_index = checkPlaneExists(gap);
     if (plane_index >= 0) {
       // std::cout << "plane exists" <<std::endl;
@@ -290,12 +293,16 @@ void FingerGripper::addCuttingPlanesEqualAligned(
 
     } else {
       if (curr_min_size < min_fingers) {  // Plane still contains fingers on both side
+        std::cout << "Add to both" << std::endl;
         addPlane(gap, centerpoint, plane_vector, true, true);
         curr_min_size++;
       } else {  // Plane only contains fingers on the side with more fingers
+        // std::cout << "Plane only contains fingers on the side with more fingers." << std::endl;
         if (side_1_max) {
+          std::cout << "Add to side 1" << std::endl;
           addPlane(gap, centerpoint, plane_vector, true, false);
         } else {
+          std::cout << "Add to side 2" << std::endl;
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
@@ -358,8 +365,10 @@ int FingerGripper::checkPlaneExists(float dist)
   std::vector<float>::iterator it = std::find(
     this->cutting_plane_distances.begin(), this->cutting_plane_distances.end(), dist);
   if (it != this->cutting_plane_distances.end()) {
+    // std::cout << "Gap of " << dist << " found." << std::endl;
     return it - this->cutting_plane_distances.begin();
   } else {
+    // std::cout << "Gap of " << dist << " NOT found." << std::endl;
     return -1;
   }
 }
@@ -454,7 +463,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
 {
   // Object in the X axis
   if (object->objectWorldCosX > this->worldXAngleThreshold) {
-    std::cout << "It is oriented with the X axis\n";
+    // std::cout << "It is oriented with the X axis\n";
     for (auto & sample : this->grasp_samples) {
       // for(auto sample : this->grasp_samples)
       int first_point_index, second_point_index;
@@ -477,7 +486,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
       }
     }
   } else {  // Object in the Y axis
-    std::cout << "It is oriented with the Y axis\n";
+    // std::cout << "It is oriented with the Y axis\n";
     for (auto & sample : this->grasp_samples) {
       int first_point_index, second_point_index;
       float minX = std::numeric_limits<float>::max();
@@ -804,7 +813,6 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
       }
     }
   }
-  std::cout << "end getAllGripperConfigs: " << std::endl;
   return valid_open_gripper_configs;
 }
 
