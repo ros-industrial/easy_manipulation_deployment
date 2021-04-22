@@ -14,7 +14,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(PCL 1.11 REQUIRED COMPONENTS common io visualization filters sample_consensus segmentation features)
+find_package(PCL REQUIRED COMPONENTS common io visualization filters sample_consensus segmentation features)
 
 find_package(fcl QUIET)
 if(fcl_FOUND)

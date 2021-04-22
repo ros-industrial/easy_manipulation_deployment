@@ -644,10 +644,11 @@ void FingerGripper::voxelizeSampleCloud()
 
 void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
 {
-  pcl::PointNormal centroid_point{
-    object->centerpoint(0),
-    object->centerpoint(1),
-    object->centerpoint(2)};
+  pcl::PointNormal centroid_point;
+  centroid_point.x = object->centerpoint(0);
+  centroid_point.y = object->centerpoint(1);
+  centroid_point.z = object->centerpoint(2);
+
   std::vector<std::future<void>> futures;
   auto getFingerSample = [this](
     std::shared_ptr<graspPlaneSample> & sample,
@@ -956,7 +957,10 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
 
     /* Now that we find the plane, we need to find the point near that plane.
      this is done using the kdtree search function */
-    pcl::PointNormal finger_1_point(finger_1_temp(0), finger_1_temp(1), finger_1_temp(2));
+    pcl::PointNormal finger_1_point;
+    finger_1_point.x = finger_1_temp(0);
+    finger_1_point.y = finger_1_temp(1);
+    finger_1_point.z = finger_1_temp(2);
     pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
     // We only need to find 1 neighbour. can be changed later
     int K = 1;
@@ -1006,7 +1010,11 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
         plane_index_2 = plane_index_2_;
       }
     }
-    pcl::PointNormal finger_2_point(finger_2_temp(0), finger_2_temp(1), finger_2_temp(2));
+    pcl::PointNormal finger_2_point;
+    finger_2_point.x = finger_2_temp(0);
+    finger_2_point.y = finger_2_temp(1);
+    finger_2_point.z = finger_2_temp(3);
+
     pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
     int K = 1;
     std::vector<int> pointIdxNKNSearch(K);
@@ -1086,10 +1094,10 @@ bool FingerGripper::checkFingerCollision(
  ******************************************************************************/
 void FingerGripper::getMaxMinValues(std::shared_ptr<GraspObject> object)
 {
-  pcl::PointNormal centroid_point{
-    object->centerpoint(0),
-    object->centerpoint(1),
-    object->centerpoint(2)};
+  pcl::PointNormal centroid_point;
+  centroid_point.x = object->centerpoint(0);
+  centroid_point.y = object->centerpoint(1);
+  centroid_point.z = object->centerpoint(2);
 
   for (auto & sample : this->grasp_samples) {
     if (sample->plane_intersects_object) {
@@ -1453,9 +1461,11 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
     }
 
     for (size_t os_1 = 0; os_1 < multigripper->open_fingers_1.size(); os_1++) {
-      pcl::PointNormal os_point_1(multigripper->open_fingers_1[os_1](0),
-        multigripper->open_fingers_1[os_1](1),
-        multigripper->open_fingers_1[os_1](2));
+      pcl::PointNormal os_point_1;
+      os_point_1.x = multigripper->open_fingers_1[os_1](0);
+      os_point_1.y = multigripper->open_fingers_1[os_1](1);
+      os_point_1.z = multigripper->open_fingers_1[os_1](2);
+
       viewer->addSphere(os_point_1, 0.01, 0, 1.0, 0, "finger_point_os_1" + std::to_string(os_1));
     }
 
@@ -1465,9 +1475,11 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
         finger_point, 0.01, 1.0, 0, 0, "finger_point_cs_2" + std::to_string(cs_2));
     }
     for (size_t os_2 = 0; os_2 < multigripper->open_fingers_2.size(); os_2++) {
-      pcl::PointNormal os_point_2(multigripper->open_fingers_2[os_2](0),
-        multigripper->open_fingers_2[os_2](1),
-        multigripper->open_fingers_2[os_2](2));
+       pcl::PointNormal os_point_2;
+       os_point_2.x = multigripper->open_fingers_2[os_2](0);
+      os_point_2.y = multigripper->open_fingers_2[os_2](1);
+      os_point_2.z = multigripper->open_fingers_2[os_2](2);
+
       viewer->addSphere(os_point_2, 0.01, 0, 1.0, 0, "finger_point_os_2" + std::to_string(os_2));
     }
     viewer->spin();
