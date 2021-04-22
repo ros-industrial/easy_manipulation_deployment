@@ -36,18 +36,17 @@
 // #include "grasp_object.h"
 
 // FCL Libraries
-#include <fcl/narrowphase/collision_object.h>  // NOLINT
-#include "fcl/geometry/octree/octree.h"
+#include "grasp_planner/common/fcl_types.hpp"
 
 
 namespace FCLFunctions
 {
-  std::shared_ptr < fcl::CollisionObject < float >> createCollisionObjectFromPointCloudRGB(
+  std::shared_ptr < grasp_planner::collision::CollisionObject > createCollisionObjectFromPointCloudRGB(
     const pcl::PointCloud < pcl::PointXYZRGB > ::Ptr pointcloud_ptr,
     const octomap::point3d & sensor_origin_wrt_world,
     float resolution);
 
-  std::shared_ptr < fcl::CollisionObject < float >> createCollisionObjectFromPointCloud(
+  std::shared_ptr < grasp_planner::collision::CollisionObject > createCollisionObjectFromPointCloud(
     const pcl::PointCloud < pcl::PointXYZ > ::Ptr & pointcloud_ptr,
     const octomap::point3d & sensor_origin_wrt_world,
     float resolution);

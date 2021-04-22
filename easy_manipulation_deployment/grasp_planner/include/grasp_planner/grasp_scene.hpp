@@ -121,7 +121,7 @@ public:
   pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_table;
 
   pcl::ModelCoefficients::Ptr table_coeff;
-  std::shared_ptr < fcl::CollisionObject < float >> world_collision_object;
+  std::shared_ptr < grasp_planner::collision::CollisionObject > world_collision_object;
 
   pcl::visualization::PCLVisualizer::Ptr viewer;
 

@@ -15,7 +15,9 @@
 
 #include "grasp_planner/common/fcl_functions.hpp"
 
-std::shared_ptr < fcl::CollisionObject < float >> FCLFunctions::createCollisionObjectFromPointCloudRGB(
+using namespace grasp_planner::collision;
+
+std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPointCloudRGB(
   const pcl::PointCloud < pcl::PointXYZRGB > ::Ptr pointcloud_ptr,
   const octomap::point3d & sensor_origin_wrt_world,
   float resolution)
@@ -97,13 +99,13 @@ std::shared_ptr < fcl::CollisionObject < float >> FCLFunctions::createCollisionO
 
   // return octomap_octree;
 
-  auto fcl_octree = std::make_shared < fcl::OcTree < float >> (octomap_octree);
-  std::shared_ptr < fcl::CollisionGeometry < float >> fcl_geometry = fcl_octree;
-  std::make_shared < fcl::CollisionObject < float >> (fcl_geometry);
-  return std::make_shared < fcl::CollisionObject < float >> (fcl_geometry);
+  auto fcl_octree = std::make_shared < OcTree > (octomap_octree);
+  std::shared_ptr < CollisionGeometry > fcl_geometry = fcl_octree;
+  std::make_shared < CollisionObject > (fcl_geometry);
+  return std::make_shared < CollisionObject > (fcl_geometry);
 }
 
-std::shared_ptr < fcl::CollisionObject < float >> FCLFunctions::createCollisionObjectFromPointCloud(
+std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPointCloud(
   const pcl::PointCloud < pcl::PointXYZ > ::Ptr & pointcloud_ptr,
   const octomap::point3d & sensor_origin_wrt_world,
   float resolution)
@@ -185,9 +187,9 @@ std::shared_ptr < fcl::CollisionObject < float >> FCLFunctions::createCollisionO
 
   // return octomap_octree;
 
-  auto fcl_octree = std::make_shared < fcl::OcTree < float >> (octomap_octree);
-  std::shared_ptr < fcl::CollisionGeometry < float >> fcl_geometry = fcl_octree;
-  std::make_shared < fcl::CollisionObject < float >> (fcl_geometry);
-  return std::make_shared < fcl::CollisionObject < float >> (fcl_geometry);
+  auto fcl_octree = std::make_shared < OcTree > (octomap_octree);
+  std::shared_ptr < CollisionGeometry > fcl_geometry = fcl_octree;
+  std::make_shared < CollisionObject > (fcl_geometry);
+  return std::make_shared < CollisionObject > (fcl_geometry);
 }
 

@@ -66,11 +66,6 @@
 #include <string>
 #include <vector>
 
-// For Collision Detection
-#include <fcl/narrowphase/collision_object.h>  //NOLINT
-#include "fcl/geometry/octree/octree.h"
-#include <octomap/octomap.h>  //NOLINT
-
 // EMD Libraries
 // #include "grasp_object.h"
 

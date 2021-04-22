@@ -51,13 +51,6 @@
 // For Multithreading
 #include <future>
 
-// For Collision Detection
-#include <fcl/narrowphase/collision_result.h> //NOLINT
-#include <fcl/narrowphase/collision_request.h>  //NOLINT
-#include <fcl/narrowphase/contact.h>  //NOLINT
-#include <fcl/narrowphase/collision.h>  //NOLINT
-#include "fcl/geometry/shape/sphere.h"
-
 // EMD libraries
 #include "grasp_planner/common/pcl_functions.hpp"
 #include "grasp_planner/common/fcl_functions.hpp"
@@ -258,7 +251,7 @@ public:
   void getBestGrasps(
     const std::shared_ptr < GraspObject > object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    const std::shared_ptr < fcl::CollisionObject < float >> world_collision_object);
+    const std::shared_ptr < CollisionObject> world_collision_object);
   void getMaxMinValues(std::shared_ptr < GraspObject > object);
   void updateMaxMinAttributes(
     std::shared_ptr < fingerCloudSample > &sample,
@@ -271,7 +264,7 @@ public:
   void planGrasps(
     std::shared_ptr < GraspObject > object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < fcl::CollisionObject < float >> world_collision_object,
+    std::shared_ptr < CollisionObject> world_collision_object,
     pcl::visualization::PCLVisualizer::Ptr viewer);
 
   void resetVariables();
@@ -293,16 +286,16 @@ public:
   void getFingerSamples(std::shared_ptr < GraspObject > object);
   std::vector < std::shared_ptr < multiFingerGripper >> getAllGripperConfigs(
     std::shared_ptr < GraspObject > object,
-    std::shared_ptr < fcl::CollisionObject < float >> world_collision_object);
+    std::shared_ptr < CollisionObject > world_collision_object);
   std::shared_ptr < multiFingerGripper > generateGripperOpenConfig(
-    std::shared_ptr < fcl::CollisionObject < float >> world_collision_object,
+    std::shared_ptr < CollisionObject > world_collision_object,
     std::shared_ptr < singleFinger > closed_center_finger_1,
     std::shared_ptr < singleFinger > closed_center_finger_2, Eigen::Vector3f open_center_finger_1,
     Eigen::Vector3f open_center_finger_2, Eigen::Vector3f plane_normal_normalized,
     Eigen::Vector3f grasp_direction);
   bool checkFingerCollision(
     Eigen::Vector3f finger_point,
-    std::shared_ptr < fcl::CollisionObject < float >> world_collision_object);
+    std::shared_ptr < CollisionObject > world_collision_object);
 
   void addPlane(float dist, Eigen::Vector4f centerpoint, Eigen::Vector4f plane_vector);
 

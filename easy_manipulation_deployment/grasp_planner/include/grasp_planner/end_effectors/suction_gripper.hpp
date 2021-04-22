@@ -43,13 +43,6 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
 
-// For Collision Detection
-#include <fcl/narrowphase/collision_result.h>
-#include <fcl/narrowphase/collision_request.h>
-#include <fcl/narrowphase/contact.h>
-#include <fcl/narrowphase/collision.h>
-#include <fcl/geometry/shape/sphere.h>
-
 // ROS2 Libraries
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -202,7 +195,7 @@ float max_center_dist;
   void planGrasps(
     std::shared_ptr < GraspObject > object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < fcl::CollisionObject < float >> world_collision_object,
+    std::shared_ptr < CollisionObject > world_collision_object,
     pcl::visualization::PCLVisualizer::Ptr viewer);
 
   std::string getID() {return id;}

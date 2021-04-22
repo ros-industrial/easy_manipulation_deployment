@@ -23,11 +23,8 @@ if(fcl_FOUND)
   message(STATUS "Using FCL version: ${FCL_VERSION}")
 else()
   include(FindPkgConfig)
-  pkg_check_modules(PC_FCL REQUIRED fcl)
-  pkg_check_modules(PC_CCD REQUIRED ccd)
-  set(FCL_LIBRARIES ${PC_FCL_LIBRARIES} ${PC_CCD_LIBRARIES})
-  set(using_new_fcl)
-  message(STATUS "Using FCL version: ${PC_FCL_VERSION}")
+  pkg_check_modules(FCL REQUIRED fcl)
+  message(STATUS "Using FCL version: ${FCL_VERSION}")
 endif()
 find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -63,6 +60,18 @@ add_library(grasp_planning_interface
   src/common/fcl_functions.cpp
 
 )
+
+if (${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
+  target_compile_definitions(grasp_planning_interface
+    PUBLIC
+    FCL_VERSION_0_6_OR_HIGHER=1
+  )
+else()
+  target_compile_definitions(grasp_planning_interface
+    PUBLIC
+    FCL_VERSION_0_6_OR_HIGHER=0
+  )
+endif()
 
 ament_target_dependencies(grasp_planning_interface
         tf2

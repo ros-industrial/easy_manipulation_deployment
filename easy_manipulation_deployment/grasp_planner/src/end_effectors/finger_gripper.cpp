@@ -105,7 +105,7 @@ FingerGripper::FingerGripper(
 void FingerGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
-  std::shared_ptr<fcl::CollisionObject<float>> world_collision_object,
+  std::shared_ptr<CollisionObject> world_collision_object,
   pcl::visualization::PCLVisualizer::Ptr viewer)
 {
   getCenterCuttingPlane(object);
@@ -772,7 +772,7 @@ void FingerGripper::getGripperClusters()
 
 std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperConfigs(
   const std::shared_ptr<GraspObject> object,
-  const std::shared_ptr<fcl::CollisionObject<float>> world_collision_object)
+  const std::shared_ptr<CollisionObject> world_collision_object)
 {
   std::vector<std::shared_ptr<multiFingerGripper>> valid_open_gripper_configs;
   // Query the gripping points at the center cutting plane
@@ -871,7 +871,7 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
  * @param plane_normal_normalized Normal vector of the center plane.
  ******************************************************************************/
 std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
-  const std::shared_ptr<fcl::CollisionObject<float>> world_collision_object,
+  const std::shared_ptr<CollisionObject> world_collision_object,
   const std::shared_ptr<singleFinger> closed_center_finger_1,
   const std::shared_ptr<singleFinger> closed_center_finger_2,
   const Eigen::Vector3f open_center_finger_1,
@@ -1061,16 +1061,26 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
  ******************************************************************************/
 bool FingerGripper::checkFingerCollision(
   const Eigen::Vector3f finger_point,
-  const std::shared_ptr<fcl::CollisionObject<float>> world_collision_object)
+  const std::shared_ptr<CollisionObject> world_collision_object)
 {
-  auto finger_shape = std::make_shared<fcl::Sphere<float>>(this->finger_thickness / 2);
-  fcl::Transform3<float> finger_transform = fcl::Transform3<float>::Identity();
-  finger_transform.translation() << finger_point(0), finger_point(1), finger_point(2);
-  fcl::CollisionObject<float> finger(finger_shape, finger_transform);
-  std::shared_ptr<fcl::CollisionObject<float>> finger_ptr =
-    std::make_shared<fcl::CollisionObject<float>>(finger);
+  grasp_planner::collision::Sphere * finger_shape =
+    new grasp_planner::collision::Sphere(this->finger_thickness / 2);
 
-  fcl::CollisionRequest<float> request;
+  grasp_planner::collision::Transform finger_transform;
+  finger_transform.setIdentity();
+
+#if FCL_VERSION_0_6_OR_HIGHER == 1
+  finger_transform.translation() << finger_point(0), finger_point(1), finger_point(2);
+#else
+  finger_transform.setTranslation(
+    grasp_planner::collision::Vector(finger_point(0), finger_point(1), finger_point(2)));
+#endif
+  CollisionObject finger(
+    std::shared_ptr<grasp_planner::collision::CollisionGeometry>(finger_shape), finger_transform);
+  std::shared_ptr<CollisionObject> finger_ptr =
+    std::make_shared<CollisionObject>(finger);
+
+  grasp_planner::collision::CollisionRequest request;
   request.enable_contact = true;
   // num_max_contacts_ = 1, //The maximum number of contacts will return.
   // enable_contact_ = false, //whether the contact information (normal, penetration depth and
@@ -1080,7 +1090,7 @@ bool FingerGripper::checkFingerCollision(
   // use_approximate_cost_ = true // whether the cost computation is approximated
 
   // result will be returned via the collision result structure
-  fcl::CollisionResult<float> result;
+  grasp_planner::collision::CollisionResult result;
   fcl::collide(world_collision_object.get(), finger_ptr.get(), request, result);
   return result.isCollision();
 }
