@@ -8,50 +8,67 @@
 Grasp Planner
 ========================================================
 
-**Motivation**
 
-Traditionally, grasp pose generation is done through using convolutional neural networks (CNNs) to achieve grasp plans. The issues with using machine learning and neural networks is several fold
+.. rubric:: Methodology
 
-1. Computation power required for fast grasp pose planning using CNNs.
-2. Dataset for training neural netwoks are currently restricted to 2 finger grippers (notably, the `Cornell Grasping Dataset <http://pr.cs.cornell.edu/grasping/rect_data/data.php>`_ has been the most comprehensive and well labelled dataset for current grasp planning neural networks) 
+The methodology for the grasp planner can be broken down into several steps.
 
+.. rubric:: 1) Point Cloud filtering
+.. rubric:: 2) Plane Segmentation
+.. rubric:: 3) Object Segmentation
+.. rubric:: 4) Grasp Area determination
+.. rubric:: 5) Grasp point determination
+.. rubric:: 6) Grasp Ranking
+.. rubric:: 7) Best Final Grasp
 
-
-.. image:: ../../images/cornell_grasp_display.jpeg
+.. image:: ../../images/grasp_planner/grasp_planner_introduction.png
    :align: center
 
-3. Training of new types of grippers require **manual labelling** of new datasets (labour intensive).
-4. Accurate and stable grasp poses may not be available for **irregular objects**, so specifically labelled dataset is needed in order to generate accurate grasps
+.. rubric:: 1) Point Cloud filtering
 
-This ROS2 package presents a solution that requires no training, no labelling and little computational power to generate a 3 + 1 DOF grasp poses. The modular design of this package also allows for expansion into other gripper types. Current support for this package includes **2 finger gripper and single suction cup gripper**.
+Raw pointclouds generally include areas that are unnecessary and include alot of noise. Therefore, the user given the option to filter to an area of 
+the raw pointcloud that they may want to focus on. This is shown later in the :ref:`Grasp Planner Configuration page <grasp_planner_configuration>`   
+  
+Once the desired area of the pointcloud is specified, noise within specified pointcloud is then removed. This is done through a 
+`StatisticalOutlierRemoval filter<https://pcl.readthedocs.io/en/latest/statistical_outlier.html>`__
 
-.. |original1| image:: ../../images/original_1.jpg   
-   :scale: 10%
-   :align: middle
-.. |finger1| image:: ../../images/finger_2_1_grasp.png
-   :scale: 10%
-   :align: middle
-.. |suction1| image:: ../../images/suction_1_1_1_grasp.png
-   :scale: 10%
-   :align: middle
+.. |Before_statis| image:: ../../images/grasp_planner/grasp_planner_before_statisticaloutlier.png
+  :align: middle
+
+.. |After_statis| image:: ../../images/grasp_planner/grasp_planner_after_statisticaloutlier.png
+  :align: middle
+
++-----------------------+---------------------+
+| Before Noise Removal  | After Noise Removal |
++=======================+=====================+
+||Before_statis|        ||After_statis|       |
++-----------------------+---------------------+
+
+.. rubric:: 2) Plane Segmentation
+
+
+.. rubric:: 3) Object Segmentation
+
+Every individual object within the filtered pointcloud is segmented and the grasp planner does planning for each object.
+
+.. rubric:: 4) Grasp Area determination
+
+Area of which the planner will take into account for determining grasp points depending on the number of fingers/number of suction cups
+
+.. rubric:: 5) Grasp point determination
+
+Exact points of where the middle of the finger/suction cup should be for that specific grasp
+
+.. rubric:: 6) Grasp Ranking
+
+There are many possibe grasping configurations that the grasp planner has taken into account. The quality of those grasps are then ranked based of a metric.
+The metrics of the individual end-effector types can be found on their respective pages
+  
+:ref:`Finger Grasps <grasp_planner_finger>` and :ref:`Suction Grasps <grasp_planner_suction>`
    
-.. |original2| image:: ../../images/original_2.png   
-   :scale: 20%
-   :align: middle
-.. |finger2| image:: ../../images/finger_2_2_grasp.png
-   :scale: 10%
-   :align: middle
-.. |suction2| image:: ../../images/suction_1_1_2_grasp.png
-   :scale: 10%
-   :align: middle
+.. rubric:: 7) Best Final Grasp
 
-+------------------+----------------------+-----------------------------+
-| Input image      | 2 Finger Gripper     | Single Cup Suction Gripper  |
-+==================+======================+=============================+
-|   |original1|    |      |finger1|       |         |suction1|          |
-+------------------+----------------------+-----------------------------+
-|   |original2|    |      |finger2|       |         |suction2|          |
-+------------------+----------------------+-----------------------------+
+The pose of the top ranked grasp is then published for :ref:`Grasp Execution <grasp_execution_demo>`
 
 
 .. toctree::

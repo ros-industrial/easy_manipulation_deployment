@@ -30,7 +30,7 @@ This package was tested with the `easy_perception_deployment <https://github.com
    :caption: Tutorials
    :name: sec-tutorials
 
-   tutorials/emd_example
+   tutorial/emd_example
 
 .. toctree::
    :maxdepth: 1
