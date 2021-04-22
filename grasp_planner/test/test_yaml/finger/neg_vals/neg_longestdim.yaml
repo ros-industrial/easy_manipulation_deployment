@@ -1,7 +1,0 @@
-end_effector:
-  type: finger
-  attributes:
-    fingers: 2
-    distance_between_fingers: 250
-    longest_gripper_dim: -40
-    table_height: 560

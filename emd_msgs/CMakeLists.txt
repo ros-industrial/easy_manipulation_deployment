@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(emd_msgs)
 
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -13,18 +18,20 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(shape_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(shape_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-set(msg_files
+rosidl_generate_interfaces( ${PROJECT_NAME}
   "msg/GraspMethod.msg"
   "msg/GraspTarget.msg"
   "msg/GraspTask.msg"
-)
-
-set(srv_files
-  "srv/SubmitGraspTask.srv"
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  shape_msgs
 )
 
 if(BUILD_TESTING)
@@ -32,15 +39,4 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  ${msg_files}
-  ${srv_files}
-  DEPENDENCIES
-    std_msgs
-    shape_msgs
-    geometry_msgs
-  ADD_LINTER_TESTS
-)
-
-ament_export_dependencies(rosidl_default_runtime)
 ament_package()

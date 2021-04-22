@@ -1,0 +1,31 @@
+pcl_node:
+  ros__parameters:
+    perception_topic: "/camera/pointcloud"
+    camera_frame: "camera_color_optical_frame"
+    point_cloud_params:
+      passthrough_filter_limits_x: [-0.50, 0.50]
+      passthrough_filter_limits_y: [-0.15, 0.40]
+      passthrough_filter_limits_z: [0.01, 0.70]      
+      segmentation_max_iterations: 50
+      segmentation_distance_threshold: 0.01
+      cluster_tolerance: 0.01
+      min_cluster_size: 750
+      cloud_normal_radius: 0.03
+    end_effectors:
+      end_effector_names: [suction_cup]
+      suction_cup:
+        type: suction
+        num_cups_length: 2
+        num_cups_breadth: 2
+        dist_between_cups_length: 0.03
+        dist_between_cups_breadth: 0.04
+        cup_radius: 0.01
+        cup_height: 0.01
+        grasp_planning_params:
+          num_sample_along_axis: 3
+          search_resolution: 0.01
+          search_angle_resolution: 4
+          weights:
+            curvature: 1.0
+            grasp_distance_to_center: 1.0
+            number_contact_points: 1.0

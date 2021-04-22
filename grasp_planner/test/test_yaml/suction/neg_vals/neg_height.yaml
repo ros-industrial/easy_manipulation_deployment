@@ -1,7 +1,0 @@
-end_effector:
-  type: suction
-  attributes:
-    length_cups: 1
-    breadth_cups: 1
-    radius: 19
-    table_height: -560

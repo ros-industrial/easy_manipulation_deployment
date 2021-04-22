@@ -1,0 +1,32 @@
+pcl_node:
+  ros__parameters:
+    perception_topic: "/camera/pointcloud"
+    camera_frame: "camera_color_optical_frame"
+    point_cloud_params:
+      passthrough_filter_limits_x: [-0.50, 0.50]
+      passthrough_filter_limits_y: [-0.15, 0.40]
+      passthrough_filter_limits_z: [0.01, 0.70]      
+      segmentation_max_iterations: 50
+      segmentation_distance_threshold: 0.01
+      cluster_tolerance: 0.01
+      min_cluster_size: 750
+      cloud_normal_radius: 0.03
+    end_effectors:
+      end_effector_names: [robotiq_3f]
+      robotiq_3f:
+        type: finger
+        num_fingers_side_1: 2
+        num_fingers_side_2: 1
+        distance_between_fingers_1: 0.06
+        distance_between_fingers_2: 0.05
+        finger_thickness: 0.01
+        gripper_stroke: 0.15
+        grasp_planning_params:
+          grasp_plane_dist_limit: 0.007
+          voxel_size: 0.01
+          grasp_rank_weight_1: 1.5
+          grasp_rank_weight_2: 1.0
+          world_x_angle_threshold: 0.5
+          world_y_angle_threshold: 0.5
+          world_z_angle_threshold: 0.25
+      
