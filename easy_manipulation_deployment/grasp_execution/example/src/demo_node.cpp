@@ -33,7 +33,7 @@ static const char EE_LINK[] = "ee_palm";
 
 static const float CLEARANCE = 0.1;
 
-static const char GRASP_TASK_TOPIC[] = "grasp_request";
+static const char GRASP_TASK_TOPIC[] = "grasp_tasks";
 
 class Demo : public moveit2::MoveitCppGraspExecution
 {
