@@ -106,18 +106,18 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_scheduler
-    test/test_scheduler.cpp
-  )
-  target_link_libraries(test_scheduler
-    grasp_execution_interface
-  )
-  ament_target_dependencies(test_scheduler
-    emd_msgs
-    rclcpp
-    tf2
-    tf2_ros
-  )
+  # ament_add_gtest(test_scheduler
+  #   test/test_scheduler.cpp
+  # )
+  # target_link_libraries(test_scheduler
+  #   grasp_execution_interface
+  # )
+  # ament_target_dependencies(test_scheduler
+  #   emd_msgs
+  #   rclcpp
+  #   tf2
+  #   tf2_ros
+  # )
 endif()
 
 # TODO(Briancbn): convert to tests instead
