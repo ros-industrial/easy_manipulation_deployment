@@ -136,10 +136,8 @@ public:
 
     // ------------------- Move to grasp location --------------------------
     prompt_job_start(node_->get_logger(), target_id, "Move to grasp location.");
-    //  execute(planning_group);
-    squash_trajectories(planning_group, 0, -1, true);
 
-    result = moveit_cpp_->execute(planning_group, arms_[planning_group].traj[0]);
+    result = squash_and_execute(planning_group);
 
     arms_[planning_group].traj.clear();
 
@@ -190,10 +188,8 @@ public:
 
     // ------------------- Move to release location --------------------------
     prompt_job_start(node_->get_logger(), target_id, "Move to release location.");
-    //  execute(planning_group);
-    squash_trajectories(planning_group, 0, -1, true);
 
-    result = moveit_cpp_->execute(planning_group, arms_[planning_group].traj[0]);
+    result = squash_and_execute(planning_group);
 
     prompt_job_end(node_->get_logger(), result);
 
