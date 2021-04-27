@@ -294,6 +294,19 @@ bool AddObject::ErrorObjectName()
         " is a reserved name. Please use another name for your object "));
     return true;
   }
+  std::string initial_name = object.name;
+  std::string final_name;
+  if (initial_name.find_first_not_of(' ') != std::string::npos) {
+    for(int i = 0 ; i < static_cast<int>(initial_name.length()); i++){
+        if(isspace(initial_name[i])){
+            final_name += "_";
+        }
+        else{
+            final_name += std::tolower(initial_name[i]);
+        }
+    }
+    object.name = final_name;
+  }
   return false;
 }
 

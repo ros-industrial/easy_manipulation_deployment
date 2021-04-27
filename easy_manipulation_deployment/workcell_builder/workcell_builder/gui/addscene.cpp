@@ -492,7 +492,18 @@ bool AddScene::CheckExtJoint()
 
 bool AddScene::CheckSceneName()
 {
-  if (ui->scene_name->text().toStdString().find_first_not_of(' ') != std::string::npos) {
+  std::string initial_name = ui->scene_name->text().toStdString();
+  std::string final_name;
+  if (initial_name.find_first_not_of(' ') != std::string::npos) {
+    for(int i = 0 ; i < static_cast<int>(initial_name.length()); i++){
+        if(isspace(initial_name[i])){
+            final_name += "_";
+        }
+        else{
+            final_name += std::tolower(initial_name[i]);
+        }
+    }
+    ui->scene_name->setText(QString::fromStdString(final_name));
     return true;
   } else {
     ui->scene_errors->append("<font color='red'> Please enter a scene name. </font>");
