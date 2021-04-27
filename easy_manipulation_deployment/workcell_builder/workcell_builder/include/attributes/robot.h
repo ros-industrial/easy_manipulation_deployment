@@ -28,6 +28,10 @@ class Robot
 public:
 // End effector should have urdf in package <name>_description
 // and filepath $(find <name>_description)/urdf/<name>.urdf.xacro
+  Robot()
+  {
+      origin.is_origin = false;
+  }
   std::string name;
   std::vector < std::string > robot_links;     // Loaded with moveit_file_config
   std::string brand;

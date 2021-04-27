@@ -27,6 +27,10 @@ class EndEffector
 public:
   // End effector should have urdf in package <name>_description
   // and filepath $(find <name>_description)/urdf/<name>.urdf.xacro
+  EndEffector()
+  {
+      origin.is_origin = false;
+  }
   std::string name;
   std::string brand;
   std::string filepath;
