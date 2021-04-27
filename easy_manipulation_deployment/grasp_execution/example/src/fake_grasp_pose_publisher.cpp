@@ -120,7 +120,7 @@ public:
     grasp_method.grasp_ranks = {1.0};
 
     publisher_ =
-      this->create_publisher<emd_msgs::msg::GraspTask>("grasp_request", 10);
+      this->create_publisher<emd_msgs::msg::GraspTask>("grasp_tasks", 10);
 
     rclcpp::sleep_for(
       std::chrono::milliseconds(
