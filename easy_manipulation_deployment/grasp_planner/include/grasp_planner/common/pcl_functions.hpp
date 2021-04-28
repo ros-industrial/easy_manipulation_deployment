@@ -177,6 +177,8 @@ namespace PCLFunctions
 
   float normalizeInt(const int & target, const int & min, const int & max);
 
+  float getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2);
+
   void createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer);
 }  // namespace PCLFunctions
 
