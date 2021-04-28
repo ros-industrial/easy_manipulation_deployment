@@ -1161,6 +1161,17 @@ void FingerGripper::getMaxMinValues(std::shared_ptr<GraspObject> object)
   }
 }
 
+/***************************************************************************//**
+ * Function that updates the max and min values of ranking attributes of 
+ * all finger samples at the particular section of the gripper. Used for 
+ * normalization later.
+
+ * @param sample FingerCloudSample for the current finger
+ * @param centroid_distance Distance from finger to object centroid
+ * @param grasp_plane_distance Distance from finger sample to grasp plane
+ * @param curvature Curvature of surface at finger point
+ ******************************************************************************/
+
 void FingerGripper::updateMaxMinAttributes(
     std::shared_ptr < fingerCloudSample > &sample,
     float centroid_distance,
@@ -1493,6 +1504,14 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
   }
   // std::cout << "getAllRanks" << std::endl;
 }
+
+/***************************************************************************//**
+ * Method that generates the grasp sample for a particular plane vector 
+ * @param plane_vector vector of plane cutting the object
+ * @param point_on_plane 3d point on plane
+ * @param dist_to_center_plane perpendicular distance from center cutting plane
+ * @param plane_index Index of plane with respect to the plane vector
+ ******************************************************************************/
 
 std::shared_ptr < graspPlaneSample > FingerGripper::generateGraspSamples(
   Eigen::Vector4f plane_vector,
