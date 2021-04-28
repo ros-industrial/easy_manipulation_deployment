@@ -792,17 +792,16 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
         float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
           grasp_direction, this->center_cutting_plane_normal);
 
-        Eigen::Vector3f curr1_normal(finger_sample_1->finger_point.normal_x,
-          finger_sample_1->finger_point.normal_y,
-          finger_sample_1->finger_point.normal_z);
-        
-        finger_sample_1->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction, curr1_normal);
+        // Find the angle of the normal vector of each point with the grasp direction vector.
+        finger_sample_1->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction,
+          {finger_sample_1->finger_point.normal_x,
+            finger_sample_1->finger_point.normal_y,
+            finger_sample_1->finger_point.normal_z});
 
-        Eigen::Vector3f curr2_normal(finger_sample_2->finger_point.normal_x,
-          finger_sample_2->finger_point.normal_y,
-          finger_sample_2->finger_point.normal_z);
-
-        finger_sample_2->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction, curr2_normal);
+        finger_sample_2->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction,
+          {finger_sample_2->finger_point.normal_x,
+            finger_sample_2->finger_point.normal_y,
+            finger_sample_2->finger_point.normal_z});
 
         // TEST
         pcl::PointXYZ parallel_object_vector = pcl::PointXYZ(
