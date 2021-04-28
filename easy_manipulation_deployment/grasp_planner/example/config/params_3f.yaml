@@ -18,7 +18,7 @@ grasp_planning_node:
         num_fingers_side_1: 2
         num_fingers_side_2: 1
         distance_between_fingers_1: 0.06
-        distance_between_fingers_2: 0.05
+        distance_between_fingers_2: 0.0
         finger_thickness: 0.01
         gripper_stroke: 0.15
         grasp_planning_params:

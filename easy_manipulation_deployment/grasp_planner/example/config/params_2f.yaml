@@ -20,7 +20,7 @@ grasp_planning_node:
         distance_between_fingers_1: 0.04
         distance_between_fingers_2: 0.04
         finger_thickness: 0.02
-        gripper_stroke: 0.085
+        gripper_stroke: 0.1
         grasp_planning_params:
           grasp_plane_dist_limit: 0.007
           voxel_size: 0.01
