@@ -244,10 +244,9 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
     if (this->distance_between_fingers_1 == this->distance_between_fingers_2) {
       addCuttingPlanesEqualAligned(object->centerpoint, this->center_cutting_plane, both_sides_even);
     } else {
-      float initial_gap_1 =
-        (both_sides_even ? this->distance_between_fingers_1 / 2 : this->distance_between_fingers_1);
-      float initial_gap_2 =
-        (both_sides_even ? this->distance_between_fingers_2 / 2 : this->distance_between_fingers_2);
+
+      float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
+      float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
 
       int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
       int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
@@ -258,14 +257,11 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
 
   } else { /*! \brief If both sides are different, the spacing for planes is not consistent,
                       we need to create planes separately */
-    bool is_even_fingers_1 = this->num_fingers_side_1 % 2 == 0;
-    bool is_even_fingers_2 = this->num_fingers_side_2 % 2 == 0;
-
     int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
     int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
 
-    float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (is_even_fingers_1 ? 1 : 0));
-    float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (is_even_fingers_2 ? 1 : 0));
+    float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
+    float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
 
     addCuttingPlanes(
       object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
