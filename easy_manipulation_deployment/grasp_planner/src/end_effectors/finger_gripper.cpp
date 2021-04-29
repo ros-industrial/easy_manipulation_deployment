@@ -954,6 +954,14 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     gripper.closed_fingers_1.push_back(
       this->grasp_samples[plane_index]->sample_side_1->finger_samples[point_index]);
     gripper.closed_fingers_1_index.push_back(point_index);
+
+    Eigen::Vector3f finger_normal(
+      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_x,
+      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_y,
+      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_z);
+    
+    gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->angle_cos =
+      MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal);
   }
 
   // Iterate through the points on side 2
@@ -977,32 +985,39 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     int point_index_2 = getNearestPointIndex(
       finger_2_point,
       this->grasp_samples[plane_index_2]->sample_side_2->finger_nvoxel);
-
     gripper.closed_fingers_2.push_back(
       this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[point_index_2]);
     gripper.closed_fingers_2_index.push_back(point_index_2);
-  }
 
-  for (auto & finger : gripper.closed_fingers_1) {
-    Eigen::Vector3f finger_normal(finger->finger_point.normal_x,
-      finger->finger_point.normal_y,
-      finger->finger_point.normal_z);
-    finger->angle_cos = 1e-8 +
-      std::abs(
-      (grasp_direction.dot(finger_normal)) /
-      (grasp_direction.norm() * finger_normal.norm()));
+    Eigen::Vector3f finger_normal_2(
+      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_x,
+      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_y,
+      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_z);
+    
+    gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->angle_cos =
+      MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal_2);
   }
+  // for (auto & finger : gripper.closed_fingers_1) {
+  //   Eigen::Vector3f finger_normal(finger->finger_point.normal_x,
+  //     finger->finger_point.normal_y,
+  //     finger->finger_point.normal_z);
+  //   finger->angle_cos = 1e-8 +
+  //     std::abs(
+  //     (grasp_direction.dot(finger_normal)) /
+  //     (grasp_direction.norm() * finger_normal.norm()));
+  //   std::cout << "Angle_1: " << finger->angle_cos << std::endl;
+  // }
 
-  for (auto & finger : gripper.closed_fingers_2) {
-    Eigen::Vector3f finger_normal(finger->finger_point.normal_x,
-      finger->finger_point.normal_y,
-      finger->finger_point.normal_z);
-    finger->angle_cos = 1e-8 +
-      std::abs(
-      (grasp_direction.dot(finger_normal)) /
-      (grasp_direction.norm() * finger_normal.norm()));
-  }
-
+  // for (auto & finger : gripper.closed_fingers_2) {
+  //   Eigen::Vector3f finger_normal(finger->finger_point.normal_x,
+  //     finger->finger_point.normal_y,
+  //     finger->finger_point.normal_z);
+  //   finger->angle_cos = 1e-8 +
+  //     std::abs(
+  //     (grasp_direction.dot(finger_normal)) /
+  //     (grasp_direction.norm() * finger_normal.norm()));
+  //   std::cout << "Angle_2: " << finger->angle_cos << std::endl;
+  // }
   return std::make_shared<multiFingerGripper>(gripper);
 }
 
