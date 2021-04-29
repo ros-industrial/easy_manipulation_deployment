@@ -1082,6 +1082,7 @@ TEST_F(MultiFingerTest, GetMaxMinValuesTest)
   gripper->getInitialSamplePoints(object);
   gripper->getInitialSampleCloud(object);
   gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
 
   pcl::PointNormal centroid_point{
     object->centerpoint(0),
@@ -1094,7 +1095,6 @@ TEST_F(MultiFingerTest, GetMaxMinValuesTest)
   std::vector<float> curvature_vec_2;
   std::vector<float> grasp_plane_distance_vec_2;
   std::vector<float> centroid_distance_vec_2;
-  gripper->getMaxMinValues(object);
   for (auto & sample : gripper->grasp_samples) {
     if (sample->plane_intersects_object) {
       for (auto & point : sample->sample_side_1->finger_nvoxel->points) {
@@ -1226,4 +1226,101 @@ TEST_F(MultiFingerTest, GetMaxMinValuesTest)
     }
   }
 
+}
+
+TEST_F(MultiFingerTest, GetFingerSamplesTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+
+
+  for (auto & sample : gripper->grasp_samples) {
+    EXPECT_TRUE(static_cast<int>(sample->sample_side_1->finger_samples.size()) == 0);
+    EXPECT_TRUE(static_cast<int>(sample->sample_side_2->finger_samples.size()) == 0);
+  }
+  gripper->getFingerSamples(object);
+
+  for (auto & sample : gripper->grasp_samples) {
+    EXPECT_TRUE(static_cast<int>(sample->sample_side_1->finger_samples.size()) > 0);
+    EXPECT_TRUE(static_cast<int>(sample->sample_side_2->finger_samples.size()) > 0);
+  }
+
+}
+
+TEST_F(MultiFingerTest, GetGripperClustersTest1)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 3;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 0);
+  gripper->getGripperClusters();
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 7);
+}
+
+TEST_F(MultiFingerTest, GetGripperClustersTest2)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 0);
+  gripper->getGripperClusters();
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 2);
+}
+
+TEST_F(MultiFingerTest, GetGripperClustersTest3)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 0);
+  gripper->getGripperClusters();
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 6);
 }
