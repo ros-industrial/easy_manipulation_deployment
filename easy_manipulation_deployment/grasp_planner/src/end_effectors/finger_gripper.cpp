@@ -1351,7 +1351,6 @@ std::vector<Eigen::Vector3f> FingerGripper::getOpenFingerCoordinates(
   Eigen::Vector3f finger_1,
   Eigen::Vector3f finger_2)
 {
-  Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
   // Get the centerpoint vector of the grasp
   Eigen::Vector3f side1_2_centerpoint_vector(
     (finger_1(0) + finger_2(0)) / 2,
@@ -1360,10 +1359,17 @@ std::vector<Eigen::Vector3f> FingerGripper::getOpenFingerCoordinates(
 
   // Get the initial finger positions in the open configuration from the center plane.
   // This may or may not be used depending on number of fingers
-  Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
-    (this->gripper_stroke / 2) * grasp_direction_normalized;
-  Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
-    (this->gripper_stroke / 2) * grasp_direction_normalized;
+  
+  // Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
+  // Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
+  //   (this->gripper_stroke / 2) * grasp_direction_normalized;
+  // Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
+  //   (this->gripper_stroke / 2) * grasp_direction_normalized;
+  
+  Eigen::Vector3f open_center_finger_1 = MathFunctions::getPointInDirection(
+    side1_2_centerpoint_vector, grasp_direction, -(this->gripper_stroke / 2));
+  Eigen::Vector3f open_center_finger_2 = MathFunctions::getPointInDirection(
+    side1_2_centerpoint_vector, grasp_direction, (this->gripper_stroke/2));
 
   std::vector<Eigen::Vector3f> result{open_center_finger_1, open_center_finger_2};
   return result;
