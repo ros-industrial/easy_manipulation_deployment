@@ -267,27 +267,28 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
       addCuttingPlanesEqualAligned(object->centerpoint, this->center_cutting_plane, both_sides_even);
     } else {
 
-      float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
-      float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
+      // float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
+      // float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
 
-      int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
-      int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
+      // int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
+      // int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
+
       addCuttingPlanes(
-        object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
-        initial_gap_2);
+        object->centerpoint, this->center_cutting_plane, this->num_itr_1, this->num_itr_2, this->initial_gap_1,
+        this->initial_gap_2);
     }
 
   } else { /*! \brief If both sides are different, the spacing for planes is not consistent,
                       we need to create planes separately */
-    int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
-    int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
+    // int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
+    // int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
 
-    float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
-    float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
+    // float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (side_1_even ? 1 : 0));
+    // float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (side_2_even ? 1 : 0));
 
     addCuttingPlanes(
-      object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
-      initial_gap_2);
+      object->centerpoint, this->center_cutting_plane, this->num_itr_1, this->num_itr_2, this->initial_gap_1,
+      this->initial_gap_2);
   }
   /*! \brief Create cutting planes for side 1 */
   // PCLFunctions::computeCloudNormal(
@@ -924,11 +925,11 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
      side, for example, it only requires one iteration. The center finger is taken, plus
      one iteration to create the top and bottom finger. */
 
-  int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
-  int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
+  // int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
+  // int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
 
   // Iterate through the points on side 1
-  for (int side_1 = 0, updown_toggle_1 = 1; side_1 < num_itr_1; side_1 += updown_toggle_1 ^= 1) {
+  for (int side_1 = 0, updown_toggle_1 = 1; side_1 < this->num_itr_1; side_1 += updown_toggle_1 ^= 1) {
     // Define the distance the current finger is from the center point.
     float gap1;
     gap1 = (updown_toggle_1 == 0 ? 1 : -1) * (initial_gap_1 + side_1 *
@@ -996,7 +997,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   }
 
   // Iterate through the points on side 2
-  for (int side_2 = 0, updown_toggle_2 = 1; side_2 < num_itr_2; side_2 += updown_toggle_2 ^= 1) {
+  for (int side_2 = 0, updown_toggle_2 = 1; side_2 < this->num_itr_2; side_2 += updown_toggle_2 ^= 1) {
     float gap2;
     gap2 =
       (updown_toggle_2 == 0 ? 1 : -1) * (initial_gap_2 + side_2 * this->distance_between_fingers_2);
