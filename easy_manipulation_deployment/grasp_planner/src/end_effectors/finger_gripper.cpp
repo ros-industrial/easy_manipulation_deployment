@@ -1004,37 +1004,45 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     }
     gripper.open_fingers_2.push_back(finger_2_temp);
 
-    int plane_index_2;
-    float plane_dist_diff_2 = std::numeric_limits<float>::max();
-    // std::cout << "Curr gap2: " << gap2 << std::endl;
+    int plane_index_2 = getNearestPlaneIndex(gap2);
+    // float plane_dist_diff_2 = std::numeric_limits<float>::max();
+    // // std::cout << "Curr gap2: " << gap2 << std::endl;
 
-    for (size_t plane_index_2_ = 0; plane_index_2_ < this->cutting_plane_distances.size();
-      plane_index_2_++)
-    {
-      if (std::abs(cutting_plane_distances[plane_index_2_] - gap2) < plane_dist_diff_2) {
-        plane_dist_diff_2 = std::abs(cutting_plane_distances[plane_index_2_] - gap2);
-        plane_index_2 = plane_index_2_;
-      }
-    }
+    // for (size_t plane_index_2_ = 0; plane_index_2_ < this->cutting_plane_distances.size();
+    //   plane_index_2_++)
+    // {
+    //   if (std::abs(cutting_plane_distances[plane_index_2_] - gap2) < plane_dist_diff_2) {
+    //     plane_dist_diff_2 = std::abs(cutting_plane_distances[plane_index_2_] - gap2);
+    //     plane_index_2 = plane_index_2_;
+    //   }
+    // }
     pcl::PointNormal finger_2_point;
     finger_2_point.x = finger_2_temp(0);
     finger_2_point.y = finger_2_temp(1);
     finger_2_point.z = finger_2_temp(2);
+    
+    int point_index_2 = getNearestPointIndex(
+      finger_2_point,
+      this->grasp_samples[plane_index_2]->sample_side_2->finger_nvoxel);
 
-    pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
-    int K = 1;
-    std::vector<int> pointIdxNKNSearch(K);
-    std::vector<float> pointNKNSquaredDistance(K);
-    kdtree.setInputCloud(this->grasp_samples[plane_index_2]->sample_side_2->finger_nvoxel);
+    gripper.closed_fingers_2.push_back(
+      this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[point_index_2]);
+    gripper.closed_fingers_2_index.push_back(point_index_2);
 
-    if (kdtree.nearestKSearch(finger_2_point, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
-      // pcl::PointNormal finger_2_contactpoint;
-      // finger_2_contactpoint = this->
-      // grasp_samples[plane_index_2].sample_side_2.finger_nvoxel->points[pointIdxNKNSearch[0]];
-      gripper.closed_fingers_2.push_back(
-        this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[pointIdxNKNSearch[0]]);
-      gripper.closed_fingers_2_index.push_back(pointIdxNKNSearch[0]);
-    }
+    // pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+    // int K = 1;
+    // std::vector<int> pointIdxNKNSearch(K);
+    // std::vector<float> pointNKNSquaredDistance(K);
+    // kdtree.setInputCloud(this->grasp_samples[plane_index_2]->sample_side_2->finger_nvoxel);
+
+    // if (kdtree.nearestKSearch(finger_2_point, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
+    //   // pcl::PointNormal finger_2_contactpoint;
+    //   // finger_2_contactpoint = this->
+    //   // grasp_samples[plane_index_2].sample_side_2.finger_nvoxel->points[pointIdxNKNSearch[0]];
+    //   gripper.closed_fingers_2.push_back(
+    //     this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[pointIdxNKNSearch[0]]);
+    //   gripper.closed_fingers_2_index.push_back(pointIdxNKNSearch[0]);
+    // }
   }
   for (auto & finger : gripper.closed_fingers_1) {
     Eigen::Vector3f finger_normal(finger->finger_point.normal_x,
