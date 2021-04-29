@@ -60,6 +60,7 @@ void MultiFingerTest::LoadGripper()
     worldXAngleThreshold,
     worldYAngleThreshold,
     worldZAngleThreshold);
+  gripper_.generateGripperAttributes();
     gripper = std::make_shared<FingerGripper>(gripper_);
 }
 
@@ -111,6 +112,10 @@ void MultiFingerTest::GenerateObjectVertical()
   object->get_object_world_angles();
 }
 
+TEST_F(MultiFingerTest, GenerateGripperAttributesTest)
+{
+  
+}
 
 TEST_F(MultiFingerTest, FingerSidesZero)
 {
@@ -1324,3 +1329,34 @@ TEST_F(MultiFingerTest, GetGripperClustersTest3)
   gripper->getGripperClusters();
   EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 6);
 }
+
+TEST_F(MultiFingerTest, getGripperPlaneTest)
+{
+  
+}
+
+TEST_F(MultiFingerTest, getOpenFingerCoordinatesTest)
+{
+  
+}
+
+TEST_F(MultiFingerTest, generateGripperOpenConfigTest)
+{
+  
+}
+
+TEST_F(MultiFingerTest, checkFingerCollisionTest)
+{
+  
+}
+
+TEST_F(MultiFingerTest, getNearestPlaneIndexTest)
+{
+  
+}
+TEST_F(MultiFingerTest, getNearestPointIndexTest)
+{
+  
+}
+
+
