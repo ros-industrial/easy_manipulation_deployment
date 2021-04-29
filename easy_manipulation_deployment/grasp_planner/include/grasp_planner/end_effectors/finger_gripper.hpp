@@ -329,6 +329,12 @@ public:
     const pcl::PointNormal &target_point,
     const pcl::PointCloud < pcl::PointNormal > ::Ptr cloud);
 
+  Eigen::Vector3f getGripperPlane(
+    std::shared_ptr<singleFinger> &finger_sample_1,
+    std::shared_ptr<singleFinger> &finger_sample_2,
+    const Eigen::Vector3f &grasp_direction,
+    const std::shared_ptr<GraspObject> &object);
+
   std::string getID() {return id;}
 };
 

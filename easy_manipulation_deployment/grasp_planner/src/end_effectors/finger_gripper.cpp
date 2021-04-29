@@ -823,28 +823,10 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
             finger_sample_2->finger_point.normal_y,
             finger_sample_2->finger_point.normal_z});
 
-        // TEST
-        pcl::PointXYZ parallel_object_vector = pcl::PointXYZ(
-          object->eigenvectors.col(0)(0) - object->centerpoint(0),
-          object->eigenvectors.col(0)(1) - object->centerpoint(1), object->eigenvectors.col(0)(
-            2) - object->centerpoint(2));
-        Eigen::Vector3f point_on_plane;
-        point_on_plane(0) = (finger_sample_1->finger_point.x + finger_sample_2->finger_point.x) / 2;
-        point_on_plane(1) = (finger_sample_1->finger_point.y + finger_sample_2->finger_point.y) / 2;
-        point_on_plane(2) = (finger_sample_1->finger_point.z + finger_sample_2->finger_point.z) / 2;
-        pcl::ModelCoefficients::Ptr parallel_object_plane(new pcl::ModelCoefficients);
-        parallel_object_plane->values.resize(4);
-        parallel_object_plane->values[0] = parallel_object_vector.x;
-        parallel_object_plane->values[1] = parallel_object_vector.y;
-        parallel_object_plane->values[2] = parallel_object_vector.z;
-        parallel_object_plane->values[3] = -((parallel_object_vector.x * point_on_plane(0)) +
-          (parallel_object_vector.y * point_on_plane(1)) +
-          (parallel_object_vector.z * point_on_plane(2)));
-        Eigen::Vector3f perpendicular_grasp_direction = getPerpendicularVectorInPlane(
-          grasp_direction, parallel_object_plane);
-        Eigen::Vector3f perpendicular_grasp_direction_normalized = perpendicular_grasp_direction /
-          perpendicular_grasp_direction.norm();
-        // END TEST
+        /* Get the vector perpendicular to the grasp direction. This vector will be used to generate
+         the other fingers with reference to the center finger. */
+        
+        Eigen::Vector3f perpendicular_grasp_direction = getGripperPlane(finger_sample_1, finger_sample_2, grasp_direction, object);
 
         std::vector<Eigen::Vector3f> open_coords = getOpenFingerCoordinates(
           grasp_direction,
@@ -1597,6 +1579,39 @@ int FingerGripper::getNearestPointIndex(
   }
 }
 
+/***************************************************************************//**
+ * Method that generates the plane in which a particular gripper lies on 
+ * @param finger_sample_1 Finger sample on side 1
+ * @param finger_sample_2 Finger sample on side 2
+ * @param grasp_direction Vector representing grasp direction
+ * @param object Grasp object
+ ******************************************************************************/
+Eigen::Vector3f FingerGripper::getGripperPlane(
+  std::shared_ptr<singleFinger> &finger_sample_1,
+  std::shared_ptr<singleFinger> &finger_sample_2,
+  const Eigen::Vector3f &grasp_direction,
+  const std::shared_ptr<GraspObject> &object)
+{
+  pcl::PointXYZ parallel_object_vector = pcl::PointXYZ(
+    object->eigenvectors.col(0)(0) - object->centerpoint(0),
+    object->eigenvectors.col(0)(1) - object->centerpoint(1), object->eigenvectors.col(0)(
+      2) - object->centerpoint(2));
+  Eigen::Vector3f point_on_plane;
+  point_on_plane(0) = (finger_sample_1->finger_point.x + finger_sample_2->finger_point.x) / 2;
+  point_on_plane(1) = (finger_sample_1->finger_point.y + finger_sample_2->finger_point.y) / 2;
+  point_on_plane(2) = (finger_sample_1->finger_point.z + finger_sample_2->finger_point.z) / 2;
+  pcl::ModelCoefficients::Ptr parallel_object_plane(new pcl::ModelCoefficients);
+  parallel_object_plane->values.resize(4);
+  parallel_object_plane->values[0] = parallel_object_vector.x;
+  parallel_object_plane->values[1] = parallel_object_vector.y;
+  parallel_object_plane->values[2] = parallel_object_vector.z;
+  parallel_object_plane->values[3] = -((parallel_object_vector.x * point_on_plane(0)) +
+    (parallel_object_vector.y * point_on_plane(1)) +
+    (parallel_object_vector.z * point_on_plane(2)));
+  Eigen::Vector3f perpendicular_grasp_direction = getPerpendicularVectorInPlane(
+    grasp_direction, parallel_object_plane);
+  return perpendicular_grasp_direction;
+}
 
 // void FingerGripper::getBestGrasps(std::shared_ptr<GraspObject> object,
 //   emd_msgs::msg::GraspMethod *grasp_method,
