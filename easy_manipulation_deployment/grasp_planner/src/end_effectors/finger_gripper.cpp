@@ -909,40 +909,21 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     gripper.open_fingers_2.push_back(open_center_finger_2);
   }
 
-  /*Get the initial gap between on each side with respect to the center plane.
-    For an odd number of fingers the initial gap is half the distance between finger
-    (since the point on the center plane is taken)
-    For an even number of fingers the initial gap is the distance between fingers
-    (Since the point on center plane is not taken.)*/
-
-  float initial_gap_1 =
-    (is_even_1 ? this->distance_between_fingers_1 / 2 : this->distance_between_fingers_1);
-  float initial_gap_2 =
-    (is_even_2 ? this->distance_between_fingers_2 / 2 : this->distance_between_fingers_2);
-
-  /* Get the number of iterations to create the entire finger gripper. Each iteration creates a
-     finger above and below the center plane with the given distance. thus for a three finger
-     side, for example, it only requires one iteration. The center finger is taken, plus
-     one iteration to create the top and bottom finger. */
-
-  // int num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
-  // int num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
-
   // Iterate through the points on side 1
   for (int side_1 = 0, updown_toggle_1 = 1; side_1 < this->num_itr_1; side_1 += updown_toggle_1 ^= 1) {
     // Define the distance the current finger is from the center point.
     float gap1;
-    gap1 = (updown_toggle_1 == 0 ? 1 : -1) * (initial_gap_1 + side_1 *
+    gap1 = (updown_toggle_1 == 0 ? 1 : -1) * (this->initial_gap_1 + side_1 *
       this->distance_between_fingers_1);
 
     // Get the coordinates of the current finger in the open configuration
-    Eigen::Vector3f finger_1_temp = open_center_finger_1 + gap1 * plane_normal_normalized;
-    gripper.open_fingers_1.push_back(finger_1_temp);
+    Eigen::Vector3f finger_1_open_temp = open_center_finger_1 + gap1 * plane_normal_normalized;
+    gripper.open_fingers_1.push_back(finger_1_open_temp);
 
     /* Check if this current open configuration for the finger collides with the world,
        since the end effector will approach the object in its open state.*/
 
-    if (checkFingerCollision(finger_1_temp, world_collision_object)) {
+    if (checkFingerCollision(finger_1_open_temp, world_collision_object)) {
       gripper.collides_with_world = true;
     }
 
