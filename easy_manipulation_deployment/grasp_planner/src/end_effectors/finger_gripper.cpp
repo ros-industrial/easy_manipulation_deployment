@@ -853,7 +853,7 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
 
         std::shared_ptr<multiFingerGripper> gripper_sample = generateGripperOpenConfig(
           world_collision_object, finger_sample_1, finger_sample_2,
-          open_coords[0], open_coords[1], perpendicular_grasp_direction_normalized,
+          open_coords[0], open_coords[1], perpendicular_grasp_direction,
           grasp_direction);
 
         // float grasp_plane_angle_cos_ = MathFunctions::getAngleBetweenVectors(
@@ -886,7 +886,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   const std::shared_ptr<singleFinger> closed_center_finger_2,
   const Eigen::Vector3f open_center_finger_1,
   const Eigen::Vector3f open_center_finger_2,
-  Eigen::Vector3f plane_normal_normalized, Eigen::Vector3f grasp_direction)
+  Eigen::Vector3f plane_normal, Eigen::Vector3f grasp_direction)
 {
   // Create an instance of the multifinger gripper.
   multiFingerGripper gripper(closed_center_finger_1, closed_center_finger_2);
@@ -922,7 +922,8 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
       this->distance_between_fingers_1);
 
     // Get the coordinates of the current finger in the open configuration
-    Eigen::Vector3f finger_1_open_temp = open_center_finger_1 + gap1 * plane_normal_normalized;
+    Eigen::Vector3f finger_1_open_temp = MathFunctions::getPointInDirection(open_center_finger_1, plane_normal, gap1);
+    // Eigen::Vector3f finger_1_open_temp = open_center_finger_1 + gap1 * plane_normal_normalized;
     gripper.open_fingers_1.push_back(finger_1_open_temp);
 
     /* Check if this current open configuration for the finger collides with the world,
@@ -969,18 +970,19 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     float gap2;
     gap2 =
       (updown_toggle_2 == 0 ? 1 : -1) * (initial_gap_2 + side_2 * this->distance_between_fingers_2);
-    Eigen::Vector3f finger_2_temp = open_center_finger_2 + gap2 * plane_normal_normalized;
-    if (checkFingerCollision(finger_2_temp, world_collision_object)) {
+    Eigen::Vector3f finger_2_open_temp = MathFunctions::getPointInDirection(open_center_finger_2, plane_normal, gap2);
+    // Eigen::Vector3f finger_2_temp = open_center_finger_2 + gap2 * plane_normal_normalized;
+    if (checkFingerCollision(finger_2_open_temp, world_collision_object)) {
       gripper.collides_with_world = true;
     }
-    gripper.open_fingers_2.push_back(finger_2_temp);
+    gripper.open_fingers_2.push_back(finger_2_open_temp);
 
     int plane_index_2 = getNearestPlaneIndex(gap2);
 
     pcl::PointNormal finger_2_point;
-    finger_2_point.x = finger_2_temp(0);
-    finger_2_point.y = finger_2_temp(1);
-    finger_2_point.z = finger_2_temp(2);
+    finger_2_point.x = finger_2_open_temp(0);
+    finger_2_point.y = finger_2_open_temp(1);
+    finger_2_point.z = finger_2_open_temp(2);
     
     int point_index_2 = getNearestPointIndex(
       finger_2_point,
