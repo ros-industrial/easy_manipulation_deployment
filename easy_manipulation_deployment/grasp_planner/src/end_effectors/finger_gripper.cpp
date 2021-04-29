@@ -258,7 +258,6 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
 
   } else { /*! \brief If both sides are different, the spacing for planes is not consistent,
                       we need to create planes separately */
-    // std::cout << "Both sides unequal" << std::endl;
     bool is_even_fingers_1 = this->num_fingers_side_1 % 2 == 0;
     bool is_even_fingers_2 = this->num_fingers_side_2 % 2 == 0;
 
@@ -267,6 +266,7 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> object)
 
     float initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (is_even_fingers_1 ? 1 : 0));
     float initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (is_even_fingers_2 ? 1 : 0));
+
     addCuttingPlanes(
       object->centerpoint, this->center_cutting_plane, num_itr_1, num_itr_2, initial_gap_1,
       initial_gap_2);
@@ -788,9 +788,6 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
         // Get the vector representing the grasping direction
         Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
           centerpoint_side1_vector, centerpoint_side2_vector).direction();
-        
-        float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
-          grasp_direction, this->center_cutting_plane_normal);
 
         // Find the angle of the normal vector of each point with the grasp direction vector.
         finger_sample_1->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction,
@@ -826,20 +823,6 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
           perpendicular_grasp_direction.norm();
         // END TEST
 
-        // // Get End effector finger clouds
-        // Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
-        // // Get the centerpoint vector of the grasp
-        // Eigen::Vector3f side1_2_centerpoint_vector((centerpoint_side1_vector(
-        //     0) + centerpoint_side2_vector(0)) / 2,
-        //   (centerpoint_side1_vector(1) + centerpoint_side2_vector(1)) / 2,
-        //   (centerpoint_side1_vector(2) + centerpoint_side2_vector(2)) / 2);
-
-        // // Get the initial finger positions in the open configuration from the center plane.
-        // // This may or may not be used depending on number of fingers
-        // Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
-        //   (this->gripper_stroke / 2) * grasp_direction_normalized;
-        // Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
-        //   (this->gripper_stroke / 2) * grasp_direction_normalized;
         std::vector<Eigen::Vector3f> open_coords = getOpenFingerCoordinates(
           grasp_direction,
           centerpoint_side1_vector,
@@ -849,7 +832,10 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
           world_collision_object, finger_sample_1, finger_sample_2,
           open_coords[0], open_coords[1], perpendicular_grasp_direction_normalized,
           grasp_direction);
-        gripper_sample->grasp_plane_angle_cos = grasp_plane_angle_cos_;
+
+        // float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
+        //   grasp_direction, this->center_cutting_plane_normal);
+        // gripper_sample->grasp_plane_angle_cos = grasp_plane_angle_cos_;
         if (!gripper_sample->collides_with_world) {
           valid_open_gripper_configs.push_back(gripper_sample);
         }
@@ -883,6 +869,13 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   gripper.collides_with_world = false;
   bool is_even_1 = this->num_fingers_side_1 % 2 == 0;
   bool is_even_2 = this->num_fingers_side_2 % 2 == 0;
+
+  /* Get the angle between the vector between the grasp direction and the normal of the cutting
+     plane */
+
+  float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
+    grasp_direction, this->center_cutting_plane_normal);
+  gripper.grasp_plane_angle_cos = grasp_plane_angle_cos_;
 
   /* Assuming the gripper is symmetrical, if a side as an odd number of fingers, the center finger
      of that side must correspond to the point on the center plane. Thus pushback the open finger
