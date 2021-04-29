@@ -324,6 +324,9 @@ public:
     Eigen::Vector3f finger_1,
     Eigen::Vector3f finger_2);
   int getNearestPlaneIndex(float target_distance);
+  int getNearestPointIndex(
+    const pcl::PointNormal &target_point,
+    const pcl::PointCloud < pcl::PointNormal > ::Ptr cloud);
 
   std::string getID() {return id;}
 };

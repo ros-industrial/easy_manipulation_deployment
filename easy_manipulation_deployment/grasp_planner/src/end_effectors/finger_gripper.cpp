@@ -1607,6 +1607,32 @@ int FingerGripper::getNearestPlaneIndex(float target_distance)
   return plane_index;
 }
 
+/***************************************************************************//**
+ * Given a vector of planes, find the index of the plane that represents a certain
+ * distance from the center plane.
+ * @param target_distance Distance target plane is from the center plane
+ ******************************************************************************/
+int FingerGripper::getNearestPointIndex(
+  const pcl::PointNormal &target_point,
+  const pcl::PointCloud < pcl::PointNormal > ::Ptr cloud)
+{
+  pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+  // We only need to find 1 neighbour. can be changed later
+  int K = 1;
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+
+  // We already have a set of voxelized points on the correspoinding side, and correspoinding plane.
+  kdtree.setInputCloud(cloud);
+
+  if (kdtree.nearestKSearch(target_point, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
+    return pointIdxNKNSearch[0];
+  }
+  else{
+    return -1;
+  }
+}
+
 
 // void FingerGripper::getBestGrasps(std::shared_ptr<GraspObject> object,
 //   emd_msgs::msg::GraspMethod *grasp_method,
