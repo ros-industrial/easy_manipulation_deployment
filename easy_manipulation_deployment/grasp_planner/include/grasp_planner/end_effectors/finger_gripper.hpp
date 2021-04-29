@@ -323,6 +323,7 @@ public:
     Eigen::Vector3f grasp_direction,
     Eigen::Vector3f finger_1,
     Eigen::Vector3f finger_2);
+  int getNearestPlaneIndex(float target_distance);
 
   std::string getID() {return id;}
 };

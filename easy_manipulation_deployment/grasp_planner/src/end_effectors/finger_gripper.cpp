@@ -1581,11 +1581,37 @@ std::shared_ptr < graspPlaneSample > FingerGripper::generateGraspSamples(
   return(std::make_shared<graspPlaneSample>(grasp_sample));  
 }
 
+/***************************************************************************//**
+ * Given a vector of planes, find the index of the plane that represents a certain
+ * distance from the center plane.
+ * @param target_distance Distance target plane is from the center plane
+ ******************************************************************************/
+
+int FingerGripper::getNearestPlaneIndex(float target_distance)
+{
+  float plane_dist_diff = std::numeric_limits<float>::max();
+  int plane_index;
+
+  /* We use the gap from the open configuration finger to compare with the cutting plane
+      gaps to find the most identical distance between the center plane to that plane, and
+      that will be the plane index that corresponds to the correct plane */
+
+  for (size_t plane_index_ = 0; plane_index_ < this->cutting_plane_distances.size();
+    plane_index_++)
+  {
+    if (std::abs(this->cutting_plane_distances[plane_index_] - target_distance) < plane_dist_diff) {
+      plane_dist_diff = std::abs(cutting_plane_distances[plane_index_] - target_distance);
+      plane_index = plane_index_;
+    }
+  }
+  return plane_index;
+}
+
+
 // void FingerGripper::getBestGrasps(std::shared_ptr<GraspObject> object,
 //   emd_msgs::msg::GraspMethod *grasp_method,
 //   std::shared_ptr<fcl::CollisionObject<float>> world_collision_object)
 // {
-
 //   std::vector<std::future<void>> futures_1;
 //   auto GetBestGrasps1 = [this](
 //     int i,
