@@ -312,6 +312,12 @@ public:
     Eigen::Vector3f point_on_plane,
     float dist_to_center_plane,
     int plane_index);
+
+  std::vector<Eigen::Vector3f> getOpenFingerCoordinates(
+    Eigen::Vector3f grasp_direction,
+    Eigen::Vector3f finger_1,
+    Eigen::Vector3f finger_2);
+
   std::string getID() {return id;}
 };
 

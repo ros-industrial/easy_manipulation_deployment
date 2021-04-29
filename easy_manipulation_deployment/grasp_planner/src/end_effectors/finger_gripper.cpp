@@ -826,23 +826,28 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
           perpendicular_grasp_direction.norm();
         // END TEST
 
-        // Get End effector finger clouds
-        Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
-        // Get the centerpoint vector of the grasp
-        Eigen::Vector3f side1_2_centerpoint_vector((centerpoint_side1_vector(
-            0) + centerpoint_side2_vector(0)) / 2,
-          (centerpoint_side1_vector(1) + centerpoint_side2_vector(1)) / 2,
-          (centerpoint_side1_vector(2) + centerpoint_side2_vector(2)) / 2);
+        // // Get End effector finger clouds
+        // Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
+        // // Get the centerpoint vector of the grasp
+        // Eigen::Vector3f side1_2_centerpoint_vector((centerpoint_side1_vector(
+        //     0) + centerpoint_side2_vector(0)) / 2,
+        //   (centerpoint_side1_vector(1) + centerpoint_side2_vector(1)) / 2,
+        //   (centerpoint_side1_vector(2) + centerpoint_side2_vector(2)) / 2);
 
-        // Get the initial finger positions in the open configuration from the center plane.
-        // This may or may not be used depending on number of fingers
-        Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
-          (this->gripper_stroke / 2) * grasp_direction_normalized;
-        Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
-          (this->gripper_stroke / 2) * grasp_direction_normalized;
+        // // Get the initial finger positions in the open configuration from the center plane.
+        // // This may or may not be used depending on number of fingers
+        // Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
+        //   (this->gripper_stroke / 2) * grasp_direction_normalized;
+        // Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
+        //   (this->gripper_stroke / 2) * grasp_direction_normalized;
+        std::vector<Eigen::Vector3f> open_coords = getOpenFingerCoordinates(
+          grasp_direction,
+          centerpoint_side1_vector,
+          centerpoint_side2_vector);
+
         std::shared_ptr<multiFingerGripper> gripper_sample = generateGripperOpenConfig(
           world_collision_object, finger_sample_1, finger_sample_2,
-          open_center_finger_1, open_center_finger_2, perpendicular_grasp_direction_normalized,
+          open_coords[0], open_coords[1], perpendicular_grasp_direction_normalized,
           grasp_direction);
         gripper_sample->grasp_plane_angle_cos = grasp_plane_angle_cos_;
         if (!gripper_sample->collides_with_world) {
@@ -1330,6 +1335,38 @@ Eigen::Vector3f FingerGripper::getPerpendicularVectorInPlane(
   float z_temp = y_temp * (-y_bar / z_bar);
   Eigen::Vector3f output_vector(x_temp, y_temp, z_temp);
   return output_vector;
+}
+
+/***************************************************************************//**
+ * Given the contact points of 2 fingers on the surface of an object, find the
+ * coordinates of the initial open configuration of the fingers depending on the
+ * stroke
+ * @param grasp_direction Vector representing the grasp direction
+ * @param finger_1 Coordinates of finger at side 1
+ * @param finger_2 Coordinates of finger at side 2
+ ******************************************************************************/
+
+std::vector<Eigen::Vector3f> FingerGripper::getOpenFingerCoordinates(
+  Eigen::Vector3f grasp_direction,
+  Eigen::Vector3f finger_1,
+  Eigen::Vector3f finger_2)
+{
+  Eigen::Vector3f grasp_direction_normalized = grasp_direction / grasp_direction.norm();
+  // Get the centerpoint vector of the grasp
+  Eigen::Vector3f side1_2_centerpoint_vector(
+    (finger_1(0) + finger_2(0)) / 2,
+    (finger_1(1) + finger_2(1)) / 2,
+    (finger_1(2) + finger_2(2)) / 2);
+
+  // Get the initial finger positions in the open configuration from the center plane.
+  // This may or may not be used depending on number of fingers
+  Eigen::Vector3f open_center_finger_1 = side1_2_centerpoint_vector -
+    (this->gripper_stroke / 2) * grasp_direction_normalized;
+  Eigen::Vector3f open_center_finger_2 = side1_2_centerpoint_vector +
+    (this->gripper_stroke / 2) * grasp_direction_normalized;
+
+  std::vector<Eigen::Vector3f> result{open_center_finger_1, open_center_finger_2};
+  return result;
 }
 
 void FingerGripper::resetVariables()
