@@ -828,11 +828,13 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
         
         Eigen::Vector3f perpendicular_grasp_direction = getGripperPlane(finger_sample_1, finger_sample_2, grasp_direction, object);
 
+        /* Get the coordinates of the open finger configuration of the center fingers of the gripper */
         std::vector<Eigen::Vector3f> open_coords = getOpenFingerCoordinates(
           grasp_direction,
           centerpoint_side1_vector,
           centerpoint_side2_vector);
 
+        /* With the open configuration of the center fingers, generate the rest of the open configuration grippers */
         std::shared_ptr<multiFingerGripper> gripper_sample = generateGripperOpenConfig(
           world_collision_object, finger_sample_1, finger_sample_2,
           open_coords[0], open_coords[1], perpendicular_grasp_direction,
@@ -1556,7 +1558,8 @@ int FingerGripper::getNearestPlaneIndex(float target_distance)
 /***************************************************************************//**
  * Given a vector of planes, find the index of the plane that represents a certain
  * distance from the center plane.
- * @param target_distance Distance target plane is from the center plane
+ * @param target_point target point of reference 
+ * @param cloud cloud to search
  ******************************************************************************/
 int FingerGripper::getNearestPointIndex(
   const pcl::PointNormal &target_point,
