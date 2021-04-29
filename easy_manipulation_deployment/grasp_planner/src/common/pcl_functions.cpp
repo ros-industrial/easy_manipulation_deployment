@@ -361,21 +361,6 @@
     output_sphere_cloud->width = output_sphere_cloud->points.size();
   }
 
-  float PCLFunctions::normalize(const float & target, const float & min, const float & max)
-  {
-    return (target + 1e-8 - min) / (max - min);
-  }
-
-  float PCLFunctions::normalizeInt(const int & target, const int & min, const int & max)
-  {
-    return float(target - min) / float(max - min);
-  }
-
-  float PCLFunctions::getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2)
-  {
-    return(1e-8 + std::abs((vector_1.dot(vector_2)) /(vector_1.norm() * vector_2.norm())));
-  }
-
   void PCLFunctions::createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer)
   {
     pcl::PointCloud < pcl::PointXYZRGB > ::Ptr rectangle_cloud(
