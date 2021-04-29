@@ -33,7 +33,10 @@ float MathFunctions::getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vec
   return(1e-8 + std::abs((vector_1.dot(vector_2)) /(vector_1.norm() * vector_2.norm())));
 }
 
-Eigen::Vector3f MathFunctions::getPointInDirection(Eigen::Vector3f base_point, Eigen::Vector3f vector_direction, float distance)
+Eigen::Vector3f MathFunctions::getPointInDirection(
+  Eigen::Vector3f base_point,
+  Eigen::Vector3f vector_direction,
+  float distance)
 {
   Eigen::Vector3f direction_normalized = vector_direction/vector_direction.norm();
   return(base_point + distance * direction_normalized);
