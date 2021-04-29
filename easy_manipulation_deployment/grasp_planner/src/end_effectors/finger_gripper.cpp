@@ -950,50 +950,44 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
        so we next need to find the finger point on the object corresponding to the current
        open configuration of the finger */
 
-    // First, find the plane in which we need to find this point
-    int plane_index;
-    float plane_dist_diff = std::numeric_limits<float>::max();
+    // Find the index of the closest cutting plane with the given gap from the center finger
+    int plane_index = getNearestPlaneIndex(gap1);
 
-    /* We use the gap from the open configuration finger to compare with the cutting plane
-       gaps to find the most identical distance between the center plane to that plane, and
-       that will be the plane index that corresponds to the correct plane */
-
-    for (size_t plane_index_ = 0; plane_index_ < this->cutting_plane_distances.size();
-      plane_index_++)
-    {
-      if (std::abs(cutting_plane_distances[plane_index_] - gap1) < plane_dist_diff) {
-        plane_dist_diff = std::abs(cutting_plane_distances[plane_index_] - gap1);
-        plane_index = plane_index_;
-      }
-    }
-
-    /* Now that we find the plane, we need to find the point near that plane.
-     this is done using the kdtree search function */
+    // Now that we find the plane, we need to find the point near that plane.
     pcl::PointNormal finger_1_point;
-    finger_1_point.x = finger_1_temp(0);
-    finger_1_point.y = finger_1_temp(1);
-    finger_1_point.z = finger_1_temp(2);
-    pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
-    // We only need to find 1 neighbour. can be changed later
-    int K = 1;
-    std::vector<int> pointIdxNKNSearch(K);
-    std::vector<float> pointNKNSquaredDistance(K);
-    // We already have a set of voxelized points on the correspoinding side, and correspoinding plane.
-    kdtree.setInputCloud(this->grasp_samples[plane_index]->sample_side_1->finger_nvoxel);
+    finger_1_point.x = finger_1_open_temp(0);
+    finger_1_point.y = finger_1_open_temp(1);
+    finger_1_point.z = finger_1_open_temp(2);
 
-    // std::cout << "Open Point at: " << finger_1_point.x <<
-    // "," << finger_1_point.y << "," << finger_1_point.z << std::endl;
+    int point_index = getNearestPointIndex(
+      finger_1_point,
+      this->grasp_samples[plane_index]->sample_side_1->finger_nvoxel);
 
-    if (kdtree.nearestKSearch(finger_1_point, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
-      // pcl::PointNormal finger_1_contactpoint;
-      // finger_1_contactpoint = this->
-      // grasp_samples[plane_index].sample_side_1.finger_nvoxel->points[pointIdxNKNSearch[0]];
-      // std::cout << "Real Point at: " << finger_1_contactpoint.x << "," <<
-      //  finger_1_contactpoint.y << "," << finger_1_contactpoint.z << std::endl;
-      gripper.closed_fingers_1.push_back(
-        this->grasp_samples[plane_index]->sample_side_1->finger_samples[pointIdxNKNSearch[0]]);
-      gripper.closed_fingers_1_index.push_back(pointIdxNKNSearch[0]);
-    }
+    gripper.closed_fingers_1.push_back(
+      this->grasp_samples[plane_index]->sample_side_1->finger_samples[point_index]);
+    gripper.closed_fingers_1_index.push_back(point_index);
+
+    // pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+    // // We only need to find 1 neighbour. can be changed later
+    // int K = 1;
+    // std::vector<int> pointIdxNKNSearch(K);
+    // std::vector<float> pointNKNSquaredDistance(K);
+    // // We already have a set of voxelized points on the correspoinding side, and correspoinding plane.
+    // kdtree.setInputCloud(this->grasp_samples[plane_index]->sample_side_1->finger_nvoxel);
+
+    // // std::cout << "Open Point at: " << finger_1_point.x <<
+    // // "," << finger_1_point.y << "," << finger_1_point.z << std::endl;
+
+    // if (kdtree.nearestKSearch(finger_1_point, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
+    //   // pcl::PointNormal finger_1_contactpoint;
+    //   // finger_1_contactpoint = this->
+    //   // grasp_samples[plane_index].sample_side_1.finger_nvoxel->points[pointIdxNKNSearch[0]];
+    //   // std::cout << "Real Point at: " << finger_1_contactpoint.x << "," <<
+    //   //  finger_1_contactpoint.y << "," << finger_1_contactpoint.z << std::endl;
+    //   gripper.closed_fingers_1.push_back(
+    //     this->grasp_samples[plane_index]->sample_side_1->finger_samples[pointIdxNKNSearch[0]]);
+    //   gripper.closed_fingers_1_index.push_back(pointIdxNKNSearch[0]);
+    // }
   }
 
   // Iterate through the points on side 2
