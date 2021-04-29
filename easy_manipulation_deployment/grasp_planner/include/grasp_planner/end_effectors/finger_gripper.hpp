@@ -222,9 +222,14 @@ public:
   std::vector < int > plane_2_index;
   std::vector < std::vector < std::shared_ptr < singleFinger >> > gripper_clusters;
   std::vector < std::vector < std::shared_ptr < singleFinger >> > gripper_clusters_flipped;
-
   std::vector < std::shared_ptr < multiFingerGripper >> sorted_gripper_configs;
 
+  bool is_even_1;
+  bool is_even_2;
+  float initial_gap_1;
+  float initial_gap_2;
+  int num_itr_1;
+  int num_itr_2;
 
   FingerGripper(
     std::string id_,
@@ -242,6 +247,7 @@ public:
     const float worldXAngleThreshold_,
     const float worldYAngleThreshold_,
     const float worldZAngleThreshold_);
+  void generateGripperAttributes();
   bool getInitialSamplePoints(const std::shared_ptr < GraspObject > object);
   void getInitialSampleCloud(const std::shared_ptr < GraspObject > object);
   bool getGraspCloud(const std::shared_ptr < GraspObject > object);
