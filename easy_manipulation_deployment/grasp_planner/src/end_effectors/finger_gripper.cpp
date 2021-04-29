@@ -683,14 +683,14 @@ void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
         std::shared_ptr<graspPlaneSample> & sample) -> void
         {
           Eigen::Vector3f curr1_vector(point.x, point.y, point.z);
-          float centroid_dist = PCLFunctions::normalize(
+          float centroid_dist = MathFunctions::normalize(
             pcl::geometry::distance(point, centroid_point),
             sample->sample_side_1->centroid_dist_min, sample->sample_side_1->centroid_dist_max);
-          float grasp_plane_dist = PCLFunctions::normalize(
+          float grasp_plane_dist = MathFunctions::normalize(
             PCLFunctions::pointToPlane(sample->plane_eigen, point),
             sample->sample_side_1->grasp_plane_dist_min,
             sample->sample_side_1->grasp_plane_dist_max);
-          float curvature = PCLFunctions::normalize(
+          float curvature = MathFunctions::normalize(
             point.curvature,
             sample->sample_side_1->curvature_min, sample->sample_side_1->curvature_max);
           singleFinger finger(point, centroid_dist, grasp_plane_dist, curvature,
@@ -705,14 +705,14 @@ void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
         std::shared_ptr<graspPlaneSample> & sample) -> void
         {
           Eigen::Vector3f curr2_vector(point.x, point.y, point.z);
-          float centroid_dist = PCLFunctions::normalize(
+          float centroid_dist = MathFunctions::normalize(
             pcl::geometry::distance(point, centroid_point),
             sample->sample_side_2->centroid_dist_min, sample->sample_side_2->centroid_dist_max);
-          float grasp_plane_dist = PCLFunctions::normalize(
+          float grasp_plane_dist = MathFunctions::normalize(
             PCLFunctions::pointToPlane(sample->plane_eigen, point),
             sample->sample_side_2->grasp_plane_dist_min,
             sample->sample_side_2->grasp_plane_dist_max);
-          float curvature = PCLFunctions::normalize(
+          float curvature = MathFunctions::normalize(
             point.curvature,
             sample->sample_side_2->curvature_min, sample->sample_side_2->curvature_max);
           singleFinger finger(point, centroid_dist, grasp_plane_dist, curvature,
@@ -813,12 +813,12 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
           centerpoint_side1_vector, centerpoint_side2_vector).direction();
 
         // Find the angle of the normal vector of each point with the grasp direction vector.
-        finger_sample_1->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction,
+        finger_sample_1->angle_cos = MathFunctions::getAngleBetweenVectors(grasp_direction,
           {finger_sample_1->finger_point.normal_x,
             finger_sample_1->finger_point.normal_y,
             finger_sample_1->finger_point.normal_z});
 
-        finger_sample_2->angle_cos = PCLFunctions::getAngleBetweenVectors(grasp_direction,
+        finger_sample_2->angle_cos = MathFunctions::getAngleBetweenVectors(grasp_direction,
           {finger_sample_2->finger_point.normal_x,
             finger_sample_2->finger_point.normal_y,
             finger_sample_2->finger_point.normal_z});
@@ -856,7 +856,7 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
           open_coords[0], open_coords[1], perpendicular_grasp_direction_normalized,
           grasp_direction);
 
-        // float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
+        // float grasp_plane_angle_cos_ = MathFunctions::getAngleBetweenVectors(
         //   grasp_direction, this->center_cutting_plane_normal);
         // gripper_sample->grasp_plane_angle_cos = grasp_plane_angle_cos_;
         if (!gripper_sample->collides_with_world) {
@@ -897,7 +897,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   /* Get the angle between the vector between the grasp direction and the normal of the cutting
      plane */
 
-  float grasp_plane_angle_cos_ = PCLFunctions::getAngleBetweenVectors(
+  float grasp_plane_angle_cos_ = MathFunctions::getAngleBetweenVectors(
     grasp_direction, this->center_cutting_plane_normal);
   gripper.grasp_plane_angle_cos = grasp_plane_angle_cos_;
 
@@ -1659,7 +1659,7 @@ int FingerGripper::getNearestPointIndex(
 //       Eigen::Vector3f curr2_vector(curr2_point.x, curr2_point.y, curr2_point.z);
 //       float curr1_curr2_dist = pcl::geometry::distance(curr1_point, curr2_point);
 //       float initial1_curr2_dist = pcl::geometry::distance(this->sample_point_1, curr2_point);
-//       float curr2_centroid_dist = PCLFunctions::normalize(
+//       float curr2_centroid_dist = MathFunctions::normalize(
 //         pcl::geometry::distance(curr2_point, centroid_point),
 //         this->centroid_dist_2_min, this->centroid_dist_2_max);
 //       // Points are closer to the centroid than initials: points on the surface!
@@ -1731,13 +1731,13 @@ int FingerGripper::getNearestPointIndex(
 //       float curr2_angle_cos = epsilon +
 //         std::abs((grasp_direction.dot(curr2_normal)) /
 //           (grasp_direction.norm() * curr2_normal.norm()));
-//       float curr2_grasp_plane_dist = PCLFunctions::normalize(
+//       float curr2_grasp_plane_dist = MathFunctions::normalize(
 //       PCLFunctions::pointToPlane(this->center_cutting_plane, curr2_point),
 //       this->grasp_plane_dist_2_min, this->grasp_plane_dist_2_max);
-//       // float curr2_grasp_plane_dist = PCLFunctions::normalize(
+//       // float curr2_grasp_plane_dist = MathFunctions::normalize(
 //       // PCLFunctions::pointToPlane(object->grasp_plane, curr2_point),
 //       // object->grasp_plane_dist_2_min, object->grasp_plane_dist_2_max);
-//       float curr2_curvature = PCLFunctions::normalize(curr2_point.curvature,
+//       float curr2_curvature = MathFunctions::normalize(curr2_point.curvature,
 //         this->curvature_2_min, this->curvature_2_max);
 //       float grasp_rank = getGraspQuality(grasp_plane_angle_cos,
 //         curr1_curvature, curr1_grasp_plane_dist, curr1_angle_cos,
@@ -1773,7 +1773,7 @@ int FingerGripper::getNearestPointIndex(
 //     pcl::PointNormal curr1_point = this->grasp_1_nvoxel->points[i];
 //     Eigen::Vector3f curr1_vector(curr1_point.x, curr1_point.y, curr1_point.z);
 //     float curr1_initial2_dist = pcl::geometry::distance(curr1_point, this->sample_point_2);
-//     float curr1_centroid_dist = PCLFunctions::normalize(
+//     float curr1_centroid_dist = MathFunctions::normalize(
 //       pcl::geometry::distance(curr1_point, centroid_point),
 //       this->centroid_dist_1_min, this->centroid_dist_1_max);
 //     // If the first point centroid distance is lesser than the initial first point
@@ -1786,13 +1786,13 @@ int FingerGripper::getNearestPointIndex(
 //     {
 //       //continue;
 //     }
-//     float curr1_grasp_plane_dist = PCLFunctions::normalize(
+//     float curr1_grasp_plane_dist = MathFunctions::normalize(
 //       PCLFunctions::pointToPlane(this->center_cutting_plane, curr1_point),
 //       this->grasp_plane_dist_1_min, this->grasp_plane_dist_1_max);
-//     // float curr1_grasp_plane_dist = PCLFunctions::normalize(
+//     // float curr1_grasp_plane_dist = MathFunctions::normalize(
 //     //   PCLFunctions::pointToPlane(object->grasp_plane, curr1_point),
 //     //   object->grasp_plane_dist_1_min, object->grasp_plane_dist_1_max);
-//     float curr1_curvature = PCLFunctions::normalize(curr1_point.curvature,
+//     float curr1_curvature = MathFunctions::normalize(curr1_point.curvature,
 //       this->curvature_1_min, this->curvature_1_max);
 //     for(int j = 0 ; j < static_cast<int>(this->grasp_2_nvoxel->points.size()); j++)
 //     {
@@ -1826,9 +1826,9 @@ int FingerGripper::getNearestPointIndex(
 //     centroid_point);
 //   float initial_2_centroid_dist = pcl::geometry::distance(this->sample_point_2,
 //     centroid_point);
-//   initial_1_centroid_dist = PCLFunctions::normalize(initial_1_centroid_dist,
+//   initial_1_centroid_dist = MathFunctions::normalize(initial_1_centroid_dist,
 //     this->centroid_dist_1_min, this->centroid_dist_1_max);
-//   initial_2_centroid_dist = PCLFunctions::normalize(initial_2_centroid_dist,
+//   initial_2_centroid_dist = MathFunctions::normalize(initial_2_centroid_dist,
 //     this->centroid_dist_2_min, this->centroid_dist_2_max);
 //   for(int i = 0 ; i < static_cast<int>(this->grasp_1_nvoxel->points.size()); i++)
 //   {

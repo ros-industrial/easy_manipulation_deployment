@@ -456,15 +456,15 @@ void SuctionGripper::getAllGraspRanks(
   // grasp_method->grasp_poses.clear();
   // grasp_method->grasp_ranks.clear();
   for (auto grasp : this->cup_array_samples) {
-    float contact_points_norm = PCLFunctions::normalizeInt(
+    float contact_points_norm = MathFunctions::normalizeInt(
       grasp->total_contact_points,
       this->min_contact_points, this->max_contact_points);
 
-    float curvature_norm = PCLFunctions::normalize(
+    float curvature_norm = MathFunctions::normalize(
       grasp->average_curvature,
       this->min_curvature, this->max_curvature);
 
-    float grasp_center_norm = PCLFunctions::normalize(
+    float grasp_center_norm = MathFunctions::normalize(
       grasp->center_dist,
       this->min_center_dist, this->max_center_dist);
 

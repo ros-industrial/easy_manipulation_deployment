@@ -54,6 +54,7 @@
 // EMD libraries
 #include "grasp_planner/common/pcl_functions.hpp"
 #include "grasp_planner/common/fcl_functions.hpp"
+#include "grasp_planner/common/math_functions.hpp"
 #include "grasp_planner/end_effectors/end_effector.hpp"
 
 

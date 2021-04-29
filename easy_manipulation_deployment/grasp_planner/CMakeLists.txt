@@ -58,6 +58,7 @@ add_library(grasp_planning_interface
   src/end_effectors/suction_gripper.cpp
   src/common/pcl_functions.cpp
   src/common/fcl_functions.cpp
+  src/common/math_functions.cpp
 
 )
 
