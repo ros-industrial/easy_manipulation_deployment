@@ -112,9 +112,72 @@ void MultiFingerTest::GenerateObjectVertical()
   object->get_object_world_angles();
 }
 
-TEST_F(MultiFingerTest, GenerateGripperAttributesTest)
+TEST_F(MultiFingerTest, GenerateGripperAttributesTestEvenOdd)
 {
-  
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0;
+  ASSERT_NO_THROW(LoadGripper());
+  EXPECT_TRUE(gripper->is_even_1);
+  EXPECT_FALSE(gripper->is_even_2);
+  EXPECT_NEAR(0.005, gripper->initial_gap_1, 0.0001);
+  EXPECT_NEAR(0, gripper->initial_gap_2, 0.0001);
+  EXPECT_EQ(1, gripper->num_itr_1);
+  EXPECT_EQ(0, gripper->num_itr_2);
+}
+
+TEST_F(MultiFingerTest, GenerateGripperAttributesTestOddEven)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 6;
+  distance_between_fingers_1 = 0.03;
+  distance_between_fingers_2 = 0.02;
+  ASSERT_NO_THROW(LoadGripper());
+  EXPECT_FALSE(gripper->is_even_1);
+  EXPECT_TRUE(gripper->is_even_2);
+  EXPECT_NEAR(0.03, gripper->initial_gap_1, 0.0001);
+  EXPECT_NEAR(0.01, gripper->initial_gap_2, 0.0001);
+  EXPECT_EQ(1, gripper->num_itr_1);
+  EXPECT_EQ(3, gripper->num_itr_2);
+}
+
+TEST_F(MultiFingerTest, GenerateGripperAttributesTestOddOdd)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 5;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.06;
+  ASSERT_NO_THROW(LoadGripper());
+  EXPECT_FALSE(gripper->is_even_1);
+  EXPECT_FALSE(gripper->is_even_2);
+  EXPECT_NEAR(0.02, gripper->initial_gap_1, 0.0001);
+  EXPECT_NEAR(0.06, gripper->initial_gap_2, 0.0001);
+  EXPECT_EQ(1, gripper->num_itr_1);
+  EXPECT_EQ(2, gripper->num_itr_2);
+}
+
+TEST_F(MultiFingerTest, GenerateGripperAttributesTestEvenEven)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  EXPECT_TRUE(gripper->is_even_1);
+  EXPECT_TRUE(gripper->is_even_2);
+  EXPECT_NEAR(0.03, gripper->initial_gap_1, 0.0001);
+  EXPECT_NEAR(0.005, gripper->initial_gap_2, 0.0001);
+  EXPECT_EQ(1, gripper->num_itr_1);
+  EXPECT_EQ(2, gripper->num_itr_2);
 }
 
 TEST_F(MultiFingerTest, FingerSidesZero)
