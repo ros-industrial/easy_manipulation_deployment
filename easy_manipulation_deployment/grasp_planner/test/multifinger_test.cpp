@@ -1395,31 +1395,209 @@ TEST_F(MultiFingerTest, GetGripperClustersTest3)
 
 TEST_F(MultiFingerTest, getGripperPlaneTest)
 {
-  
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  pcl::PointNormal finger_point_1;
+  finger_point_1.x = -0.005;
+  finger_point_1.y = 0.025;
+  finger_point_1.z = 0.01;
+  pcl::PointNormal finger_point_2;
+  finger_point_2.x = 0.015;
+  finger_point_2.y = 0.025;
+  finger_point_2.z = 0.01;
+  Eigen::Vector3f finger_point_1_eigen(-0.005, 0.025, 0.01);
+  Eigen::Vector3f finger_point_2_eigen(0.015, 0.025, 0.01);
+
+  Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
+          finger_point_1_eigen, finger_point_2_eigen).direction();
+  auto finger_1 = std::make_shared<singleFinger>(
+    finger_point_1,
+    0,0,0,0
+  );
+  auto finger_2 = std::make_shared<singleFinger>(
+    finger_point_2,
+    0,0,0,0
+  );
+  Eigen::Vector3f output_vec = gripper->getGripperPlane(
+    finger_1,
+    finger_2,
+    grasp_direction,
+    object
+  );
+
+  float dot_pdt = output_vec.dot(grasp_direction);
+  ASSERT_NEAR(0, dot_pdt, 0.00001);
+  // Must be perpendicular to the grasp direction
 }
 
 TEST_F(MultiFingerTest, getOpenFingerCoordinatesTest)
 {
+  GenerateObjectVertical();
+  ResetVariables();
+  gripper_stroke = 0.04;
+  ASSERT_NO_THROW(LoadGripper());
+  
+  Eigen::Vector3f closed_finger_point_1(0.06, 0.03, 0.03);
+  Eigen::Vector3f closed_finger_point_2(0.06, 0.03, 0.01);
+  Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
+          closed_finger_point_1, closed_finger_point_2).direction();
+  std::vector<Eigen::Vector3f> open_fingers = gripper->getOpenFingerCoordinates(
+    grasp_direction, closed_finger_point_1, closed_finger_point_2);
+  
+  EXPECT_EQ(2, static_cast<int>(open_fingers.size()));
+  EXPECT_NEAR(0.06, open_fingers[0](0), 0.00001);
+  EXPECT_NEAR(0.03, open_fingers[0](1), 0.00001);
+  EXPECT_NEAR(0.04, open_fingers[0](2), 0.00001);
+
+  EXPECT_NEAR(0.06, open_fingers[1](0), 0.00001);
+  EXPECT_NEAR(0.03, open_fingers[1](1), 0.00001);
+  EXPECT_NEAR(0, open_fingers[1](2), 0.00001);
   
 }
 
-TEST_F(MultiFingerTest, generateGripperOpenConfigTest)
-{
-  
-}
-
+//ERRORS WITH EIGEN + FCL. CHeck again
 TEST_F(MultiFingerTest, checkFingerCollisionTest)
 {
+  // GenerateObjectVertical();
+  // ResetVariables();
+  // gripper_stroke = 0.04;
+  // ASSERT_NO_THROW(LoadGripper());
+
   
+  // grasp_planner::collision::Box * collision_object_shape =
+  //   new grasp_planner::collision::Box(0.01, 0.05, 0.02);
+
+  // grasp_planner::collision::Transform finger_transform;
+  
+  // // fcl::Transform3<float> collision_object_transform = fcl::Transform3<float>::Identity();
+  // grasp_planner::collision::Transform collision_object_transform;
+  // collision_object_transform.setIdentity();
+
+  // #if FCL_VERSION_0_6_OR_HIGHER == 1
+  //   std::cout << " Version 0.6 or higher is 1" << std::endl;
+  //   collision_object_transform.translation() << 0, 0, 0;
+  // #else
+  //   std::cout << " Version 0.6 or higher is zero" << std::endl;
+  //   collision_object_transform.setTranslation(
+  //     grasp_planner::collision::Vector(0, 0, 0));
+  // #endif
+
+  // grasp_planner::collision::CollisionObject collision_object(
+  //   std::shared_ptr<grasp_planner::collision::CollisionGeometry>(collision_object_shape), fcl::Transform3<float>::Identity());
+
+  // std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr =
+  //   std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
+
+  // Eigen::Vector3f finger_point_sample_center(0.005, 0.025, 0.01);
+  // EXPECT_TRUE(gripper->checkFingerCollision(finger_point_sample_center, collision_object_ptr));
 }
 
 TEST_F(MultiFingerTest, getNearestPlaneIndexTest)
 {
-  
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  EXPECT_EQ(0, gripper->getNearestPlaneIndex(0));
+  EXPECT_EQ(1, gripper->getNearestPlaneIndex(-0.03));
+  EXPECT_EQ(2, gripper->getNearestPlaneIndex(0.015));
+  EXPECT_EQ(3, gripper->getNearestPlaneIndex(-0.01));
+  EXPECT_EQ(3, gripper->getNearestPlaneIndex(-0.004));
+  EXPECT_EQ(4, gripper->getNearestPlaneIndex(0.003));
 }
+
 TEST_F(MultiFingerTest, getNearestPointIndexTest)
 {
-  
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  EXPECT_TRUE(static_cast<int>(gripper->gripper_clusters.size()) == 0);
+  gripper->getGripperClusters();
+  pcl::PointNormal midpoint;
+  midpoint.x = 0.005;
+  midpoint.y = 0.025;
+  midpoint.z = 0.01;
+  EXPECT_TRUE(gripper->getNearestPointIndex(midpoint, object->cloud_normal) > 0);
+
+  pcl::PointNormal origin;
+  origin.x = 0;
+  origin.y = 0;
+  origin.z = 0;
+  EXPECT_TRUE(gripper->getNearestPointIndex(origin, object->cloud_normal) == 0);
+
+  pcl::PointNormal bottom_corner;
+  midpoint.x = 0.01;
+  midpoint.y = 0.05;
+  midpoint.z = 0.02;
+  EXPECT_TRUE(gripper->getNearestPointIndex(midpoint, object->cloud_normal) ==
+    static_cast<int>(object->cloud_normal->points.size()) - 1);
 }
 
+TEST_F(MultiFingerTest, generateGripperOpenConfigTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+}
 
+TEST_F(MultiFingerTest, getAllGripperConfigsTest)
+{
+
+}
+
+TEST_F(MultiFingerTest, getGraspPoseTest)
+{
+
+}
+
+TEST_F(MultiFingerTest, getGripperRankTest)
+{
+
+}
+
+TEST_F(MultiFingerTest, getAllRanksTest)
+{
+
+}

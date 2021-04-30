@@ -20,11 +20,24 @@
 #include <gtest/gtest.h>
 #include "grasp_planner/end_effectors/finger_gripper.hpp"
 #include "grasp_planner/common/pcl_functions.hpp"
+#include "grasp_planner/common/fcl_types.hpp"
 #include "grasp_planner/grasp_object.hpp"
+
+// Other Libraries
+#include <math.h>
+#include <stdlib.h>
+#include <chrono>
+#include <iostream>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <vector>
+#include <limits>
 
 class MultiFingerTest : public ::testing::Test
 {
 public:
+  using CollisionObject = grasp_planner::collision::CollisionObject;
   std::shared_ptr<GraspObject> object;
   std::string id;
   int num_fingers_side_1;
