@@ -17,10 +17,17 @@
 #include "grasp_planner/common/math_functions.hpp"
 
 
-
 float MathFunctions::normalize(const float & target, const float & min, const float & max)
 {
-  return (target + 1e-8 - min) / (max - min);
+  if(target == min && min == max)
+  {
+    return 1;
+  }
+  else
+  {
+    return (target - min) / (max - min);
+  }
+  //return (target + 1e-8 - min) / (max - min);
 }
 
 float MathFunctions::normalizeInt(const int & target, const int & min, const int & max)
