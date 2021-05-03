@@ -1278,25 +1278,26 @@ Eigen::Vector3f FingerGripper::getPerpendicularVectorInPlane(
   Eigen::Vector3f target_vector,
   pcl::ModelCoefficients::Ptr plane)
 {
-  Eigen::Vector4f plane_vector(plane->values[0], plane->values[1], plane->values[2],
-    plane->values[3]);
+  // Eigen::Vector4f plane_vector(plane->values[0], plane->values[1], plane->values[2],
+  //   plane->values[3]);
+  // float z_bar = plane_normal_vector(0) * target_vector(2) - target_vector(0) *
+  //   plane_normal_vector(2);
+  // float y_bar = plane_normal_vector(0) * target_vector(1) - target_vector(0) *
+  //   plane_normal_vector(1);
+  // float y_numerator = (-plane_vector(3) * plane_normal_vector(0) * z_bar);
+  // float y_denominator = (plane_vector(0) * plane_normal_vector(2) * y_bar) -
+  //   (plane_normal_vector(1) * z_bar) +
+  //   (plane_vector(1) * plane_normal_vector(0) * z_bar) -
+  //   (plane_vector(2) * plane_normal_vector(0) * y_bar);
+
+  // float y_temp = y_numerator / y_denominator;
+  // float x_temp = y_temp *
+  //   (((plane_normal_vector(2) * y_bar) / (plane_normal_vector(0) * z_bar)) -
+  //   (plane_normal_vector(1) / plane_normal_vector(0)));
+  // float z_temp = y_temp * (-y_bar / z_bar);
+  // Eigen::Vector3f output_vector(x_temp, y_temp, z_temp);
   Eigen::Vector3f plane_normal_vector(plane->values[0], plane->values[1], plane->values[2]);
-  float z_bar = plane_normal_vector(0) * target_vector(2) - target_vector(0) *
-    plane_normal_vector(2);
-  float y_bar = plane_normal_vector(0) * target_vector(1) - target_vector(0) *
-    plane_normal_vector(1);
-  float y_numerator = (-plane_vector(3) * plane_normal_vector(0) * z_bar);
-  float y_denominator = (plane_vector(0) * plane_normal_vector(2) * y_bar) -
-    (plane_normal_vector(1) * z_bar) +
-    (plane_vector(1) * plane_normal_vector(0) * z_bar) -
-    (plane_vector(2) * plane_normal_vector(0) * y_bar);
-  float y_temp = y_numerator / y_denominator;
-  float x_temp = y_temp *
-    (((plane_normal_vector(2) * y_bar) / (plane_normal_vector(0) * z_bar)) -
-    (plane_normal_vector(1) / plane_normal_vector(0)));
-  float z_temp = y_temp * (-y_bar / z_bar);
-  Eigen::Vector3f output_vector(x_temp, y_temp, z_temp);
-  return output_vector;
+  return target_vector.cross(plane_normal_vector);
 }
 
 /***************************************************************************//**
