@@ -898,6 +898,14 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     gripper.open_fingers_2.push_back(open_center_finger_2);
   }
 
+  // Check Initial middle fingers if they collide with world
+  if (checkFingerCollision(open_center_finger_1, world_collision_object)) {
+      gripper.collides_with_world = true;
+    }
+  if (checkFingerCollision(open_center_finger_2, world_collision_object)) {
+      gripper.collides_with_world = true;
+    }
+
   // Iterate through the points on side 1
   for (int side_1 = 0, updown_toggle_1 = 1; side_1 < this->num_itr_1; side_1 += updown_toggle_1 ^= 1) {
     // Define the distance the current finger is from the center point.
