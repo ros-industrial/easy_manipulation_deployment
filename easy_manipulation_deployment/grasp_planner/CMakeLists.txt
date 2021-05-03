@@ -7,8 +7,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-
+  add_compile_options(-Wall -Wextra -Wpedantic -DEIGEN_MAX_ALIGN_BYTES=16 -DEIGEN_UNALIGNED_VECTORIZE=0)
 endif()
 
 # find dependencies
@@ -125,13 +124,26 @@ if(BUILD_TESTING)
 
   ament_add_gtest(grasptest test/init_tests.cpp)
   ament_target_dependencies(grasptest ament_index_cpp)
+ 
+  if (${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
+  target_compile_definitions(grasptest
+    PUBLIC
+    FCL_VERSION_0_6_OR_HIGHER=1
+  )
+  else()
+    target_compile_definitions(grasptest
+      PUBLIC
+      FCL_VERSION_0_6_OR_HIGHER=0
+    )
+  endif()
+
   target_link_libraries(grasptest 
   grasp_planning_interface
   ${PCL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
   ${FCL_LIBRARIES}
   ccd)
-
+  target_compile_features(grasptest PRIVATE cxx_std_17)
   add_custom_target(gcov
     COMMAND mkdir -p coverage
     COMMAND ${CMAKE_MAKE_PROGRAM} test
