@@ -56,6 +56,7 @@ public:
   float worldZAngleThreshold;
 
   std::shared_ptr<FingerGripper> gripper;
+  std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr;
 
   //pcl::visualization::PCLVisualizer::Ptr viewer;
   
@@ -64,6 +65,7 @@ public:
   void LoadGripper();
   void GenerateObjectHorizontal();
   void GenerateObjectVertical();
+  void GenerateObjectCollision();
   
 
 

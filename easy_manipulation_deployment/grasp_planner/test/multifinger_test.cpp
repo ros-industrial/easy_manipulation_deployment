@@ -112,6 +112,28 @@ void MultiFingerTest::GenerateObjectVertical()
   object->get_object_world_angles();
 }
 
+void MultiFingerTest::GenerateObjectCollision()
+{
+  grasp_planner::collision::Box * collision_object_shape =
+    new grasp_planner::collision::Box(0.01, 0.05, 0.02);
+
+  grasp_planner::collision::Transform collision_object_transform;
+  collision_object_transform.setIdentity();
+
+  #if FCL_VERSION_0_6_OR_HIGHER == 1
+    collision_object_transform.translation() << 0, 0, 0;
+  #else
+    collision_object_transform.setTranslation(
+      grasp_planner::collision::Vector(0, 0, 0));
+  #endif
+
+  grasp_planner::collision::CollisionObject collision_object(
+    std::shared_ptr<grasp_planner::collision::CollisionGeometry>(collision_object_shape), fcl::Transform3<float>::Identity());
+
+  collision_object_ptr =
+    std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
+}
+
 TEST_F(MultiFingerTest, GenerateGripperAttributesTestEvenOdd)
 {
   GenerateObjectVertical();
@@ -1467,31 +1489,8 @@ TEST_F(MultiFingerTest, checkFingerCollisionTest)
   ResetVariables();
   gripper_stroke = 0.04;
   ASSERT_NO_THROW(LoadGripper());
-
   
-  grasp_planner::collision::Box * collision_object_shape =
-    new grasp_planner::collision::Box(0.01, 0.05, 0.02);
-
-  grasp_planner::collision::Transform finger_transform;
-
-  // fcl::Transform3<float> collision_object_transform = fcl::Transform3<float>::Identity();
-  grasp_planner::collision::Transform collision_object_transform;
-  collision_object_transform.setIdentity();
-
-  #if FCL_VERSION_0_6_OR_HIGHER == 1
-    std::cout << " Version 0.6 or higher is 1" << std::endl;
-    collision_object_transform.translation() << 0, 0, 0;
-  #else
-    std::cout << " Version 0.6 or higher is zero" << std::endl;
-    collision_object_transform.setTranslation(
-      grasp_planner::collision::Vector(0, 0, 0));
-  #endif
-
-  grasp_planner::collision::CollisionObject collision_object(
-    std::shared_ptr<grasp_planner::collision::CollisionGeometry>(collision_object_shape), fcl::Transform3<float>::Identity());
-
-  std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr =
-    std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
+  GenerateObjectCollision();
 
   Eigen::Vector3f finger_point_sample_center(0.005, 0.025, 0.01);
   Eigen::Vector3f finger_point_far_away(0.1, 0.25, 0.1);
