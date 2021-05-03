@@ -160,41 +160,4 @@ if(BUILD_TESTING)
   ament_export_dependencies(rosidl_default_runtime)
 endif()
 
-
-if(FALSE) # fake a block comment
-add_executable(pcl_test_node src/pcl_test.cpp)
-include_directories(include msg ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${LIBFCL_INCLUDE_DIRS})
-add_definitions( ${PCL_DEFINITIONS} )
-link_directories( ${PCL_LIBRARY_DIRS} ${FCL_LIBRARY_DIRS})
-target_link_libraries(pcl_test_node ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${FCL_LIBRARIES} ccd)
-rosidl_target_interfaces(pcl_test_node ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-ament_target_dependencies(
-        pcl_test_node
-        tf2
-        rclcpp
-        emd_msgs
-        epd_msgs
-        sensor_msgs
-        geometry_msgs
-        shape_msgs
-        tf2_ros
-        message_filters
-        cv_bridge #temp
-)
-
-install(TARGETS
-  pcl_test_node
-  EXPORT export_${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME}
-)
-install(DIRECTORY
-  include
-  msg
-  launch
-  config
-  test
-  DESTINATION share/${PROJECT_NAME}
-)
-endif()
 ament_package()
