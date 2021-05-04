@@ -130,7 +130,7 @@ void MultiFingerTest::GenerateObjectCollision(float length, float breadth, float
     grasp_planner::collision::Vector(0, 0, 0));
   grasp_planner::collision::CollisionObject collision_object(
     std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
-      collision_object_shape), fcl::Transform3f<float>::Identity());
+      collision_object_shape), collision_object_transform);
   collision_object_ptr =
     std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
   #endif
