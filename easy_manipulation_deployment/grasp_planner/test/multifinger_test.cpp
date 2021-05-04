@@ -1801,5 +1801,24 @@ TEST_F(MultiFingerTest, getGraspPoseTest)
 
 TEST_F(MultiFingerTest, getAllRanksTest)
 {
-
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.0;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
 }
