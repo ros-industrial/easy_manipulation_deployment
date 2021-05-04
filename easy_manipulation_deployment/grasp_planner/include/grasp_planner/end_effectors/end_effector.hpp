@@ -27,7 +27,7 @@
 #include "grasp_planner/common/fcl_types.hpp"
 #include "grasp_planner/grasp_object.hpp"
 
-#define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(expr) do {(void)(expr);} while (0)
 
 class EndEffector
 {
@@ -35,15 +35,16 @@ public:
   using CollisionObject = grasp_planner::collision::CollisionObject;
 
   virtual void planGrasps(
-    std::shared_ptr < GraspObject > object,
+    std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < CollisionObject > world_collision_object,
-    pcl::visualization::PCLVisualizer::Ptr viewer) {
-      UNUSED(object);
-      UNUSED(grasp_method);
-      UNUSED(world_collision_object);
-      UNUSED(viewer);
-    }
+    std::shared_ptr<CollisionObject> world_collision_object,
+    pcl::visualization::PCLVisualizer::Ptr viewer)
+  {
+    UNUSED(object);
+    UNUSED(grasp_method);
+    UNUSED(world_collision_object);
+    UNUSED(viewer);
+  }
   virtual void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer) {UNUSED(viewer);}
   virtual std::string getID() {return id;}
 

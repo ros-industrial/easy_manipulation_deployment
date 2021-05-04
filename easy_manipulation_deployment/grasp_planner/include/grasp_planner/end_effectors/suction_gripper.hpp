@@ -82,7 +82,7 @@ struct singleSuctionCup
 struct suctionCupArray
 {
   /*! \brief 2D matrix representing a suction cup array */
-  std::vector < std::vector < std::shared_ptr < singleSuctionCup >> > cup_array;
+  std::vector<std::vector<std::shared_ptr<singleSuctionCup>>> cup_array;
   /*! \brief Center of entire suction cup array */
   pcl::PointXYZ gripper_center;
   /*! \brief Distance from gripper center to the center of object */
@@ -99,7 +99,7 @@ struct suctionCupArray
   float grasp_angle;
 };
 
-class SuctionGripper: public EndEffector
+class SuctionGripper : public EndEffector
 {
 public:
   /*! \brief Gripper ID */
@@ -152,7 +152,7 @@ public:
   /*! \brief Maximum distance from the center of grasp to the object center,
   comparing all the grasp samples sampled */
 
-float max_center_dist;
+  float max_center_dist;
   /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
   float min_center_dist;
 
@@ -160,7 +160,7 @@ float max_center_dist;
   Eigen::Vector3f row_cen_point;
 
   /*! \brief All sampled grasp array grasps */
-  std::vector < std::shared_ptr < suctionCupArray >> cup_array_samples;
+  std::vector<std::shared_ptr<suctionCupArray>> cup_array_samples;
 
   // std::vector<std::vector<pcl::PointXYZ>> cup_points; //temp_var
 
@@ -194,75 +194,75 @@ float max_center_dist;
     const float num_contact_points_weight_);
 
   void planGrasps(
-    std::shared_ptr < GraspObject > object,
+    std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < CollisionObject > world_collision_object,
+    std::shared_ptr<CollisionObject> world_collision_object,
     pcl::visualization::PCLVisualizer::Ptr viewer);
 
   std::string getID() {return id;}
 
   void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
 
-  int getCentroidIndex(pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud);
+  int getCentroidIndex(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
   void getAllPossibleGrasps(
-    std::shared_ptr < GraspObject > object,
+    std::shared_ptr<GraspObject> object,
     pcl::PointXYZ object_center,
     pcl::PointXYZRGB top_point,
     pcl::visualization::PCLVisualizer::Ptr viewer);
 
   bool getCupContactCloud(
     pcl::PointXYZRGB contact_point,
-    float radius, pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_input,
-    pcl::PointCloud < pcl::PointXYZ > ::Ptr cloud_output);
+    float radius, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output);
 
-  std::vector < int > getCupContactIndices(
+  std::vector<int> getCupContactIndices(
     pcl::PointXYZRGB contact_point,
-    float radius, pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_input);
+    float radius, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input);
 
-  pcl::PointXYZRGB findHighestPoint(pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud);
+  pcl::PointXYZRGB findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
   void getStartingPlane(
     pcl::ModelCoefficients::Ptr plane_coefficients,
-    std::shared_ptr < GraspObject > object, pcl::PointXYZRGB top_point);
+    std::shared_ptr<GraspObject> object, pcl::PointXYZRGB top_point);
 
   // void getSlicedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
   //   float top_limit, float bottom_limit,
   //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud);
 
   void getSlicedCloud(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr input_cloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr input_cloud_normal,
-    float top_limit, float bottom_limit, pcl::PointCloud < pcl::PointXYZRGB > ::Ptr sliced_cloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr sliced_cloud_normal);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud_normal,
+    float top_limit, float bottom_limit, pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal);
 
   void projectCloudToPlane(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr input_cloud,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
     pcl::ModelCoefficients::Ptr plane_coefficients,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr projected_cloud);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud);
 
-  std::vector < int > createDiskFromCloud(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr input_cloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr sliced_cloud_normal,
+  std::vector<int> createDiskFromCloud(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
     pcl::PointXYZ centerpoint, float radius,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr disk_cloud,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr disk_cloud,
     float * curvature_sum);
 
-  std::vector < int > createDiskFromCloud(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr input_cloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr sliced_cloud_normal,
+  std::vector<int> createDiskFromCloud(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
     pcl::PointXYZ centerpoint, float radius,
-    pcl::PointCloud < pcl::PointXYZ > ::Ptr disk_cloud,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr disk_cloud,
     float * curvature_sum);
 
   void updateMaxMinValues(int num_contact_points, float average_curvature, float center_dist);
   void getAllGraspRanks(
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < GraspObject > object);
+    std::shared_ptr<GraspObject> object);
 
   geometry_msgs::msg::PoseStamped getGraspPose(
-    std::shared_ptr < suctionCupArray > grasp,
-    std::shared_ptr < GraspObject > object);
+    std::shared_ptr<suctionCupArray> grasp,
+    std::shared_ptr<GraspObject> object);
 };
 
 #endif  // GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_

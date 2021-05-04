@@ -19,12 +19,9 @@
 
 float MathFunctions::normalize(const float & target, const float & min, const float & max)
 {
-  if(target == min && min == max)
-  {
+  if (target == min && min == max) {
     return 1;
-  }
-  else
-  {
+  } else {
     return (target - min) / (max - min);
   }
   //return (target + 1e-8 - min) / (max - min);
@@ -37,7 +34,7 @@ float MathFunctions::normalizeInt(const int & target, const int & min, const int
 
 float MathFunctions::getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2)
 {
-  return(1e-8 + std::abs((vector_1.dot(vector_2)) /(vector_1.norm() * vector_2.norm())));
+  return 1e-8 + std::abs((vector_1.dot(vector_2)) / (vector_1.norm() * vector_2.norm()));
 }
 
 Eigen::Vector3f MathFunctions::getPointInDirection(
@@ -45,6 +42,6 @@ Eigen::Vector3f MathFunctions::getPointInDirection(
   Eigen::Vector3f vector_direction,
   float distance)
 {
-  Eigen::Vector3f direction_normalized = vector_direction/vector_direction.norm();
-  return(base_point + distance * direction_normalized);
+  Eigen::Vector3f direction_normalized = vector_direction / vector_direction.norm();
+  return base_point + distance * direction_normalized;
 }

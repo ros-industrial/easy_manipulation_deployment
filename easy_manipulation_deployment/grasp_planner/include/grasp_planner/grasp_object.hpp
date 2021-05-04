@@ -79,11 +79,11 @@ public:
   /*! \brief Tf frame the object pose is with respect to */
   std::string object_frame;
   /*! \brief Object point cloud */
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
   /*! \brief Projected Objected Point Cloud */
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_projected;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_projected;
   /*! \brief Grasp Object Normal Point cloud */
-  pcl::PointCloud < pcl::PointNormal > ::Ptr cloud_normal;
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal;
   /*! \brief Vector representing the major axis of the Grasp Object*/
   Eigen::Vector3f axis;  // Obj coeff 3,4,5
   /*! \brief Computed 3D centroid of the Grasp Object point cloud*/
@@ -118,11 +118,11 @@ public:
 
 
   GraspObject(
-    std::string object_frame_, pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_,
+    std::string object_frame_, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
     Eigen::Vector4f centerpoint_);
   GraspObject(
     std::string object_name_, std::string object_frame_,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_, Eigen::Vector4f centerpoint_);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_, Eigen::Vector4f centerpoint_);
   void get_object_bb();
   void get_object_world_angles();
   // void add_cutting_plane_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);

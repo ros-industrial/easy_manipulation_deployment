@@ -65,19 +65,19 @@
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("GraspScene");
 
-class GraspScene: public rclcpp::Node
+class GraspScene : public rclcpp::Node
 {
 public:
   void getCameraPosition();
   // void planning_init(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
-  std::vector < std::shared_ptr < GraspObject >> extractObjects(
+  std::vector<std::shared_ptr<GraspObject>> extractObjects(
     std::string camera_frame,
     float cloud_normal_radius,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
     float cluster_tolerance,
     int min_cluster_size);
-  std::vector < std::shared_ptr < GraspObject >> processEPDObjects(
-    std::vector < epd_msgs::msg::LocalizedObject > objects,
+  std::vector<std::shared_ptr<GraspObject>> processEPDObjects(
+    std::vector<epd_msgs::msg::LocalizedObject> objects,
     std::string camera_frame,
     float cloud_normal_radius);
   void printPose(const geometry_msgs::msg::PoseStamped & _pose);
@@ -115,95 +115,95 @@ public:
 
   std::string incloudfile;
   std::string outcloudfile;
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud;
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_plane_removed;
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr org_cloud;  // REMOVE LATER
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_table;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr org_cloud;      // REMOVE LATER
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table;
 
   pcl::ModelCoefficients::Ptr table_coeff;
-  std::shared_ptr < grasp_planner::collision::CollisionObject > world_collision_object;
+  std::shared_ptr<grasp_planner::collision::CollisionObject> world_collision_object;
 
   pcl::visualization::PCLVisualizer::Ptr viewer;
 
   sensor_msgs::msg::PointCloud2 pointcloud2;
 
   // For collision checking
-  std::shared_ptr < tf2_ros::Buffer > buffer_;
-  std::shared_ptr < tf2_ros::TransformListener > tf_listener;
+  std::shared_ptr<tf2_ros::Buffer> buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener;
 
 
   // ROS Pub/Sub
   // rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_sub;
-  rclcpp::Publisher < emd_msgs::msg::GraspTask > ::SharedPtr output_pub;
-  std::shared_ptr < message_filters::Subscriber < sensor_msgs::msg::PointCloud2 >> cloud_sub;
-  std::shared_ptr < tf2_ros::MessageFilter < sensor_msgs::msg::PointCloud2 >> tf_cloud_sub;
-  std::vector < std::shared_ptr < GraspObject >> grasp_objects;
+  rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr output_pub;
+  std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>> cloud_sub;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>> tf_cloud_sub;
+  std::vector<std::shared_ptr<GraspObject>> grasp_objects;
   // std::vector<std::shared_ptr<emd_msgs::msg::GraspTask>> grasp_objects;
 
-  std::shared_ptr < message_filters::Subscriber < epd_msgs::msg::EPDObjectLocalization >> epd_sub;
-  std::shared_ptr < tf2_ros::MessageFilter < epd_msgs::msg::EPDObjectLocalization >> tf_epd_sub;
+  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>> epd_sub;
+  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectLocalization>> tf_epd_sub;
 
-  std::vector < std::shared_ptr < EndEffector >> end_effectors;
+  std::vector<std::shared_ptr<EndEffector>> end_effectors;
 
   GraspScene()
-    : Node(
+  : Node(
       "grasp_planning_node",
       rclcpp::NodeOptions()
       .allow_undeclared_parameters(true)
       .automatically_declare_parameters_from_overrides(true)),
     ptFilter_Ulimit_x(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
       as_double_array()[1])),
     ptFilter_Llimit_x(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
       as_double_array()[0])),
     ptFilter_Ulimit_y(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
       as_double_array()[1])),
     ptFilter_Llimit_y(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
       as_double_array()[0])),
     ptFilter_Ulimit_z(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
       as_double_array()[1])),
     ptFilter_Llimit_z(
-      static_cast < float > (this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+      static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
       as_double_array()[0])),
     segmentation_max_iterations(
       this->get_parameter(
         "point_cloud_params.segmentation_max_iterations").as_int()),
     segmentation_distance_threshold(
-      static_cast < float > (this->get_parameter(
+      static_cast<float>(this->get_parameter(
         "point_cloud_params.segmentation_distance_threshold").as_double())),
     cluster_tolerance(
-      static_cast < float > (this->get_parameter(
+      static_cast<float>(this->get_parameter(
         "point_cloud_params.cluster_tolerance").as_double())),
     min_cluster_size(
       this->get_parameter(
         "point_cloud_params.min_cluster_size").as_int()),
-    cloud(new pcl::PointCloud < pcl::PointXYZRGB > ()),
-    cloud_plane_removed(new pcl::PointCloud < pcl::PointXYZRGB > ()),
-    org_cloud(new pcl::PointCloud < pcl::PointXYZRGB > ()),
-    cloud_table(new pcl::PointCloud < pcl::PointXYZRGB > ()),
+    cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    cloud_plane_removed(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    org_cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    cloud_table(new pcl::PointCloud<pcl::PointXYZRGB>()),
     table_coeff(new pcl::ModelCoefficients),
     viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
   {
-    output_pub = this->create_publisher < emd_msgs::msg::GraspTask > ("/grasp_tasks", 10);
-    rclcpp::Clock::SharedPtr clock = std::make_shared < rclcpp::Clock > (RCL_SYSTEM_TIME);
-    this->buffer_ = std::make_shared < tf2_ros::Buffer > (clock);
+    output_pub = this->create_publisher<emd_msgs::msg::GraspTask>("/grasp_tasks", 10);
+    rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+    this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
     this->buffer_->setUsingDedicatedThread(true);
-    this->tf_listener = std::make_shared < tf2_ros::TransformListener > (
+    this->tf_listener = std::make_shared<tf2_ros::TransformListener>(
       *buffer_, this, false);
 
-    auto create_timer_interface = std::make_shared < tf2_ros::CreateTimerROS > (
+    auto create_timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
       this->get_node_base_interface(),
       this->get_node_timers_interface());
     this->buffer_->setCreateTimerInterface(create_timer_interface);
-    this->cloud_sub = std::make_shared <
-      message_filters::Subscriber < sensor_msgs::msg::PointCloud2 >> (
+    this->cloud_sub = std::make_shared<
+      message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
       this, "/camera/pointcloud");
-    this->tf_cloud_sub = std::make_shared < tf2_ros::MessageFilter <
-      sensor_msgs::msg::PointCloud2 >> (
+    this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
+          sensor_msgs::msg::PointCloud2>>(
       *buffer_, "base_link", 5,
       this->get_node_logging_interface(),
       this->get_node_clock_interface(),
@@ -215,11 +215,11 @@ public:
         std::placeholders::_1));
 
 
-    this->epd_sub = std::make_shared <
-      message_filters::Subscriber < epd_msgs::msg::EPDObjectLocalization >> (
+    this->epd_sub = std::make_shared<
+      message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
       this, "/processor/epd_localize_output");
-    this->tf_epd_sub = std::make_shared < tf2_ros::MessageFilter <
-      epd_msgs::msg::EPDObjectLocalization >> (
+    this->tf_epd_sub = std::make_shared<tf2_ros::MessageFilter<
+          epd_msgs::msg::EPDObjectLocalization>>(
       *buffer_, "base_link", 5,
       this->get_node_logging_interface(),
       this->get_node_clock_interface(),

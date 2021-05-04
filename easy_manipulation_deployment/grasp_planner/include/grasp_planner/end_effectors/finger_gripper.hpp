@@ -73,11 +73,12 @@ struct singleFinger
     float grasp_plane_dist_,
     float curvature_,
     int plane_index_)
-    : finger_point(finger_point_),
+  : finger_point(finger_point_),
     centroid_dist(centroid_dist_),
     grasp_plane_dist(grasp_plane_dist_),
     curvature(curvature_),
-    plane_index(plane_index_) {
+    plane_index(plane_index_)
+  {
     // std::cout << "New finger: " << std::endl;
     // std::cout << " centroid_dist: " << centroid_dist << std::endl;
     // std::cout << " grasp_plane_dist_: " << grasp_plane_dist << std::endl;
@@ -88,25 +89,26 @@ struct singleFinger
 
 struct multiFingerGripper
 {
-  std::vector < std::shared_ptr < singleFinger >> closed_fingers_1;
-  std::vector < std::shared_ptr < singleFinger >> closed_fingers_2;
-  std::vector < int > closed_fingers_1_index;
-  std::vector < int > closed_fingers_2_index;
-  std::vector < Eigen::Vector3f > open_fingers_1;
-  std::vector < Eigen::Vector3f > open_fingers_2;
+  std::vector<std::shared_ptr<singleFinger>> closed_fingers_1;
+  std::vector<std::shared_ptr<singleFinger>> closed_fingers_2;
+  std::vector<int> closed_fingers_1_index;
+  std::vector<int> closed_fingers_2_index;
+  std::vector<Eigen::Vector3f> open_fingers_1;
+  std::vector<Eigen::Vector3f> open_fingers_2;
   float grasp_plane_angle_cos;
   float rank;
   geometry_msgs::msg::PoseStamped pose;
   pcl::PointXYZ gripper_palm_center;
-  std::shared_ptr < singleFinger > base_point_1;
-  std::shared_ptr < singleFinger > base_point_2;
+  std::shared_ptr<singleFinger> base_point_1;
+  std::shared_ptr<singleFinger> base_point_2;
   bool collides_with_world;
 
   multiFingerGripper(
-    std::shared_ptr < singleFinger > base_point_1_,
-    std::shared_ptr < singleFinger > base_point_2_)
-    : base_point_1(base_point_1_),
-    base_point_2(base_point_2_) {
+    std::shared_ptr<singleFinger> base_point_1_,
+    std::shared_ptr<singleFinger> base_point_2_)
+  : base_point_1(base_point_1_),
+    base_point_2(base_point_2_)
+  {
     gripper_palm_center.x = (base_point_1_->finger_point.x + base_point_2_->finger_point.x) / 2;
     gripper_palm_center.y = (base_point_1_->finger_point.y + base_point_2_->finger_point.y) / 2;
     gripper_palm_center.z = (base_point_1_->finger_point.z + base_point_2_->finger_point.z) / 2;
@@ -117,20 +119,21 @@ struct multiFingerGripper
 
 struct fingerCloudSample
 {
-  pcl::PointCloud < pcl::PointXYZRGB > ::Ptr finger_cloud;
-  pcl::PointCloud < pcl::PointNormal > ::Ptr finger_ncloud;
-  pcl::PointCloud < pcl::PointNormal > ::Ptr finger_nvoxel;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr finger_cloud;
+  pcl::PointCloud<pcl::PointNormal>::Ptr finger_ncloud;
+  pcl::PointCloud<pcl::PointNormal>::Ptr finger_nvoxel;
   float centroid_dist_min, centroid_dist_max;
   float grasp_plane_dist_min, grasp_plane_dist_max;
   float curvature_min, curvature_max;
   int start_index;
-  std::vector < std::shared_ptr < singleFinger >> finger_samples;
-  fingerCloudSample() : finger_cloud(new pcl::PointCloud < pcl::PointXYZRGB >),
-    finger_ncloud(new pcl::PointCloud < pcl::PointNormal >),
-    finger_nvoxel(new pcl::PointCloud < pcl::PointNormal >)
+  std::vector<std::shared_ptr<singleFinger>> finger_samples;
+  fingerCloudSample()
+  : finger_cloud(new pcl::PointCloud<pcl::PointXYZRGB>),
+    finger_ncloud(new pcl::PointCloud<pcl::PointNormal>),
+    finger_nvoxel(new pcl::PointCloud<pcl::PointNormal>)
   {
-    centroid_dist_min = std::numeric_limits < float > ::max();
-    centroid_dist_max = std::numeric_limits < float > ::min();
+    centroid_dist_min = std::numeric_limits<float>::max();
+    centroid_dist_max = std::numeric_limits<float>::min();
     grasp_plane_dist_min = curvature_min = centroid_dist_min;
     grasp_plane_dist_max = curvature_max = centroid_dist_max;
     start_index = -1;
@@ -142,22 +145,23 @@ struct graspPlaneSample
   int plane_index;
   bool plane_intersects_object;
   float dist_to_center_plane;
-  std::shared_ptr < fingerCloudSample > sample_side_1;
-  std::shared_ptr < fingerCloudSample > sample_side_2;
-  pcl::PointCloud < pcl::PointNormal > ::Ptr grasp_plane_ncloud;
+  std::shared_ptr<fingerCloudSample> sample_side_1;
+  std::shared_ptr<fingerCloudSample> sample_side_2;
+  pcl::PointCloud<pcl::PointNormal>::Ptr grasp_plane_ncloud;
   pcl::ModelCoefficients::Ptr plane;
   Eigen::Vector4f plane_eigen;
-  graspPlaneSample() : grasp_plane_ncloud(new pcl::PointCloud < pcl::PointNormal >),
+  graspPlaneSample()
+  : grasp_plane_ncloud(new pcl::PointCloud<pcl::PointNormal>),
     plane(new pcl::ModelCoefficients)
   {
     fingerCloudSample point_1;
-    sample_side_1 = std::make_shared < fingerCloudSample > (point_1);
+    sample_side_1 = std::make_shared<fingerCloudSample>(point_1);
     fingerCloudSample point_2;
-    sample_side_2 = std::make_shared < fingerCloudSample > (point_2);
+    sample_side_2 = std::make_shared<fingerCloudSample>(point_2);
   }
 };
 
-class FingerGripper: public EndEffector
+class FingerGripper : public EndEffector
 {
 public:
   // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_cloud;
@@ -206,25 +210,25 @@ public:
   // float curvature_2_min, curvature_2_max;
 
 
-  std::vector < float > centroid_dist_min_vec;
-  std::vector < float > centroid_dist_max_vec;
-  std::vector < float > grasp_plane_dist_min_vec;
-  std::vector < float > grasp_plane_dist_max_vec;
-  std::vector < float > curvature_min_vec;
-  std::vector < float > curvature_max_vec;
+  std::vector<float> centroid_dist_min_vec;
+  std::vector<float> centroid_dist_max_vec;
+  std::vector<float> grasp_plane_dist_min_vec;
+  std::vector<float> grasp_plane_dist_max_vec;
+  std::vector<float> curvature_min_vec;
+  std::vector<float> curvature_max_vec;
 
   // std::vector<graspPlaneSample> grasp_samples;
   // std::vector<multiFingerGripper> gripper_samples;
-  std::vector < std::shared_ptr < graspPlaneSample >> grasp_samples;
-  std::vector < std::shared_ptr < multiFingerGripper >> gripper_samples;
+  std::vector<std::shared_ptr<graspPlaneSample>> grasp_samples;
+  std::vector<std::shared_ptr<multiFingerGripper>> gripper_samples;
 
 
-  std::vector < float > cutting_plane_distances;
-  std::vector < int > plane_1_index;
-  std::vector < int > plane_2_index;
-  std::vector < std::vector < std::shared_ptr < singleFinger >> > gripper_clusters;
-  std::vector < std::vector < std::shared_ptr < singleFinger >> > gripper_clusters_flipped;
-  std::vector < std::shared_ptr < multiFingerGripper >> sorted_gripper_configs;
+  std::vector<float> cutting_plane_distances;
+  std::vector<int> plane_1_index;
+  std::vector<int> plane_2_index;
+  std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters;
+  std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters_flipped;
+  std::vector<std::shared_ptr<multiFingerGripper>> sorted_gripper_configs;
 
   bool is_even_1;
   bool is_even_2;
@@ -250,29 +254,29 @@ public:
     const float worldYAngleThreshold_,
     const float worldZAngleThreshold_);
   void generateGripperAttributes();
-  bool getInitialSamplePoints(const std::shared_ptr < GraspObject > object);
-  void getInitialSampleCloud(const std::shared_ptr < GraspObject > object);
-  bool getGraspCloud(const std::shared_ptr < GraspObject > object);
+  bool getInitialSamplePoints(const std::shared_ptr<GraspObject> object);
+  void getInitialSampleCloud(const std::shared_ptr<GraspObject> object);
+  bool getGraspCloud(const std::shared_ptr<GraspObject> object);
   void getCenterCuttingPlane(const std::shared_ptr<GraspObject> object);
-  void getCuttingPlanes(const std::shared_ptr < GraspObject > object);
+  void getCuttingPlanes(const std::shared_ptr<GraspObject> object);
   void voxelizeSampleCloud();
   void getBestGrasps(
-    const std::shared_ptr < GraspObject > object,
+    const std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    const std::shared_ptr < CollisionObject> world_collision_object);
-  void getMaxMinValues(std::shared_ptr < GraspObject > object);
+    const std::shared_ptr<CollisionObject> world_collision_object);
+  void getMaxMinValues(std::shared_ptr<GraspObject> object);
   void updateMaxMinAttributes(
-    std::shared_ptr < fingerCloudSample > &sample,
+    std::shared_ptr<fingerCloudSample> & sample,
     float centroid_distance,
     float grasp_plane_distance,
     float curvature);
   void getGraspPose(
-    std::shared_ptr < multiFingerGripper > gripper,
-    const std::shared_ptr < GraspObject > object);
+    std::shared_ptr<multiFingerGripper> gripper,
+    const std::shared_ptr<GraspObject> object);
   void planGrasps(
-    std::shared_ptr < GraspObject > object,
+    std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr < CollisionObject> world_collision_object,
+    std::shared_ptr<CollisionObject> world_collision_object,
     pcl::visualization::PCLVisualizer::Ptr viewer);
 
   void resetVariables();
@@ -291,19 +295,19 @@ public:
 
   void getGripperClusters();
   void getGripperSamplesFromClusters();
-  void getFingerSamples(std::shared_ptr < GraspObject > object);
-  std::vector < std::shared_ptr < multiFingerGripper >> getAllGripperConfigs(
-    std::shared_ptr < GraspObject > object,
-    std::shared_ptr < CollisionObject > world_collision_object);
-  std::shared_ptr < multiFingerGripper > generateGripperOpenConfig(
-    std::shared_ptr < CollisionObject > world_collision_object,
-    std::shared_ptr < singleFinger > closed_center_finger_1,
-    std::shared_ptr < singleFinger > closed_center_finger_2, Eigen::Vector3f open_center_finger_1,
+  void getFingerSamples(std::shared_ptr<GraspObject> object);
+  std::vector<std::shared_ptr<multiFingerGripper>> getAllGripperConfigs(
+    std::shared_ptr<GraspObject> object,
+    std::shared_ptr<CollisionObject> world_collision_object);
+  std::shared_ptr<multiFingerGripper> generateGripperOpenConfig(
+    std::shared_ptr<CollisionObject> world_collision_object,
+    std::shared_ptr<singleFinger> closed_center_finger_1,
+    std::shared_ptr<singleFinger> closed_center_finger_2, Eigen::Vector3f open_center_finger_1,
     Eigen::Vector3f open_center_finger_2, Eigen::Vector3f plane_normal_normalized,
     Eigen::Vector3f grasp_direction);
   bool checkFingerCollision(
     Eigen::Vector3f finger_point,
-    std::shared_ptr < CollisionObject > world_collision_object);
+    std::shared_ptr<CollisionObject> world_collision_object);
 
   void addPlane(float dist, Eigen::Vector4f centerpoint, Eigen::Vector4f plane_vector);
 
@@ -311,11 +315,11 @@ public:
   Eigen::Vector3f getPerpendicularVectorInPlane(
     Eigen::Vector3f target_vector,
     pcl::ModelCoefficients::Ptr plane);
-  void getGripperRank(std::shared_ptr < multiFingerGripper > gripper);
-  std::vector < std::shared_ptr < multiFingerGripper >> getAllRanks(
-    std::vector < std::shared_ptr < multiFingerGripper >> input_vector,
+  void getGripperRank(std::shared_ptr<multiFingerGripper> gripper);
+  std::vector<std::shared_ptr<multiFingerGripper>> getAllRanks(
+    std::vector<std::shared_ptr<multiFingerGripper>> input_vector,
     emd_msgs::msg::GraspMethod * grasp_method);
-  std::shared_ptr < graspPlaneSample > generateGraspSamples(
+  std::shared_ptr<graspPlaneSample> generateGraspSamples(
     Eigen::Vector4f plane_vector,
     Eigen::Vector3f point_on_plane,
     float dist_to_center_plane,
@@ -327,14 +331,14 @@ public:
     Eigen::Vector3f finger_2);
   int getNearestPlaneIndex(float target_distance);
   int getNearestPointIndex(
-    const pcl::PointNormal &target_point,
-    const pcl::PointCloud < pcl::PointNormal > ::Ptr cloud);
+    const pcl::PointNormal & target_point,
+    const pcl::PointCloud<pcl::PointNormal>::Ptr cloud);
 
   Eigen::Vector3f getGripperPlane(
-    std::shared_ptr<singleFinger> &finger_sample_1,
-    std::shared_ptr<singleFinger> &finger_sample_2,
-    const Eigen::Vector3f &grasp_direction,
-    const std::shared_ptr<GraspObject> &object);
+    std::shared_ptr<singleFinger> & finger_sample_1,
+    std::shared_ptr<singleFinger> & finger_sample_2,
+    const Eigen::Vector3f & grasp_direction,
+    const std::shared_ptr<GraspObject> & object);
 
   std::string getID() {return id;}
 };

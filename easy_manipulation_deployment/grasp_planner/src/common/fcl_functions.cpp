@@ -17,8 +17,8 @@
 
 using namespace grasp_planner::collision;
 
-std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPointCloudRGB(
-  const pcl::PointCloud < pcl::PointXYZRGB > ::Ptr pointcloud_ptr,
+std::shared_ptr<CollisionObject> FCLFunctions::createCollisionObjectFromPointCloudRGB(
+  const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_ptr,
   const octomap::point3d & sensor_origin_wrt_world,
   float resolution)
 // std::shared_ptr<octomap::OcTree> createOctomapFromPointCloud(
@@ -32,8 +32,7 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
   const double clamping_thres_min = 0.12;
   const double clamping_thres_max = 0.98;
 
-  std::shared_ptr < octomap::OcTree > octomap_octree = std::make_shared < octomap::OcTree >
-    (resolution);
+  std::shared_ptr<octomap::OcTree> octomap_octree = std::make_shared<octomap::OcTree>(resolution);
   octomap_octree->setProbHit(prob_hit);
   octomap_octree->setProbMiss(prob_miss);
   octomap_octree->setClampingThresMin(clamping_thres_min);
@@ -53,8 +52,8 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
     int thread_id = 0;
     int thread_num = 1;
 #endif
-    int start_idx = static_cast < int > (pointcloud_ptr->size() / thread_num) * thread_id;
-    int end_idx = static_cast < int > (pointcloud_ptr->size() / thread_num) * (thread_id + 1);
+    int start_idx = static_cast<int>(pointcloud_ptr->size() / thread_num) * thread_id;
+    int end_idx = static_cast<int>(pointcloud_ptr->size() / thread_num) * (thread_id + 1);
     if (thread_id == thread_num - 1) {
       end_idx = pointcloud_ptr->size();
     }
@@ -99,14 +98,14 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
 
   // return octomap_octree;
 
-  auto fcl_octree = std::make_shared < OcTree > (octomap_octree);
-  std::shared_ptr < CollisionGeometry > fcl_geometry = fcl_octree;
-  std::make_shared < CollisionObject > (fcl_geometry);
-  return std::make_shared < CollisionObject > (fcl_geometry);
+  auto fcl_octree = std::make_shared<OcTree>(octomap_octree);
+  std::shared_ptr<CollisionGeometry> fcl_geometry = fcl_octree;
+  std::make_shared<CollisionObject>(fcl_geometry);
+  return std::make_shared<CollisionObject>(fcl_geometry);
 }
 
-std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPointCloud(
-  const pcl::PointCloud < pcl::PointXYZ > ::Ptr & pointcloud_ptr,
+std::shared_ptr<CollisionObject> FCLFunctions::createCollisionObjectFromPointCloud(
+  const pcl::PointCloud<pcl::PointXYZ>::Ptr & pointcloud_ptr,
   const octomap::point3d & sensor_origin_wrt_world,
   float resolution)
 // std::shared_ptr<octomap::OcTree> createOctomapFromPointCloud(
@@ -120,8 +119,7 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
   const double clamping_thres_min = 0.12;
   const double clamping_thres_max = 0.98;
 
-  std::shared_ptr < octomap::OcTree > octomap_octree = std::make_shared < octomap::OcTree >
-    (resolution);
+  std::shared_ptr<octomap::OcTree> octomap_octree = std::make_shared<octomap::OcTree>(resolution);
   octomap_octree->setProbHit(prob_hit);
   octomap_octree->setProbMiss(prob_miss);
   octomap_octree->setClampingThresMin(clamping_thres_min);
@@ -141,8 +139,8 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
     int thread_id = 0;
     int thread_num = 1;
 #endif
-    int start_idx = static_cast < int > (pointcloud_ptr->size() / thread_num) * thread_id;
-    int end_idx = static_cast < int > (pointcloud_ptr->size() / thread_num) * (thread_id + 1);
+    int start_idx = static_cast<int>(pointcloud_ptr->size() / thread_num) * thread_id;
+    int end_idx = static_cast<int>(pointcloud_ptr->size() / thread_num) * (thread_id + 1);
     if (thread_id == thread_num - 1) {
       end_idx = pointcloud_ptr->size();
     }
@@ -187,9 +185,8 @@ std::shared_ptr < CollisionObject > FCLFunctions::createCollisionObjectFromPoint
 
   // return octomap_octree;
 
-  auto fcl_octree = std::make_shared < OcTree > (octomap_octree);
-  std::shared_ptr < CollisionGeometry > fcl_geometry = fcl_octree;
-  std::make_shared < CollisionObject > (fcl_geometry);
-  return std::make_shared < CollisionObject > (fcl_geometry);
+  auto fcl_octree = std::make_shared<OcTree>(octomap_octree);
+  std::shared_ptr<CollisionGeometry> fcl_geometry = fcl_octree;
+  std::make_shared<CollisionObject>(fcl_geometry);
+  return std::make_shared<CollisionObject>(fcl_geometry);
 }
-

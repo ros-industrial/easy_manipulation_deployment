@@ -21,7 +21,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # ld = LaunchDescription()
-    config = get_package_share_directory('grasp_planner') + "/config/params_suction.yaml"
+    config = get_package_share_directory('grasp_planner') + '/config/params_suction.yaml'
     print(config)
     node = Node(
         package='grasp_planner',

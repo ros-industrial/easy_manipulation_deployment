@@ -62,7 +62,7 @@ add_library(grasp_planning_interface
 
 )
 
-if (${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
+if(${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
   target_compile_definitions(grasp_planning_interface
     PUBLIC
     FCL_VERSION_0_6_OR_HIGHER=1
@@ -121,12 +121,13 @@ if(BUILD_TESTING)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
   set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
   ament_add_gtest(grasptest test/init_tests.cpp)
   ament_target_dependencies(grasptest ament_index_cpp)
- 
-  if (${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
+
+  if(${FCL_VERSION} VERSION_GREATER_EQUAL 0.6.0)
   target_compile_definitions(grasptest
     PUBLIC
     FCL_VERSION_0_6_OR_HIGHER=1
@@ -138,7 +139,7 @@ if(BUILD_TESTING)
     )
   endif()
 
-  target_link_libraries(grasptest 
+  target_link_libraries(grasptest
   grasp_planning_interface
   ${PCL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
@@ -161,14 +162,13 @@ if(BUILD_TESTING)
   # Make sure to clean up the coverage folder
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
-  # Create the gcov-clean target. This cleans the build as well as generated 
+  # Create the gcov-clean target. This cleans the build as well as generated
   # .gcda and .gcno files.
   add_custom_target(scrub
       COMMAND ${CMAKE_MAKE_PROGRAM} clean
       COMMAND rm -f ${OBJECT_DIR}/*.gcno
       COMMAND rm -f ${OBJECT_DIR}/*.gcda
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      )
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
   # Testing
   enable_testing()

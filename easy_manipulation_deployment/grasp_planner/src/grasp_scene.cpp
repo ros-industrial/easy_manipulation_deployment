@@ -154,8 +154,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       std::cout << "Grasp planning time for " << grasp_method.ee_id << " : " <<
         std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count() <<
         "[ms]" << std::endl;
-      for(auto rank : grasp_method.grasp_ranks)
-      {
+      for (auto rank : grasp_method.grasp_ranks) {
         std::cout << "grasp method rank: " << rank << std::endl;
       }
       gripper->visualizeGrasps(viewer);

@@ -41,15 +41,15 @@
 
 namespace FCLFunctions
 {
-  std::shared_ptr < grasp_planner::collision::CollisionObject > createCollisionObjectFromPointCloudRGB(
-    const pcl::PointCloud < pcl::PointXYZRGB > ::Ptr pointcloud_ptr,
-    const octomap::point3d & sensor_origin_wrt_world,
-    float resolution);
+std::shared_ptr<grasp_planner::collision::CollisionObject> createCollisionObjectFromPointCloudRGB(
+  const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_ptr,
+  const octomap::point3d & sensor_origin_wrt_world,
+  float resolution);
 
-  std::shared_ptr < grasp_planner::collision::CollisionObject > createCollisionObjectFromPointCloud(
-    const pcl::PointCloud < pcl::PointXYZ > ::Ptr & pointcloud_ptr,
-    const octomap::point3d & sensor_origin_wrt_world,
-    float resolution);
+std::shared_ptr<grasp_planner::collision::CollisionObject> createCollisionObjectFromPointCloud(
+  const pcl::PointCloud<pcl::PointXYZ>::Ptr & pointcloud_ptr,
+  const octomap::point3d & sensor_origin_wrt_world,
+  float resolution);
 }  // namespace FCLFunctions
 
 #endif  // GRASP_PLANNER__COMMON__FCL_FUNCTIONS_HPP_

@@ -72,108 +72,108 @@
 
 namespace PCLFunctions
 {
-  template < typename T, typename U >
-  void extractInliersCloud(
-    const T & inputCloud,
-    const pcl::PointIndices::Ptr & inputCloudInliers, T outputCloud)
-  {
-    U extractor;
-    extractor.setInputCloud(inputCloud);
+template<typename T, typename U>
+void extractInliersCloud(
+  const T & inputCloud,
+  const pcl::PointIndices::Ptr & inputCloudInliers, T outputCloud)
+{
+  U extractor;
+  extractor.setInputCloud(inputCloud);
 
-    extractor.setIndices(inputCloudInliers);
+  extractor.setIndices(inputCloudInliers);
 
-    extractor.filter(*outputCloud);
-  }
+  extractor.filter(*outputCloud);
+}
 
-  void centerCamera(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr target_cloud,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
-
-
-  void viewCloud(
-    pcl::PointCloud < pcl::PointNormal > ::Ptr target_cloud,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
-
-  void viewerAddNormalCloud(
-    pcl::PointCloud < pcl::PointNormal > ::Ptr target_ncloud,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr target_cloud,
-    std::string name, pcl::visualization::PCLVisualizer::Ptr viewer);
-
-  void viewerAddRGBCloud(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr target_cloud, std::string name,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
+void centerCamera(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud,
+  pcl::visualization::PCLVisualizer::Ptr viewer);
 
 
-  bool passthroughFilter(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud,
-    float ptFilter_Ulimit_x,
-    float ptFilter_Llimit_x,
-    float ptFilter_Ulimit_y,
-    float ptFilter_Llimit_y,
-    float ptFilter_Ulimit_z,
-    float ptFilter_Llimit_z);
+void viewCloud(
+  pcl::PointCloud<pcl::PointNormal>::Ptr target_cloud,
+  pcl::visualization::PCLVisualizer::Ptr viewer);
 
-  bool passthroughFilter(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud,
-    float ptFilter_Ulimit_x,
-    float ptFilter_Llimit_x,
-    float ptFilter_Ulimit_y,
-    float ptFilter_Llimit_y,
-    float ptFilter_Ulimit_z,
-    float ptFilter_Llimit_z,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
+void viewerAddNormalCloud(
+  pcl::PointCloud<pcl::PointNormal>::Ptr target_ncloud,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud,
+  std::string name, pcl::visualization::PCLVisualizer::Ptr viewer);
 
-  void SensorMsgtoPCLPointCloud2(
-    const sensor_msgs::msg::PointCloud2 & pc2,
-    pcl::PCLPointCloud2 & pcl_pc2);
-
-  bool planeSegmentation(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_plane_removed,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud_table, int segmentation_max_iterations,
-    float segmentation_distance_threshold);
-
-  void removeAllZeros(pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud);
-
-  void removeAllZeros(pcl::PointCloud < pcl::PointXYZ > ::Ptr cloud);
-
-  float pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point);
-
-  float pointToPlane(Eigen::Vector4f & plane, pcl::PointNormal const & point);
-
-  float pointToPlane(Eigen::Vector3f & plane, pcl::PointNormal const & point);
-
-  void removeStatisticalOutlier(
-    const pcl::PointCloud < pcl::PointXYZRGB > ::Ptr & cloud,
-    float threshold);
-
-  void getClosestPointsByRadius(
-    const pcl::PointNormal & point,
-    const float & radius, pcl::PointCloud < pcl::PointXYZRGB > ::Ptr & inputCloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr & inputNormalCloud,
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr & outputCloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr & outputNormalCloud);
-
-  void computeCloudNormal(
-    pcl::PointCloud < pcl::PointXYZRGB > ::Ptr cloud,
-    pcl::PointCloud < pcl::PointNormal > ::Ptr cloud_normal, const float & cloud_normal_radius);
-
-  template < typename T, typename U >
-  void voxelizeCloud(const T & inputCloud, const float & leafSize, T outputCloud)
-  {
-    U voxelFilter;
-    voxelFilter.setInputCloud(inputCloud);
-    voxelFilter.setLeafSize(leafSize, leafSize, leafSize);
-    voxelFilter.filter(*outputCloud);
-  }
+void viewerAddRGBCloud(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud, std::string name,
+  pcl::visualization::PCLVisualizer::Ptr viewer);
 
 
-  void createSphereCloud(
-    pcl::PointCloud < pcl::PointXYZ > ::Ptr output_sphere_cloud,
-    Eigen::Vector3f & centerpoint,
-    const float & radius, const int & resolution);
+bool passthroughFilter(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  float ptFilter_Ulimit_x,
+  float ptFilter_Llimit_x,
+  float ptFilter_Ulimit_y,
+  float ptFilter_Llimit_y,
+  float ptFilter_Ulimit_z,
+  float ptFilter_Llimit_z);
 
-  void createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer);
+bool passthroughFilter(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  float ptFilter_Ulimit_x,
+  float ptFilter_Llimit_x,
+  float ptFilter_Ulimit_y,
+  float ptFilter_Llimit_y,
+  float ptFilter_Ulimit_z,
+  float ptFilter_Llimit_z,
+  pcl::visualization::PCLVisualizer::Ptr viewer);
+
+void SensorMsgtoPCLPointCloud2(
+  const sensor_msgs::msg::PointCloud2 & pc2,
+  pcl::PCLPointCloud2 & pcl_pc2);
+
+bool planeSegmentation(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table, int segmentation_max_iterations,
+  float segmentation_distance_threshold);
+
+void removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+
+void removeAllZeros(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
+float pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point);
+
+float pointToPlane(Eigen::Vector4f & plane, pcl::PointNormal const & point);
+
+float pointToPlane(Eigen::Vector3f & plane, pcl::PointNormal const & point);
+
+void removeStatisticalOutlier(
+  const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud,
+  float threshold);
+
+void getClosestPointsByRadius(
+  const pcl::PointNormal & point,
+  const float & radius, pcl::PointCloud<pcl::PointXYZRGB>::Ptr & inputCloud,
+  pcl::PointCloud<pcl::PointNormal>::Ptr & inputNormalCloud,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr & outputCloud,
+  pcl::PointCloud<pcl::PointNormal>::Ptr & outputNormalCloud);
+
+void computeCloudNormal(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal, const float & cloud_normal_radius);
+
+template<typename T, typename U>
+void voxelizeCloud(const T & inputCloud, const float & leafSize, T outputCloud)
+{
+  U voxelFilter;
+  voxelFilter.setInputCloud(inputCloud);
+  voxelFilter.setLeafSize(leafSize, leafSize, leafSize);
+  voxelFilter.filter(*outputCloud);
+}
+
+
+void createSphereCloud(
+  pcl::PointCloud<pcl::PointXYZ>::Ptr output_sphere_cloud,
+  Eigen::Vector3f & centerpoint,
+  const float & radius, const int & resolution);
+
+void createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer);
 }  // namespace PCLFunctions
 
 #endif  // GRASP_PLANNER__COMMON__PCL_FUNCTIONS_HPP_
