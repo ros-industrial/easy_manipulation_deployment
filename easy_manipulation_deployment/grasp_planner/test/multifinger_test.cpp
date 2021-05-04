@@ -1747,7 +1747,7 @@ TEST_F(MultiFingerTest, getAllGripperConfigsTest)
   GenerateObjectCollision(0.01, 0.05, 0.02);
   std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
   finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
-  EXPECT_GT(finger_samples.size(), 0);
+  EXPECT_GT(static_cast<int>(finger_samples.size()), 0);
 }
 
 TEST_F(MultiFingerTest, getAllGripperConfigsTestCollide)
@@ -1772,7 +1772,7 @@ TEST_F(MultiFingerTest, getAllGripperConfigsTestCollide)
   GenerateObjectCollision(0.05, 0.05, 0.05);
   std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
   finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
-  EXPECT_EQ(finger_samples.size(), 0);
+  EXPECT_EQ(static_cast<int>(finger_samples.size()), 0);
 }
 
 TEST_F(MultiFingerTest, getGripperRankTest)
