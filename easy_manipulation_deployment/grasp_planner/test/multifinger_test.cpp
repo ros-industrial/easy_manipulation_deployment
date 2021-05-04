@@ -120,14 +120,20 @@ void MultiFingerTest::GenerateObjectCollision(float length, float breadth, float
 
   #if FCL_VERSION_0_6_OR_HIGHER == 1
   collision_object_transform.translation() << 0, 0, 0;
-  #else
-  collision_object_transform.setTranslation(
-    grasp_planner::collision::Vector(0, 0, 0));
-  #endif
-
   grasp_planner::collision::CollisionObject collision_object(
     std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
       collision_object_shape), fcl::Transform3<float>::Identity());
+  #else
+  collision_object_transform.setTranslation(
+    grasp_planner::collision::Vector(0, 0, 0));
+  grasp_planner::collision::CollisionObject collision_object(
+    std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
+      collision_object_shape), fcl::Transform3f<float>::Identity());
+  #endif
+
+  // grasp_planner::collision::CollisionObject collision_object(
+  //   std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
+  //     collision_object_shape), fcl::Transform3<float>::Identity());
 
   collision_object_ptr =
     std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
