@@ -120,13 +120,11 @@ void FingerGripper::generateGripperAttributes()
   this->initial_gap_1 = this->distance_between_fingers_1 / (1.0 + (is_even_1 ? 1 : 0));
   this->initial_gap_2 = this->distance_between_fingers_2 / (1.0 + (is_even_2 ? 1 : 0));
 
-  bool both_sides_even = (is_even_1 && is_even_2);
-  bool both_sides_odd = (!is_even_1 && !is_even_2);
+  // bool both_sides_even = (is_even_1 && is_even_2);
+  // bool both_sides_odd = (!is_even_1 && !is_even_2);
 
   this->num_itr_1 = (this->num_fingers_side_1 == 1 ? 0 : floor(this->num_fingers_side_1 / 2));
   this->num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
-  std::cout << "Num itr 1: " << this->num_itr_1 << std::endl;
-  std::cout << "Num itr 2: " << this->num_itr_2 << std::endl;
 }
 
 void FingerGripper::planGrasps(
