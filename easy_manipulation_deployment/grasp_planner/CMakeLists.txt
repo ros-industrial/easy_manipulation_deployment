@@ -8,6 +8,7 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -DEIGEN_MAX_ALIGN_BYTES=16 -DEIGEN_UNALIGNED_VECTORIZE=0)
+  set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 endif()
 
 # find dependencies
@@ -142,8 +143,9 @@ if(BUILD_TESTING)
   ${PCL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
   ${FCL_LIBRARIES}
+  ${GTEST_LIBRARIES}
+  ${Boost_LIBRARIES}
   ccd)
-  target_compile_features(grasptest PRIVATE cxx_std_17)
   add_custom_target(gcov
     COMMAND mkdir -p coverage
     COMMAND ${CMAKE_MAKE_PROGRAM} test
@@ -151,12 +153,26 @@ if(BUILD_TESTING)
   add_custom_command(TARGET gcov
     COMMAND echo "=================== GCOV ===================="
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
-        | grep -A 5 "src/grasp_planning.cpp" > CoverageSummary.tmp
+        | grep -A 5 "src/end_effectors/finger_gripper.cpp" > CoverageSummary.tmp
     COMMAND cat CoverageSummary.tmp
     COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage)
+  add_dependencies(gcov grasp_planning_interface)
+  # Make sure to clean up the coverage folder
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
-  target_link_libraries(grasptest ${GTEST_LIBRARIES} ${Boost_LIBRARIES})
+  # Create the gcov-clean target. This cleans the build as well as generated 
+  # .gcda and .gcno files.
+  add_custom_target(scrub
+      COMMAND ${CMAKE_MAKE_PROGRAM} clean
+      COMMAND rm -f ${OBJECT_DIR}/*.gcno
+      COMMAND rm -f ${OBJECT_DIR}/*.gcda
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      )
+
+  # Testing
+  enable_testing()
+
   ament_export_dependencies(rosidl_default_runtime)
 endif()
 
