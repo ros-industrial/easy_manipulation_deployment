@@ -74,6 +74,10 @@ else()
   )
 endif()
 
+get_target_property(target_options grasp_planning_interface COMPILE_OPTIONS)
+list(REMOVE_ITEM target_options "-Wpedantic")
+set_property(TARGET grasp_planning_interface PROPERTY COMPILE_OPTIONS ${target_options})
+
 ament_target_dependencies(grasp_planning_interface
         tf2
         rclcpp
