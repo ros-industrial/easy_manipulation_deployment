@@ -123,20 +123,17 @@ void MultiFingerTest::GenerateObjectCollision(float length, float breadth, float
   grasp_planner::collision::CollisionObject collision_object(
     std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
       collision_object_shape), fcl::Transform3<float>::Identity());
+  collision_object_ptr =
+    std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
   #else
   collision_object_transform.setTranslation(
     grasp_planner::collision::Vector(0, 0, 0));
   grasp_planner::collision::CollisionObject collision_object(
     std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
       collision_object_shape), fcl::Transform3f<float>::Identity());
-  #endif
-
-  // grasp_planner::collision::CollisionObject collision_object(
-  //   std::shared_ptr<grasp_planner::collision::CollisionGeometry>(
-  //     collision_object_shape), fcl::Transform3<float>::Identity());
-
   collision_object_ptr =
     std::make_shared<grasp_planner::collision::CollisionObject>(collision_object);
+  #endif
 }
 
 TEST_F(MultiFingerTest, GenerateGripperAttributesTestEvenOdd)
@@ -1187,10 +1184,11 @@ TEST_F(MultiFingerTest, GetMaxMinValuesTest)
   gripper->voxelizeSampleCloud();
   gripper->getMaxMinValues(object);
 
-  pcl::PointNormal centroid_point{
-    object->centerpoint(0),
-    object->centerpoint(1),
-    object->centerpoint(2)};
+  pcl::PointNormal centroid_point;
+  centroid_point.x = object->centerpoint(0);
+  centroid_point.y = object->centerpoint(1);
+  centroid_point.z = object->centerpoint(2);
+
   std::vector<float> curvature_vec_1;
   std::vector<float> grasp_plane_distance_vec_1;
   std::vector<float> centroid_distance_vec_1;
