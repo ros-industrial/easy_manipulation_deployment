@@ -65,7 +65,7 @@ public:
   void LoadGripper();
   void GenerateObjectHorizontal();
   void GenerateObjectVertical();
-  void GenerateObjectCollision();
+  void GenerateObjectCollision(float length, float breadth, float height);
   
 
 

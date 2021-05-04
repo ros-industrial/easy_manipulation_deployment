@@ -110,10 +110,10 @@ void MultiFingerTest::GenerateObjectVertical()
   object->get_object_world_angles();
 }
 
-void MultiFingerTest::GenerateObjectCollision()
+void MultiFingerTest::GenerateObjectCollision(float length, float breadth, float height)
 {
   grasp_planner::collision::Box * collision_object_shape =
-    new grasp_planner::collision::Box(0.01, 0.05, 0.02);
+    new grasp_planner::collision::Box(length, breadth, height);
 
   grasp_planner::collision::Transform collision_object_transform;
   collision_object_transform.setIdentity();
@@ -1487,8 +1487,8 @@ TEST_F(MultiFingerTest, checkFingerCollisionTest)
   ResetVariables();
   gripper_stroke = 0.04;
   ASSERT_NO_THROW(LoadGripper());
-  
-  GenerateObjectCollision();
+
+  GenerateObjectCollision(0.01, 0.05, 0.02);
 
   Eigen::Vector3f finger_point_sample_center(0.005, 0.025, 0.01);
   Eigen::Vector3f finger_point_far_away(0.1, 0.25, 0.1);
@@ -1615,7 +1615,7 @@ TEST_F(MultiFingerTest, generateGripperOpenConfigTest)
     closed_finger_point_1,
     closed_finger_point_2);
 
-  GenerateObjectCollision();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
   std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
     collision_object_ptr, finger_1, finger_2,
     open_coords[0], open_coords[1], perpendicular_grasp_direction,
@@ -1691,7 +1691,7 @@ TEST_F(MultiFingerTest, generateGripperOpenConfigTestCollision)
     closed_finger_point_1,
     closed_finger_point_2);
 
-  GenerateObjectCollision();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
   std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
     collision_object_ptr, finger_1, finger_2,
     open_coords[0], open_coords[1], perpendicular_grasp_direction,
