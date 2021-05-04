@@ -1716,9 +1716,80 @@ TEST_F(MultiFingerTest, getAllGripperConfigsTest)
 {
   GenerateObjectVertical();
   ResetVariables();
-  gripper_stroke = 0.04;
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
   ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
+  EXPECT_TRUE(finger_samples.size() > 0);
+}
 
+TEST_F(MultiFingerTest, getAllGripperConfigsTestCollide)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.05, 0.05, 0.05);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
+  EXPECT_TRUE(finger_samples.size() == 0);
+}
+
+TEST_F(MultiFingerTest, getGripperRankTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.0;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr);
+  for(auto sample : finger_samples)
+  {
+    EXPECT_TRUE(sample->rank == 0);
+    gripper->getGripperRank(sample);
+    EXPECT_TRUE(sample->rank != 0);
+  }
 }
 
 TEST_F(MultiFingerTest, getGraspPoseTest)
@@ -1726,10 +1797,7 @@ TEST_F(MultiFingerTest, getGraspPoseTest)
 
 }
 
-TEST_F(MultiFingerTest, getGripperRankTest)
-{
 
-}
 
 TEST_F(MultiFingerTest, getAllRanksTest)
 {
