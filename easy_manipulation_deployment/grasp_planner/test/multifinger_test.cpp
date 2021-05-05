@@ -72,7 +72,10 @@ void MultiFingerTest::GenerateObjectHorizontal()
   for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
     for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
       for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
-        pcl::PointXYZRGB temp_point(length_, breadth_, height_);
+        pcl::PointXYZRGB temp_point;
+        temp_point.x = length_;
+        temp_point.y = breadth_;
+        temp_point.x = height_;
         rectangle_cloud->points.push_back(temp_point);
       }
     }
@@ -96,7 +99,10 @@ void MultiFingerTest::GenerateObjectVertical()
   for (float length_ = 0.0; length_ < length; length_ += 0.0025) {
     for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.0025) {
       for (float height_ = 0.0; height_ < height; height_ += 0.0025) {
-        pcl::PointXYZRGB temp_point(length_, breadth_, height_);
+        pcl::PointXYZRGB temp_point;
+        temp_point.x = length_;
+        temp_point.y = breadth_;
+        temp_point.x = height_;
         rectangle_cloud->points.push_back(temp_point);
       }
     }
