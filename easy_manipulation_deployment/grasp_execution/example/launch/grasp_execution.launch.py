@@ -14,12 +14,13 @@
 
 import os
 import tempfile
-import xacro
-import yaml
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+
+import xacro
+import yaml
 
 scene_pkg = 'ur5_2f_test'
 robot_base_link = 'base_link'
@@ -150,7 +151,7 @@ def generate_launch_description():
         arguments=[os.path.join(get_package_share_directory(scene_pkg),
                    'urdf/scene.urdf')],
         output='log',
-        parameters=[{'source_list': ["/fake_controller_joint_states"]},
+        parameters=[{'source_list': ['/fake_controller_joint_states']},
                     {'zeros': load_yaml('grasp_execution', 'config/start_positions.yaml')}
                     ]
         )
