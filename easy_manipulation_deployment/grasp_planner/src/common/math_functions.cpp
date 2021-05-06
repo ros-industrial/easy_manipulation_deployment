@@ -15,21 +15,50 @@
 // Main PCL files
 
 #include "grasp_planner/common/math_functions.hpp"
+#include "rclcpp/rclcpp.hpp"
 
+static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::MathFunctions");
 
 float MathFunctions::normalize(const float & target, const float & min, const float & max)
 {
-  if (target == min && min == max) {
-    return 1;
-  } else {
+  if (min == max) {
+    if(target == min){
+      RCLCPP_WARN(LOGGER, "Possible Normalizing Error, Min, Max and target same value");
+      return 1;
+    }
+    else{
+      RCLCPP_WARN(LOGGER, "Error: Normalizing divides by zero.");
+      return -1;
+    }
+  }
+  else if(min > max){
+    RCLCPP_WARN(LOGGER, "Error: Min value more than Max, normalizing error");
+    return -1;
+  }
+  else {
     return (target - min) / (max - min);
   }
-  //return (target + 1e-8 - min) / (max - min);
 }
 
 float MathFunctions::normalizeInt(const int & target, const int & min, const int & max)
 {
-  return float(target - min) / float(max - min);
+  if (min == max) {
+    if(target == min){
+      RCLCPP_WARN(LOGGER, "Possible Normalizing Error, Min, Max and target same value");
+      return 1;
+    }
+    else{
+      RCLCPP_WARN(LOGGER, "Error: Normalizing divides by zero.");
+      return -1;
+    }
+  }
+  else if(min > max){
+    RCLCPP_WARN(LOGGER, "Error: Min value more than Max, normalizing error");
+    return -1;
+  }
+  else {
+    return float(target - min) / float(max - min);
+  }
 }
 
 float MathFunctions::getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2)
