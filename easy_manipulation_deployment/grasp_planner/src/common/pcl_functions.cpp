@@ -104,15 +104,8 @@ bool PCLFunctions::passthroughFilter(
   float ptFilter_Ulimit_y,
   float ptFilter_Llimit_y,
   float ptFilter_Ulimit_z,
-  float ptFilter_Llimit_z,
-  pcl::visualization::PCLVisualizer::Ptr viewer)
+  float ptFilter_Llimit_z)
 {
-  std::cout << ptFilter_Ulimit_x << std::endl;
-  std::cout << ptFilter_Llimit_x << std::endl;
-  std::cout << ptFilter_Ulimit_y << std::endl;
-  std::cout << ptFilter_Llimit_y << std::endl;
-  std::cout << ptFilter_Ulimit_z << std::endl;
-  std::cout << ptFilter_Llimit_z << std::endl;
   // Remove NaN values
   std::vector<int> nanIndices;
 
@@ -361,31 +354,4 @@ void PCLFunctions::createSphereCloud(
   output_sphere_cloud->is_dense = true;
   output_sphere_cloud->height = 1;
   output_sphere_cloud->width = output_sphere_cloud->points.size();
-}
-
-void PCLFunctions::createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud(
-    new pcl::PointCloud<pcl::PointXYZRGB>);
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-  // pcl::PointCloud<pcl::PointNormal>::Ptr
-  float length = 0.05;
-  float breadth = 0.01;
-  float height = 0.02;
-
-  for (float length_ = 0.0; length_ < length; length_ += 0.001) {
-    for (float breadth_ = 0.0; breadth_ < breadth; breadth_ += 0.001) {
-      for (float height_ = 0.0; height_ < height; height_ += 0.001) {
-        pcl::PointXYZRGB temp_point(length_, breadth_, height_);
-        rectangle_cloud->points.push_back(temp_point);
-      }
-    }
-  }
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb(
-    rectangle_cloud, 0,
-    255, 0);    // This is blue
-  viewer->addPointCloud<pcl::PointXYZRGB>(rectangle_cloud, rgb, "rectangle_cloud");
-  viewer->spin();
-  viewer->close();
-  viewer->removeAllPointClouds();
 }
