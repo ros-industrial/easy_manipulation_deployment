@@ -16,54 +16,6 @@
 
 #include "grasp_planner/common/pcl_functions.hpp"
 
-
-void PCLFunctions::centerCamera(
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud,
-  pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  pcl::CentroidPoint<pcl::PointXYZRGB> centroid;
-  for (int i = 0; i < static_cast<int>(target_cloud->size()); i++) {
-    centroid.add(target_cloud->points[i]);
-  }
-  pcl::PointXYZ c1;
-  centroid.get(c1);
-  viewer->setCameraPosition(c1.x, c1.y, c1.z, 0, 0, 1);
-}
-
-void PCLFunctions::viewCloud(
-  pcl::PointCloud<pcl::PointNormal>::Ptr target_cloud,
-  pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  // viewer->removeAllPointClouds();
-  viewer->addPointCloud<pcl::PointNormal>(target_cloud, "Main cloud");
-  viewer->spin();
-  viewer->close();
-}
-
-void PCLFunctions::viewerAddNormalCloud(
-  pcl::PointCloud<pcl::PointNormal>::Ptr target_ncloud,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud,
-  std::string name, pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  std::vector<int> nanNormalIndices;
-  pcl::removeNaNNormalsFromPointCloud(*target_ncloud, *target_ncloud, nanNormalIndices);
-  viewer->addPointCloudNormals<pcl::PointXYZRGB,
-    pcl::PointNormal>(target_cloud, target_ncloud, 10, 0.05, name);
-  viewer->setPointCloudRenderingProperties(
-    pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 1.0,
-    1.0, name);
-}
-
-void PCLFunctions::viewerAddRGBCloud(
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud, std::string name,
-  pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(target_cloud);
-  // viewer->removeAllPointClouds();
-  viewer->addPointCloud<pcl::PointXYZRGB>(target_cloud, rgb, name);
-}
-
-
 bool PCLFunctions::passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   float ptFilter_Ulimit_x,
@@ -96,58 +48,6 @@ bool PCLFunctions::passthroughFilter(
   ptFilter.filter(*cloud);
   return true;
 }
-
-bool PCLFunctions::passthroughFilter(
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  float ptFilter_Ulimit_x,
-  float ptFilter_Llimit_x,
-  float ptFilter_Ulimit_y,
-  float ptFilter_Llimit_y,
-  float ptFilter_Ulimit_z,
-  float ptFilter_Llimit_z)
-{
-  // Remove NaN values
-  std::vector<int> nanIndices;
-
-  // pcl::removeNaNFromPointCloud(*cloud, *cloud, nanIndices);
-
-  // Remove background points
-  pcl::PassThrough<pcl::PointXYZRGB> ptFilter;
-  ptFilter.setInputCloud(cloud);
-  ptFilter.setFilterFieldName("z");
-  ptFilter.setFilterLimits(ptFilter_Llimit_z, ptFilter_Ulimit_z);
-  ptFilter.filter(*cloud);
-
-  PCLFunctions::viewerAddRGBCloud(cloud, "original_cloud", viewer);
-  viewer->spin();
-  viewer->close();
-  viewer->removeAllPointClouds();
-
-
-  ptFilter.setInputCloud(cloud);
-  ptFilter.setFilterFieldName("y");
-  ptFilter.setFilterLimits(ptFilter_Llimit_y, ptFilter_Ulimit_y);
-  ptFilter.filter(*cloud);
-
-  PCLFunctions::viewerAddRGBCloud(cloud, "original_cloud", viewer);
-  viewer->spin();
-  viewer->close();
-  viewer->removeAllPointClouds();
-
-
-  ptFilter.setInputCloud(cloud);
-  ptFilter.setFilterFieldName("x");
-  ptFilter.setFilterLimits(ptFilter_Llimit_x, ptFilter_Ulimit_x);
-  ptFilter.filter(*cloud);
-
-  PCLFunctions::viewerAddRGBCloud(cloud, "original_cloud", viewer);
-  viewer->spin();
-  viewer->close();
-  viewer->removeAllPointClouds();
-
-  return true;
-}
-
 
 void PCLFunctions::SensorMsgtoPCLPointCloud2(
   const sensor_msgs::msg::PointCloud2 & pc2,

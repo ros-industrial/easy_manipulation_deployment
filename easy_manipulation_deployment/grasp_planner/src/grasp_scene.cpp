@@ -129,17 +129,17 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   std::cout << " Direct Point Cloud Grasp Planning:  " << std::endl;
   processPointCloud(msg);
   createWorldCollision(msg);
-  PCLFunctions::centerCamera(this->cloud, viewer);
+  PCLVisualizer::centerCamera(this->cloud, viewer);
   this->grasp_objects = extractObjects(
     this->get_parameter("camera_frame").as_string(),
     static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()),
     cloud_plane_removed, cluster_tolerance, min_cluster_size);
   loadEndEffectors();
-  PCLFunctions::viewerAddRGBCloud(cloud, "original_cloud", viewer);
+  PCLVisualizer::viewerAddRGBCloud(cloud, "original_cloud", viewer);
   emd_msgs::msg::GraspTask grasp_task;
   grasp_task.task_id = uuid::generate_uuid();
   for (auto object : this->grasp_objects) {
-    PCLFunctions::centerCamera(object->cloud, viewer);
+    PCLVisualizer::centerCamera(object->cloud, viewer);
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     for (auto gripper : this->end_effectors) {
       std::chrono::steady_clock::time_point grasp_begin = std::chrono::steady_clock::now();
