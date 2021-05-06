@@ -7,9 +7,12 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -DEIGEN_MAX_ALIGN_BYTES=16 -DEIGEN_UNALIGNED_VECTORIZE=0)
+  add_compile_options(-Wall -Wextra -Wpedantic)
   set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 endif()
+
+# add_definitions(-DEIGEN_MAX_ALIGN_BYTES=16)
+# add_definitions(-DEIGEN_UNALIGNED_VECTORIZE=0)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
