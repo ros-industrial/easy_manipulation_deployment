@@ -116,7 +116,7 @@ public:
   Eigen::Matrix4f affine_matrix;
   /*! \brief */
   int max_grasp_samples;  // Maximum number of grasp options
-
+  int dimensions[3];
   // // To be removed, temp variable
   // pcl::ModelCoefficients::Ptr cutting_plane;
 
@@ -132,6 +132,7 @@ public:
   // void add_cutting_plane_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
   void add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
   shape_msgs::msg::SolidPrimitive getObjectShape();
+  void getObjectDimensions();
   geometry_msgs::msg::PoseStamped getObjectPose(std::string pose_frame);
 };
 

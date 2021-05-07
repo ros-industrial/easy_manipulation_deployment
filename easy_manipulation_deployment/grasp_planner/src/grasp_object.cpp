@@ -88,11 +88,19 @@ void GraspObject::get_object_bb()
   pcl::transformPointCloud(*(this->cloud), *(this->cloud_projected), projectionTransform);
   this->affine_matrix = projectionTransform;
   pcl::getMinMax3D(*(this->cloud_projected), this->minPoint, this->maxPoint);
+  getObjectDimensions();
   const Eigen::Vector3f meanDiagonal = 0.5f *
     (this->maxPoint.getVector3fMap() + this->minPoint.getVector3fMap());
   Eigen::Quaternionf bboxQuaternion(this->eigenvectors);
   this->bboxQuaternion = bboxQuaternion;
   this->bboxTransform = this->eigenvectors * meanDiagonal + this->centerpoint.head<3>();
+}
+
+void GraspObject::getObjectDimensions()
+{
+  this->dimensions[0] = abs(this->maxPoint.x - this->minPoint.x);
+  this->dimensions[1] = abs(this->maxPoint.y - this->minPoint.y);
+  this->dimensions[2] = abs(this->maxPoint.z - this->minPoint.z);
 }
 
 void GraspObject::get_object_world_angles()
@@ -120,7 +128,6 @@ geometry_msgs::msg::PoseStamped GraspObject::getObjectPose(std::string pose_fram
   result_pose.pose.position.y = this->centerpoint(1);
   result_pose.pose.position.z = this->centerpoint(2);
 
-
   Eigen::Matrix3f midPointRotation;
   midPointRotation << this->affine_matrix(0, 0), this->affine_matrix(0, 1),
     this->affine_matrix(0, 2),
@@ -147,9 +154,9 @@ shape_msgs::msg::SolidPrimitive GraspObject::getObjectShape()
   shape_msgs::msg::SolidPrimitive object_shape;
   object_shape.type = object_shape.BOX;
   object_shape.dimensions.resize(3);
-  object_shape.dimensions[0] = abs(this->maxPoint.x - this->minPoint.x);
-  object_shape.dimensions[1] = abs(this->maxPoint.y - this->minPoint.y);
-  object_shape.dimensions[2] = abs(this->maxPoint.z - this->minPoint.z);
+  object_shape.dimensions[0] = this->dimensions[0];
+  object_shape.dimensions[1] = this->dimensions[1];
+  object_shape.dimensions[2] = this->dimensions[2];
   std::cout << "dim 0" << object_shape.dimensions[0] << std::endl;
   std::cout << "dim 1" << object_shape.dimensions[1] << std::endl;
   std::cout << "dim 2" << object_shape.dimensions[2] << std::endl;
