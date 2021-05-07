@@ -15,6 +15,8 @@
 
 // Main PCL files
 #include "grasp_planner/end_effectors/suction_gripper.hpp"
+static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::SuctionGripper");
+
 #define PI 3.14159265
 
 SuctionGripper::SuctionGripper(
@@ -47,6 +49,48 @@ SuctionGripper::SuctionGripper(
   grasp_center_distance_weight(grasp_center_distance_weight_),
   num_contact_points_weight(num_contact_points_weight_)
 {
+  if (num_cups_length_ <= 0 || num_cups_breadth_ <= 0) {
+    RCLCPP_ERROR(LOGGER, "Length and breadth values need to be positive numbers");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
+  if (dist_between_cups_length_ <= 0 || dist_between_cups_breadth_ <= 0) {
+    RCLCPP_ERROR(LOGGER, "Distance values between length and breadth should be a positive number");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  
+  if (cup_radius * 2 > dist_between_cups_length ||
+    cup_radius * 2 > dist_between_cups_breadth){
+    RCLCPP_ERROR(LOGGER, "Suction Cup radius too large, will collide with adjacent fingers");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
+  if (cup_radius <= 0 || cup_height_ <= 0) {
+    RCLCPP_ERROR(LOGGER, "cup_radius and height needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  if (num_sample_along_axis_ <= 0) {
+    RCLCPP_ERROR(LOGGER, "num_sample_along_axis_ variable needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
+  if (search_resolution <= 0) {
+    RCLCPP_ERROR(LOGGER, "search_resolution variable needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
+  if (search_angle_resolution_ <= 0) {
+    RCLCPP_ERROR(LOGGER, "search_angle_resolution_ variable needs to be positive and non-zero");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+  if(
+    curvature_weight_ > 1.0 || curvature_weight_ < 0.0 ||
+    grasp_center_distance_weight_ > 1.0 || grasp_center_distance_weight_ < 0.0 ||
+    num_contact_points_weight_ > 1.0 || num_contact_points_weight_ < 0.0){
+    RCLCPP_ERROR(LOGGER, "All Weights need to be a positive value less than 1");
+    throw std::invalid_argument("Invalid value for field.");
+  }
+
   this->max_curvature = std::numeric_limits<float>::min();
   this->min_curvature = std::numeric_limits<float>::max();
 
@@ -105,6 +149,19 @@ SuctionGripper::SuctionGripper(
   this->grasp_center_distance_weight = 1.0;
   this->num_contact_points_weight = 1.0;
 }
+
+void SuctionGripper::generateGripperAttributes()
+{
+  this->is_even_breadth = (this->num_cups_breadth % 2 == 0);
+  this->is_even_length = (this->num_cups_length % 2 == 0);
+  this->num_itr_breadth = floor(this->num_cups_breadth / 2) + 1;
+  this->num_itr_length = floor(this->num_cups_length / 2) + 1;
+  this->initial_gap_breadth = this->dist_between_cups_breadth /
+    (1.0 + (this->num_cups_breadth % 2 == 0 ? 1 : 0));
+  this->initial_gap_length = this->dist_between_cups_length /
+    (1.0 + (this->num_cups_length % 2 == 0 ? 1 : 0));
+}
+
 void SuctionGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,

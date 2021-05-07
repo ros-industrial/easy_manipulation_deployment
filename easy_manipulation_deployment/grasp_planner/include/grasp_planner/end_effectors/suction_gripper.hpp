@@ -97,11 +97,17 @@ struct suctionCupArray
   float average_curvature;
   /*! \brief Angle of grasp sample */
   float grasp_angle;
+
+  suctionCupArray(pcl::PointXYZ gripper_center_){
+    gripper_center = gripper_center_;
+    total_contact_points = 0;
+  }
 };
 
 class SuctionGripper : public EndEffector
 {
 public:
+  // Gripper predefined Attributes
   /*! \brief Gripper ID */
   std::string id;
   /*! \brief User Defined: Number of suction cups in the length direction */
@@ -138,31 +144,34 @@ public:
   /*! \brief Actual length dimensions of the entire suction gripper*/
   float length_dim;
 
+  // Gripper Derived Attributes
+  bool is_even_breadth;
+  bool is_even_length;
+  int num_itr_breadth;
+  int num_itr_length;
+  float initial_gap_breadth;
+  float initial_gap_length;
+
   // For grasp planning
   /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
   float max_curvature;
   /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
   float min_curvature;
-
   /*! \brief Maximum total contact points, comparing all the grasp samples sampled */
   int max_contact_points;
   /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
   int min_contact_points;
-
   /*! \brief Maximum distance from the center of grasp to the object center,
   comparing all the grasp samples sampled */
-
   float max_center_dist;
   /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
   float min_center_dist;
-
-  Eigen::Matrix4f affine_matrix_test;
-  Eigen::Vector3f row_cen_point;
-
   /*! \brief All sampled grasp array grasps */
   std::vector<std::shared_ptr<suctionCupArray>> cup_array_samples;
 
-  // std::vector<std::vector<pcl::PointXYZ>> cup_points; //temp_var
+
+  Eigen::Matrix4f affine_matrix_test;
+  Eigen::Vector3f row_cen_point;
 
   SuctionGripper(
     std::string id,
@@ -193,6 +202,7 @@ public:
     const float grasp_center_distance_weight_,
     const float num_contact_points_weight_);
 
+  void generateGripperAttributes();
   void planGrasps(
     std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
