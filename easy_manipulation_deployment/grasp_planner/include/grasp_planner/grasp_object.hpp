@@ -86,6 +86,10 @@ public:
   pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal;
   /*! \brief Vector representing the major axis of the Grasp Object*/
   Eigen::Vector3f axis;  // Obj coeff 3,4,5
+  /*! \brief Vector representing the minor axis of the Grasp Object*/
+  Eigen::Vector3f minor_axis; 
+  /*! \brief Vector representing the grasp axis of the Grasp Object*/
+  Eigen::Vector3f grasp_axis;
   /*! \brief Computed 3D centroid of the Grasp Object point cloud*/
   Eigen::Vector4f centerpoint;  // Obj coeff 1,2,3
   /*! \brief Eigenvalues of the Object point cloud from the covariance matrix */

@@ -67,6 +67,14 @@ void GraspObject::get_object_bb()
     this->eigenvectors.col(2)(0),
     this->eigenvectors.col(2)(1), this->eigenvectors.col(2)(2));
 
+  this->minor_axis = Eigen::Vector3f(
+    this->eigenvectors.col(0)(0),
+    this->eigenvectors.col(0)(1), this->eigenvectors.col(0)(2));
+
+  this->grasp_axis = Eigen::Vector3f(
+    this->eigenvectors.col(1)(0),
+    this->eigenvectors.col(1)(1), this->eigenvectors.col(1)(2));
+
   // http://codextechnicanum.blogspot.com/2015/04/find-minimum-oriented-bounding-box-of.html?m=1
   // Transform the original cloud to the origin where
   // the principal components correspond to the axes.
