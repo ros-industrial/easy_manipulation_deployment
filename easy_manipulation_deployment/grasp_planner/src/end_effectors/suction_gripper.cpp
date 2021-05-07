@@ -221,7 +221,7 @@ void SuctionGripper::getAllPossibleGrasps(
 
           Eigen::Vector3f grasp_direction;
           grasp_direction(0) = object->eigenvectors.col(1)(0) * cos(PI / angle) -
-            object->eigenvectors.col(1)(1) * sin(PI / angle);
+            object->eigenvectors.col(1)(0) * sin(PI / angle);
           grasp_direction(1) = object->eigenvectors.col(1)(0) * sin(PI / angle) +
             object->eigenvectors.col(1)(1) * cos(PI / angle);
           grasp_direction(2) = object->eigenvectors.col(1)(2);
@@ -229,7 +229,7 @@ void SuctionGripper::getAllPossibleGrasps(
 
           Eigen::Vector3f object_direction;
           object_direction(0) = object->eigenvectors.col(2)(0) * cos(PI / angle) -
-            object->eigenvectors.col(2)(1) * sin(PI / angle);
+            object->eigenvectors.col(2)(0) * sin(PI / angle);
           object_direction(1) = object->eigenvectors.col(2)(0) * sin(PI / angle) +
             object->eigenvectors.col(2)(1) * cos(PI / angle);
           object_direction(2) = object->eigenvectors.col(2)(2);
