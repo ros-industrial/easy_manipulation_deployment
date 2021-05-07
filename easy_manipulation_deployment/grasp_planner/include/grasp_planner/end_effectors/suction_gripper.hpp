@@ -74,10 +74,25 @@ struct singleSuctionCup
 {
   /*! \brief Total number of contact points for the suction cup */
   int contact_points;
+  /*! \brief Weighted value contact points based on user config */
+  int weighted_contact_points;
   /*! \brief Average curvature of the points in the suction cup */
-  float curvature;
+  float average_curvature;
+  /*! \brief Sum of all curvature values of points in contact with the suction cup */
+  float curvature_sum;
   /*! \brief 3D coordinates of the suction cup */
   pcl::PointXYZ cup_center;
+  singleSuctionCup(
+    pcl::PointXYZ cup_center_,
+    float curvature_sum_,
+    float contact_points_,
+    float weighted_contact_points_){
+    cup_center = cup_center_;
+    contact_points = contact_points_;
+    weighted_contact_points = weighted_contact_points_;
+    curvature_sum = curvature_sum_;
+    average_curvature = curvature_sum_ / contact_points_;
+  }
 };
 struct suctionCupArray
 {
@@ -145,12 +160,15 @@ public:
   float length_dim;
 
   // Gripper Derived Attributes
-  bool is_even_breadth;
-  bool is_even_length;
-  int num_itr_breadth;
-  int num_itr_length;
-  float initial_gap_breadth;
-  float initial_gap_length;
+  bool col_is_even;
+  float col_itr;
+  float col_dist_between_cups;
+  float col_initial_gap;
+
+  bool row_is_even;
+  float row_itr;
+  float row_dist_between_cups;
+  float row_initial_gap;
 
   // For grasp planning
   /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
@@ -236,9 +254,13 @@ public:
     pcl::ModelCoefficients::Ptr plane_coefficients,
     std::shared_ptr<GraspObject> object, pcl::PointXYZRGB top_point);
 
-  // void getSlicedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
-  //   float top_limit, float bottom_limit,
-  //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud);
+  singleSuctionCup generateSuctionCup(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
+    Eigen::Vector3f suction_cup_center,
+    Eigen::Vector3f object_direction,
+    pcl::PointXYZ object_center,
+    float object_max_dim);
 
   void getSlicedCloud(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
@@ -257,13 +279,19 @@ public:
     pcl::PointXYZ centerpoint, float radius,
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr disk_cloud,
     float * curvature_sum);
+  
+  // std::vector<int> SuctionGripper::createDiskFromCloud(
+  //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
+  //   pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
+  //   pcl::PointXYZ centerpoint,
+  //   float * curvature_sum);
 
-  std::vector<int> createDiskFromCloud(
+  int SuctionGripper::getContactPoints(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
     pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
-    pcl::PointXYZ centerpoint, float radius,
-    pcl::PointCloud<pcl::PointXYZ>::Ptr disk_cloud,
+    pcl::PointXYZ centerpoint,
     float * curvature_sum);
+  
 
   void updateMaxMinValues(int num_contact_points, float average_curvature, float center_dist);
   void getAllGraspRanks(
@@ -273,6 +301,27 @@ public:
   geometry_msgs::msg::PoseStamped getGraspPose(
     std::shared_ptr<suctionCupArray> grasp,
     std::shared_ptr<GraspObject> object);
+
+  suctionCupArray generateGraspSample(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
+    pcl::PointXYZ sample_gripper_center,
+    pcl::PointXYZ object_center,
+    Eigen::Vector3f grasp_direction,
+    Eigen::Vector3f object_direction,
+    float object_max_dim,
+    float angle);
+
+  int generateWeightedContactPoints(
+    int contact_points,
+    float cup_to_center_dist,
+    float object_max_dim);
+
+  float getGap(
+    int itr,
+    bool is_even,
+    float initial_gap,
+    float dist_between_cups);
 };
 
 #endif  // GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_
