@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "multifinger_test.cpp"
+#include "suction_gripper_test.cpp"
+#include "math_functions_test.cpp"
 // #include "ee_config_test.cpp"
 // #include "msg_test.cpp"
 // #include "grasp_test.cpp"
