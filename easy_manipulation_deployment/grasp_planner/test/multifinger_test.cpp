@@ -75,7 +75,7 @@ void MultiFingerTest::GenerateObjectHorizontal()
         pcl::PointXYZRGB temp_point;
         temp_point.x = length_;
         temp_point.y = breadth_;
-        temp_point.x = height_;
+        temp_point.z = height_;
         rectangle_cloud->points.push_back(temp_point);
       }
     }
@@ -102,7 +102,7 @@ void MultiFingerTest::GenerateObjectVertical()
         pcl::PointXYZRGB temp_point;
         temp_point.x = length_;
         temp_point.y = breadth_;
-        temp_point.x = height_;
+        temp_point.z = height_;
         rectangle_cloud->points.push_back(temp_point);
       }
     }
