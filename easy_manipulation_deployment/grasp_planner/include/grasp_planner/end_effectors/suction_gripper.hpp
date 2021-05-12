@@ -248,11 +248,14 @@ public:
     pcl::PointXYZRGB contact_point,
     float radius, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input);
 
-  pcl::PointXYZRGB findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+  pcl::PointXYZRGB findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, char height_axis, bool is_positive);
 
   void getStartingPlane(
     pcl::ModelCoefficients::Ptr plane_coefficients,
-    std::shared_ptr<GraspObject> object, pcl::PointXYZRGB top_point);
+    Eigen::Vector3f axis,
+    Eigen::Vector4f object_centerpoint,
+    pcl::PointXYZRGB top_point,
+    char height_axis);
 
   singleSuctionCup generateSuctionCup(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
@@ -266,7 +269,7 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
     pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud_normal,
     float top_limit, float bottom_limit, pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud,
-    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal);
+    pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal, char height_axis);
 
   void projectCloudToPlane(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
@@ -280,13 +283,15 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr disk_cloud,
     float * curvature_sum);
   
-  // std::vector<int> SuctionGripper::createDiskFromCloud(
-  //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
-  //   pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
-  //   pcl::PointXYZ centerpoint,
-  //   float * curvature_sum);
+  pcl::PointXYZ getGripperCenter(Eigen::Vector3f object_axis,
+    float offset,
+    pcl::PointXYZRGB slice_centroid,
+    float slice_height,
+    char height_axis);
+  Eigen::Vector3f getGraspDirection(Eigen::Vector3f grasp_axis, float angle);
+  Eigen::Vector3f getObjectDirection(Eigen::Vector3f object_axis, float angle);
 
-  int SuctionGripper::getContactPoints(
+  int getContactPoints(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
     pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
     pcl::PointXYZ centerpoint,
@@ -309,8 +314,7 @@ public:
     pcl::PointXYZ object_center,
     Eigen::Vector3f grasp_direction,
     Eigen::Vector3f object_direction,
-    float object_max_dim,
-    float angle);
+    float object_max_dim);
 
   int generateWeightedContactPoints(
     int contact_points,

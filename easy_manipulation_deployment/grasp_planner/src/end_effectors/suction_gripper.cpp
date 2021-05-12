@@ -16,7 +16,7 @@
 // Main PCL files
 #include "grasp_planner/end_effectors/suction_gripper.hpp"
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::SuctionGripper");
-
+#define combine(g,g2) g##g2
 #define PI 3.14159265
 
 SuctionGripper::SuctionGripper(
@@ -191,26 +191,28 @@ void SuctionGripper::planGrasps(
   std::shared_ptr<CollisionObject> world_collision_object,
   pcl::visualization::PCLVisualizer::Ptr viewer)
 {
+  RCLCPP_INFO(LOGGER, "Generate Gripper Attributes");
   generateGripperAttributes();
   UNUSED(world_collision_object);
   pcl::PointXYZ object_center;
   object_center.x = object->centerpoint(0);
   object_center.y = object->centerpoint(1);
   object_center.z = object->centerpoint(2);
+  std::cout << "object->dimensions[0]: " << object->dimensions[0] << std::endl;
+  std::cout << "object->dimensions[1]: " << object->dimensions[1] << std::endl;
+  std::cout << "object->dimensions[2]: " << object->dimensions[2] << std::endl;
 
   // Get highest point of the object to begin grasp search
-  pcl::PointXYZRGB object_top_point = findHighestPoint(object->cloud);
-
-  std::cout << "Object center: x " << object->centerpoint(0) << std::endl;
-  std::cout << "Object center: y " << object->centerpoint(1) << std::endl;
-  std::cout << "Object center: z " << object->centerpoint(2) << std::endl;
-
-  std::cout << "object_top_point: x " << object_top_point.x << std::endl;
-  std::cout << "object_top_point: y " << object_top_point.y << std::endl;
-  std::cout << "object_top_point: z " << object_top_point.z << std::endl;
-
+  RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
+  pcl::PointXYZRGB object_top_point = findHighestPoint(object->cloud, 'z', false);
+  std::cout <<object_top_point.x << "," << object_top_point.y << "," << object_top_point.z << std::endl;
+  viewer->addSphere(object_top_point, 0.0001, "spheres");
+  viewer->spin();
+  viewer->close();
+  viewer->removeShape("spheres");
   // std::chrono::steady_clock::time_point getAllPossibleGraspsStart =
   // std::chrono::steady_clock::now();
+  RCLCPP_INFO(LOGGER, "Initializing Grasp sample generation");
   getAllPossibleGrasps(object, object_center, object_top_point, viewer);
   // std::chrono::steady_clock::time_point getAllPossibleGraspsEnd =
   //  std::chrono::steady_clock::now();
@@ -254,14 +256,18 @@ void SuctionGripper::getAllPossibleGrasps(
 
       /*! \brief A sliced cloud is created to account for noise,
       so we take a range of z values and assume them to be in the same height*/
+      RCLCPP_INFO(LOGGER, "Slice pointcloud");
       getSlicedCloud(
         object->cloud, object->cloud_normal, slice_limit, 0, sliced_cloud,
-        sliced_cloud_normal);
+        sliced_cloud_normal, 'z');
       /*! \brief We then make them part of the same plane throguh projection*/
+      RCLCPP_INFO(LOGGER, "Project Sliced pointcloud to a plane");
       projectCloudToPlane(sliced_cloud, plane, projected_cloud);
       /*! \brief Get the center index of the sliced cloud,
       which may not necessarily be the center of the object cloud*/
+      RCLCPP_INFO(LOGGER, "Get the centroid of the projected point cloud");
       int centroid_index = getCentroidIndex(projected_cloud);
+      RCLCPP_INFO(LOGGER, "Generate grasp samples");
 
       // Iterate at different angles to search for best possible grasp
       for (int i = 1, angle = 2, toggle = 1; i < this->search_angle_resolution; i += toggle ^= 1) {
@@ -271,29 +277,42 @@ void SuctionGripper::getAllPossibleGrasps(
 
           // Get the maximum direction in the three axes. 
           float object_max_dim = *std::max_element(std::begin(object->dimensions), std::end(object->dimensions));
-
           // Iterate between the positive and negative sides
           float offset = this->search_resolution * (k == 0 ? j : -j);
-          pcl::PointXYZ sample_gripper_center;
-          sample_gripper_center.x = projected_cloud->points[centroid_index].x +
-            (object->axis(0)) * offset;
-          sample_gripper_center.y = projected_cloud->points[centroid_index].y +
-            (object->axis(1)) * offset;
-          sample_gripper_center.z = slice_limit + (object->axis(2)) * offset;
 
-          Eigen::Vector3f grasp_direction;
-          grasp_direction(0) = object->grasp_axis(0) * cos(PI / angle) -
-            object->grasp_axis(0) * sin(PI / angle);
-          grasp_direction(1) = object->grasp_axis(0) * sin(PI / angle) +
-            object->grasp_axis(1) * cos(PI / angle);
-          grasp_direction(2) = object->grasp_axis(2);
+          pcl::PointXYZ sample_gripper_center = getGripperCenter(object->axis,
+            offset,
+            projected_cloud->points[centroid_index],
+            slice_limit, object->alignments[0]);
+          
+          // pcl::PointXYZ sample_gripper_center;
+          // sample_gripper_center.x = projected_cloud->points[centroid_index].x +
+          //   (object->axis(0)) * offset;
+          // sample_gripper_center.y = projected_cloud->points[centroid_index].y +
+          //   (object->axis(1)) * offset;
+          // sample_gripper_center.z = slice_limit + (object->axis(2)) * offset;
 
-          Eigen::Vector3f object_direction;
-          object_direction(0) = object->axis(0) * cos(PI / angle) -
-            object->axis(0) * sin(PI / angle);
-          object_direction(1) = object->axis(0) * sin(PI / angle) +
-            object->axis(1) * cos(PI / angle);
-          object_direction(2) = object->axis(2);
+          Eigen::Vector3f grasp_direction = getGraspDirection(object->grasp_axis, angle);
+          // Eigen::Vector3f grasp_direction;
+          // grasp_direction(0) = object->grasp_axis(0) * cos(PI / angle) -
+          //   object->grasp_axis(0) * sin(PI / angle);
+          // grasp_direction(1) = object->grasp_axis(0) * sin(PI / angle) +
+          //   object->grasp_axis(1) * cos(PI / angle);
+          // grasp_direction(2) = object->grasp_axis(2);
+
+          Eigen::Vector3f object_direction = getObjectDirection(object->axis, angle);
+
+          // Eigen::Vector3f object_direction;
+          // object_direction(0) = object->axis(0) * cos(PI / angle) -
+          //   object->axis(0) * sin(PI / angle);
+          // object_direction(1) = object->axis(0) * sin(PI / angle) +
+          //   object->axis(1) * cos(PI / angle);
+          // object_direction(2) = object->axis(2);
+
+
+          std::cout << "object dots dot X: '" << object_direction.dot(grasp_direction) << std::endl;
+          std::cout << "objectss: '" << object->axis.dot(object->grasp_axis) << std::endl;
+
           //Eigen::Vector3f object_direction_normalized = object_direction / object_direction.norm();
           // Eigen::Vector3f grasp_centerpoint;
           // grasp_centerpoint(0) = sample_gripper_center.x;
@@ -304,7 +323,7 @@ void SuctionGripper::getAllPossibleGrasps(
 
           static std::mutex mutex_2;
           std::lock_guard<std::mutex> lock(mutex_2);
-
+          RCLCPP_INFO(LOGGER, "Generate grasp samples");
           suctionCupArray grasp_sample = generateGraspSample(
             projected_cloud,
             sliced_cloud_normal,
@@ -312,12 +331,21 @@ void SuctionGripper::getAllPossibleGrasps(
             object_center,
             grasp_direction,
             object_direction,
-            object_max_dim,
-            float(PI / angle));
+            object_max_dim);
+          
+          // std::cout << "grasp_sample.average_curvature: " << grasp_sample.average_curvature << std::endl;
+          // std::cout << "grasp_sample.center_dist: " << grasp_sample.center_dist << std::endl;
+          // std::cout << "grasp_sample.total_contact_points: " << grasp_sample.total_contact_points<< std::endl;
           
           updateMaxMinValues(
             grasp_sample.total_contact_points, grasp_sample.average_curvature,
             grasp_sample.center_dist);
+          // std::cout << "max_curvature: " << this->max_curvature << std::endl;
+          // std::cout << "min_curvature: " << this->min_curvature << std::endl;
+          // std::cout << "max_center_dist: " << this->max_center_dist << std::endl;
+          // std::cout << "min_center_dist: " << this->min_center_dist << std::endl;
+          // std::cout << "max_contact_points: " << this->max_contact_points<< std::endl;
+          // std::cout << "min_contact_points: " << this->min_contact_points << std::endl;
           //grasp_sample.grasp_angle = PI / angle;
           this->cup_array_samples.push_back(std::make_shared<suctionCupArray>(grasp_sample));
 
@@ -436,23 +464,40 @@ void SuctionGripper::getAllPossibleGrasps(
 
   // End lambda
   pcl::ModelCoefficients::Ptr plane(new pcl::ModelCoefficients);
-  getStartingPlane(plane, object, top_point);
+  getStartingPlane(plane, object->minor_axis, object->centerpoint, top_point, 'z');
   float slice_limit = top_point.z;
+  // if(object->alignments[2] == 'z')
+  // {
+  //   slice_limit = top_point.z;
+  // }
+  // else if(object->alignments[2] == 'y')
+  // {
+  //   slice_limit = top_point.y;
+  // }
+  // else if(object->alignments[2] == 'x')
+  // {
+  //   slice_limit = top_point.x;
+  // }
+  
   std::vector<std::future<void>> futures_1;
 
   for (int i = 0; i < static_cast<int>(round(this->cup_height / 0.001)); i++) {
+
     // Start async
-    futures_1.push_back(
-      std::async(
-        std::launch::async,
-        GetBestGrasps1,
-        i,
-        slice_limit,
-        std::ref(object),
-        std::ref(object_center),
-        std::ref(plane),
-        viewer
-    ));
+    // futures_1.push_back(
+    //   std::async(
+    //     std::launch::async,
+    //     GetBestGrasps1,
+    //     i,
+    //     slice_limit,
+    //     std::ref(object),
+    //     std::ref(object_center),
+    //     std::ref(plane),
+    //     viewer
+    // ));
+
+    // Non Async version
+    GetBestGrasps1(i, slice_limit, std::ref(object), std::ref(object_center), std::ref(plane), viewer);
   }
   // End Test Projected
   viewer->removeShape("object_cloud");
@@ -463,7 +508,6 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
   if (this->cup_array_samples.size() > 0) {
     for (auto suction_cup_array : this->cup_array_samples) {
       int counter = 0;
-      std::cout << "RANK: " << suction_cup_array->rank << std::endl;
       for (auto row : suction_cup_array->cup_array) {
         for (auto cup : row) {
           viewer->addSphere(
@@ -591,44 +635,103 @@ std::vector<int> SuctionGripper::getCupContactIndices(
   return kd_radius_search;
 }
 
-pcl::PointXYZRGB SuctionGripper::findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+pcl::PointXYZRGB SuctionGripper::findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  char height_axis, bool is_positive)
 {
   std::vector<std::future<void>> futures;
   auto checkTopPoint = [this](
     pcl::PointXYZRGB & point,
-    pcl::PointXYZRGB & top_point) -> void
+    pcl::PointXYZRGB & top_point,
+    char height_axis,
+    bool is_positive) -> void
     {
-      if (point.z < top_point.z) {
-        top_point = point;
+      if(height_axis == 'x'){
+        if(is_positive)
+        {
+          if (point.x > top_point.x) {
+            top_point = point;
+          }
+        }
+        else{
+          if (point.x < top_point.x) {
+            top_point = point;
+          }
+        }
+      }
+      else if(height_axis == 'y'){
+        if(is_positive)
+        {
+          if (point.y > top_point.y) {
+            top_point = point;
+          }
+        }
+        else{
+          if (point.y < top_point.y) {
+            top_point = point;
+          }
+        }
+      }
+      else if(height_axis == 'z'){
+        if(is_positive)
+        {
+          if (point.z > top_point.z) {
+            top_point = point;
+          }
+        }
+        else{
+          if (point.z < top_point.z) {
+            top_point = point;
+          }
+        }
       }
     };
   pcl::PointXYZRGB top_point;
-  top_point.x = std::numeric_limits<float>::max();
-  top_point.y = std::numeric_limits<float>::max();
-  top_point.z = std::numeric_limits<float>::max();
+  if(is_positive){
+    top_point.x = std::numeric_limits<float>::min();
+    top_point.y = std::numeric_limits<float>::min();
+    top_point.z = std::numeric_limits<float>::min();
+  }
+  else{
+    top_point.x = std::numeric_limits<float>::max();
+    top_point.y = std::numeric_limits<float>::max();
+    top_point.z = std::numeric_limits<float>::max();
+  }
+  
+
   for (pcl::PointXYZRGB point : cloud->points) {
     futures.push_back(
       std::async(
         std::launch::async,
         checkTopPoint,
         std::ref(point),
-        std::ref(top_point)));
+        std::ref(top_point),
+        height_axis,
+        is_positive));
   }
-  // for(pcl::PointXYZRGB point : cloud->points)
-  // {
-  //   std::cout << "Z values: " << point.z << std::endl;
-  // }
   return top_point;
 }
 
 void SuctionGripper::getStartingPlane(
   pcl::ModelCoefficients::Ptr plane_coefficients,
-  std::shared_ptr<GraspObject> object, pcl::PointXYZRGB top_point)
+  Eigen::Vector3f axis,
+  Eigen::Vector4f object_centerpoint,
+  pcl::PointXYZRGB top_point,
+  char height_axis)
 {
-  float a = object->minor_axis(0);
-  float b = object->minor_axis(1);
-  float c = object->minor_axis(2);
-  float d = -((a * object->centerpoint(0)) + (b * object->centerpoint(1)) + (c * (top_point.z)));
+  float a = axis(0);
+  float b = axis(1);
+  float c = axis(2);
+  float d;
+  if(height_axis == 'x'){
+    d = -((a * top_point.x) + (b * object_centerpoint(1)) + (c * object_centerpoint(2)));
+  }
+  else if(height_axis == 'y'){
+    d = -((a * object_centerpoint(0)) + (b * top_point.y) + (c * object_centerpoint(2)));
+  }
+  else if(height_axis == 'z'){
+    d = -((a * object_centerpoint(0)) + (b * object_centerpoint(1)) + (c * (top_point.z)));
+  }
+  // float d = -((a * object_centerpoint(0)) + (b * object_centerpoint(1)) + (c * (top_point.z)));
   plane_coefficients->values.resize(4);
   plane_coefficients->values[0] = a;
   plane_coefficients->values[1] = b;
@@ -654,17 +757,37 @@ void SuctionGripper::getSlicedCloud(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
   pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud_normal,
   float top_limit, float bottom_limit, pcl::PointCloud<pcl::PointXYZRGB>::Ptr sliced_cloud,
-  pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal)
+  pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
+  char height_axis)
 {
   pcl::PassThrough<pcl::PointXYZRGB> ptFilter;
   ptFilter.setInputCloud(input_cloud);
-  ptFilter.setFilterFieldName("z");
+  
+  if(height_axis == 'x'){
+    ptFilter.setFilterFieldName("x");
+  }
+  else if(height_axis == 'y'){
+    ptFilter.setFilterFieldName("y");
+  }
+  else if(height_axis == 'z'){
+    ptFilter.setFilterFieldName("z");
+  }
   ptFilter.setFilterLimits(bottom_limit, top_limit);
   ptFilter.filter(*sliced_cloud);
 
   for (auto point : input_cloud_normal->points) {
-    if (point.z <= top_limit && point.z >= bottom_limit) {
-      sliced_cloud_normal->points.push_back(point);
+    if(height_axis == 'x'){
+      if (point.x <= top_limit && point.x >= bottom_limit) {
+        sliced_cloud_normal->points.push_back(point);}
+    }
+    else if(height_axis == 'y'){
+      if (point.y <= top_limit && point.y >= bottom_limit) {
+      sliced_cloud_normal->points.push_back(point);}
+
+    }
+    else if(height_axis == 'z'){
+      if (point.z <= top_limit && point.z >= bottom_limit) {
+      sliced_cloud_normal->points.push_back(point);}
     }
   }
 }
@@ -811,10 +934,11 @@ suctionCupArray SuctionGripper::generateGraspSample(
   pcl::PointXYZ object_center,
   Eigen::Vector3f grasp_direction,
   Eigen::Vector3f object_direction,
-  float object_max_dim,
-  float angle)
+  float object_max_dim)
 {
+
   suctionCupArray grasp_sample(sample_gripper_center);
+  Eigen::Vector3f sample_gripper_center_eigen = PCLFunctions::convertPCLtoEigen(sample_gripper_center);
   float total_contact_points = 0;
   float total_curvature = 0;
   for (int row = 0, row_updown_toggle = 0; row < this->row_itr; row += row_updown_toggle ^= 1){
@@ -823,25 +947,41 @@ suctionCupArray SuctionGripper::generateGraspSample(
     float row_gap = getGap(
       row, this->row_is_even, this->row_initial_gap, this->row_dist_between_cups);
 
+    if(row_gap < 0) // For even grippers, the first iteration has no cup generation
+    {
+      continue;
+    }
+    (row_updown_toggle == 0 ? row_gap = row_gap : row_gap = -row_gap);
     Eigen::Vector3f row_cen_point = MathFunctions::getPointInDirection(
-      PCLFunctions::convertPCLtoEigen(sample_gripper_center), grasp_direction,
-      (row_updown_toggle == 0 ? row_gap : -row_gap));
+      sample_gripper_center_eigen, grasp_direction,
+      row_gap);
 
     std::vector<std::shared_ptr<singleSuctionCup>> temp_row_array;
-
+    // std::cout << "row_gap: " << row_gap << std::endl;
+    // std::cout << "row_cen_point: " << row_cen_point(0) << "," << row_cen_point(1) << "," << row_cen_point(2) << std::endl;
     for (int col = 0, col_updown_toggle = 0; col < this->col_itr; col += col_updown_toggle ^= 1){
 
       float col_gap = getGap(
         col, this->col_is_even, this->col_initial_gap, this->col_dist_between_cups);
-
+      
+      if(col_gap < 0) // For even grippers, the first iteration has no cup generation
+      {
+        continue;
+      }
+      (col_updown_toggle == 0 ? col_gap = col_gap : col_gap = -col_gap);
+      
       Eigen::Vector3f cup_vector = MathFunctions::getPointInDirection(
         row_cen_point, object_direction,
-        (col_updown_toggle == 0 ? col_gap : -col_gap));
+        col_gap);
+      // std::cout << "col: " << col << std::endl;
+      // std::cout << "col_updown_toggle: " << col_updown_toggle << std::endl;
+      // std::cout << "col_gap: " << col_gap << std::endl;
+      // std::cout << "cup_vector: " << cup_vector(0) << "," << cup_vector(1) << "," << cup_vector(2) << std::endl;
 
       singleSuctionCup cup = generateSuctionCup(projected_cloud, sliced_cloud_normal,
         cup_vector, object_direction, object_center, object_max_dim);
-
       total_contact_points += cup.weighted_contact_points;
+      
       total_curvature += cup.curvature_sum;
       temp_row_array.push_back(std::make_shared<singleSuctionCup>(cup));
     }
@@ -851,6 +991,7 @@ suctionCupArray SuctionGripper::generateGraspSample(
   grasp_sample.total_curvature = total_curvature;
   grasp_sample.center_dist = pcl::geometry::distance(sample_gripper_center, object_center);
   grasp_sample.average_curvature = grasp_sample.total_curvature/grasp_sample.total_contact_points;
+  return grasp_sample;
 }
 
 
@@ -906,4 +1047,60 @@ int SuctionGripper::generateWeightedContactPoints(
     contact_points *
     (this->num_contact_points_weight *
       (1 - cup_to_center_dist / object_max_dim)));
+}
+
+pcl::PointXYZ SuctionGripper::getGripperCenter(Eigen::Vector3f object_axis,
+  float offset,
+  pcl::PointXYZRGB slice_centroid,
+  float slice_height,
+  char height_axis)
+{
+  pcl::PointXYZ sample_gripper_center;
+  // sample_gripper_center.x = slice_centroid.x +
+  //   (object_axis(0)) * offset;
+  // sample_gripper_center.y = slice_centroid.y +
+  //   (object_axis(1)) * offset;
+  // sample_gripper_center.z = slice_height + (object_axis(2)) * offset;
+
+  if(height_axis == 'x'){
+    std::cout << "x!" << std::endl;
+    sample_gripper_center.x = slice_centroid.x + (object_axis(0)) * offset;
+    sample_gripper_center.y = slice_centroid.y;
+    sample_gripper_center.z = slice_centroid.z;
+  }
+  else if(height_axis == 'y'){
+    std::cout << "y!" << std::endl;
+    sample_gripper_center.x = slice_centroid.x;
+    sample_gripper_center.y = slice_centroid.y + (object_axis(1)) * offset;
+    sample_gripper_center.z = slice_centroid.z;
+  }
+  else if(height_axis == 'z'){
+    std::cout << "z!" << std::endl;
+    sample_gripper_center.x = slice_centroid.x;
+    sample_gripper_center.y = slice_centroid.y;
+    sample_gripper_center.z = slice_centroid.z + (object_axis(2)) * offset;
+  }
+  return sample_gripper_center;
+}
+
+Eigen::Vector3f SuctionGripper::getGraspDirection(Eigen::Vector3f grasp_axis, float angle)
+{
+  Eigen::Vector3f grasp_direction;
+  grasp_direction(0) = grasp_axis(0) * cos(PI / angle) -
+    grasp_axis(1) * sin(PI / angle);
+  grasp_direction(1) = grasp_axis(0) * sin(PI / angle) +
+    grasp_axis(1) * cos(PI / angle);
+  grasp_direction(2) = grasp_axis(2);
+  return grasp_direction;
+}
+
+Eigen::Vector3f SuctionGripper::getObjectDirection(Eigen::Vector3f object_axis, float angle)
+{
+  Eigen::Vector3f object_direction;
+  object_direction(0) = object_axis(0) * cos(PI / angle) -
+    object_axis(1) * sin(PI / angle);
+  object_direction(1) = object_axis(0) * sin(PI / angle) +
+    object_axis(1) * cos(PI / angle);
+  object_direction(2) = object_axis(2);
+  return object_direction;
 }
