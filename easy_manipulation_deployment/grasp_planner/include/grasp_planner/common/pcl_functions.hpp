@@ -173,7 +173,14 @@ void createSphereCloud(
   Eigen::Vector3f & centerpoint,
   const float & radius, const int & resolution);
 
-void createRectangularCloud(pcl::visualization::PCLVisualizer::Ptr viewer);
+template<typename V>
+Eigen::Vector3f convertPCLtoEigen(V pcl_point)
+{
+  return Eigen::Vector3f(pcl_point.x , pcl_point.y, pcl_point.z);
+}
+
+Eigen::Vector3f convertPCLNormaltoEigen(pcl::PointNormal pcl_point);
+
 }  // namespace PCLFunctions
 
 #endif  // GRASP_PLANNER__COMMON__PCL_FUNCTIONS_HPP_

@@ -74,3 +74,28 @@ Eigen::Vector3f MathFunctions::getPointInDirection(
   Eigen::Vector3f direction_normalized = vector_direction / vector_direction.norm();
   return base_point + distance * direction_normalized;
 }
+
+Eigen::Vector3f MathFunctions::getRotatedVector(Eigen::Vector3f target_vector, float angle, char axis)
+{
+  Eigen::Vector3f result_vector;
+  if(axis == 'x'){
+    result_vector(0) = target_vector(0); 
+    result_vector(1) = target_vector(1) * cos(angle) - target_vector(2) * sin(angle);
+    result_vector(2) = target_vector(1) * sin(angle) + target_vector(2) * cos(angle);
+  }
+  else if(axis == 'y'){
+    result_vector(0) = target_vector(0) * cos(angle) - target_vector(1) * sin(angle);
+    result_vector(1) = target_vector(1);
+    result_vector(2) = target_vector(2) * -sin(angle) + target_vector(1) * cos(angle);
+  }
+  else if(axis == 'z'){
+    result_vector(0) = target_vector(0) * cos(angle) - target_vector(1) * sin(angle);
+    result_vector(1) = target_vector(0) * sin(angle) + target_vector(1) * cos(angle);
+    result_vector(2) = target_vector(2);
+  }
+  else{
+    RCLCPP_ERROR(LOGGER, "Invalid axis of rotation.");
+    throw std::invalid_argument("Invalid axis of rotation.");
+  }
+  return result_vector;
+}

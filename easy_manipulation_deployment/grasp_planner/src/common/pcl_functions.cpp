@@ -255,3 +255,8 @@ void PCLFunctions::createSphereCloud(
   output_sphere_cloud->height = 1;
   output_sphere_cloud->width = output_sphere_cloud->points.size();
 }
+
+Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(pcl::PointNormal pcl_point)
+{
+  return Eigen::Vector3f(pcl_point.normal_x , pcl_point.normal_y, pcl_point.normal_z);
+}

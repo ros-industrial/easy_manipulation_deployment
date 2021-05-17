@@ -28,8 +28,6 @@
 // For Statistical outlier removal
 #include <pcl/filters/statistical_outlier_removal.h>
 
-// For Voxelization
-#include <pcl/filters/voxel_grid.h>
 
 // For Plane Segmentation
 #include <pcl/sample_consensus/method_types.h>
@@ -47,24 +45,6 @@
 // For Visualization
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
-
-// Normal Estimation
-#include <pcl/features/normal_3d.h>
-#include <pcl/features/normal_3d_omp.h>
-
-// ROS2 Libraries
-// #include "rclcpp/rclcpp.hpp"
-#include <sensor_msgs/msg/point_cloud2.hpp>
-
-// Other Libraries
-#include <stdlib.h>
-#include <math.h>
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <future>
-#include <string>
-#include <vector>
 
 // EMD Libraries
 // #include "grasp_object.h"
