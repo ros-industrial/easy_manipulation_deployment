@@ -205,11 +205,6 @@ void SuctionGripper::planGrasps(
   // Get highest point of the object to begin grasp search
   RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
   pcl::PointXYZRGB object_top_point = findHighestPoint(object->cloud, 'z', false);
-  std::cout <<object_top_point.x << "," << object_top_point.y << "," << object_top_point.z << std::endl;
-  viewer->addSphere(object_top_point, 0.0001, "spheres");
-  viewer->spin();
-  viewer->close();
-  viewer->removeShape("spheres");
   // std::chrono::steady_clock::time_point getAllPossibleGraspsStart =
   // std::chrono::steady_clock::now();
   RCLCPP_INFO(LOGGER, "Initializing Grasp sample generation");
@@ -292,7 +287,9 @@ void SuctionGripper::getAllPossibleGrasps(
           //   (object->axis(1)) * offset;
           // sample_gripper_center.z = slice_limit + (object->axis(2)) * offset;
 
-          Eigen::Vector3f grasp_direction = getGraspDirection(object->grasp_axis, angle);
+          // Eigen::Vector3f grasp_direction = getGraspDirection(object->grasp_axis, angle);
+          Eigen::Vector3f grasp_direction = MathFunctions::getRotatedVector(object->grasp_axis, PI/angle, 'z');
+
           // Eigen::Vector3f grasp_direction;
           // grasp_direction(0) = object->grasp_axis(0) * cos(PI / angle) -
           //   object->grasp_axis(0) * sin(PI / angle);
@@ -300,7 +297,8 @@ void SuctionGripper::getAllPossibleGrasps(
           //   object->grasp_axis(1) * cos(PI / angle);
           // grasp_direction(2) = object->grasp_axis(2);
 
-          Eigen::Vector3f object_direction = getObjectDirection(object->axis, angle);
+          // Eigen::Vector3f object_direction = getObjectDirection(object->axis, angle);
+          Eigen::Vector3f object_direction = MathFunctions::getRotatedVector(object->axis, PI/angle, 'z');
 
           // Eigen::Vector3f object_direction;
           // object_direction(0) = object->axis(0) * cos(PI / angle) -
@@ -308,10 +306,6 @@ void SuctionGripper::getAllPossibleGrasps(
           // object_direction(1) = object->axis(0) * sin(PI / angle) +
           //   object->axis(1) * cos(PI / angle);
           // object_direction(2) = object->axis(2);
-
-
-          std::cout << "object dots dot X: '" << object_direction.dot(grasp_direction) << std::endl;
-          std::cout << "objectss: '" << object->axis.dot(object->grasp_axis) << std::endl;
 
           //Eigen::Vector3f object_direction_normalized = object_direction / object_direction.norm();
           // Eigen::Vector3f grasp_centerpoint;
@@ -1083,24 +1077,24 @@ pcl::PointXYZ SuctionGripper::getGripperCenter(Eigen::Vector3f object_axis,
   return sample_gripper_center;
 }
 
-Eigen::Vector3f SuctionGripper::getGraspDirection(Eigen::Vector3f grasp_axis, float angle)
-{
-  Eigen::Vector3f grasp_direction;
-  grasp_direction(0) = grasp_axis(0) * cos(PI / angle) -
-    grasp_axis(1) * sin(PI / angle);
-  grasp_direction(1) = grasp_axis(0) * sin(PI / angle) +
-    grasp_axis(1) * cos(PI / angle);
-  grasp_direction(2) = grasp_axis(2);
-  return grasp_direction;
-}
+// Eigen::Vector3f SuctionGripper::getGraspDirection(Eigen::Vector3f grasp_axis, float angle)
+// {
+//   Eigen::Vector3f grasp_direction;
+//   grasp_direction(0) = grasp_axis(0) * cos(PI / angle) -
+//     grasp_axis(1) * sin(PI / angle);
+//   grasp_direction(1) = grasp_axis(0) * sin(PI / angle) +
+//     grasp_axis(1) * cos(PI / angle);
+//   grasp_direction(2) = grasp_axis(2);
+//   return grasp_direction;
+// }
 
-Eigen::Vector3f SuctionGripper::getObjectDirection(Eigen::Vector3f object_axis, float angle)
-{
-  Eigen::Vector3f object_direction;
-  object_direction(0) = object_axis(0) * cos(PI / angle) -
-    object_axis(1) * sin(PI / angle);
-  object_direction(1) = object_axis(0) * sin(PI / angle) +
-    object_axis(1) * cos(PI / angle);
-  object_direction(2) = object_axis(2);
-  return object_direction;
-}
+// Eigen::Vector3f SuctionGripper::getObjectDirection(Eigen::Vector3f object_axis, float angle)
+// {
+//   Eigen::Vector3f object_direction;
+//   object_direction(0) = object_axis(0) * cos(PI / angle) -
+//     object_axis(1) * sin(PI / angle);
+//   object_direction(1) = object_axis(0) * sin(PI / angle) +
+//     object_axis(1) * cos(PI / angle);
+//   object_direction(2) = object_axis(2);
+//   return object_direction;
+// }

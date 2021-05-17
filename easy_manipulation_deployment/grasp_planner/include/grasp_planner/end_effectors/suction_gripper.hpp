@@ -288,8 +288,8 @@ public:
     pcl::PointXYZRGB slice_centroid,
     float slice_height,
     char height_axis);
-  Eigen::Vector3f getGraspDirection(Eigen::Vector3f grasp_axis, float angle);
-  Eigen::Vector3f getObjectDirection(Eigen::Vector3f object_axis, float angle);
+  // Eigen::Vector3f getGraspDirection(Eigen::Vector3f grasp_axis, float angle);
+  // Eigen::Vector3f getObjectDirection(Eigen::Vector3f object_axis, float angle);
 
   int getContactPoints(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,
