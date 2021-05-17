@@ -283,8 +283,7 @@ public:
   
   pcl::PointXYZ getGripperCenter(Eigen::Vector3f object_axis,
     float offset,
-    pcl::PointXYZRGB slice_centroid,
-    char height_axis);
+    pcl::PointXYZRGB slice_centroid);
 
   int getContactPoints(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,

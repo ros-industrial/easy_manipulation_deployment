@@ -492,18 +492,15 @@ TEST_F(SuctionGripperTest, getGripperCenterTest)
 
   pcl::PointXYZ sample_gripper_center_x = gripper->getGripperCenter(object->axis,
     0.002,
-    projected_cloud->points[centroid_index],
-    'x');
+    projected_cloud->points[centroid_index]);
     
   pcl::PointXYZ sample_gripper_center_y = gripper->getGripperCenter(object->grasp_axis,
     0.001,
-    projected_cloud->points[centroid_index],
-    'y');
+    projected_cloud->points[centroid_index]);
 
   pcl::PointXYZ sample_gripper_center_z = gripper->getGripperCenter(object->minor_axis,
     0.003,
-    projected_cloud->points[centroid_index],
-    'z');
+    projected_cloud->points[centroid_index]);
 
   EXPECT_NEAR(projected_cloud->points[centroid_index].x + 0.002, sample_gripper_center_x.x, 0.0001);
   EXPECT_NEAR(projected_cloud->points[centroid_index].y, sample_gripper_center_x.y , 0.0001);
@@ -783,7 +780,7 @@ TEST_F(SuctionGripperTest, generateGraspSampleTest){
   int centroid_index = gripper->getCentroidIndex(projected_cloud);
   pcl::PointXYZ sample_gripper_center = gripper->getGripperCenter(object->axis,
     0,
-    projected_cloud->points[centroid_index], object->alignments[2]);
+    projected_cloud->points[centroid_index]);
 
   Eigen::Vector3f grasp_direction = object->grasp_axis;
   Eigen::Vector3f object_direction = object->axis;

@@ -749,31 +749,46 @@ int SuctionGripper::generateWeightedContactPoints(
       (1 - cup_to_center_dist / object_max_dim)));
 }
 
+/***************************************************************************//**
+ * Function that calculates center of the suction cup array
+ * 
+ * @param object_axis Vector representing the object 
+ * @param offset Offset from centroid of sliced cloud
+ * @param slice_centroid Center point of sliced cloud
+ * @param height_axis Axis along which to add the 
+ ******************************************************************************/
+
+
 pcl::PointXYZ SuctionGripper::getGripperCenter(Eigen::Vector3f object_axis,
   float offset,
-  pcl::PointXYZRGB slice_centroid,
-  char height_axis)
+  pcl::PointXYZRGB slice_centroid)
 {
+  Eigen::Vector3f slice_centroid_eigen = PCLFunctions::convertPCLtoEigen(slice_centroid);
+  Eigen::Vector3f result_vector = MathFunctions::getPointInDirection(slice_centroid_eigen,
+    object_axis, offset);
   pcl::PointXYZ sample_gripper_center;
+  sample_gripper_center.x = result_vector(0);
+  sample_gripper_center.y = result_vector(1);
+  sample_gripper_center.z = result_vector(2);
 
-  if(height_axis == 'x'){
-    std::cout << "x!" << std::endl;
-    sample_gripper_center.x = slice_centroid.x + (object_axis(0)) * offset;
-    sample_gripper_center.y = slice_centroid.y;
-    sample_gripper_center.z = slice_centroid.z;
-  }
-  else if(height_axis == 'y'){
-    std::cout << "y!" << std::endl;
-    sample_gripper_center.x = slice_centroid.x;
-    sample_gripper_center.y = slice_centroid.y + (object_axis(1)) * offset;
-    sample_gripper_center.z = slice_centroid.z;
-  }
-  else if(height_axis == 'z'){
-    std::cout << "z!" << std::endl;
-    sample_gripper_center.x = slice_centroid.x;
-    sample_gripper_center.y = slice_centroid.y;
-    sample_gripper_center.z = slice_centroid.z + (object_axis(2)) * offset;
-  }
+  // if(height_axis == 'x'){
+  //   std::cout << "x!" << std::endl;
+  //   sample_gripper_center.x = slice_centroid.x + (object_axis(0)) * offset;
+  //   sample_gripper_center.y = slice_centroid.y;
+  //   sample_gripper_center.z = slice_centroid.z;
+  // }
+  // else if(height_axis == 'y'){
+  //   std::cout << "y!" << std::endl;
+  //   sample_gripper_center.x = slice_centroid.x;
+  //   sample_gripper_center.y = slice_centroid.y + (object_axis(1)) * offset;
+  //   sample_gripper_center.z = slice_centroid.z;
+  // }
+  // else if(height_axis == 'z'){
+  //   std::cout << "z!" << std::endl;
+  //   sample_gripper_center.x = slice_centroid.x;
+  //   sample_gripper_center.y = slice_centroid.y;
+  //   sample_gripper_center.z = slice_centroid.z + (object_axis(2)) * offset;
+  // }
   return sample_gripper_center;
 }
 
