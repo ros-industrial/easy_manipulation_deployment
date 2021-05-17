@@ -188,8 +188,7 @@ void SuctionGripper::generateGripperAttributes()
 void SuctionGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
-  std::shared_ptr<CollisionObject> world_collision_object,
-  pcl::visualization::PCLVisualizer::Ptr viewer)
+  std::shared_ptr<CollisionObject> world_collision_object)
 {
   RCLCPP_INFO(LOGGER, "Generate Gripper Attributes");
   generateGripperAttributes();

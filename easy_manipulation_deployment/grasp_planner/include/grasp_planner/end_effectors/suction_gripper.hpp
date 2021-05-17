@@ -225,8 +225,7 @@ public:
   void planGrasps(
     std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr<CollisionObject> world_collision_object,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
+    std::shared_ptr<CollisionObject> world_collision_object);
 
   std::string getID() {return id;}
 
