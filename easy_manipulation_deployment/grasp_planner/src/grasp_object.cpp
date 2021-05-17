@@ -88,12 +88,14 @@ void GraspObject::get_object_bb()
   pcl::transformPointCloud(*(this->cloud), *(this->cloud_projected), projectionTransform);
   this->affine_matrix = projectionTransform;
   pcl::getMinMax3D(*(this->cloud_projected), this->minPoint, this->maxPoint);
-  getObjectDimensions();
+  
   const Eigen::Vector3f meanDiagonal = 0.5f *
     (this->maxPoint.getVector3fMap() + this->minPoint.getVector3fMap());
   Eigen::Quaternionf bboxQuaternion(this->eigenvectors);
   this->bboxQuaternion = bboxQuaternion;
   this->bboxTransform = this->eigenvectors * meanDiagonal + this->centerpoint.head<3>();
+  getObjectDimensions();
+  getAxisAlignments();
 }
 
 void GraspObject::getObjectDimensions()
@@ -157,8 +159,35 @@ shape_msgs::msg::SolidPrimitive GraspObject::getObjectShape()
   object_shape.dimensions[0] = this->dimensions[0];
   object_shape.dimensions[1] = this->dimensions[1];
   object_shape.dimensions[2] = this->dimensions[2];
-  std::cout << "dim 0" << object_shape.dimensions[0] << std::endl;
-  std::cout << "dim 1" << object_shape.dimensions[1] << std::endl;
-  std::cout << "dim 2" << object_shape.dimensions[2] << std::endl;
   return object_shape;
+}
+
+void GraspObject::getAxisAlignments()
+{
+  alignments[0] = getAxis(axis);
+  alignments[1] = getAxis(grasp_axis);
+  alignments[2] = getAxis(minor_axis);
+}
+
+char GraspObject::getAxis(Eigen::Vector3f vector)
+{
+  Eigen::Vector3f worldXVector = Eigen::Vector3f(1, 0, 0);
+  Eigen::Vector3f worldYVector = Eigen::Vector3f(0, 1, 0);
+  Eigen::Vector3f worldZVector = Eigen::Vector3f(0, 0, 1);
+  
+  float vec_x = std::abs(vector.dot(worldXVector));
+  float vec_y = std::abs(vector.dot(worldYVector));
+  float vec_z = std::abs(vector.dot(worldZVector));
+  
+  float max_temp = std::max(vec_x, vec_y);
+  float max_ = std::max(max_temp, vec_z);
+  if(vec_x == max_){
+    return 'x';
+  }
+  else if(vec_y == max_){
+    return 'y';
+  }
+  else if(vec_z == max_){
+    return 'z';
+  }
 }

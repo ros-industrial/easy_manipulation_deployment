@@ -51,6 +51,7 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <algorithm>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "shape_msgs/msg/solid_primitive.hpp"
@@ -112,11 +113,13 @@ public:
   float objectWorldCosY;
   /*! \brief Cos angle of the object with respect to the world Z axis*/
   float objectWorldCosZ;
+  /*! \brief Alignment of each eigenvector wrt world axes*/
+  char alignments[3];
   /*! \brief */
   Eigen::Matrix4f affine_matrix;
   /*! \brief */
   int max_grasp_samples;  // Maximum number of grasp options
-  int dimensions[3];
+  float dimensions[3];
   // // To be removed, temp variable
   // pcl::ModelCoefficients::Ptr cutting_plane;
 
@@ -133,6 +136,8 @@ public:
   void add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
   shape_msgs::msg::SolidPrimitive getObjectShape();
   void getObjectDimensions();
+  void getAxisAlignments();
+  char getAxis(Eigen::Vector3f vector);
   geometry_msgs::msg::PoseStamped getObjectPose(std::string pose_frame);
 };
 
