@@ -260,7 +260,6 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
     pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
     Eigen::Vector3f suction_cup_center,
-    Eigen::Vector3f object_direction,
     pcl::PointXYZ object_center,
     float object_max_dim);
 
@@ -285,10 +284,7 @@ public:
   pcl::PointXYZ getGripperCenter(Eigen::Vector3f object_axis,
     float offset,
     pcl::PointXYZRGB slice_centroid,
-    float slice_height,
     char height_axis);
-  // Eigen::Vector3f getGraspDirection(Eigen::Vector3f grasp_axis, float angle);
-  // Eigen::Vector3f getObjectDirection(Eigen::Vector3f object_axis, float angle);
 
   int getContactPoints(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud,

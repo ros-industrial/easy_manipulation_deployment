@@ -493,19 +493,16 @@ TEST_F(SuctionGripperTest, getGripperCenterTest)
   pcl::PointXYZ sample_gripper_center_x = gripper->getGripperCenter(object->axis,
     0.002,
     projected_cloud->points[centroid_index],
-    0,
     'x');
     
   pcl::PointXYZ sample_gripper_center_y = gripper->getGripperCenter(object->grasp_axis,
     0.001,
     projected_cloud->points[centroid_index],
-    0,
     'y');
 
   pcl::PointXYZ sample_gripper_center_z = gripper->getGripperCenter(object->minor_axis,
     0.003,
     projected_cloud->points[centroid_index],
-    0,
     'z');
 
   EXPECT_NEAR(projected_cloud->points[centroid_index].x + 0.002, sample_gripper_center_x.x, 0.0001);
@@ -735,13 +732,13 @@ TEST_F(SuctionGripperTest, generateSuctionCupTest){
   Eigen::Vector3f no_cup_point{0.3, 0.3, 0.08};
 
   singleSuctionCup cup_full = gripper->generateSuctionCup(projected_cloud, sliced_cloud_normal,
-    full_cup_point, object_direction, object_center, object_max_dim);
+    full_cup_point, object_center, object_max_dim);
 
   singleSuctionCup cup_half = gripper->generateSuctionCup(projected_cloud, sliced_cloud_normal,
-    half_cup_point, object_direction, object_center, object_max_dim);
+    half_cup_point, object_center, object_max_dim);
 
   singleSuctionCup cup_none = gripper->generateSuctionCup(projected_cloud, sliced_cloud_normal,
-    no_cup_point, object_direction, object_center, object_max_dim);
+    no_cup_point, object_center, object_max_dim);
 
   EXPECT_NEAR(object_top_point.x, cup_full.cup_center.x, 0.0001);
   EXPECT_NEAR(object_top_point.y, cup_full.cup_center.y, 0.0001);
@@ -786,8 +783,7 @@ TEST_F(SuctionGripperTest, generateGraspSampleTest){
   int centroid_index = gripper->getCentroidIndex(projected_cloud);
   pcl::PointXYZ sample_gripper_center = gripper->getGripperCenter(object->axis,
     0,
-    projected_cloud->points[centroid_index],
-    0, object->alignments[2]);
+    projected_cloud->points[centroid_index], object->alignments[2]);
 
   Eigen::Vector3f grasp_direction = object->grasp_axis;
   Eigen::Vector3f object_direction = object->axis;
