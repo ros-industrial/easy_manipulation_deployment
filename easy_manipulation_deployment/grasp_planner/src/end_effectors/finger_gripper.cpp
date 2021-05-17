@@ -609,7 +609,7 @@ void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
         pcl::PointNormal & centroid_point,
         std::shared_ptr<graspPlaneSample> & sample) -> void
         {
-          Eigen::Vector3f curr1_vector(point.x, point.y, point.z);
+          // Eigen::Vector3f curr1_vector(point.x, point.y, point.z);
           float centroid_dist = MathFunctions::normalize(
             pcl::geometry::distance(point, centroid_point),
             sample->sample_side_1->centroid_dist_min, sample->sample_side_1->centroid_dist_max);
@@ -631,7 +631,7 @@ void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
         pcl::PointNormal & centroid_point,
         std::shared_ptr<graspPlaneSample> & sample) -> void
         {
-          Eigen::Vector3f curr2_vector(point.x, point.y, point.z);
+          // Eigen::Vector3f curr2_vector(point.x, point.y, point.z);
           float centroid_dist = MathFunctions::normalize(
             pcl::geometry::distance(point, centroid_point),
             sample->sample_side_2->centroid_dist_min, sample->sample_side_2->centroid_dist_max);
@@ -729,12 +729,17 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
   if (this->grasp_samples[0]->plane_intersects_object) {
     for (auto & finger_sample_1 : this->grasp_samples[0]->sample_side_1->finger_samples) {
       for (auto & finger_sample_2 : this->grasp_samples[0]->sample_side_2->finger_samples) {
-        Eigen::Vector3f centerpoint_side1_vector(finger_sample_1->finger_point.x,
-          finger_sample_1->finger_point.y,
-          finger_sample_1->finger_point.z);
-        Eigen::Vector3f centerpoint_side2_vector(finger_sample_2->finger_point.x,
-          finger_sample_2->finger_point.y,
-          finger_sample_2->finger_point.z);
+        // Eigen::Vector3f centerpoint_side1_vector(finger_sample_1->finger_point.x,
+        //   finger_sample_1->finger_point.y,
+        //   finger_sample_1->finger_point.z);
+        // Eigen::Vector3f centerpoint_side2_vector(finger_sample_2->finger_point.x,
+        //   finger_sample_2->finger_point.y,
+        //   finger_sample_2->finger_point.z);
+        Eigen::Vector3f centerpoint_side1_vector =
+          PCLFunctions::convertPCLtoEigen(finger_sample_1->finger_point);
+        Eigen::Vector3f centerpoint_side2_vector =
+          PCLFunctions::convertPCLtoEigen(finger_sample_2->finger_point);
+
         // Get the vector representing the grasping direction
         Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
           centerpoint_side1_vector, centerpoint_side2_vector).direction();
@@ -881,10 +886,13 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
       this->grasp_samples[plane_index]->sample_side_1->finger_samples[point_index]);
     gripper.closed_fingers_1_index.push_back(point_index);
 
-    Eigen::Vector3f finger_normal(
-      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_x,
-      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_y,
-      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_z);
+    // Eigen::Vector3f finger_normal(
+    //   gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_x,
+    //   gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_y,
+    //   gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_z);
+    Eigen::Vector3f finger_normal =
+      PCLFunctions::convertPCLNormaltoEigen(
+        gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point);
 
     gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->angle_cos =
       MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal);
@@ -919,10 +927,14 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
       this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[point_index_2]);
     gripper.closed_fingers_2_index.push_back(point_index_2);
 
-    Eigen::Vector3f finger_normal_2(
-      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_x,
-      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_y,
-      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_z);
+    // Eigen::Vector3f finger_normal_2(
+    //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_x,
+    //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_y,
+    //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_z);
+    
+    Eigen::Vector3f finger_normal_2 =
+      PCLFunctions::convertPCLNormaltoEigen(
+        gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point);
 
     gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->angle_cos =
       MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal_2);
@@ -1336,6 +1348,7 @@ Eigen::Vector3f FingerGripper::getGripperPlane(
     object->eigenvectors.col(0)(0) - object->centerpoint(0),
     object->eigenvectors.col(0)(1) - object->centerpoint(1), object->eigenvectors.col(0)(
       2) - object->centerpoint(2));
+
   Eigen::Vector3f point_on_plane;
   point_on_plane(0) = (finger_sample_1->finger_point.x + finger_sample_2->finger_point.x) / 2;
   point_on_plane(1) = (finger_sample_1->finger_point.y + finger_sample_2->finger_point.y) / 2;
