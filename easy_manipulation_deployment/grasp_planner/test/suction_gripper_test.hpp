@@ -65,9 +65,10 @@ public:
   void LoadGripperNoWeights();
   void GenerateObjectHorizontal();
   void GenerateObjectVertical();
-  void createSphereCloud(
+  void CreateSphereCloud(
     Eigen::Vector3f & centerpoint,
-    const float & radius, const int & resolution);
+    const float & radius, const int & resolution,
+    const float & x_scale, const float & y_scale, const float & z_scale);
   void GenerateObjectCollision(float length, float breadth, float height);
 
   void SetUp(void)
