@@ -116,6 +116,7 @@ struct suctionCupArray
   suctionCupArray(pcl::PointXYZ gripper_center_){
     gripper_center = gripper_center_;
     total_contact_points = 0;
+    rank = 0;
   }
 };
 
@@ -236,8 +237,7 @@ public:
   void getAllPossibleGrasps(
     std::shared_ptr<GraspObject> object,
     pcl::PointXYZ object_center,
-    pcl::PointXYZRGB top_point,
-    pcl::visualization::PCLVisualizer::Ptr viewer);
+    pcl::PointXYZRGB top_point);
 
   bool getCupContactCloud(
     pcl::PointXYZRGB contact_point,
