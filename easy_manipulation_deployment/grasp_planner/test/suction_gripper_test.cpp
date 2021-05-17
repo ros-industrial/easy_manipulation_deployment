@@ -808,27 +808,30 @@ TEST_F(SuctionGripperTest, generateGraspSampleTest){
     object_direction,
     object_max_dim);
   
-  EXPECT_EQ(2, static_cast<int>(grasp_sample.cup_array.size()));
+  ASSERT_EQ(2, static_cast<int>(grasp_sample.cup_array.size()));
+  ASSERT_EQ(6, static_cast<int>(grasp_sample.cup_array[0].size()));
+  ASSERT_EQ(6, static_cast<int>(grasp_sample.cup_array[1].size()));
+  float z_vals[2];
   for(size_t i = 0; i < grasp_sample.cup_array.size(); i++)
   {
     EXPECT_EQ(6, static_cast<int>(grasp_sample.cup_array[i].size()));
-    std::vector<float> sorted_x_vals;
+    std::vector<float> sorted_z_vals;
     std::vector<float> sorted_y_vals;
     for(size_t j = 0; j < grasp_sample.cup_array[i].size(); j++)
     {
-      std::cout << "i: " << i << std::endl;
-      std::cout << "j: " << j << std::endl;
-      sorted_x_vals.push_back(grasp_sample.cup_array[i][j]->cup_center.x);
+      // std::cout << "cup_center: "<< grasp_sample.cup_array[i][j]->cup_center.x << "," << grasp_sample.cup_array[i][j]->cup_center.y << " , " << grasp_sample.cup_array[i][j]->cup_center.z << std::endl;
+      sorted_z_vals.push_back(grasp_sample.cup_array[i][j]->cup_center.z);
+      z_vals[i] = grasp_sample.cup_array[i][j]->cup_center.z;
       sorted_y_vals.push_back(grasp_sample.cup_array[i][j]->cup_center.y);
     }
-    std::sort(sorted_x_vals.begin(), sorted_x_vals.end());
+    std::sort(sorted_z_vals.begin(), sorted_z_vals.end());
     std::sort(sorted_y_vals.begin(), sorted_y_vals.end());
 
-    for(size_t k = 0; k < sorted_x_vals.size(); k++)
+    for(size_t k = 0; k < sorted_z_vals.size(); k++)
     {
       if(k!= 0)
       {
-        EXPECT_NEAR(0.02, std::abs(sorted_x_vals[k] - sorted_x_vals[k-1]), 0.0001);
+        EXPECT_NEAR(sorted_z_vals[k], sorted_z_vals[k-1], 0.0001);
       }
     }
 
@@ -836,66 +839,154 @@ TEST_F(SuctionGripperTest, generateGraspSampleTest){
     {
       if(l!= 0)
       {
-        EXPECT_NEAR(0.05, std::abs(sorted_y_vals[l] - sorted_y_vals[l-1]), 0.0001);
+        EXPECT_NEAR(0.02, std::abs(sorted_y_vals[l] - sorted_y_vals[l-1]), 0.0001);
       }
     }
   }
 
-  pcl::PointXYZRGB centerpoint_;
-  centerpoint_.x = object->centerpoint(0);
-  centerpoint_.y = object->centerpoint(1);
-  centerpoint_.z = object->centerpoint(2);
-
-  pcl::PointXYZRGB axis1;
-  axis1.x = object->axis(0);
-  axis1.y = object->axis(1);
-  axis1.z = object->axis(2);
-  
-  pcl::PointXYZRGB axis2;
-  axis2.x = object->grasp_axis(0);
-  axis2.y = object->grasp_axis(1);
-  axis2.z = object->grasp_axis(2);
-  
-  pcl::PointXYZRGB axis3;
-  axis3.x = object->minor_axis(0);
-  axis3.y = object->minor_axis(1);
-  axis3.z = object->minor_axis(2);
-
-  Eigen::Vector3f x_axis{1, 0, 0};
-  Eigen::Vector3f y_axis{0, 1, 0};
-  Eigen::Vector3f z_axis{0, 0, 1};
-
-  pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb(projected_cloud, 255, 0, 0);
-  viewer->addPointCloud<pcl::PointXYZRGB>(projected_cloud, rgb, "cloud");
-
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 0, 255, 0);
-  viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud2");
-  pcl::PointXYZRGB sphere = projected_cloud->points[centroid_index];
-  sphere.x = object->centerpoint(0);
-  sphere.y = object->centerpoint(1);
-  sphere.z = object_top_point.z;
-  viewer->addSphere(sphere, 0.001, "sphere12");
-  viewer->addLine(axis1, centerpoint_, 255, 0, 0, "Axis1", 0);
-  viewer->addLine(axis2, centerpoint_, 0, 255, 0, "Axis2", 0);
-  viewer->addLine(axis3, centerpoint_, 0, 0, 255, "Axis3", 0);
-  viewer->addCoordinateSystem(0.1);
-  viewer->addPlane(*plane, "plane", 0);
-  viewer->spin();
-  viewer->close();
-  viewer->removeAllPointClouds();
-
-  // for(size_t l = 0; l < sorted_z_vals_array[0].size(); l++)
-  // {
-  //   std::cout << sorted_z_vals_array[0][l] << std::endl;
-  //   EXPECT_NEAR(0.05, std::abs(sorted_z_vals_array[0][l] - sorted_z_vals_array[1][l]), 0.0001);
-  // }
+  EXPECT_NEAR(0.05, std::abs(z_vals[0] - z_vals[1]), 0.0001);
 }
 
 TEST_F(SuctionGripperTest, updateMaxMinValuesTest){
 
+  ResetVariables();
+  Eigen::Vector3f centerpoint{0.0125, 0.08,0.04};
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+
+  gripper->updateMaxMinValues(45, 0.004, 0.002);
+  EXPECT_NEAR(0.002, gripper->max_center_dist, 0.00001);
+  EXPECT_NEAR(0.002, gripper->min_center_dist, 0.00001);
+  EXPECT_NEAR(0.004, gripper->max_curvature, 0.00001);
+  EXPECT_NEAR(0.004, gripper->min_curvature, 0.00001);
+  EXPECT_NEAR(45, gripper->max_contact_points, 0.00001);
+  EXPECT_NEAR(45, gripper->min_contact_points, 0.00001);
+
+  gripper->updateMaxMinValues(15, 0.001, 0.0005);
+  EXPECT_NEAR(0.002, gripper->max_center_dist, 0.00001);
+  EXPECT_NEAR(0.0005, gripper->min_center_dist, 0.00001);
+  EXPECT_NEAR(0.004, gripper->max_curvature, 0.00001);
+  EXPECT_NEAR(0.001, gripper->min_curvature, 0.00001);
+  EXPECT_NEAR(45, gripper->max_contact_points, 0.00001);
+  EXPECT_NEAR(15, gripper->min_contact_points, 0.00001);
+
+  gripper->updateMaxMinValues(55, 0.007, 0.006);
+  EXPECT_NEAR(0.006, gripper->max_center_dist, 0.00001);
+  EXPECT_NEAR(0.0005, gripper->min_center_dist, 0.00001);
+  EXPECT_NEAR(0.007, gripper->max_curvature, 0.00001);
+  EXPECT_NEAR(0.001, gripper->min_curvature, 0.00001);
+  EXPECT_NEAR(55, gripper->max_contact_points, 0.00001);
+  EXPECT_NEAR(15, gripper->min_contact_points, 0.00001);
+
+
+  // pcl::PointXYZRGB centerpoint_;
+  // centerpoint_.x = object->centerpoint(0);
+  // centerpoint_.y = object->centerpoint(1);
+  // centerpoint_.z = object->centerpoint(2);
+
+  // pcl::PointXYZRGB axis1;
+  // axis1.x = object->axis(0);
+  // axis1.y = object->axis(1);
+  // axis1.z = object->axis(2);
+  
+  // pcl::PointXYZRGB axis2;
+  // axis2.x = object->grasp_axis(0);
+  // axis2.y = object->grasp_axis(1);
+  // axis2.z = object->grasp_axis(2);
+  
+  // pcl::PointXYZRGB axis3;
+  // axis3.x = object->minor_axis(0);
+  // axis3.y = object->minor_axis(1);
+  // axis3.z = object->minor_axis(2);
+
+  // Eigen::Vector3f x_axis{1, 0, 0};
+  // Eigen::Vector3f y_axis{0, 1, 0};
+  // Eigen::Vector3f z_axis{0, 0, 1};
+
+  // pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+  // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb(projected_cloud, 255, 0, 0);
+  // viewer->addPointCloud<pcl::PointXYZRGB>(projected_cloud, rgb, "cloud");
+
+  // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 0, 255, 0);
+  // viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud2");
+  // pcl::PointXYZRGB sphere = projected_cloud->points[centroid_index];
+  // sphere.x = object->centerpoint(0);
+  // sphere.y = object->centerpoint(1);
+  // sphere.z = object_top_point.z;
+  // viewer->addSphere(sphere, 0.001, "sphere12");
+  // viewer->addLine(axis1, centerpoint_, 255, 0, 0, "Axis1", 0);
+  // viewer->addLine(axis2, centerpoint_, 0, 255, 0, "Axis2", 0);
+  // viewer->addLine(axis3, centerpoint_, 0, 0, 255, "Axis3", 0);
+  // viewer->addCoordinateSystem(0.1);
+  // viewer->addPlane(*plane, "plane", 0);
+  // viewer->spin();
+  // viewer->close();
+  // viewer->removeAllPointClouds();
 }
 
+TEST_F(SuctionGripperTest, getAllPossibleGraspsTest){
+
+  ResetVariables();
+  Eigen::Vector3f centerpoint{0.0125, 0.08,0.04};
+  num_cups_length = 2;
+  num_cups_breadth = 6;
+  dist_between_cups_length = 0.05;
+  dist_between_cups_breadth = 0.02;
+  cup_radius = 0.005;
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+  pcl::PointXYZ object_center;
+  object_center.x = object->centerpoint(0);
+  object_center.y = object->centerpoint(1);
+  object_center.z = object->centerpoint(2);
+  pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(object->cloud, object->alignments[2], true);
+  EXPECT_EQ(0, gripper->cup_array_samples.size());
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point);
+  EXPECT_GT(gripper->cup_array_samples.size(), 0);
+  for(auto grasp_sample : gripper->cup_array_samples)
+  {
+    EXPECT_NEAR(0, grasp_sample->rank, 0.0001);
+  }
+}
+
+TEST_F(SuctionGripperTest, getAllRanksTest){
+  ResetVariables();
+  Eigen::Vector3f centerpoint{0.0125, 0.08,0.04};
+  num_cups_length = 2;
+  num_cups_breadth = 6;
+  dist_between_cups_length = 0.05;
+  dist_between_cups_breadth = 0.02;
+  cup_radius = 0.005;
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+  pcl::PointXYZ object_center;
+  object_center.x = object->centerpoint(0);
+  object_center.y = object->centerpoint(1);
+  object_center.z = object->centerpoint(2);
+  pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(object->cloud, object->alignments[2], true);
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point);
+  EXPECT_GT(gripper->cup_array_samples.size(), 0);
+  for(auto grasp_sample : gripper->cup_array_samples)
+  {
+    EXPECT_NEAR(0, grasp_sample->rank, 0.0001);
+  }
+  std::cout << "getAllGraspRanks" << std::endl;
+  emd_msgs::msg::GraspMethod grasp_method;
+  gripper->getAllGraspRanks(&grasp_method, object);
+  std::cout << "getAllGraspRanks" << std::endl;
+
+  for(auto grasp_sample : gripper->cup_array_samples)
+  {
+    EXPECT_GT(grasp_sample->rank, 0);
+  }
+}
+
+TEST_F(SuctionGripperTest, getGraspPoseTest){
+  // TODO: Glenn
+}
 
   // pcl::PointXYZRGB centerpoint_;
   // centerpoint_.x = object->centerpoint(0);
