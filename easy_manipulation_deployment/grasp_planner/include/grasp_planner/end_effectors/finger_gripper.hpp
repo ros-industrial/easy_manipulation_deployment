@@ -78,12 +78,7 @@ struct singleFinger
     grasp_plane_dist(grasp_plane_dist_),
     curvature(curvature_),
     plane_index(plane_index_)
-  {
-    // std::cout << "New finger: " << std::endl;
-    // std::cout << " centroid_dist: " << centroid_dist << std::endl;
-    // std::cout << " grasp_plane_dist_: " << grasp_plane_dist << std::endl;
-    // std::cout << " curvature: " << curvature << std::endl;
-  }
+  {}
   singleFinger() = default;
 };
 
@@ -164,13 +159,6 @@ struct graspPlaneSample
 class FingerGripper : public EndEffector
 {
 public:
-  // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_cloud;
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr grasp_1_cloud;
-  // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_1_ncloud;
-  // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_1_nvoxel;
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr grasp_2_cloud;
-  // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_2_ncloud;
-  // pcl::PointCloud<pcl::PointNormal>::Ptr grasp_2_nvoxel;
 
   std::string id;
   int num_fingers_total;
@@ -196,20 +184,6 @@ public:
   Eigen::Vector4f center_cutting_plane;  // grasp Plane vector coeff: a, b, c ,d
   Eigen::Vector3f center_cutting_plane_normal;
 
-  // pcl::PointNormal sample_point_1;
-
-  // float centroid_dist_1_min, centroid_dist_1_max;
-  // float grasp_plane_dist_1_min, grasp_plane_dist_1_max;
-  // float curvature_1_min, curvature_1_max;
-
-  // pcl::PointNormal sample_point_2;
-
-
-  // float centroid_dist_2_min, centroid_dist_2_max;
-  // float grasp_plane_dist_2_min, grasp_plane_dist_2_max;
-  // float curvature_2_min, curvature_2_max;
-
-
   std::vector<float> centroid_dist_min_vec;
   std::vector<float> centroid_dist_max_vec;
   std::vector<float> grasp_plane_dist_min_vec;
@@ -217,11 +191,8 @@ public:
   std::vector<float> curvature_min_vec;
   std::vector<float> curvature_max_vec;
 
-  // std::vector<graspPlaneSample> grasp_samples;
-  // std::vector<multiFingerGripper> gripper_samples;
   std::vector<std::shared_ptr<graspPlaneSample>> grasp_samples;
   std::vector<std::shared_ptr<multiFingerGripper>> gripper_samples;
-
 
   std::vector<float> cutting_plane_distances;
   std::vector<int> plane_1_index;

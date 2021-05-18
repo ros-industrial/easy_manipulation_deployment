@@ -19,6 +19,25 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::SuctionGripper")
 #define combine(g,g2) g##g2
 #define PI 3.14159265
 
+/***************************************************************************//**
+ * Suction Gripper Constructor
+ * 
+ * @param id_ gripper id
+ * @param num_cups_length_ Number of cups in the length vector
+ * @param num_cups_breadth_ Number of cups in the breadth vector
+ * @param dist_between_cups_length_ Distance between cups in the length vector
+ * @param dist_between_cups_breadth_ Distance between cups in the breadth vector
+ * @param cup_radius_ Radius of each suction cup
+ * @param cup_height_ Height of suction cup
+ * @param num_sample_along_axis_ number of samples along object axis
+ * @param search_resolution_ How far of an offset along the object axis to search
+ * @param search_angle_resolution_ Angle step for rotation of each grasp sample
+ * @param cloud_normal_radius_ Radius of which to determine cloud normals
+ * @param curvature_weight_ Weights for the curvature sum of the grasp
+ * @param grasp_center_distance_weight_ Weights for the grasp center distance
+ * @param num_contact_points_weight_ Weights for the number of contact points
+ ******************************************************************************/
+
 SuctionGripper::SuctionGripper(
   std::string id_,
   const int & num_cups_length_,
@@ -104,6 +123,22 @@ SuctionGripper::SuctionGripper(
   this->breadth_dim = (this->num_cups_breadth - 1) * this->dist_between_cups_breadth;
 }
 
+/***************************************************************************//**
+ * Suction Gripper Constructor
+ * 
+ * @param id_ gripper id
+ * @param num_cups_length_ Number of cups in the length vector
+ * @param num_cups_breadth_ Number of cups in the breadth vector
+ * @param dist_between_cups_length_ Distance between cups in the length vector
+ * @param dist_between_cups_breadth_ Distance between cups in the breadth vector
+ * @param cup_radius_ Radius of each suction cup
+ * @param cup_height_ Height of suction cup
+ * @param num_sample_along_axis_ number of samples along object axis
+ * @param search_resolution_ How far of an offset along the object axis to search
+ * @param search_angle_resolution_ Angle step for rotation of each grasp sample
+ * @param cloud_normal_radius_ Radius of which to determine cloud normals
+ ******************************************************************************/
+
 SuctionGripper::SuctionGripper(
   std::string id_,
   const int & num_cups_length_,
@@ -147,7 +182,9 @@ SuctionGripper::SuctionGripper(
   this->grasp_center_distance_weight = 1.0;
   this->num_contact_points_weight = 1.0;
 }
-
+/***************************************************************************//**
+ * Method that generates the relevant gripper attributes before grasp planning
+ ******************************************************************************/
 void SuctionGripper::generateGripperAttributes()
 {
   float is_even_breadth = (this->num_cups_breadth % 2 == 0);
@@ -184,7 +221,13 @@ void SuctionGripper::generateGripperAttributes()
     this->row_initial_gap = initial_gap_length;
   }
 }
-
+/***************************************************************************//**
+ * Inherited method that visualizes the required grasps
+ * 
+ * @param object Grasp Object
+ * @param grasp_method Grasp method output for all possible grasps
+ * @param world_collision_object FCL collision object of the world
+ ******************************************************************************/
 void SuctionGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
@@ -197,9 +240,6 @@ void SuctionGripper::planGrasps(
   object_center.x = object->centerpoint(0);
   object_center.y = object->centerpoint(1);
   object_center.z = object->centerpoint(2);
-  std::cout << "object->dimensions[0]: " << object->dimensions[0] << std::endl;
-  std::cout << "object->dimensions[1]: " << object->dimensions[1] << std::endl;
-  std::cout << "object->dimensions[2]: " << object->dimensions[2] << std::endl;
 
   // Get highest point of the object to begin grasp search
   RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
@@ -211,6 +251,14 @@ void SuctionGripper::planGrasps(
   getAllPossibleGrasps(object, object_center, object_top_point);
   getAllGraspRanks(grasp_method, object);
 }
+
+/***************************************************************************//**
+ * Inherited method that visualizes the required grasps
+ * 
+ * @param object Grasp Object
+ * @param object_center PCL centroid point of the object
+ * @param top_point Highest point on object
+ ******************************************************************************/
 
 void SuctionGripper::getAllPossibleGrasps(
   std::shared_ptr<GraspObject> object,
@@ -262,7 +310,7 @@ void SuctionGripper::getAllPossibleGrasps(
 
           pcl::PointXYZ sample_gripper_center = getGripperCenter(object->axis,
             offset,
-            projected_cloud->points[centroid_index], object->alignments[0]);
+            projected_cloud->points[centroid_index]);
 
           Eigen::Vector3f grasp_direction = MathFunctions::getRotatedVector(object->grasp_axis, PI/angle, 'z');
 
@@ -329,6 +377,11 @@ void SuctionGripper::getAllPossibleGrasps(
   }
 }
 
+/***************************************************************************//**
+ * Inherited method that visualizes the required grasps
+ * 
+ * @param viewer Projected Cloud Visualizer
+ ******************************************************************************/
 void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
 {
   if (this->cup_array_samples.size() > 0) {
@@ -351,6 +404,11 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
   }
 }
 
+/***************************************************************************//**
+ * Method that gets the index of the centroid of the projected cloud
+ * 
+ * @param cloud Projected Cloud
+ ******************************************************************************/
 // Get the point index of the centroid of the object
 int SuctionGripper::getCentroidIndex(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
@@ -412,6 +470,14 @@ std::vector<int> SuctionGripper::getCupContactIndices(
   kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist);
   return kd_radius_search;
 }
+
+/***************************************************************************//**
+ * Method that defines the highest point of the object
+ * 
+ * @param cloud Object Cloud
+ * @param height_axis Closest world axes to the minor axis of the object (WIP)
+ * @param is_positive True if aligned to positive closest world axis (WIP)
+ ******************************************************************************/
 
 pcl::PointXYZRGB SuctionGripper::findHighestPoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   char height_axis, bool is_positive)
@@ -488,6 +554,16 @@ pcl::PointXYZRGB SuctionGripper::findHighestPoint(pcl::PointCloud<pcl::PointXYZR
   }
   return top_point;
 }
+
+/***************************************************************************//**
+ * Method that defines the plane on which to project the point cloud points on
+ * 
+ * @param plane_coefficients Coefficients of the plane
+ * @param axis Major axis of the grasp object
+ * @param object_centerpoint Center of grasp object
+ * @param top_point Highest point of the grasp object
+ * @param height_axis Closest world axes to the minor axis of the object (WIP)
+ ******************************************************************************/
 
 void SuctionGripper::getStartingPlane(
   pcl::ModelCoefficients::Ptr plane_coefficients,
@@ -614,6 +690,15 @@ int SuctionGripper::getContactPoints(
   return num_contact_points;
 }
 
+/***************************************************************************//**
+ * Function that updates the maximum and minimum values of the attributes
+ * required for calculation of ranks, for normalization later on
+ * 
+ * @param num_contact_points Weighted number of contact points on the object
+ * @param average_curvature Average Curvature of the points on the gripper
+ * @param center_dist Center distance of the gripper to object centroid
+ ******************************************************************************/
+
 void SuctionGripper::updateMaxMinValues(
   int num_contact_points, float average_curvature,
   float center_dist)
@@ -632,6 +717,18 @@ void SuctionGripper::updateMaxMinValues(
     this->max_curvature = average_curvature;
   }
 }
+
+/***************************************************************************//**
+ * Function that generates a single grasp sample of the user defined end effector
+ * 
+ * @param projected_cloud Projected cloud slice on a plane
+ * @param sliced_cloud_normal Normals of the sliced cloud
+ * @param sample_gripper_center Center of Suction Array
+ * @param object_center Center point of object
+ * @param grasp_direction Vector representing the direction of grasp 
+ * @param object_direction Vector representing the direction of object's major axis
+ * @param object_max_dim Maximum dimensions of obejct
+ ******************************************************************************/
 
 suctionCupArray SuctionGripper::generateGraspSample(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
@@ -695,7 +792,15 @@ suctionCupArray SuctionGripper::generateGraspSample(
   return grasp_sample;
 }
 
-
+/***************************************************************************//**
+ * Function that generates a single suction cup in an array
+ * 
+ * @param projected_cloud Projected cloud slice on a plane
+ * @param sliced_cloud_normal Normals of the sliced cloud
+ * @param suction_cup_center Center of Suction Cup
+ * @param object_center Center point of object
+ * @param object_max_dim Maximum dimensions of obejct
+ ******************************************************************************/
 singleSuctionCup SuctionGripper::generateSuctionCup(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud,
   pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal,
@@ -725,6 +830,16 @@ singleSuctionCup SuctionGripper::generateSuctionCup(
   return singleSuctionCup(cup_point, curvature_sum, contact_points, weighted_contact_points);
 }
 
+/***************************************************************************//**
+ * Function that calculates the distance between a suction cup and the gripper 
+ * array center
+ * 
+ * @param itr Current iteration in the suction cup array iteration
+ * @param is_even True if the row/column has even cups
+ * @param initial_gap Initial gap between the center of array and the first cup
+ * @param dist_between_cups Distance between the suction cups
+ ******************************************************************************/
+
 float SuctionGripper::getGap(
   int itr,
   bool is_even,
@@ -738,6 +853,14 @@ float SuctionGripper::getGap(
   }
 }
 
+/***************************************************************************//**
+ * Method that calculates the weighted value of the number of contact points
+ * 
+ * @param contact_points Actual number of contact points
+ * @param cup_to_center_dist True if the row/column has even cups
+ * @param object_max_dim Maximum dimensions of grasp object
+ ******************************************************************************/
+
 int SuctionGripper::generateWeightedContactPoints(
   int contact_points,
   float cup_to_center_dist,
@@ -750,7 +873,7 @@ int SuctionGripper::generateWeightedContactPoints(
 }
 
 /***************************************************************************//**
- * Function that calculates center of the suction cup array
+ * Method that calculates center of the suction cup array
  * 
  * @param object_axis Vector representing the object 
  * @param offset Offset from centroid of sliced cloud
@@ -791,6 +914,13 @@ pcl::PointXYZ SuctionGripper::getGripperCenter(Eigen::Vector3f object_axis,
   // }
   return sample_gripper_center;
 }
+
+/***************************************************************************//**
+ * Method that calculate the ranks of all grasp samples
+ * 
+ * @param grasp_method Output Grasp Method to be used for Grasp Execution
+ * @param object Target Grasp Object
+ ******************************************************************************/
 
 void SuctionGripper::getAllGraspRanks(
   emd_msgs::msg::GraspMethod * grasp_method,
@@ -840,6 +970,13 @@ void SuctionGripper::getAllGraspRanks(
   }
   this->cup_array_samples = sorted_grasps;
 }
+
+/***************************************************************************//**
+ * Method that calculate the pose of the grasp sample
+ * 
+ * @param grasp Target Grasp
+ * @param object Target Grasp Object
+ ******************************************************************************/
 
 geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
   std::shared_ptr<suctionCupArray> grasp,

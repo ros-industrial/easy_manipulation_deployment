@@ -18,6 +18,26 @@
 #include "grasp_planner/end_effectors/finger_gripper.hpp"
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
 
+/***************************************************************************//**
+ * Finger Gripper Constructor
+ * 
+ * @param id_ gripper id
+ * @param num_fingers_side_1_ Number of fingers on side 1
+ * @param num_fingers_side_2_ Number of fingers on side 2
+ * @param distance_between_fingers_1_ Distance between fingers at side 1
+ * @param distance_between_fingers_2_ Distance between fingers at side 2
+ * @param finger_thickness_ largest dimension of the finger
+ * @param gripper_stroke_ distance between opposing gripper fingers
+ * @param voxel_size_ Voxel size for downsampling
+ * @param grasp_quality_weight1_ weight 1 of grasp ranking
+ * @param grasp_quality_weight2_ weight 2 of grasp ranking
+ * @param grasp_plane_dist_limit_ Parameter for SAC search for points on plane
+ * @param cloud_normal_radius_ Radius of which to determine cloud normals
+ * @param worldXAngleThreshold_ Threshold after which the object is angled to the world X axis
+ * @param worldYAngleThreshold_ Threshold after which the object is angled to the world Y axis
+ * @param worldZAngleThreshold_ Threshold after which the object is angled to the world Z axis
+ ******************************************************************************/
+
 FingerGripper::FingerGripper(
   std::string id_,
   const int num_fingers_side_1_,
@@ -590,7 +610,11 @@ void FingerGripper::voxelizeSampleCloud()
   }
 }
 
-
+/***************************************************************************//**
+ * Method that generates all possible finger grasp samples
+ * 
+ * @param object Grasp Object
+ ******************************************************************************/
 void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
 {
   pcl::PointNormal centroid_point;
@@ -1212,7 +1236,11 @@ void FingerGripper::resetVariables()
 {
 }
 
-
+/***************************************************************************//**
+ * Inherited method that visualizes the required grasps
+ * 
+ * @param viewer Projected Cloud Visualizer
+ ******************************************************************************/
 void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
 {
   std::cout << "Visualizing " << this->sorted_gripper_configs.size() << " grasps" << std::endl;
