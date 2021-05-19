@@ -88,6 +88,9 @@ GraspScene::GraspScene()
   min_cluster_size(
     this->get_parameter(
       "point_cloud_params.min_cluster_size").as_int()),
+  fcl_voxel_size(
+    static_cast<float>(this->get_parameter(
+      "point_cloud_params.fcl_voxel_size").as_double())),
   cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_plane_removed(new pcl::PointCloud<pcl::PointXYZRGB>()),
   org_cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
@@ -95,7 +98,7 @@ GraspScene::GraspScene()
   table_coeff(new pcl::ModelCoefficients),
   viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
 {
-  output_pub = this->create_publisher<emd_msgs::msg::GraspTask>("/grasp_tasks", 10);
+  output_pub = this->create_publisher<emd_msgs::msg::GraspTask>(this->get_parameter("grasp_output_topic").as_string(), 10);
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
   this->buffer_->setUsingDedicatedThread(true);
@@ -110,7 +113,7 @@ GraspScene::GraspScene()
 
   this->cloud_sub = std::make_shared<
     message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
-    this, "/camera/pointcloud");
+    this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
 
   this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
         sensor_msgs::msg::PointCloud2>>(
@@ -211,7 +214,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   createWorldCollision(msg);
   PCLVisualizer::centerCamera(this->cloud, viewer);
   this->grasp_objects = extractObjects(
-    this->get_parameter("camera_frame").as_string(),
+    this->get_parameter("camera_parameters.camera_frame").as_string(),
     static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()),
     cloud_plane_removed, cluster_tolerance, min_cluster_size);
   loadEndEffectors();
@@ -448,7 +451,7 @@ void GraspScene::EPDCreateWorldCollisionObject(
     msg->header.stamp);
   octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
   PCLFunctions::voxelizeCloud<pcl::PointCloud<pcl::PointXYZRGB>::Ptr,
-    pcl::VoxelGrid<pcl::PointXYZRGB>>(scene_cloud, 0.005, this->org_cloud);
+    pcl::VoxelGrid<pcl::PointXYZRGB>>(scene_cloud, this->fcl_voxel_size, this->org_cloud);
   this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
     this->org_cloud, sensor_origin, 0.01);
 }
@@ -601,7 +604,7 @@ void GraspScene::processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSha
     this->ptFilter_Llimit_z);
   PCLFunctions::removeStatisticalOutlier(this->cloud, 1.0);
   PCLFunctions::voxelizeCloud<pcl::PointCloud<pcl::PointXYZRGB>::Ptr,
-    pcl::VoxelGrid<pcl::PointXYZRGB>>(this->cloud, 0.005, this->org_cloud);
+    pcl::VoxelGrid<pcl::PointXYZRGB>>(this->cloud, this->fcl_voxel_size, this->org_cloud);
   PCLFunctions::planeSegmentation(
     this->cloud, this->cloud_plane_removed, this->cloud_table,
     this->segmentation_max_iterations,

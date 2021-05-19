@@ -118,6 +118,9 @@ public:
   const float cluster_tolerance;
   /*! \brief Minimum size of a cluster to constitute as an object cluster */
   const int min_cluster_size;
+  /*! \brief Voxel size for fcl collision object generation */
+  const float fcl_voxel_size;
+
 
   /*! \brief  */
   std::string incloudfile;
