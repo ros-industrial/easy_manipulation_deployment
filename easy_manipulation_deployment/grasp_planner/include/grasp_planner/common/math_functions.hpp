@@ -30,7 +30,8 @@ float getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2)
 Eigen::Vector3f getPointInDirection(
   Eigen::Vector3f base_point, Eigen::Vector3f vector_direction,
   float distance);
-Eigen::Vector3f getRotatedVector(Eigen::Vector3f target_vector,
+Eigen::Vector3f getRotatedVector(
+  Eigen::Vector3f target_vector,
   float angle, char axis);
 }  // namespace MathFunctions
 

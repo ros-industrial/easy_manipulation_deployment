@@ -22,20 +22,17 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::MathFunctions");
 float MathFunctions::normalize(const float & target, const float & min, const float & max)
 {
   if (min == max) {
-    if(target == min){
+    if (target == min) {
       RCLCPP_WARN(LOGGER, "Possible Normalizing Error, Min, Max and target same value");
       return 1;
-    }
-    else{
+    } else {
       RCLCPP_WARN(LOGGER, "Error: Normalizing divides by zero.");
       return -1;
     }
-  }
-  else if(min > max){
+  } else if (min > max) {
     RCLCPP_WARN(LOGGER, "Error: Min value more than Max, normalizing error");
     return -1;
-  }
-  else {
+  } else {
     return (target - min) / (max - min);
   }
 }
@@ -43,20 +40,17 @@ float MathFunctions::normalize(const float & target, const float & min, const fl
 float MathFunctions::normalizeInt(const int & target, const int & min, const int & max)
 {
   if (min == max) {
-    if(target == min){
+    if (target == min) {
       RCLCPP_WARN(LOGGER, "Possible Normalizing Error, Min, Max and target same value");
       return 1;
-    }
-    else{
+    } else {
       RCLCPP_WARN(LOGGER, "Error: Normalizing divides by zero.");
       return -1;
     }
-  }
-  else if(min > max){
+  } else if (min > max) {
     RCLCPP_WARN(LOGGER, "Error: Min value more than Max, normalizing error");
     return -1;
-  }
-  else {
+  } else {
     return float(target - min) / float(max - min);
   }
 }
@@ -75,25 +69,24 @@ Eigen::Vector3f MathFunctions::getPointInDirection(
   return base_point + distance * direction_normalized;
 }
 
-Eigen::Vector3f MathFunctions::getRotatedVector(Eigen::Vector3f target_vector, float angle, char axis)
+Eigen::Vector3f MathFunctions::getRotatedVector(
+  Eigen::Vector3f target_vector, float angle,
+  char axis)
 {
   Eigen::Vector3f result_vector;
-  if(axis == 'x'){
-    result_vector(0) = target_vector(0); 
+  if (axis == 'x') {
+    result_vector(0) = target_vector(0);
     result_vector(1) = target_vector(1) * cos(angle) - target_vector(2) * sin(angle);
     result_vector(2) = target_vector(1) * sin(angle) + target_vector(2) * cos(angle);
-  }
-  else if(axis == 'y'){
+  } else if (axis == 'y') {
     result_vector(0) = target_vector(0) * cos(angle) - target_vector(1) * sin(angle);
     result_vector(1) = target_vector(1);
     result_vector(2) = target_vector(2) * -sin(angle) + target_vector(1) * cos(angle);
-  }
-  else if(axis == 'z'){
+  } else if (axis == 'z') {
     result_vector(0) = target_vector(0) * cos(angle) - target_vector(1) * sin(angle);
     result_vector(1) = target_vector(0) * sin(angle) + target_vector(1) * cos(angle);
     result_vector(2) = target_vector(2);
-  }
-  else{
+  } else {
     RCLCPP_ERROR(LOGGER, "Invalid axis of rotation.");
     throw std::invalid_argument("Invalid axis of rotation.");
   }

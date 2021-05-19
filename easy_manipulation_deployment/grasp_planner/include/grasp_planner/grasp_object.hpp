@@ -63,13 +63,6 @@
 // EMD Libraries
 #include "grasp_planner/common/pcl_functions.hpp"
 
-
-struct GraspContacts
-{
-  pcl::PointXYZ point_1;
-  pcl::PointXYZ point_2;
-};
-
 class GraspObject
 {
 public:
@@ -88,7 +81,7 @@ public:
   /*! \brief Vector representing the major axis of the Grasp Object*/
   Eigen::Vector3f axis;  // Obj coeff 3,4,5
   /*! \brief Vector representing the minor axis of the Grasp Object*/
-  Eigen::Vector3f minor_axis; 
+  Eigen::Vector3f minor_axis;
   /*! \brief Vector representing the grasp axis of the Grasp Object*/
   Eigen::Vector3f grasp_axis;
   /*! \brief Computed 3D centroid of the Grasp Object point cloud*/
@@ -115,14 +108,12 @@ public:
   float objectWorldCosZ;
   /*! \brief Alignment of each eigenvector wrt world axes*/
   char alignments[3];
-  /*! \brief */
+  /*! \brief Affine transform matrix of the object*/
   Eigen::Matrix4f affine_matrix;
-  /*! \brief */
-  int max_grasp_samples;  // Maximum number of grasp options
+  /*! \brief  Maximum number of grasp options*/
+  int max_grasp_samples;
+  /*! \brief  Dimensions of the object*/
   float dimensions[3];
-  // // To be removed, temp variable
-  // pcl::ModelCoefficients::Ptr cutting_plane;
-
 
   GraspObject(
     std::string object_frame_, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,

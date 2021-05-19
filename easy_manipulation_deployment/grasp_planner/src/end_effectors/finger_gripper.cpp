@@ -20,7 +20,7 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
 
 /***************************************************************************//**
  * Finger Gripper Constructor
- * 
+ *
  * @param id_ gripper id
  * @param num_fingers_side_1_ Number of fingers on side 1
  * @param num_fingers_side_2_ Number of fingers on side 2
@@ -612,7 +612,7 @@ void FingerGripper::voxelizeSampleCloud()
 
 /***************************************************************************//**
  * Method that generates all possible finger grasp samples
- * 
+ *
  * @param object Grasp Object
  ******************************************************************************/
 void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
@@ -708,7 +708,7 @@ void FingerGripper::getFingerSamples(std::shared_ptr<GraspObject> const object)
 /***************************************************************************//**
  * Now that we have generated the various fingerCloudSamples for each plane
  * (2 per plane), we now choose the correct finger clouds that corresponds to
- * the multifinger gripper.
+ * the multifinger gripper. TODO:
  ******************************************************************************/
 void FingerGripper::getGripperClusters()
 {
@@ -915,7 +915,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     //   gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point.normal_z);
     Eigen::Vector3f finger_normal =
       PCLFunctions::convertPCLNormaltoEigen(
-        gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point);
+      gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->finger_point);
 
     gripper.closed_fingers_1[gripper.closed_fingers_1.size() - 1]->angle_cos =
       MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal);
@@ -954,10 +954,10 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_x,
     //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_y,
     //   gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point.normal_z);
-    
+
     Eigen::Vector3f finger_normal_2 =
       PCLFunctions::convertPCLNormaltoEigen(
-        gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point);
+      gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->finger_point);
 
     gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->angle_cos =
       MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal_2);
@@ -1238,7 +1238,7 @@ void FingerGripper::resetVariables()
 
 /***************************************************************************//**
  * Inherited method that visualizes the required grasps
- * 
+ *
  * @param viewer Projected Cloud Visualizer
  ******************************************************************************/
 void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)

@@ -60,11 +60,17 @@
 
 struct singleFinger
 {
+  /*! \brief 3D coordinate of point */
   pcl::PointNormal finger_point;
+  /*! \brief Distance between finger to center point of object */
   float centroid_dist;
+  /*! \brief Distance between point to the finger's grasp plane */
   float grasp_plane_dist;
+  /*! \brief Curvature at this Point */
   float curvature;
+  /*! \brief Index of plane this finger belongs to with respect to the plane vector */
   int plane_index;
+  /*! \brief Cosine of angle of Finger normal with respect to the plane normal vector */
   float angle_cos;
 
   singleFinger(
@@ -84,18 +90,31 @@ struct singleFinger
 
 struct multiFingerGripper
 {
+  /*! \brief Closed finger configuration on side 1 */
   std::vector<std::shared_ptr<singleFinger>> closed_fingers_1;
+  /*! \brief Closed finger configuration on side 2 */
   std::vector<std::shared_ptr<singleFinger>> closed_fingers_2;
+  /*! \brief Currently not used (I think) */
   std::vector<int> closed_fingers_1_index;
+  /*! \brief Currently not used (I think) */
   std::vector<int> closed_fingers_2_index;
+  /*! \brief 3D coordinates of the open configuration for finger gripper on side 1 */
   std::vector<Eigen::Vector3f> open_fingers_1;
+  /*! \brief 3D coordinates of the open configuration for finger gripper on side 2*/
   std::vector<Eigen::Vector3f> open_fingers_2;
+  /*! \brief Angle of multifinger gripper with respect to the object axis*/
   float grasp_plane_angle_cos;
+  /*! \brief Rank of current Gripper*/
   float rank;
+  /*! \brief Pose of gripper*/
   geometry_msgs::msg::PoseStamped pose;
+  /*! \brief Centerpoint of gripper */
   pcl::PointXYZ gripper_palm_center;
+  /*! \brief Middle finger on side 1 */
   std::shared_ptr<singleFinger> base_point_1;
+  /*! \brief Middle finger on side 2 */
   std::shared_ptr<singleFinger> base_point_2;
+  /*! \brief True if colliding with world */
   bool collides_with_world;
 
   multiFingerGripper(
@@ -114,13 +133,26 @@ struct multiFingerGripper
 
 struct fingerCloudSample
 {
+  /*! \brief Point cloud for current finger sample */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr finger_cloud;
+  /*! \brief Point cloud normals for current finger sample */
   pcl::PointCloud<pcl::PointNormal>::Ptr finger_ncloud;
+  /*! \brief Downsampled Point cloud normals for current finger sample */
   pcl::PointCloud<pcl::PointNormal>::Ptr finger_nvoxel;
-  float centroid_dist_min, centroid_dist_max;
-  float grasp_plane_dist_min, grasp_plane_dist_max;
-  float curvature_min, curvature_max;
+  /*! \brief Maximum distance of a point in the cloud sample to the center of object */
+  float centroid_dist_min;
+  /*! \brief Minimum distance of a point in the cloud sample to the center of object */
+  float centroid_dist_max;
+  /*! \brief Minimum distance of a point in the cloud sample to the grasp plane */
+  float grasp_plane_dist_min;
+  /*! \brief Maximum distance of a point in the cloud sample to the grasp plane */
+  float grasp_plane_dist_max;
+  /*! \brief Minimum Curvature of point in cloud sample */
+  float curvature_min;
+  /*! \brief Maximum Curvature of point in cloud sample */
+  float curvature_max;
   int start_index;
+  /*! \brief Finger Samples derived from current finger cloud */
   std::vector<std::shared_ptr<singleFinger>> finger_samples;
   fingerCloudSample()
   : finger_cloud(new pcl::PointCloud<pcl::PointXYZRGB>),
@@ -137,13 +169,21 @@ struct fingerCloudSample
 
 struct graspPlaneSample
 {
+  /*! \brief Index of this current plane with respect to plane vector */
   int plane_index;
+  /*! \brief True if cutting plane intersects object */
   bool plane_intersects_object;
+  /*! \brief Distance of this plane to the center plane */
   float dist_to_center_plane;
+  /*! \brief Point cloud on plane containing points representing side 1 */
   std::shared_ptr<fingerCloudSample> sample_side_1;
+  /*! \brief Point cloud on plane containing points representing side 2 */
   std::shared_ptr<fingerCloudSample> sample_side_2;
+  /*! \brief Normal Point cloud strip for this grasp plane */
   pcl::PointCloud<pcl::PointNormal>::Ptr grasp_plane_ncloud;
+  /*! \brief Coefficients for this current plane */
   pcl::ModelCoefficients::Ptr plane;
+  /*! \brief Coefficients for this current plane as Eigen 4f */
   Eigen::Vector4f plane_eigen;
   graspPlaneSample()
   : grasp_plane_ncloud(new pcl::PointCloud<pcl::PointNormal>),
@@ -159,53 +199,66 @@ struct graspPlaneSample
 class FingerGripper : public EndEffector
 {
 public:
-
+  /*! \brief Gripper ID*/
   std::string id;
+  /*! \brief Total Number of finger grippers*/
   int num_fingers_total;
+  /*! \brief Number of fingers on side 1*/
   const int num_fingers_side_1;
+  /*! \brief Number of fingers on side 2*/
   const int num_fingers_side_2;
-
+  /*! \brief Distance between fingers on side 1*/
   const float distance_between_fingers_1;
+  /*! \brief Distance between fingers on side 2*/
   const float distance_between_fingers_2;
-
+  /*! \brief Largest thickness dimension of a finger*/
   const float finger_thickness;
+  /*! \brief Distance between fingers of opposing sides*/
   const float gripper_stroke;
+  /*! \brief Voxel Size for downsampling of point cloud */
   const float voxel_size;
+  /*! \brief weight 1 of grasp ranking */
   const float grasp_quality_weight1;
+  /*! \brief weight 2 of grasp ranking */
   const float grasp_quality_weight2;
-
+  /*! \brief Parameter for SAC search for points on plane */
   const float grasp_plane_dist_limit;
+  /*! \brief Radius of which to determine cloud normals */
   const float cloud_normal_radius;
+  /*! \brief Threshold after which the object is angled to the world X axis */
   const float worldXAngleThreshold;
+  /*! \brief Threshold after which the object is angled to the world Y axis */
   const float worldYAngleThreshold;
+  /*! \brief Threshold after which the object is angled to the world Z axis */
   const float worldZAngleThreshold;
 
-  // Object Specific
+  /*! \brief Coefficients of the cutting plane through the object */
   Eigen::Vector4f center_cutting_plane;  // grasp Plane vector coeff: a, b, c ,d
+  /*! \brief Normal vector of the cutting plane */
   Eigen::Vector3f center_cutting_plane_normal;
-
-  std::vector<float> centroid_dist_min_vec;
-  std::vector<float> centroid_dist_max_vec;
-  std::vector<float> grasp_plane_dist_min_vec;
-  std::vector<float> grasp_plane_dist_max_vec;
-  std::vector<float> curvature_min_vec;
-  std::vector<float> curvature_max_vec;
-
+  /*! \brief List of finger grasp samples */
   std::vector<std::shared_ptr<graspPlaneSample>> grasp_samples;
-  std::vector<std::shared_ptr<multiFingerGripper>> gripper_samples;
-
+  /*! \brief Vector containing distance of each cutting plane to the center */
   std::vector<float> cutting_plane_distances;
+  /*! \brief Vector containing the indexes of the cutting planes belonging to side 1 */
   std::vector<int> plane_1_index;
+  /*! \brief Vector containing the indexes of the cutting planes belonging to side 2 */
   std::vector<int> plane_2_index;
+  /*! \brief  */
   std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters;
-  std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters_flipped;
+  /*! \brief Vector containing grasp samples sorted by ranks */
   std::vector<std::shared_ptr<multiFingerGripper>> sorted_gripper_configs;
-
+  /*! \brief True if number of fingers in side 1 is even */
   bool is_even_1;
+  /*! \brief True if number of fingers in side 2 is even */
   bool is_even_2;
+  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 1 */
   float initial_gap_1;
+  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 2 */
   float initial_gap_2;
+  /*! \brief Number of iterations for Finger gripper to be populated in side 1 */
   int num_itr_1;
+  /*! \brief Number of iterations for Finger gripper to be populated in side 2 */
   int num_itr_2;
 
   FingerGripper(

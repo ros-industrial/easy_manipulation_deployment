@@ -258,5 +258,5 @@ void PCLFunctions::createSphereCloud(
 
 Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(pcl::PointNormal pcl_point)
 {
-  return Eigen::Vector3f(pcl_point.normal_x , pcl_point.normal_y, pcl_point.normal_z);
+  return Eigen::Vector3f(pcl_point.normal_x, pcl_point.normal_y, pcl_point.normal_z);
 }

@@ -16,8 +16,9 @@
 #include <gtest/gtest.h>
 #include "pcl_functions_test.hpp"
 
-PCLFunctionsTest():rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>)
-{}
+PCLFunctionsTest() : rectangle_cloud(new pcl::PointCloud<pcl::PointXYZRGB>)
+{
+}
 
 void PCLFunctionsTest::GenerateCloud()
 {
@@ -40,11 +41,11 @@ void PCLFunctionsTest::GenerateCloud()
 
 void PCLFunctionsTest::AddNoise()
 {
-  
+
 }
-    
+
 TEST_F(PCLFunctionsTest, NormalizeTest)
 {
-  float result  = MathFunctions::normalize(10.0, 0.0, 100.0);
+  float result = MathFunctions::normalize(10.0, 0.0, 100.0);
   EXPECT_NEAR(result, 0.1, 0.00001);
 }

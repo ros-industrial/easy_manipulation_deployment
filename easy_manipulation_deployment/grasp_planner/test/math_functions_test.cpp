@@ -18,49 +18,49 @@
 
 TEST(MathFunctionTest, NormalizeTest)
 {
-  float result  = MathFunctions::normalize(10.0, 0.0, 100.0);
+  float result = MathFunctions::normalize(10.0, 0.0, 100.0);
   EXPECT_NEAR(result, 0.1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeTestMaxMinTargetEqual)
 {
-  float result  = MathFunctions::normalize(5.5, 5.5, 5.5);
+  float result = MathFunctions::normalize(5.5, 5.5, 5.5);
   EXPECT_NEAR(result, 1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeTestMinMoreThanMax)
 {
-  float result  = MathFunctions::normalize(13.0, 5.6, 1.2);
+  float result = MathFunctions::normalize(13.0, 5.6, 1.2);
   EXPECT_NEAR(result, -1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeTestMinEqualMax)
 {
-  float result  = MathFunctions::normalize(2.4, 4.4, 4.4);
+  float result = MathFunctions::normalize(2.4, 4.4, 4.4);
   EXPECT_NEAR(result, -1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeIntTest)
 {
-  float result  = MathFunctions::normalizeInt(10, 1, 200);
+  float result = MathFunctions::normalizeInt(10, 1, 200);
   EXPECT_NEAR(result, 0.045226, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeIntTestMaxMinTargetEqual)
 {
-  float result  = MathFunctions::normalizeInt(6, 6, 6);
+  float result = MathFunctions::normalizeInt(6, 6, 6);
   EXPECT_NEAR(result, 1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeIntTestMinMoreThanMax)
 {
-  float result  = MathFunctions::normalizeInt(22, 13, 7);
+  float result = MathFunctions::normalizeInt(22, 13, 7);
   EXPECT_NEAR(result, -1, 0.00001);
 }
 
 TEST(MathFunctionTest, NormalizeIntTestMinEqualMax)
 {
-  float result  = MathFunctions::normalizeInt(20, 60, 60);
+  float result = MathFunctions::normalizeInt(20, 60, 60);
   EXPECT_NEAR(result, -1, 0.00001);
 }
 

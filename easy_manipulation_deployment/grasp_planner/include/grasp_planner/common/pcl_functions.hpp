@@ -176,7 +176,7 @@ void createSphereCloud(
 template<typename V>
 Eigen::Vector3f convertPCLtoEigen(V pcl_point)
 {
-  return Eigen::Vector3f(pcl_point.x , pcl_point.y, pcl_point.z);
+  return Eigen::Vector3f(pcl_point.x, pcl_point.y, pcl_point.z);
 }
 
 Eigen::Vector3f convertPCLNormaltoEigen(pcl::PointNormal pcl_point);
