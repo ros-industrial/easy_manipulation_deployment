@@ -110,42 +110,45 @@ GraspScene::GraspScene()
     this->get_node_timers_interface());
 
   this->buffer_->setCreateTimerInterface(create_timer_interface);
-
-  this->cloud_sub = std::make_shared<
-    message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
-    this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
-
-  this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
-        sensor_msgs::msg::PointCloud2>>(
-    *buffer_, "base_link", 5,
-    this->get_node_logging_interface(),
-    this->get_node_clock_interface(),
-    std::chrono::seconds(1));
-
-  this->tf_cloud_sub->connectInput(*cloud_sub);
-
-  this->tf_cloud_sub->registerCallback(
-    std::bind(
-      &GraspScene::planning_init, this,
-      std::placeholders::_1));
-
-  this->epd_sub = std::make_shared<
+  if(this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()){
+    RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Input....");
+    this->epd_sub = std::make_shared<
     message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
     this, "/processor/epd_localize_output");
 
-  this->tf_epd_sub = std::make_shared<tf2_ros::MessageFilter<
-        epd_msgs::msg::EPDObjectLocalization>>(
-    *buffer_, "base_link", 5,
-    this->get_node_logging_interface(),
-    this->get_node_clock_interface(),
-    std::chrono::seconds(1));
+    this->tf_epd_sub = std::make_shared<tf2_ros::MessageFilter<
+          epd_msgs::msg::EPDObjectLocalization>>(
+      *buffer_, "base_link", 5,
+      this->get_node_logging_interface(),
+      this->get_node_clock_interface(),
+      std::chrono::seconds(1));
 
-  this->tf_epd_sub->connectInput(*epd_sub);
+    this->tf_epd_sub->connectInput(*epd_sub);
 
-  this->tf_epd_sub->registerCallback(
-    std::bind(
-      &GraspScene::planning_init_epd, this,
-      std::placeholders::_1));
+    this->tf_epd_sub->registerCallback(
+      std::bind(
+        &GraspScene::planning_init_epd, this,
+        std::placeholders::_1));
+  } else{
+    RCLCPP_INFO(LOGGER, "Using Direct Camera Input....");
+    this->cloud_sub = std::make_shared<
+    message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
+    this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
+
+    this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
+          sensor_msgs::msg::PointCloud2>>(
+      *buffer_, "base_link", 5,
+      this->get_node_logging_interface(),
+      this->get_node_clock_interface(),
+      std::chrono::seconds(1));
+
+    this->tf_cloud_sub->connectInput(*cloud_sub);
+
+    this->tf_cloud_sub->registerCallback(
+      std::bind(
+        &GraspScene::planning_init, this,
+        std::placeholders::_1));
+  }
 
   RCLCPP_INFO(LOGGER, "waiting....");
 }
@@ -164,7 +167,7 @@ void GraspScene::planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::C
   EPDCreateWorldCollisionObject(msg);
   this->grasp_objects = processEPDObjects(
     msg->objects,
-    this->get_parameter("camera_frame").as_string(),
+    this->get_parameter("camera_parameters.camera_frame").as_string(),
     static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()));
   loadEndEffectors();
 
