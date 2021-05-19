@@ -48,6 +48,11 @@ GraspObject::GraspObject(
   grasp_target.target_type = object_name_;
 }
 
+/***************************************************************************//**
+ * Add bounding box to PCL Viewer
+ * @param viewer PCL Visualizer
+ ******************************************************************************/
+
 void GraspObject::add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer)
 {
   viewer->addCube(
@@ -56,6 +61,11 @@ void GraspObject::add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr 
     this->maxPoint.y - this->minPoint.y,
     this->maxPoint.z - this->minPoint.z, "bbox_" + std::to_string(pos));
 }
+
+/***************************************************************************//**
+ * Generate the 3 dimensional bounding box of an object using Principle 
+ * Component Analysis (PCA)
+ ******************************************************************************/
 
 void GraspObject::get_object_bb()
 {
@@ -98,6 +108,9 @@ void GraspObject::get_object_bb()
   getAxisAlignments();
 }
 
+/***************************************************************************//**
+ * Method that gets the dimensions of the object in the X Y and Z axes
+ ******************************************************************************/
 void GraspObject::getObjectDimensions()
 {
   this->dimensions[0] = abs(this->maxPoint.x - this->minPoint.x);
@@ -105,6 +118,9 @@ void GraspObject::getObjectDimensions()
   this->dimensions[2] = abs(this->maxPoint.z - this->minPoint.z);
 }
 
+/***************************************************************************//**
+ * Method that gets the angles of the object with respect to the world Axes
+ ******************************************************************************/
 void GraspObject::get_object_world_angles()
 {
   Eigen::Vector3f worldXVector = Eigen::Vector3f(1, 0, 0);
@@ -122,6 +138,11 @@ void GraspObject::get_object_world_angles()
     (this->axis.norm() * worldZVector.norm()));
 }
 
+/***************************************************************************//**
+ * Method that gets the pose of the object
+ * 
+ * @param pose_frame  Reference frame for object
+ ******************************************************************************/
 geometry_msgs::msg::PoseStamped GraspObject::getObjectPose(std::string pose_frame)
 {
   geometry_msgs::msg::PoseStamped result_pose;
@@ -151,6 +172,9 @@ geometry_msgs::msg::PoseStamped GraspObject::getObjectPose(std::string pose_fram
   return result_pose;
 }
 
+/***************************************************************************//**
+ * Method that generates the shape of the object. Currently only supports the box primitive
+ ******************************************************************************/
 shape_msgs::msg::SolidPrimitive GraspObject::getObjectShape()
 {  // This function is highly dependant on what the camera axis is.
   shape_msgs::msg::SolidPrimitive object_shape;
@@ -162,6 +186,10 @@ shape_msgs::msg::SolidPrimitive GraspObject::getObjectShape()
   return object_shape;
 }
 
+/***************************************************************************//**
+ * Method that gets the general alignment of each axes of the object with respect
+ * to the world axes (WIP)
+ ******************************************************************************/
 void GraspObject::getAxisAlignments()
 {
   alignments[0] = getAxis(axis);
@@ -169,6 +197,11 @@ void GraspObject::getAxisAlignments()
   alignments[2] = getAxis(minor_axis);
 }
 
+/***************************************************************************//**
+ * Method that gets the nearest world axis for the given vector
+ * 
+ * @param vector  Target vector to check
+ ******************************************************************************/
 char GraspObject::getAxis(Eigen::Vector3f vector)
 {
   Eigen::Vector3f worldXVector = Eigen::Vector3f(1, 0, 0);
