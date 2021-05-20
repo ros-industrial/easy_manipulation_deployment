@@ -65,7 +65,10 @@ GraspScene::GraspScene()
   table_coeff(new pcl::ModelCoefficients),
   viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
 {
-  output_pub = this->create_publisher<emd_msgs::msg::GraspTask>(this->get_parameter("grasp_output_topic").as_string(), 10);
+  output_pub =
+    this->create_publisher<emd_msgs::msg::GraspTask>(
+    this->get_parameter(
+      "grasp_output_topic").as_string(), 10);
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
   this->buffer_->setUsingDedicatedThread(true);
@@ -77,11 +80,11 @@ GraspScene::GraspScene()
     this->get_node_timers_interface());
 
   this->buffer_->setCreateTimerInterface(create_timer_interface);
-  if(this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()){
+  if (this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
     RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Input....");
     this->epd_sub = std::make_shared<
-    message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
-    this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
+      message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
+      this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
 
     this->tf_epd_sub = std::make_shared<tf2_ros::MessageFilter<
           epd_msgs::msg::EPDObjectLocalization>>(
@@ -96,11 +99,11 @@ GraspScene::GraspScene()
       std::bind(
         &GraspScene::planning_init_epd, this,
         std::placeholders::_1));
-  } else{
+  } else {
     RCLCPP_INFO(LOGGER, "Using Direct Camera Input....");
     this->cloud_sub = std::make_shared<
-    message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
-    this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
+      message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
+      this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
 
     this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
           sensor_msgs::msg::PointCloud2>>(
@@ -156,18 +159,20 @@ void GraspScene::planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::C
       grasp_method.grasp_ranks.pop_back();
       object->grasp_target.grasp_methods.push_back(grasp_method);
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
-      RCLCPP_INFO(LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " + 
+      RCLCPP_INFO(
+        LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
         std::to_string(
-          std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count())
-        + " [ms] ");
+          std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
+        " [ms] ");
       gripper->visualizeGrasps(viewer);
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    RCLCPP_INFO(LOGGER, "Grasp planning time for object " + object->object_name + " " + 
-        std::to_string(
-          std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count())
-        + " [ms] ");
+    RCLCPP_INFO(
+      LOGGER, "Grasp planning time for object " + object->object_name + " " +
+      std::to_string(
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
+      " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
     viewer->removeAllPointClouds();
   }
@@ -212,11 +217,13 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       // std::cout << "Grasp planning time for " << grasp_method.ee_id << " : " <<
       //   std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count() <<
       //   "[ms]" << std::endl;
-      RCLCPP_INFO(LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " + 
+      RCLCPP_INFO(
+        LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
         std::to_string(
-          std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count())
-        + " [ms] ");
-      RCLCPP_INFO(LOGGER, std::to_string(grasp_method.grasp_ranks.size()) +
+          std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
+        " [ms] ");
+      RCLCPP_INFO(
+        LOGGER, std::to_string(grasp_method.grasp_ranks.size()) +
         " Grasp Samples have been generated.");
       // for (auto rank : grasp_method.grasp_ranks) {
       //   std::cout << "grasp method rank: " << rank << std::endl;
@@ -225,10 +232,11 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    RCLCPP_INFO(LOGGER, "Grasp planning time for object " + object->object_name + " " + 
-        std::to_string(
-          std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count())
-        + " [ms] ");
+    RCLCPP_INFO(
+      LOGGER, "Grasp planning time for object " + object->object_name + " " +
+      std::to_string(
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
+      " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
   }
   viewer->removeShape("original_cloud");
@@ -451,7 +459,7 @@ void GraspScene::loadEndEffectors()
   for (std::string end_effector : end_effector_array) {
     std::string end_effector_type =
       this->get_parameter("end_effectors." + end_effector + ".type").as_string();
-      RCLCPP_INFO(LOGGER, "Loading " + end_effector_type + " gripper " + end_effector);
+    RCLCPP_INFO(LOGGER, "Loading " + end_effector_type + " gripper " + end_effector);
     if (end_effector_type.compare("finger") == 0) {
       FingerGripper gripper(
         end_effector,

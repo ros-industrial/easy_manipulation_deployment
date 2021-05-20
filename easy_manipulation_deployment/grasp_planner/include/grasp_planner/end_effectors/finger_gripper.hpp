@@ -226,7 +226,6 @@ struct graspPlaneSample
 class FingerGripper : public EndEffector
 {
 public:
-
   FingerGripper(
     std::string id_,
     const int num_fingers_side_1_,
@@ -331,7 +330,7 @@ public:
 
   std::string getID() {return id;}
 
-    /*! \brief Gripper ID*/
+  /*! \brief Gripper ID*/
   std::string id;
   /*! \brief Total Number of finger grippers*/
   int num_fingers_total;

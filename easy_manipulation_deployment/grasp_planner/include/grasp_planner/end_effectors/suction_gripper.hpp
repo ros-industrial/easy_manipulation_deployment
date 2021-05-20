@@ -128,7 +128,6 @@ struct suctionCupArray
 class SuctionGripper : public EndEffector
 {
 public:
-
   SuctionGripper(
     std::string id,
     const int & num_cups_length_,
@@ -260,7 +259,7 @@ public:
     bool is_even,
     float initial_gap,
     float dist_between_cups);
-  
+
   /*! \brief Gripper ID */
   std::string id;
   /*! \brief User Defined: Number of suction cups in the length direction */

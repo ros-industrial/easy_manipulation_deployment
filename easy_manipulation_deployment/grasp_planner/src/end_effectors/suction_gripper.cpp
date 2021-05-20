@@ -993,7 +993,7 @@ geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
  * Provides the cloud representing the contact with suction gripper
  * (Only for visualization purposes) (CURRENTLY NOT USED)
  * @param contact_point Contact point
- * @param radius Radius of contact point 
+ * @param radius Radius of contact point
  * @param cloud_input Input cloud
  * @param cloud_output Result cloud
  ******************************************************************************/
@@ -1026,7 +1026,7 @@ bool SuctionGripper::getCupContactCloud(
  * Provides the cloud point indices. For actual implementation.
  * (Only for visualization purposes) (CURRENTLY NOT USED)
  * @param contact_point Contact point
- * @param radius Radius of contact point 
+ * @param radius Radius of contact point
  * @param cloud_input Input cloud
  ******************************************************************************/
 std::vector<int> SuctionGripper::getCupContactIndices(

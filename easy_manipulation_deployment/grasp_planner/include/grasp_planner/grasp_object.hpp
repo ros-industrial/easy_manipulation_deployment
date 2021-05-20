@@ -67,7 +67,6 @@
 class GraspObject
 {
 public:
-
   GraspObject(
     std::string object_frame_, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
     Eigen::Vector4f centerpoint_);
