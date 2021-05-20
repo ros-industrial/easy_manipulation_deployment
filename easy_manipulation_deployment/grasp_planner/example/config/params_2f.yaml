@@ -2,7 +2,7 @@ grasp_planning_node:
   ros__parameters:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
-      epd_enabled: true
+      epd_enabled: false
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"
@@ -16,9 +16,9 @@ grasp_planning_node:
       cluster_tolerance: 0.01
       min_cluster_size: 750
       cloud_normal_radius: 0.03
-      fcl_voxel_size: 0.005
+      fcl_voxel_size: 0.02
     end_effectors:
-      end_effector_names: [robotiq_2f]
+      end_effector_names: [robotiq_2f, suction_cup]
       robotiq_2f:
         type: finger
         num_fingers_side_1: 2
@@ -35,4 +35,20 @@ grasp_planning_node:
           world_x_angle_threshold: 0.5
           world_y_angle_threshold: 0.5
           world_z_angle_threshold: 0.25
+      suction_cup:
+        type: suction
+        num_cups_length: 2
+        num_cups_breadth: 2
+        dist_between_cups_length: 0.06
+        dist_between_cups_breadth: 0.03
+        cup_radius: 0.01
+        cup_height: 0.01
+        grasp_planning_params:
+          num_sample_along_axis: 3
+          search_resolution: 0.01
+          search_angle_resolution: 4
+          weights:
+            curvature: 1.0
+            grasp_distance_to_center: 1.0
+            number_contact_points: 1.0
       

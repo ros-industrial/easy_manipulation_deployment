@@ -16,7 +16,13 @@
 // Main PCL files
 #include "grasp_planner/grasp_object.hpp"
 
-// pcl::PointCloud<pcl::PointNormal>::Ptr grasp_cloud_finger1;
+/***************************************************************************//**
+ * Grasp Object constructor if no name is provided
+ *
+ * @param object_frame_ The frame from which the object is observed, typically camera frame
+ * @param cloud_ Segmented point cloud of the object
+ * @param centerpoint_ Centerpoint of the object
+ ******************************************************************************/
 
 GraspObject::GraspObject(
   std::string object_frame_,
@@ -32,6 +38,15 @@ GraspObject::GraspObject(
   max_grasp_samples = 1;
   this->grasp_target.target_type = "unknown_object";
 }
+
+/***************************************************************************//**
+ * Grasp Object constructor
+ *
+ * @param object_name_ Object name
+ * @param object_frame_ The frame from which the object is observed, typically camera frame
+ * @param cloud_ Segmented point cloud of the object
+ * @param centerpoint_ Centerpoint of the object
+ ******************************************************************************/
 
 GraspObject::GraspObject(
   std::string object_name_, std::string object_frame_,
@@ -93,8 +108,7 @@ void GraspObject::get_object_bb()
   projectionTransform.block<3, 1>(
     0,
     3) = -1.f * (projectionTransform.block<3, 3>(0, 0) * this->centerpoint.head<3>());
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPointsProjected(
-  //  new pcl::PointCloud<pcl::PointXYZRGB>);
+
   pcl::transformPointCloud(*(this->cloud), *(this->cloud_projected), projectionTransform);
   this->affine_matrix = projectionTransform;
   pcl::getMinMax3D(*(this->cloud_projected), this->minPoint, this->maxPoint);

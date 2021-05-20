@@ -232,7 +232,7 @@ void SuctionGripper::planGrasps(
   emd_msgs::msg::GraspMethod * grasp_method,
   std::shared_ptr<CollisionObject> world_collision_object)
 {
-  RCLCPP_INFO(LOGGER, "Generate Gripper Attributes");
+  // RCLCPP_INFO(LOGGER, "Generate Gripper Attributes");
   generateGripperAttributes();
   UNUSED(world_collision_object);
   pcl::PointXYZ object_center;
@@ -241,12 +241,12 @@ void SuctionGripper::planGrasps(
   object_center.z = object->centerpoint(2);
 
   // Get highest point of the object to begin grasp search
-  RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
+  // RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
 
   // For now we say that the height vector is the negative world Z Axis. will change in future.
   pcl::PointXYZRGB object_top_point = findHighestPoint(object->cloud, 'z', false);
 
-  RCLCPP_INFO(LOGGER, "Initializing Grasp sample generation");
+  // RCLCPP_INFO(LOGGER, "Initializing Grasp sample generation");
   getAllPossibleGrasps(object, object_center, object_top_point);
   getAllGraspRanks(grasp_method, object);
 }
@@ -283,18 +283,18 @@ void SuctionGripper::getAllPossibleGrasps(
 
       /*! \brief A sliced cloud is created to account for noise,
       so we take a range of z values and assume them to be in the same height*/
-      RCLCPP_INFO(LOGGER, "Slice pointcloud");
+      // RCLCPP_INFO(LOGGER, "Slice pointcloud");
       getSlicedCloud(
         object->cloud, object->cloud_normal, slice_limit, 0, sliced_cloud,
         sliced_cloud_normal, 'z');
       /*! \brief We then make them part of the same plane throguh projection*/
-      RCLCPP_INFO(LOGGER, "Project Sliced pointcloud to a plane");
+      // RCLCPP_INFO(LOGGER, "Project Sliced pointcloud to a plane");
       projectCloudToPlane(sliced_cloud, plane, projected_cloud);
       /*! \brief Get the center index of the sliced cloud,
       which may not necessarily be the center of the object cloud*/
-      RCLCPP_INFO(LOGGER, "Get the centroid of the projected point cloud");
+      // RCLCPP_INFO(LOGGER, "Get the centroid of the projected point cloud");
       int centroid_index = getCentroidIndex(projected_cloud);
-      RCLCPP_INFO(LOGGER, "Generate grasp samples");
+      // RCLCPP_INFO(LOGGER, "Generate grasp samples");
 
       // Iterate at different angles to search for best possible grasp
       for (int i = 1, angle = 2, toggle = 1; i < this->search_angle_resolution; i += toggle ^= 1) {
@@ -323,7 +323,7 @@ void SuctionGripper::getAllPossibleGrasps(
 
           static std::mutex mutex_2;
           std::lock_guard<std::mutex> lock(mutex_2);
-          RCLCPP_INFO(LOGGER, "Generate grasp samples");
+          // RCLCPP_INFO(LOGGER, "Generate grasp samples");
           suctionCupArray grasp_sample = generateGraspSample(
             projected_cloud,
             sliced_cloud_normal,
@@ -413,7 +413,6 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
  *
  * @param cloud Projected Cloud
  ******************************************************************************/
-// Get the point index of the centroid of the object
 int SuctionGripper::getCentroidIndex(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
   Eigen::Vector4f centroid;
@@ -432,47 +431,6 @@ int SuctionGripper::getCentroidIndex(pcl::PointCloud<pcl::PointXYZRGB>::Ptr clou
   } else {
     return -1;
   }
-}
-
-// Provides the cloud representing the contact with suction gripper
-// (Only for visualization purposes) (CURRENTLY NOT USED)
-bool SuctionGripper::getCupContactCloud(
-  pcl::PointXYZRGB contact_point,
-  float radius,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input,
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output)
-{
-  pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
-  std::vector<int> kd_radius_search;
-  std::vector<float> kd_sq_dist;
-  kdtree.setInputCloud(cloud_input);
-  if (kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist) > 0) {
-    for (std::size_t m = 0; m < kd_radius_search.size(); ++m) {
-      pcl::PointXYZ temp_p;
-      temp_p.x = cloud_input->points[kd_radius_search[m]].x;
-      temp_p.y = cloud_input->points[kd_radius_search[m]].y;
-      temp_p.z = cloud_input->points[kd_radius_search[m]].z;
-      cloud_output->points.push_back(temp_p);
-    }
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// Provides the cloud point indices. For actual implementation.
-//  No need to generate the cloud (CURRENTLY NOT USED)
-std::vector<int> SuctionGripper::getCupContactIndices(
-  pcl::PointXYZRGB contact_point,
-  float radius,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input)
-{
-  pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
-  std::vector<int> kd_radius_search;
-  std::vector<float> kd_sq_dist;
-  kdtree.setInputCloud(cloud_input);
-  kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist);
-  return kd_radius_search;
 }
 
 /***************************************************************************//**
@@ -1028,4 +986,58 @@ geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
   result_pose.header.stamp.sec = std::chrono::duration_cast<std::chrono::seconds>(
     clock.time_since_epoch()).count();
   return result_pose;
+}
+
+
+/***************************************************************************//**
+ * Provides the cloud representing the contact with suction gripper
+ * (Only for visualization purposes) (CURRENTLY NOT USED)
+ * @param contact_point Contact point
+ * @param radius Radius of contact point 
+ * @param cloud_input Input cloud
+ * @param cloud_output Result cloud
+ ******************************************************************************/
+
+bool SuctionGripper::getCupContactCloud(
+  pcl::PointXYZRGB contact_point,
+  float radius,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input,
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output)
+{
+  pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
+  std::vector<int> kd_radius_search;
+  std::vector<float> kd_sq_dist;
+  kdtree.setInputCloud(cloud_input);
+  if (kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist) > 0) {
+    for (std::size_t m = 0; m < kd_radius_search.size(); ++m) {
+      pcl::PointXYZ temp_p;
+      temp_p.x = cloud_input->points[kd_radius_search[m]].x;
+      temp_p.y = cloud_input->points[kd_radius_search[m]].y;
+      temp_p.z = cloud_input->points[kd_radius_search[m]].z;
+      cloud_output->points.push_back(temp_p);
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/***************************************************************************//**
+ * Provides the cloud point indices. For actual implementation.
+ * (Only for visualization purposes) (CURRENTLY NOT USED)
+ * @param contact_point Contact point
+ * @param radius Radius of contact point 
+ * @param cloud_input Input cloud
+ ******************************************************************************/
+std::vector<int> SuctionGripper::getCupContactIndices(
+  pcl::PointXYZRGB contact_point,
+  float radius,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_input)
+{
+  pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
+  std::vector<int> kd_radius_search;
+  std::vector<float> kd_sq_dist;
+  kdtree.setInputCloud(cloud_input);
+  kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist);
+  return kd_radius_search;
 }

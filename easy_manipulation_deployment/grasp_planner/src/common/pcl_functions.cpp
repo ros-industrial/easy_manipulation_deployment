@@ -105,7 +105,6 @@ bool PCLFunctions::planeSegmentation(
     PCL_ERROR("Could not estimate a planar model for the given dataset.");
     return false;
   }
-  std::cout << "indExt" << std::endl;
   // Remove the planar inliers, extract the rest
   pcl::ExtractIndices<pcl::PointXYZRGB> indExtractor2;
   indExtractor2.setInputCloud(cloud);
@@ -130,28 +129,28 @@ bool PCLFunctions::planeSegmentation(
 
 void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
-  int initial_size = cloud->points.size();
+  // int initial_size = cloud->points.size();
   pcl::PassThrough<pcl::PointXYZRGB> ptFilter;
   ptFilter.setInputCloud(cloud);
   ptFilter.setFilterFieldName("z");
   // ptFilter.setFilterLimitsNegative (true);
   ptFilter.setFilterLimits(0, 0.0001);
   ptFilter.filter(*cloud);
-  int after_size = cloud->points.size();
-  std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
+  // int after_size = cloud->points.size();
+  // std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
 }
 
 void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
-  int initial_size = cloud->points.size();
+  // int initial_size = cloud->points.size();
   pcl::PassThrough<pcl::PointXYZ> ptFilter;
   ptFilter.setInputCloud(cloud);
   ptFilter.setFilterFieldName("z");
   // ptFilter.setFilterLimitsNegative (true);
   ptFilter.setFilterLimits(0, 0.0001);
   ptFilter.filter(*cloud);
-  int after_size = cloud->points.size();
-  std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
+  // int after_size = cloud->points.size();
+  // std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
 }
 
 float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point)
@@ -213,7 +212,7 @@ void PCLFunctions::computeCloudNormal(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal, const float & cloud_normal_radius)
 {
-  std::chrono::steady_clock::time_point getSlicedCloud1 = std::chrono::steady_clock::now();
+  // std::chrono::steady_clock::time_point getSlicedCloud1 = std::chrono::steady_clock::now();
   pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(
     new pcl::search::KdTree<pcl::PointXYZRGB>());
   pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::PointNormal> normal_estimation;
@@ -223,11 +222,11 @@ void PCLFunctions::computeCloudNormal(
   normal_estimation.setRadiusSearch(cloud_normal_radius);
   normal_estimation.compute(*cloud_normal);
   // NormalEstimation only fills with normals the output
-  std::chrono::steady_clock::time_point getSlicedCloud2 = std::chrono::steady_clock::now();
-  std::cout << "Grasp planning time for computeCloudNormal " <<
-    std::chrono::duration_cast<std::chrono::milliseconds>(
-    getSlicedCloud2 -
-    getSlicedCloud1).count() << "[ms]" << std::endl;
+  // std::chrono::steady_clock::time_point getSlicedCloud2 = std::chrono::steady_clock::now();
+  // std::cout << "Grasp planning time for computeCloudNormal " <<
+  //   std::chrono::duration_cast<std::chrono::milliseconds>(
+  //   getSlicedCloud2 -
+  //   getSlicedCloud1).count() << "[ms]" << std::endl;
 
   for (size_t i = 0; i < cloud_normal->points.size(); ++i) {
     cloud_normal->points[i].x = cloud->points[i].x;

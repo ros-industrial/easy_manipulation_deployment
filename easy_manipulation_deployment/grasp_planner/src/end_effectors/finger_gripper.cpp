@@ -149,6 +149,14 @@ void FingerGripper::generateGripperAttributes()
   this->num_itr_2 = (this->num_fingers_side_2 == 1 ? 0 : floor(this->num_fingers_side_2 / 2));
 }
 
+/***************************************************************************//**
+ * Inherited method that visualizes the required grasps
+ *
+ * @param object Grasp Object
+ * @param grasp_method Grasp method output for all possible grasps
+ * @param world_collision_object FCL collision object of the world
+ ******************************************************************************/
+
 void FingerGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
@@ -156,9 +164,7 @@ void FingerGripper::planGrasps(
 {
   generateGripperAttributes();
   getCenterCuttingPlane(object);
-  std::cout << "getCuttingPlanes" << std::endl;
   getCuttingPlanes(object);
-  std::cout << "getGraspCloud" << std::endl;
   if (!this->getGraspCloud(object)) {
     RCLCPP_ERROR(
       LOGGER,
@@ -167,23 +173,16 @@ void FingerGripper::planGrasps(
     return;
   }
 
-  std::cout << "getInitialSamplePoints" << std::endl;
   if (!this->getInitialSamplePoints(object)) {
     this->resetVariables();
     return;
   }
 
-  std::cout << "getInitialSampleCloud" << std::endl;
   getInitialSampleCloud(object);
-  std::cout << "voxelizeSampleCloud" << std::endl;
   voxelizeSampleCloud();
-  std::cout << "getMaxMinValues" << std::endl;
   getMaxMinValues(object);
-  std::cout << "getFingerSamples" << std::endl;
   getFingerSamples(object);
-  std::cout << "getGripperClusters" << std::endl;
   getGripperClusters();
-  std::cout << "getAllGripperConfigs" << std::endl;
   std::vector<std::shared_ptr<multiFingerGripper>> valid_open_gripper_configs =
     getAllGripperConfigs(object, world_collision_object);
 
@@ -332,15 +331,15 @@ void FingerGripper::addCuttingPlanesEqualAligned(
 
     } else {
       if (curr_min_size < min_fingers) {  // Plane still contains fingers on both side
-        std::cout << "Add to both" << std::endl;
+        // std::cout << "Add to both" << std::endl;
         addPlane(gap, centerpoint, plane_vector, true, true);
         curr_min_size++;
       } else {  // Plane only contains fingers on the side with more fingers
         if (side_1_max) {
-          std::cout << "Add to side 1" << std::endl;
+          // std::cout << "Add to side 1" << std::endl;
           addPlane(gap, centerpoint, plane_vector, true, false);
         } else {
-          std::cout << "Add to side 2" << std::endl;
+          // std::cout << "Add to side 2" << std::endl;
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
@@ -489,7 +488,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
 {
   // Object in the X axis
   if (object->objectWorldCosX > this->worldXAngleThreshold) {
-    std::cout << "It is oriented with the X axis\n";
+    // std::cout << "It is oriented with the X axis\n";
     for (auto & sample : this->grasp_samples) {
       int first_point_index, second_point_index;
       float minY = std::numeric_limits<float>::max();
@@ -511,7 +510,7 @@ bool FingerGripper::getInitialSamplePoints(std::shared_ptr<GraspObject> object)
       }
     }
   } else {  // Object in the Y axis
-    std::cout << "It is oriented with the Y axis\n";
+    // std::cout << "It is oriented with the Y axis\n";
     for (auto & sample : this->grasp_samples) {
       int first_point_index, second_point_index;
       float minX = std::numeric_limits<float>::max();
@@ -1231,7 +1230,9 @@ std::vector<Eigen::Vector3f> FingerGripper::getOpenFingerCoordinates(
   std::vector<Eigen::Vector3f> result{open_center_finger_1, open_center_finger_2};
   return result;
 }
-
+/***************************************************************************//**
+ * Method to reset gripper variables (Not used)
+ ******************************************************************************/
 void FingerGripper::resetVariables()
 {
 }
@@ -1243,7 +1244,7 @@ void FingerGripper::resetVariables()
  ******************************************************************************/
 void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
 {
-  std::cout << "Visualizing " << this->sorted_gripper_configs.size() << " grasps" << std::endl;
+  // std::cout << "Visualizing " << this->sorted_gripper_configs.size() << " grasps" << std::endl;
   for (auto const & multigripper : this->sorted_gripper_configs) {
     for (size_t cs_1 = 0; cs_1 < multigripper->closed_fingers_1.size(); cs_1++) {
       viewer->addSphere(

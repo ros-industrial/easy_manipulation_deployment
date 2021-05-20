@@ -89,6 +89,7 @@ public:
   void planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
   void EPDCreateWorldCollisionObject(
     const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
+  std::string generate_task_id();
 
   ~GraspScene();
   GraspScene();
