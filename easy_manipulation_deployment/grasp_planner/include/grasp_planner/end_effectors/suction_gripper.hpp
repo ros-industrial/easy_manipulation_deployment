@@ -95,6 +95,8 @@ struct singleSuctionCup
     average_curvature = curvature_sum_ / contact_points_;
   }
 };
+
+/*! \brief General Struct for Suction array grasp sample  */
 struct suctionCupArray
 {
   /*! \brief 2D matrix representing a suction cup array */
@@ -122,82 +124,10 @@ struct suctionCupArray
   }
 };
 
+/*! \brief General Class for Suction Gripper grasp planning  */
 class SuctionGripper : public EndEffector
 {
 public:
-  // Gripper predefined Attributes
-  /*! \brief Gripper ID */
-  std::string id;
-  /*! \brief User Defined: Number of suction cups in the length direction */
-  const int num_cups_length;
-  /*! \brief User Defined: Number of suction cups in the breadth direction */
-  const int num_cups_breadth;
-  /*! \brief User Defined: Distance between the suction cups in the length direction */
-  const float dist_between_cups_length;
-  /*! \brief User Defined: Distance between the suction cups in the breadth direction */
-  const float dist_between_cups_breadth;
-  /*! \brief User Defined: Radius of each suction cup*/
-  const float cup_radius;
-  /*! \brief User Defined: Height of each suction cup*/
-  const float cup_height;
-  /*! \brief User Defined: Number of grasp samples to be sampled along the axis for
-  each search iteration*/
-  const int num_sample_along_axis;
-  /*! \brief User Defined: Step size for each search iteration*/
-  const float search_resolution;
-  /*! \brief User Defined: Angle resolution for each search iteration.
-  Default is 3 for a single 90 degree angle iteration. Min 3, Max 9. */
-  const int search_angle_resolution;
-  /*! \brief User Defined: Radius used for creating Normal Point Cloud of grasp samples*/
-  const float cloud_normal_radius;
-  /*! \brief User Defined: Weights to determine importance of curvature.  Default is 1.0 */
-  float curvature_weight;
-  /*! \brief User Defined: Weights to determine importance of Center Distance. Default is 1.0 */
-  float grasp_center_distance_weight;
-  /*! \brief User Defined: Weights to determine importance of the number of
-  contact points. Default is 1.0 */
-  float num_contact_points_weight;
-  /*! \brief Actual breadth dimensions of the entire suction gripper*/
-  float breadth_dim;
-  /*! \brief Actual length dimensions of the entire suction gripper*/
-  float length_dim;
-
-  /*! \brief True if number of cups is even in the column direction */
-  bool col_is_even;
-  /*! \brief Number of iterations to generate full suction cup array in the column direction */
-  float col_itr;
-  /*! \brief Distance between cups in the column direction */
-  float col_dist_between_cups;
-  /*! \brief Initial distance between center of suction array gripper to the first suction cup in
-    the column direction */
-  float col_initial_gap;
-
-  /*! \brief True if number of cups is even in the row direction */
-  bool row_is_even;
-  /*! \brief Number of iterations to generate full suction cup array in the row direction */
-  float row_itr;
-  /*! \brief Distance between cups in the row direction */
-  float row_dist_between_cups;
-  /*! \brief Initial distance between center of suction array gripper to the first suction cup in
-    the row direction */
-  float row_initial_gap;
-
-  // For grasp planning
-  /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
-  float max_curvature;
-  /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
-  float min_curvature;
-  /*! \brief Maximum total contact points, comparing all the grasp samples sampled */
-  int max_contact_points;
-  /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
-  int min_contact_points;
-  /*! \brief Maximum distance from the center of grasp to the object center,
-  comparing all the grasp samples sampled */
-  float max_center_dist;
-  /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
-  float min_center_dist;
-  /*! \brief All sampled grasp array grasps */
-  std::vector<std::shared_ptr<suctionCupArray>> cup_array_samples;
 
   SuctionGripper(
     std::string id,
@@ -330,6 +260,79 @@ public:
     bool is_even,
     float initial_gap,
     float dist_between_cups);
+  
+  /*! \brief Gripper ID */
+  std::string id;
+  /*! \brief User Defined: Number of suction cups in the length direction */
+  const int num_cups_length;
+  /*! \brief User Defined: Number of suction cups in the breadth direction */
+  const int num_cups_breadth;
+  /*! \brief User Defined: Distance between the suction cups in the length direction */
+  const float dist_between_cups_length;
+  /*! \brief User Defined: Distance between the suction cups in the breadth direction */
+  const float dist_between_cups_breadth;
+  /*! \brief User Defined: Radius of each suction cup*/
+  const float cup_radius;
+  /*! \brief User Defined: Height of each suction cup*/
+  const float cup_height;
+  /*! \brief User Defined: Number of grasp samples to be sampled along the axis for
+  each search iteration*/
+  const int num_sample_along_axis;
+  /*! \brief User Defined: Step size for each search iteration*/
+  const float search_resolution;
+  /*! \brief User Defined: Angle resolution for each search iteration.
+  Default is 3 for a single 90 degree angle iteration. Min 3, Max 9. */
+  const int search_angle_resolution;
+  /*! \brief User Defined: Radius used for creating Normal Point Cloud of grasp samples*/
+  const float cloud_normal_radius;
+  /*! \brief User Defined: Weights to determine importance of curvature.  Default is 1.0 */
+  float curvature_weight;
+  /*! \brief User Defined: Weights to determine importance of Center Distance. Default is 1.0 */
+  float grasp_center_distance_weight;
+  /*! \brief User Defined: Weights to determine importance of the number of
+  contact points. Default is 1.0 */
+  float num_contact_points_weight;
+  /*! \brief Actual breadth dimensions of the entire suction gripper*/
+  float breadth_dim;
+  /*! \brief Actual length dimensions of the entire suction gripper*/
+  float length_dim;
+
+  /*! \brief True if number of cups is even in the column direction */
+  bool col_is_even;
+  /*! \brief Number of iterations to generate full suction cup array in the column direction */
+  float col_itr;
+  /*! \brief Distance between cups in the column direction */
+  float col_dist_between_cups;
+  /*! \brief Initial distance between center of suction array gripper to the first suction cup in
+    the column direction */
+  float col_initial_gap;
+
+  /*! \brief True if number of cups is even in the row direction */
+  bool row_is_even;
+  /*! \brief Number of iterations to generate full suction cup array in the row direction */
+  float row_itr;
+  /*! \brief Distance between cups in the row direction */
+  float row_dist_between_cups;
+  /*! \brief Initial distance between center of suction array gripper to the first suction cup in
+    the row direction */
+  float row_initial_gap;
+
+  // For grasp planning
+  /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
+  float max_curvature;
+  /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */
+  float min_curvature;
+  /*! \brief Maximum total contact points, comparing all the grasp samples sampled */
+  int max_contact_points;
+  /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
+  int min_contact_points;
+  /*! \brief Maximum distance from the center of grasp to the object center,
+  comparing all the grasp samples sampled */
+  float max_center_dist;
+  /*! \brief Minimum total contact points, comparing all the grasp samples sampled */
+  float min_center_dist;
+  /*! \brief All sampled grasp array grasps */
+  std::vector<std::shared_ptr<suctionCupArray>> cup_array_samples;
 };
 
 #endif  // GRASP_PLANNER__END_EFFECTORS__SUCTION_GRIPPER_HPP_

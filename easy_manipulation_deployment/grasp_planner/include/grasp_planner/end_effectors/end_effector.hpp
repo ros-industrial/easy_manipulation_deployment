@@ -29,6 +29,7 @@
 
 #define UNUSED(expr) do {(void)(expr);} while (0)
 
+/*! \brief Generic class for an end effector, to be inherited by other end effectors*/
 class EndEffector
 {
 public:

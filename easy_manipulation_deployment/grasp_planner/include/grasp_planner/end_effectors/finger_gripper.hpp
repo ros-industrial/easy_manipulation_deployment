@@ -57,7 +57,7 @@
 #include "grasp_planner/common/math_functions.hpp"
 #include "grasp_planner/end_effectors/end_effector.hpp"
 
-
+/*! \brief General Struct for a single finger in a gripper sample  */
 struct singleFinger
 {
   /*! \brief 3D coordinate of point */
@@ -72,6 +72,16 @@ struct singleFinger
   int plane_index;
   /*! \brief Cosine of angle of Finger normal with respect to the plane normal vector */
   float angle_cos;
+
+  /***************************************************************************//**
+  * singleFinger Constructor
+  *
+  * @param finger_point_ Coordinate of finger point
+  * @param centroid_dist_ Distance between Finger point and center of gripper
+  * @param grasp_plane_dist_ Distance between Finger point and grasp plane
+  * @param curvature_  Curvature of that particular point
+  * @param plane_index_ Plane this point is in with respect to the plane vector
+  ******************************************************************************/
 
   singleFinger(
     pcl::PointNormal finger_point_,
@@ -88,6 +98,7 @@ struct singleFinger
   singleFinger() = default;
 };
 
+/*! \brief General Struct for a finger grasp sample  */
 struct multiFingerGripper
 {
   /*! \brief Closed finger configuration on side 1 */
@@ -117,6 +128,12 @@ struct multiFingerGripper
   /*! \brief True if colliding with world */
   bool collides_with_world;
 
+  /***************************************************************************//**
+  * multiFingerGripper Constructor
+  *
+  * @param base_point_1_ middle single finger on side 1
+  * @param base_point_2_ middle single finger on side 2
+  ******************************************************************************/
   multiFingerGripper(
     std::shared_ptr<singleFinger> base_point_1_,
     std::shared_ptr<singleFinger> base_point_2_)
@@ -130,7 +147,7 @@ struct multiFingerGripper
   }
 };
 
-
+/*! \brief General Struct for a Finger Cloud Sample  */
 struct fingerCloudSample
 {
   /*! \brief Point cloud for current finger sample */
@@ -154,6 +171,10 @@ struct fingerCloudSample
   int start_index;
   /*! \brief Finger Samples derived from current finger cloud */
   std::vector<std::shared_ptr<singleFinger>> finger_samples;
+
+  /***************************************************************************//**
+  * fingerCloudSample Constructor
+  ******************************************************************************/
   fingerCloudSample()
   : finger_cloud(new pcl::PointCloud<pcl::PointXYZRGB>),
     finger_ncloud(new pcl::PointCloud<pcl::PointNormal>),
@@ -167,6 +188,7 @@ struct fingerCloudSample
   }
 };
 
+/*! \brief General Struct for a grasp plane  */
 struct graspPlaneSample
 {
   /*! \brief Index of this current plane with respect to plane vector */
@@ -185,6 +207,10 @@ struct graspPlaneSample
   pcl::ModelCoefficients::Ptr plane;
   /*! \brief Coefficients for this current plane as Eigen 4f */
   Eigen::Vector4f plane_eigen;
+
+  /***************************************************************************//**
+  * graspPlaneSample Constructor
+  ******************************************************************************/
   graspPlaneSample()
   : grasp_plane_ncloud(new pcl::PointCloud<pcl::PointNormal>),
     plane(new pcl::ModelCoefficients)
@@ -196,70 +222,10 @@ struct graspPlaneSample
   }
 };
 
+/*! \brief General Struct for Finger gripper grasp planning  */
 class FingerGripper : public EndEffector
 {
 public:
-  /*! \brief Gripper ID*/
-  std::string id;
-  /*! \brief Total Number of finger grippers*/
-  int num_fingers_total;
-  /*! \brief Number of fingers on side 1*/
-  const int num_fingers_side_1;
-  /*! \brief Number of fingers on side 2*/
-  const int num_fingers_side_2;
-  /*! \brief Distance between fingers on side 1*/
-  const float distance_between_fingers_1;
-  /*! \brief Distance between fingers on side 2*/
-  const float distance_between_fingers_2;
-  /*! \brief Largest thickness dimension of a finger*/
-  const float finger_thickness;
-  /*! \brief Distance between fingers of opposing sides*/
-  const float gripper_stroke;
-  /*! \brief Voxel Size for downsampling of point cloud */
-  const float voxel_size;
-  /*! \brief weight 1 of grasp ranking */
-  const float grasp_quality_weight1;
-  /*! \brief weight 2 of grasp ranking */
-  const float grasp_quality_weight2;
-  /*! \brief Parameter for SAC search for points on plane */
-  const float grasp_plane_dist_limit;
-  /*! \brief Radius of which to determine cloud normals */
-  const float cloud_normal_radius;
-  /*! \brief Threshold after which the object is angled to the world X axis */
-  const float worldXAngleThreshold;
-  /*! \brief Threshold after which the object is angled to the world Y axis */
-  const float worldYAngleThreshold;
-  /*! \brief Threshold after which the object is angled to the world Z axis */
-  const float worldZAngleThreshold;
-
-  /*! \brief Coefficients of the cutting plane through the object */
-  Eigen::Vector4f center_cutting_plane;  // grasp Plane vector coeff: a, b, c ,d
-  /*! \brief Normal vector of the cutting plane */
-  Eigen::Vector3f center_cutting_plane_normal;
-  /*! \brief List of finger grasp samples */
-  std::vector<std::shared_ptr<graspPlaneSample>> grasp_samples;
-  /*! \brief Vector containing distance of each cutting plane to the center */
-  std::vector<float> cutting_plane_distances;
-  /*! \brief Vector containing the indexes of the cutting planes belonging to side 1 */
-  std::vector<int> plane_1_index;
-  /*! \brief Vector containing the indexes of the cutting planes belonging to side 2 */
-  std::vector<int> plane_2_index;
-  /*! \brief  */
-  std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters;
-  /*! \brief Vector containing grasp samples sorted by ranks */
-  std::vector<std::shared_ptr<multiFingerGripper>> sorted_gripper_configs;
-  /*! \brief True if number of fingers in side 1 is even */
-  bool is_even_1;
-  /*! \brief True if number of fingers in side 2 is even */
-  bool is_even_2;
-  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 1 */
-  float initial_gap_1;
-  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 2 */
-  float initial_gap_2;
-  /*! \brief Number of iterations for Finger gripper to be populated in side 1 */
-  int num_itr_1;
-  /*! \brief Number of iterations for Finger gripper to be populated in side 2 */
-  int num_itr_2;
 
   FingerGripper(
     std::string id_,
@@ -364,6 +330,68 @@ public:
     const std::shared_ptr<GraspObject> & object);
 
   std::string getID() {return id;}
+
+    /*! \brief Gripper ID*/
+  std::string id;
+  /*! \brief Total Number of finger grippers*/
+  int num_fingers_total;
+  /*! \brief Number of fingers on side 1*/
+  const int num_fingers_side_1;
+  /*! \brief Number of fingers on side 2*/
+  const int num_fingers_side_2;
+  /*! \brief Distance between fingers on side 1*/
+  const float distance_between_fingers_1;
+  /*! \brief Distance between fingers on side 2*/
+  const float distance_between_fingers_2;
+  /*! \brief Largest thickness dimension of a finger*/
+  const float finger_thickness;
+  /*! \brief Distance between fingers of opposing sides*/
+  const float gripper_stroke;
+  /*! \brief Voxel Size for downsampling of point cloud */
+  const float voxel_size;
+  /*! \brief weight 1 of grasp ranking */
+  const float grasp_quality_weight1;
+  /*! \brief weight 2 of grasp ranking */
+  const float grasp_quality_weight2;
+  /*! \brief Parameter for SAC search for points on plane */
+  const float grasp_plane_dist_limit;
+  /*! \brief Radius of which to determine cloud normals */
+  const float cloud_normal_radius;
+  /*! \brief Threshold after which the object is angled to the world X axis */
+  const float worldXAngleThreshold;
+  /*! \brief Threshold after which the object is angled to the world Y axis */
+  const float worldYAngleThreshold;
+  /*! \brief Threshold after which the object is angled to the world Z axis */
+  const float worldZAngleThreshold;
+
+  /*! \brief Coefficients of the cutting plane through the object */
+  Eigen::Vector4f center_cutting_plane;  // grasp Plane vector coeff: a, b, c ,d
+  /*! \brief Normal vector of the cutting plane */
+  Eigen::Vector3f center_cutting_plane_normal;
+  /*! \brief List of finger grasp samples */
+  std::vector<std::shared_ptr<graspPlaneSample>> grasp_samples;
+  /*! \brief Vector containing distance of each cutting plane to the center */
+  std::vector<float> cutting_plane_distances;
+  /*! \brief Vector containing the indexes of the cutting planes belonging to side 1 */
+  std::vector<int> plane_1_index;
+  /*! \brief Vector containing the indexes of the cutting planes belonging to side 2 */
+  std::vector<int> plane_2_index;
+  /*! \brief  */
+  std::vector<std::vector<std::shared_ptr<singleFinger>>> gripper_clusters;
+  /*! \brief Vector containing grasp samples sorted by ranks */
+  std::vector<std::shared_ptr<multiFingerGripper>> sorted_gripper_configs;
+  /*! \brief True if number of fingers in side 1 is even */
+  bool is_even_1;
+  /*! \brief True if number of fingers in side 2 is even */
+  bool is_even_2;
+  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 1 */
+  float initial_gap_1;
+  /*! \brief Initial gap between the center of finger gripper and the next gripper in side 2 */
+  float initial_gap_2;
+  /*! \brief Number of iterations for Finger gripper to be populated in side 1 */
+  int num_itr_1;
+  /*! \brief Number of iterations for Finger gripper to be populated in side 2 */
+  int num_itr_2;
 };
 
 #endif  // GRASP_PLANNER__END_EFFECTORS__FINGER_GRIPPER_HPP_

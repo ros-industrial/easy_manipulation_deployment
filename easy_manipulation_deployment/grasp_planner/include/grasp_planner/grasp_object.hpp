@@ -63,9 +63,27 @@
 // EMD Libraries
 #include "grasp_planner/common/pcl_functions.hpp"
 
+/*! \brief General Class for a grasp object*/
 class GraspObject
 {
 public:
+
+  GraspObject(
+    std::string object_frame_, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
+    Eigen::Vector4f centerpoint_);
+  GraspObject(
+    std::string object_name_, std::string object_frame_,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_, Eigen::Vector4f centerpoint_);
+  void get_object_bb();
+  void get_object_world_angles();
+  // void add_cutting_plane_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
+  void add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
+  shape_msgs::msg::SolidPrimitive getObjectShape();
+  void getObjectDimensions();
+  void getAxisAlignments();
+  char getAxis(Eigen::Vector3f vector);
+  geometry_msgs::msg::PoseStamped getObjectPose(std::string pose_frame);
+
   /*! \brief Message output to describe grasp decisions for this object */
   emd_msgs::msg::GraspTarget grasp_target;
   /*! \brief Object Name */
@@ -114,22 +132,6 @@ public:
   int max_grasp_samples;
   /*! \brief  Dimensions of the object*/
   float dimensions[3];
-
-  GraspObject(
-    std::string object_frame_, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
-    Eigen::Vector4f centerpoint_);
-  GraspObject(
-    std::string object_name_, std::string object_frame_,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_, Eigen::Vector4f centerpoint_);
-  void get_object_bb();
-  void get_object_world_angles();
-  // void add_cutting_plane_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
-  void add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer);
-  shape_msgs::msg::SolidPrimitive getObjectShape();
-  void getObjectDimensions();
-  void getAxisAlignments();
-  char getAxis(Eigen::Vector3f vector);
-  geometry_msgs::msg::PoseStamped getObjectPose(std::string pose_frame);
 };
 
 #endif  // GRASP_PLANNER__GRASP_OBJECT_HPP_

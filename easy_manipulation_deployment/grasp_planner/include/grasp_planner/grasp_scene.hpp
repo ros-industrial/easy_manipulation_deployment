@@ -66,6 +66,7 @@
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("GraspScene");
 
+/*! \brief General Class for a grasp scene*/
 class GraspScene : public rclcpp::Node
 {
 public:
