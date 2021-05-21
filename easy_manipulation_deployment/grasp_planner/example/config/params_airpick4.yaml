@@ -3,6 +3,7 @@ grasp_planning_node:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
       epd_enabled: true
+      tracking_enabled: true
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"

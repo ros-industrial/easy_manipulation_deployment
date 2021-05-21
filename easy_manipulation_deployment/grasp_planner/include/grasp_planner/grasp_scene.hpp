@@ -36,6 +36,7 @@
 #include <emd_msgs/msg/grasp_target.hpp>
 #include <emd_msgs/msg/grasp_task.hpp>
 #include <epd_msgs/msg/epd_object_localization.hpp>
+#include <epd_msgs/msg/epd_object_tracking.hpp>
 #include <epd_msgs/msg/localized_object.hpp>
 
 // Temp
@@ -87,10 +88,19 @@ public:
   void loadEndEffectors();
   void processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
   void createWorldCollision(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
-  void planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
-  void EPDCreateWorldCollisionObject(
-    const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
+  
   std::string generate_task_id();
+  
+  // void EPDCreateWorldCollisionObject(
+  //   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
+  template <typename T>
+  void EPDCreateWorldCollisionObject(
+    const T & msg);
+  // void planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
+  template <typename U>
+  void planningInit(const U & msg);
+  void EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg);
+  void EPDLocalizationCallback(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
 
   ~GraspScene();
   GraspScene();
@@ -158,10 +168,14 @@ public:
   std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>> tf_cloud_sub;
   /*! \brief Vector of objects in the scene to be picked */
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
-  /*! \brief Subscriber that subscribes to the EPD output */
-  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>> epd_sub;
-  /*! \brief Message filter for Easy perception deployment message */
-  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectLocalization>> tf_epd_sub;
+  /*! \brief Subscriber that subscribes to the EPD precision 2 output */
+  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>> epd_localize_sub;
+  /*! \brief Message filter for EPD precision 2 message */
+  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectLocalization>> tf_epd_localize_sub;
+  /*! \brief Subscriber that subscribes to the EPD precision 3 output */
+  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectTracking>> epd_tracking_sub;
+  /*! \brief Message filter for EPD precision 3 message */
+  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectTracking>> tf_epd_tracking_sub;
   /*! \brief Vector of End effectors available */
   std::vector<std::shared_ptr<EndEffector>> end_effectors;
 

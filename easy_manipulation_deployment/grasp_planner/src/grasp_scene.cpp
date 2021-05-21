@@ -81,24 +81,44 @@ GraspScene::GraspScene()
 
   this->buffer_->setCreateTimerInterface(create_timer_interface);
   if (this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
-    RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Input....");
-    this->epd_sub = std::make_shared<
-      message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
-      this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
+    if(this->get_parameter("easy_perception_deployment.tracking_enabled").as_bool())
+    {
+      RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Tracking input....");
+      this->epd_tracking_sub = std::make_shared<
+        message_filters::Subscriber<epd_msgs::msg::EPDObjectTracking>>(
+        this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
 
-    this->tf_epd_sub = std::make_shared<tf2_ros::MessageFilter<
-          epd_msgs::msg::EPDObjectLocalization>>(
-      *buffer_, "base_link", 5,
-      this->get_node_logging_interface(),
-      this->get_node_clock_interface(),
-      std::chrono::seconds(1));
+      this->tf_epd_tracking_sub = std::make_shared<tf2_ros::MessageFilter<
+            epd_msgs::msg::EPDObjectTracking>>(
+        *buffer_, "base_link", 5,
+        this->get_node_logging_interface(),
+        this->get_node_clock_interface(),
+        std::chrono::seconds(1));
 
-    this->tf_epd_sub->connectInput(*epd_sub);
+      this->tf_epd_tracking_sub->connectInput(*epd_tracking_sub);
+      this->tf_epd_tracking_sub->registerCallback(
+        std::bind(
+          &GraspScene::EPDTrackingCallback, this,
+          std::placeholders::_1));
+    } else{
+      RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Localization input....");
+      this->epd_localize_sub = std::make_shared<
+        message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
+        this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
 
-    this->tf_epd_sub->registerCallback(
-      std::bind(
-        &GraspScene::planning_init_epd, this,
-        std::placeholders::_1));
+      this->tf_epd_localize_sub = std::make_shared<tf2_ros::MessageFilter<
+            epd_msgs::msg::EPDObjectLocalization>>(
+        *buffer_, "base_link", 5,
+        this->get_node_logging_interface(),
+        this->get_node_clock_interface(),
+        std::chrono::seconds(1));
+
+      this->tf_epd_localize_sub->connectInput(*epd_localize_sub);
+      this->tf_epd_localize_sub->registerCallback(
+        std::bind(
+          &GraspScene::EPDLocalizationCallback, this,
+          std::placeholders::_1));
+    }
   } else {
     RCLCPP_INFO(LOGGER, "Using Direct Camera Input....");
     this->cloud_sub = std::make_shared<
@@ -131,10 +151,29 @@ GraspScene::~GraspScene()
 {}
 
 /****************************************************************************************//**
- * Callback function for EPD-EMD pipeline
+ * General Callback function for EPD-EMD pipeline for Object Localization
  * @param msg Input message
  *******************************************************************************************/
-void GraspScene::planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+void GraspScene::EPDLocalizationCallback(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+{
+  planningInit(msg);
+}
+
+/****************************************************************************************//**
+ * General Callback function for EPD-EMD pipeline for Object Tracking
+ * @param msg Input message
+ *******************************************************************************************/
+void GraspScene::EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg)
+{
+  planningInit(msg);
+}
+
+/****************************************************************************************//**
+ * General Callback function for EPD-EMD pipeline for tracking and localization
+ * @param msg Input message
+ *******************************************************************************************/
+template <typename U>
+void GraspScene::planningInit(const U & msg)
 {
   RCLCPP_INFO(LOGGER, "EPD input received!");
   EPDCreateWorldCollisionObject(msg);
@@ -406,8 +445,11 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
  * @param msg EPD input
  ******************************************************************************/
 
+// void GraspScene::EPDCreateWorldCollisionObject(
+//   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+template <typename T>
 void GraspScene::EPDCreateWorldCollisionObject(
-  const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+  const T & msg)
 {
   float ppx = 323.3077697753906;
   float fx = 610.3740844726562;

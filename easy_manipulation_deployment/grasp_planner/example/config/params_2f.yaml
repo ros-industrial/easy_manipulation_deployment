@@ -2,7 +2,8 @@ grasp_planning_node:
   ros__parameters:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
-      epd_enabled: false
+      epd_enabled: true
+      tracking_enabled: false
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"
