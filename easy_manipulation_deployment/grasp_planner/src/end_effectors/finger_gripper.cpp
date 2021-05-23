@@ -40,20 +40,20 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
 
 FingerGripper::FingerGripper(
   std::string id_,
-  const int &num_fingers_side_1_,
-  const int &num_fingers_side_2_,
-  const float &distance_between_fingers_1_,
-  const float &distance_between_fingers_2_,
-  const float &finger_thickness_,
-  const float &gripper_stroke_,
-  const float &voxel_size_,
-  const float &grasp_quality_weight1_,
-  const float &grasp_quality_weight2_,
-  const float &grasp_plane_dist_limit_,
-  const float &cloud_normal_radius_,
-  const float &worldXAngleThreshold_,
-  const float &worldYAngleThreshold_,
-  const float &worldZAngleThreshold_)
+  const int & num_fingers_side_1_,
+  const int & num_fingers_side_2_,
+  const float & distance_between_fingers_1_,
+  const float & distance_between_fingers_2_,
+  const float & finger_thickness_,
+  const float & gripper_stroke_,
+  const float & voxel_size_,
+  const float & grasp_quality_weight1_,
+  const float & grasp_quality_weight2_,
+  const float & grasp_plane_dist_limit_,
+  const float & cloud_normal_radius_,
+  const float & worldXAngleThreshold_,
+  const float & worldYAngleThreshold_,
+  const float & worldZAngleThreshold_)
 : id(id_),
   num_fingers_side_1(num_fingers_side_1_),
   num_fingers_side_2(num_fingers_side_2_),
@@ -198,7 +198,7 @@ void FingerGripper::planGrasps(
  * @param object grasp object
  ******************************************************************************/
 
-void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> &object)
+void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> & object)
 {
   /*! \brief First we find the vector representing the major axis of the object */
   pcl::PointXYZ gradient_vector = pcl::PointXYZ(
@@ -251,7 +251,7 @@ void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> &ob
  * the planar contact area for two fingers. For multi-fingered gripper, multiple planes are created,
  * @param object grasp object
  ******************************************************************************/
-void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> &object)
+void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> & object)
 {
   bool side_1_even = this->num_fingers_side_1 % 2 == 0;
   bool side_2_even = this->num_fingers_side_2 % 2 == 0;
@@ -292,9 +292,9 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> &object)
  * @param both_sides_even True if both sides of the end effector is even
  ******************************************************************************/
 void FingerGripper::addCuttingPlanesEqualAligned(
-  const Eigen::Vector4f &centerpoint,
-  const Eigen::Vector4f &plane_vector,
-  const bool &both_sides_even)
+  const Eigen::Vector4f & centerpoint,
+  const Eigen::Vector4f & plane_vector,
+  const bool & both_sides_even)
 {
   /*! \brief If both even, the initial gap is half the space between fingers, since middle plane is ignored
   If both odd, the initial gap is the space between fingers*/
@@ -360,10 +360,10 @@ void FingerGripper::addCuttingPlanesEqualAligned(
 void FingerGripper::addCuttingPlanes(
   const Eigen::Vector4f & centerpoint,
   const Eigen::Vector4f & plane_vector,
-  const int &num_itr_1,
-  const int &num_itr_2,
-  const float &initial_gap_1,
-  const float &initial_gap_2)
+  const int & num_itr_1,
+  const int & num_itr_2,
+  const float & initial_gap_1,
+  const float & initial_gap_2)
 {
   for (int side_1 = 0, updown_toggle_1 = 1; side_1 < num_itr_1; side_1 += updown_toggle_1 ^= 1) {
     float gap;
@@ -396,7 +396,7 @@ void FingerGripper::addCuttingPlanes(
  * @param dist Distance from the center plane to the current plane checked
  ******************************************************************************/
 
-int FingerGripper::checkPlaneExists(const float &dist)
+int FingerGripper::checkPlaneExists(const float & dist)
 {
   std::vector<float>::iterator it = std::find(
     this->cutting_plane_distances.begin(), this->cutting_plane_distances.end(), dist);
@@ -418,11 +418,11 @@ int FingerGripper::checkPlaneExists(const float &dist)
  ******************************************************************************/
 
 void FingerGripper::addPlane(
-  const float &dist,
-  const Eigen::Vector4f &centerpoint,
-  const Eigen::Vector4f &plane_vector,
-  const bool &inside_1,
-  const bool &inside_2)
+  const float & dist,
+  const Eigen::Vector4f & centerpoint,
+  const Eigen::Vector4f & plane_vector,
+  const bool & inside_1,
+  const bool & inside_2)
 {
   // Get the vector representing the gripper direction
   Eigen::Vector3f plane_normal(plane_vector(0), plane_vector(1), plane_vector(2));
@@ -456,7 +456,7 @@ void FingerGripper::addPlane(
  * grasp_plane_dist_limit. This create a strip of point cloud about the grasp plane.
  * @param object grasp object
  ******************************************************************************/
-bool FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> &object)
+bool FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> & object)
 {
   bool at_least_one_plane_intersect = false;
   pcl::SampleConsensusModelPlane<pcl::PointNormal>::Ptr planeSAC(
@@ -489,7 +489,7 @@ bool FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> &object)
  * on the angle of the object with respect to the world. This start point will represent
  * the center of the finger cloud on that side of this plane.
  ******************************************************************************/
-bool FingerGripper::getInitialSamplePoints(const std::shared_ptr<GraspObject> &object)
+bool FingerGripper::getInitialSamplePoints(const std::shared_ptr<GraspObject> & object)
 {
   // Object in the X axis
   if (object->objectWorldCosX > this->worldXAngleThreshold) {
@@ -544,7 +544,7 @@ bool FingerGripper::getInitialSamplePoints(const std::shared_ptr<GraspObject> &o
  * a certain start index that has already been defined in another method. This cluster
  * of point clouds will repreesnt the gripper finger point cloud at that point on the plane
  ******************************************************************************/
-void FingerGripper::getInitialSampleCloud(const std::shared_ptr<GraspObject> &object)
+void FingerGripper::getInitialSampleCloud(const std::shared_ptr<GraspObject> & object)
 {
   std::vector<std::future<void>> futures;
   auto getAllRadiusPoints = [this](
@@ -619,7 +619,7 @@ void FingerGripper::voxelizeSampleCloud()
  *
  * @param object Grasp Object
  ******************************************************************************/
-void FingerGripper::getFingerSamples(const std::shared_ptr<GraspObject>  &object)
+void FingerGripper::getFingerSamples(const std::shared_ptr<GraspObject> & object)
 {
   pcl::PointNormal centroid_point;
   centroid_point.x = object->centerpoint(0);
@@ -748,8 +748,8 @@ void FingerGripper::getGripperClusters()
  ******************************************************************************/
 
 std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperConfigs(
-  const std::shared_ptr<GraspObject> &object,
-  const std::shared_ptr<CollisionObject> &world_collision_object)
+  const std::shared_ptr<GraspObject> & object,
+  const std::shared_ptr<CollisionObject> & world_collision_object)
 {
   std::vector<std::shared_ptr<multiFingerGripper>> valid_open_gripper_configs;
   // Query the gripping points at the center cutting plane
@@ -826,13 +826,13 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
  * @param plane_normal_normalized Normal vector of the center plane.
  ******************************************************************************/
 std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
-  const std::shared_ptr<CollisionObject>  & world_collision_object,
+  const std::shared_ptr<CollisionObject> & world_collision_object,
   const std::shared_ptr<singleFinger> & closed_center_finger_1,
   const std::shared_ptr<singleFinger> & closed_center_finger_2,
   const Eigen::Vector3f & open_center_finger_1,
   const Eigen::Vector3f & open_center_finger_2,
   const Eigen::Vector3f & plane_normal,
-  const Eigen::Vector3f &grasp_direction)
+  const Eigen::Vector3f & grasp_direction)
 {
   // Create an instance of the multifinger gripper.
   multiFingerGripper gripper(closed_center_finger_1, closed_center_finger_2);
@@ -1064,9 +1064,9 @@ void FingerGripper::getMaxMinValues(const std::shared_ptr<GraspObject> & object)
 
 void FingerGripper::updateMaxMinAttributes(
   std::shared_ptr<fingerCloudSample> & sample,
-  const float &centroid_distance,
-  const float &grasp_plane_distance,
-  const float &curvature)
+  const float & centroid_distance,
+  const float & grasp_plane_distance,
+  const float & curvature)
 {
   if (curvature < sample->curvature_min) {
     sample->curvature_min = curvature;
@@ -1159,7 +1159,7 @@ void FingerGripper::getGripperRank(std::shared_ptr<multiFingerGripper> gripper)
  ******************************************************************************/
 void FingerGripper::getGraspPose(
   std::shared_ptr<multiFingerGripper> gripper,
-  const std::shared_ptr<GraspObject> &object)
+  const std::shared_ptr<GraspObject> & object)
 {
   geometry_msgs::msg::PoseStamped result_pose;
   result_pose.pose.position.x = gripper->gripper_palm_center.x;
@@ -1168,7 +1168,7 @@ void FingerGripper::getGraspPose(
 
 
   tf2::Matrix3x3 rotation_matrix(
-    object->affine_matrix(0, 0), object->affine_matrix(1,0), object->affine_matrix(2, 0),
+    object->affine_matrix(0, 0), object->affine_matrix(1, 0), object->affine_matrix(2, 0),
     object->affine_matrix(0, 1), object->affine_matrix(1, 1), object->affine_matrix(2, 1),
     object->affine_matrix(0, 2), object->affine_matrix(1, 2), object->affine_matrix(2, 2));
 
@@ -1213,9 +1213,9 @@ Eigen::Vector3f FingerGripper::getPerpendicularVectorInPlane(
  ******************************************************************************/
 
 std::vector<Eigen::Vector3f> FingerGripper::getOpenFingerCoordinates(
-  const Eigen::Vector3f &grasp_direction,
-  const Eigen::Vector3f &finger_1,
-  const Eigen::Vector3f &finger_2)
+  const Eigen::Vector3f & grasp_direction,
+  const Eigen::Vector3f & finger_1,
+  const Eigen::Vector3f & finger_2)
 {
   // Get the centerpoint vector of the grasp
   Eigen::Vector3f side1_2_centerpoint_vector(

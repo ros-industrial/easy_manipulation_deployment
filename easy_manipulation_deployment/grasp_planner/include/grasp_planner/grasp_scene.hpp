@@ -88,16 +88,16 @@ public:
   void loadEndEffectors();
   void processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
   void createWorldCollision(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
-  
+
   std::string generate_task_id();
-  
+
   // void EPDCreateWorldCollisionObject(
   //   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
-  template <typename T>
+  template<typename T>
   void EPDCreateWorldCollisionObject(
     const T & msg);
   // void planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
-  template <typename U>
+  template<typename U>
   void planningInit(const U & msg);
   void EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg);
   void EPDLocalizationCallback(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
@@ -169,7 +169,8 @@ public:
   /*! \brief Vector of objects in the scene to be picked */
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
   /*! \brief Subscriber that subscribes to the EPD precision 2 output */
-  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>> epd_localize_sub;
+  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>
+  epd_localize_sub;
   /*! \brief Message filter for EPD precision 2 message */
   std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectLocalization>> tf_epd_localize_sub;
   /*! \brief Subscriber that subscribes to the EPD precision 3 output */

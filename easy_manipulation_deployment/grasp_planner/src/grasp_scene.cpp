@@ -81,8 +81,7 @@ GraspScene::GraspScene()
 
   this->buffer_->setCreateTimerInterface(create_timer_interface);
   if (this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
-    if(this->get_parameter("easy_perception_deployment.tracking_enabled").as_bool())
-    {
+    if (this->get_parameter("easy_perception_deployment.tracking_enabled").as_bool()) {
       RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Tracking input....");
       this->epd_tracking_sub = std::make_shared<
         message_filters::Subscriber<epd_msgs::msg::EPDObjectTracking>>(
@@ -100,7 +99,7 @@ GraspScene::GraspScene()
         std::bind(
           &GraspScene::EPDTrackingCallback, this,
           std::placeholders::_1));
-    } else{
+    } else {
       RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Localization input....");
       this->epd_localize_sub = std::make_shared<
         message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
@@ -154,7 +153,8 @@ GraspScene::~GraspScene()
  * General Callback function for EPD-EMD pipeline for Object Localization
  * @param msg Input message
  *******************************************************************************************/
-void GraspScene::EPDLocalizationCallback(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+void GraspScene::EPDLocalizationCallback(
+  const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
 {
   planningInit(msg);
 }
@@ -172,7 +172,7 @@ void GraspScene::EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::Con
  * General Callback function for EPD-EMD pipeline for tracking and localization
  * @param msg Input message
  *******************************************************************************************/
-template <typename U>
+template<typename U>
 void GraspScene::planningInit(const U & msg)
 {
   RCLCPP_INFO(LOGGER, "EPD input received!");
@@ -447,10 +447,10 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
 
 // void GraspScene::EPDCreateWorldCollisionObject(
 //   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
-template <typename T>
+template<typename T>
 void GraspScene::EPDCreateWorldCollisionObject(
   const T & msg)
-{ 
+{
   // auto ppx = camera_info.k.at(2);
   // auto fx = camera_info.k.at(0);
   // auto ppy = camera_info.k.at(5);

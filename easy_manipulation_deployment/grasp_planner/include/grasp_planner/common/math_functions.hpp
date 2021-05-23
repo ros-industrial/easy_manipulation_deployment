@@ -32,18 +32,18 @@ float normalizeInt(
   const int & max);
 
 float getAngleBetweenVectors(
-  const Eigen::Vector3f &vector_1,
-  const Eigen::Vector3f &vector_2);
+  const Eigen::Vector3f & vector_1,
+  const Eigen::Vector3f & vector_2);
 
 Eigen::Vector3f getPointInDirection(
-  const Eigen::Vector3f &base_point,
-  const Eigen::Vector3f &vector_direction,
-  const float &distance);
+  const Eigen::Vector3f & base_point,
+  const Eigen::Vector3f & vector_direction,
+  const float & distance);
 
 Eigen::Vector3f getRotatedVector(
-  const Eigen::Vector3f &target_vector,
-  const float &angle,
-  const char &axis);
+  const Eigen::Vector3f & target_vector,
+  const float & angle,
+  const char & axis);
 }  // namespace MathFunctions
 
 #endif  // GRASP_PLANNER__COMMON__MATH_FUNCTIONS_HPP_

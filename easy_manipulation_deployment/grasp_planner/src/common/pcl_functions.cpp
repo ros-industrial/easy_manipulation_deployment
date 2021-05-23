@@ -18,12 +18,12 @@
 
 bool PCLFunctions::passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  const float &ptFilter_Ulimit_x,
-  const float &ptFilter_Llimit_x,
-  const float &ptFilter_Ulimit_y,
-  const float &ptFilter_Llimit_y,
-  const float &ptFilter_Ulimit_z,
-  const float &ptFilter_Llimit_z)
+  const float & ptFilter_Ulimit_x,
+  const float & ptFilter_Llimit_x,
+  const float & ptFilter_Ulimit_y,
+  const float & ptFilter_Llimit_y,
+  const float & ptFilter_Ulimit_z,
+  const float & ptFilter_Llimit_z)
 {
   // Remove NaN values
   std::vector<int> nanIndices;
@@ -84,8 +84,8 @@ bool PCLFunctions::planeSegmentation(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table,
-  const int &segmentation_max_iterations,
-  const float &segmentation_distance_threshold)
+  const int & segmentation_max_iterations,
+  const float & segmentation_distance_threshold)
 {
   pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
@@ -254,7 +254,7 @@ void PCLFunctions::createSphereCloud(
 }
 
 Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(
-  const pcl::PointNormal &pcl_point)
+  const pcl::PointNormal & pcl_point)
 {
   return Eigen::Vector3f(pcl_point.normal_x, pcl_point.normal_y, pcl_point.normal_z);
 }

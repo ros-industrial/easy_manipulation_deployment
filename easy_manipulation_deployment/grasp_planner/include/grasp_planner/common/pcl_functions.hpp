@@ -106,12 +106,12 @@ void viewerAddRGBCloud(
 
 bool passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  const float &ptFilter_Ulimit_x,
-  const float &ptFilter_Llimit_x,
-  const float &ptFilter_Ulimit_y,
-  const float &ptFilter_Llimit_y,
-  const float &ptFilter_Ulimit_z,
-  const float &ptFilter_Llimit_z);
+  const float & ptFilter_Ulimit_x,
+  const float & ptFilter_Llimit_x,
+  const float & ptFilter_Ulimit_y,
+  const float & ptFilter_Llimit_y,
+  const float & ptFilter_Ulimit_z,
+  const float & ptFilter_Llimit_z);
 
 void SensorMsgtoPCLPointCloud2(
   const sensor_msgs::msg::PointCloud2 & pc2,
@@ -121,8 +121,8 @@ bool planeSegmentation(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table,
-  const int &segmentation_max_iterations,
-  const float &segmentation_distance_threshold);
+  const int & segmentation_max_iterations,
+  const float & segmentation_distance_threshold);
 
 void removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
@@ -174,7 +174,7 @@ Eigen::Vector3f convertPCLtoEigen(
 }
 
 Eigen::Vector3f convertPCLNormaltoEigen(
-  const pcl::PointNormal &pcl_point);
+  const pcl::PointNormal & pcl_point);
 
 }  // namespace PCLFunctions
 

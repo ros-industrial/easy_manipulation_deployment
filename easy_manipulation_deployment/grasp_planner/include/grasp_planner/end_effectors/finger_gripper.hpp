@@ -228,32 +228,32 @@ class FingerGripper : public EndEffector
 public:
   FingerGripper(
     std::string id_,
-    const int &num_fingers_side_1_,
-    const int &num_fingers_side_2_,
-    const float &distance_between_fingers_1_,
-    const float &distance_between_fingers_2_,
-    const float &finger_thickness_,
-    const float &gripper_stroke_,
-    const float &voxel_size_,
-    const float &grasp_quality_weight1_,
-    const float &grasp_quality_weight2_,
-    const float &grasp_plane_dist_limit_,
-    const float &cloud_normal_radius_,
-    const float &worldXAngleThreshold_,
-    const float &worldYAngleThreshold_,
-    const float &worldZAngleThreshold_);
+    const int & num_fingers_side_1_,
+    const int & num_fingers_side_2_,
+    const float & distance_between_fingers_1_,
+    const float & distance_between_fingers_2_,
+    const float & finger_thickness_,
+    const float & gripper_stroke_,
+    const float & voxel_size_,
+    const float & grasp_quality_weight1_,
+    const float & grasp_quality_weight2_,
+    const float & grasp_plane_dist_limit_,
+    const float & cloud_normal_radius_,
+    const float & worldXAngleThreshold_,
+    const float & worldYAngleThreshold_,
+    const float & worldZAngleThreshold_);
 
   void generateGripperAttributes();
 
-  bool getInitialSamplePoints(const std::shared_ptr<GraspObject> &object);
+  bool getInitialSamplePoints(const std::shared_ptr<GraspObject> & object);
 
-  void getInitialSampleCloud(const std::shared_ptr<GraspObject> &object);
+  void getInitialSampleCloud(const std::shared_ptr<GraspObject> & object);
 
-  bool getGraspCloud(const std::shared_ptr<GraspObject> &object);
+  bool getGraspCloud(const std::shared_ptr<GraspObject> & object);
 
-  void getCenterCuttingPlane(const std::shared_ptr<GraspObject> &object);
+  void getCenterCuttingPlane(const std::shared_ptr<GraspObject> & object);
 
-  void getCuttingPlanes(const std::shared_ptr<GraspObject> &object);
+  void getCuttingPlanes(const std::shared_ptr<GraspObject> & object);
 
   void voxelizeSampleCloud();
 
@@ -262,17 +262,17 @@ public:
     emd_msgs::msg::GraspMethod * grasp_method,
     const std::shared_ptr<CollisionObject> world_collision_object);
 
-  void getMaxMinValues(const std::shared_ptr<GraspObject> &object);
+  void getMaxMinValues(const std::shared_ptr<GraspObject> & object);
 
   void updateMaxMinAttributes(
     std::shared_ptr<fingerCloudSample> & sample,
-    const float &centroid_distance,
-    const float &grasp_plane_distance,
-    const float &curvature);
+    const float & centroid_distance,
+    const float & grasp_plane_distance,
+    const float & curvature);
 
   void getGraspPose(
     std::shared_ptr<multiFingerGripper> gripper,
-    const std::shared_ptr<GraspObject> &object);
+    const std::shared_ptr<GraspObject> & object);
 
   void planGrasps(
     std::shared_ptr<GraspObject> object,
@@ -282,48 +282,48 @@ public:
   void resetVariables();
 
   void addCuttingPlanesEqualAligned(
-    const Eigen::Vector4f &centerpoint,
-    const Eigen::Vector4f &plane_vector,
-    const bool &both_sides_even);
+    const Eigen::Vector4f & centerpoint,
+    const Eigen::Vector4f & plane_vector,
+    const bool & both_sides_even);
 
   void addCuttingPlanes(
     const Eigen::Vector4f & centerpoint,
     const Eigen::Vector4f & plane_vector,
-    const int &num_itr_1,
-    const int &num_itr_2,
-    const float &initial_gap_1,
-    const float &initial_gap_2);
+    const int & num_itr_1,
+    const int & num_itr_2,
+    const float & initial_gap_1,
+    const float & initial_gap_2);
 
-  int checkPlaneExists(const float &dist);
+  int checkPlaneExists(const float & dist);
 
   void addPlane(
-    const float &dist,
-    const Eigen::Vector4f &centerpoint,
-    const Eigen::Vector4f &plane_vector,
-    const bool &inside_1,
-    const bool &inside_2);
+    const float & dist,
+    const Eigen::Vector4f & centerpoint,
+    const Eigen::Vector4f & plane_vector,
+    const bool & inside_1,
+    const bool & inside_2);
 
   void getGripperClusters();
 
   void getGripperSamplesFromClusters();
 
-  void getFingerSamples( const std::shared_ptr<GraspObject> &object);
+  void getFingerSamples(const std::shared_ptr<GraspObject> & object);
   std::vector<std::shared_ptr<multiFingerGripper>> getAllGripperConfigs(
-    const std::shared_ptr<GraspObject> &object,
-    const std::shared_ptr<CollisionObject> &world_collision_object);
+    const std::shared_ptr<GraspObject> & object,
+    const std::shared_ptr<CollisionObject> & world_collision_object);
 
   std::shared_ptr<multiFingerGripper> generateGripperOpenConfig(
-    const std::shared_ptr<CollisionObject> &world_collision_object,
-    const std::shared_ptr<singleFinger> &closed_center_finger_1,
-    const std::shared_ptr<singleFinger> &closed_center_finger_2,
-    const Eigen::Vector3f &open_center_finger_1,
-    const Eigen::Vector3f &open_center_finger_2,
-    const Eigen::Vector3f &plane_normal_normalized,
-    const Eigen::Vector3f &grasp_direction);
+    const std::shared_ptr<CollisionObject> & world_collision_object,
+    const std::shared_ptr<singleFinger> & closed_center_finger_1,
+    const std::shared_ptr<singleFinger> & closed_center_finger_2,
+    const Eigen::Vector3f & open_center_finger_1,
+    const Eigen::Vector3f & open_center_finger_2,
+    const Eigen::Vector3f & plane_normal_normalized,
+    const Eigen::Vector3f & grasp_direction);
 
   bool checkFingerCollision(
-    const Eigen::Vector3f &finger_point,
-    const std::shared_ptr<CollisionObject> &world_collision_object);
+    const Eigen::Vector3f & finger_point,
+    const std::shared_ptr<CollisionObject> & world_collision_object);
 
   void addPlane(float dist, Eigen::Vector4f centerpoint, Eigen::Vector4f plane_vector);
 
@@ -346,9 +346,9 @@ public:
     int plane_index);
 
   std::vector<Eigen::Vector3f> getOpenFingerCoordinates(
-    const Eigen::Vector3f &grasp_direction,
-    const Eigen::Vector3f &finger_1,
-    const Eigen::Vector3f &finger_2);
+    const Eigen::Vector3f & grasp_direction,
+    const Eigen::Vector3f & finger_1,
+    const Eigen::Vector3f & finger_2);
 
   int getNearestPlaneIndex(float target_distance);
 

@@ -62,25 +62,25 @@ float MathFunctions::normalizeInt(
 }
 
 float MathFunctions::getAngleBetweenVectors(
-  const Eigen::Vector3f &vector_1,
-  const Eigen::Vector3f &vector_2)
+  const Eigen::Vector3f & vector_1,
+  const Eigen::Vector3f & vector_2)
 {
   return 1e-8 + std::abs((vector_1.dot(vector_2)) / (vector_1.norm() * vector_2.norm()));
 }
 
 Eigen::Vector3f MathFunctions::getPointInDirection(
-  const Eigen::Vector3f &base_point,
-  const Eigen::Vector3f &vector_direction,
-  const float &distance)
+  const Eigen::Vector3f & base_point,
+  const Eigen::Vector3f & vector_direction,
+  const float & distance)
 {
   Eigen::Vector3f direction_normalized = vector_direction / vector_direction.norm();
   return base_point + distance * direction_normalized;
 }
 
 Eigen::Vector3f MathFunctions::getRotatedVector(
-  const Eigen::Vector3f &target_vector,
-  const float &angle,
-  const char &axis)
+  const Eigen::Vector3f & target_vector,
+  const float & angle,
+  const char & axis)
 {
   Eigen::Vector3f result_vector;
   if (axis == 'x') {
