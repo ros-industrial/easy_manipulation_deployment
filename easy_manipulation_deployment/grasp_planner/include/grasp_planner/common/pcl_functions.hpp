@@ -106,22 +106,12 @@ void viewerAddRGBCloud(
 
 bool passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  float ptFilter_Ulimit_x,
-  float ptFilter_Llimit_x,
-  float ptFilter_Ulimit_y,
-  float ptFilter_Llimit_y,
-  float ptFilter_Ulimit_z,
-  float ptFilter_Llimit_z);
-
-bool passthroughFilter(
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  float ptFilter_Ulimit_x,
-  float ptFilter_Llimit_x,
-  float ptFilter_Ulimit_y,
-  float ptFilter_Llimit_y,
-  float ptFilter_Ulimit_z,
-  float ptFilter_Llimit_z,
-  pcl::visualization::PCLVisualizer::Ptr viewer);
+  const float &ptFilter_Ulimit_x,
+  const float &ptFilter_Llimit_x,
+  const float &ptFilter_Ulimit_y,
+  const float &ptFilter_Llimit_y,
+  const float &ptFilter_Ulimit_z,
+  const float &ptFilter_Llimit_z);
 
 void SensorMsgtoPCLPointCloud2(
   const sensor_msgs::msg::PointCloud2 & pc2,
@@ -130,8 +120,9 @@ void SensorMsgtoPCLPointCloud2(
 bool planeSegmentation(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table, int segmentation_max_iterations,
-  float segmentation_distance_threshold);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table,
+  const int &segmentation_max_iterations,
+  const float &segmentation_distance_threshold);
 
 void removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
@@ -156,7 +147,8 @@ void getClosestPointsByRadius(
 
 void computeCloudNormal(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal, const float & cloud_normal_radius);
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal,
+  const float & cloud_normal_radius);
 
 template<typename T, typename U>
 void voxelizeCloud(const T & inputCloud, const float & leafSize, T outputCloud)
@@ -171,15 +163,18 @@ void voxelizeCloud(const T & inputCloud, const float & leafSize, T outputCloud)
 void createSphereCloud(
   pcl::PointCloud<pcl::PointXYZ>::Ptr output_sphere_cloud,
   Eigen::Vector3f & centerpoint,
-  const float & radius, const int & resolution);
+  const float & radius,
+  const int & resolution);
 
 template<typename V>
-Eigen::Vector3f convertPCLtoEigen(V pcl_point)
+Eigen::Vector3f convertPCLtoEigen(
+  V pcl_point)
 {
   return Eigen::Vector3f(pcl_point.x, pcl_point.y, pcl_point.z);
 }
 
-Eigen::Vector3f convertPCLNormaltoEigen(pcl::PointNormal pcl_point);
+Eigen::Vector3f convertPCLNormaltoEigen(
+  const pcl::PointNormal &pcl_point);
 
 }  // namespace PCLFunctions
 

@@ -21,18 +21,29 @@
 
 namespace MathFunctions
 {
-float normalize(const float & target, const float & min, const float & max);
+float normalize(
+  const float & target,
+  const float & min,
+  const float & max);
 
-float normalizeInt(const int & target, const int & min, const int & max);
+float normalizeInt(
+  const int & target,
+  const int & min,
+  const int & max);
 
-float getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2);
+float getAngleBetweenVectors(
+  const Eigen::Vector3f &vector_1,
+  const Eigen::Vector3f &vector_2);
 
 Eigen::Vector3f getPointInDirection(
-  Eigen::Vector3f base_point, Eigen::Vector3f vector_direction,
-  float distance);
+  const Eigen::Vector3f &base_point,
+  const Eigen::Vector3f &vector_direction,
+  const float &distance);
+
 Eigen::Vector3f getRotatedVector(
-  Eigen::Vector3f target_vector,
-  float angle, char axis);
+  const Eigen::Vector3f &target_vector,
+  const float &angle,
+  const char &axis);
 }  // namespace MathFunctions
 
 #endif  // GRASP_PLANNER__COMMON__MATH_FUNCTIONS_HPP_

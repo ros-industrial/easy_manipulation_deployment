@@ -450,7 +450,12 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
 template <typename T>
 void GraspScene::EPDCreateWorldCollisionObject(
   const T & msg)
-{
+{ 
+  // auto ppx = camera_info.k.at(2);
+  // auto fx = camera_info.k.at(0);
+  // auto ppy = camera_info.k.at(5);
+  // auto fy = camera_info.k.at(4);
+
   float ppx = 323.3077697753906;
   float fx = 610.3740844726562;
   float ppy = 235.43516540527344;

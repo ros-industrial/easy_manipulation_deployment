@@ -19,7 +19,10 @@
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::MathFunctions");
 
-float MathFunctions::normalize(const float & target, const float & min, const float & max)
+float MathFunctions::normalize(
+  const float & target,
+  const float & min,
+  const float & max)
 {
   if (min == max) {
     if (target == min) {
@@ -37,7 +40,10 @@ float MathFunctions::normalize(const float & target, const float & min, const fl
   }
 }
 
-float MathFunctions::normalizeInt(const int & target, const int & min, const int & max)
+float MathFunctions::normalizeInt(
+  const int & target,
+  const int & min,
+  const int & max)
 {
   if (min == max) {
     if (target == min) {
@@ -55,23 +61,26 @@ float MathFunctions::normalizeInt(const int & target, const int & min, const int
   }
 }
 
-float MathFunctions::getAngleBetweenVectors(Eigen::Vector3f vector_1, Eigen::Vector3f vector_2)
+float MathFunctions::getAngleBetweenVectors(
+  const Eigen::Vector3f &vector_1,
+  const Eigen::Vector3f &vector_2)
 {
   return 1e-8 + std::abs((vector_1.dot(vector_2)) / (vector_1.norm() * vector_2.norm()));
 }
 
 Eigen::Vector3f MathFunctions::getPointInDirection(
-  Eigen::Vector3f base_point,
-  Eigen::Vector3f vector_direction,
-  float distance)
+  const Eigen::Vector3f &base_point,
+  const Eigen::Vector3f &vector_direction,
+  const float &distance)
 {
   Eigen::Vector3f direction_normalized = vector_direction / vector_direction.norm();
   return base_point + distance * direction_normalized;
 }
 
 Eigen::Vector3f MathFunctions::getRotatedVector(
-  Eigen::Vector3f target_vector, float angle,
-  char axis)
+  const Eigen::Vector3f &target_vector,
+  const float &angle,
+  const char &axis)
 {
   Eigen::Vector3f result_vector;
   if (axis == 'x') {

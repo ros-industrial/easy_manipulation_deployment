@@ -18,12 +18,12 @@
 
 bool PCLFunctions::passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  float ptFilter_Ulimit_x,
-  float ptFilter_Llimit_x,
-  float ptFilter_Ulimit_y,
-  float ptFilter_Llimit_y,
-  float ptFilter_Ulimit_z,
-  float ptFilter_Llimit_z)
+  const float &ptFilter_Ulimit_x,
+  const float &ptFilter_Llimit_x,
+  const float &ptFilter_Ulimit_y,
+  const float &ptFilter_Llimit_y,
+  const float &ptFilter_Ulimit_z,
+  const float &ptFilter_Llimit_z)
 {
   // Remove NaN values
   std::vector<int> nanIndices;
@@ -83,8 +83,9 @@ void PCLFunctions::SensorMsgtoPCLPointCloud2(
 bool PCLFunctions::planeSegmentation(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_removed,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table, int segmentation_max_iterations,
-  float segmentation_distance_threshold)
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_table,
+  const int &segmentation_max_iterations,
+  const float &segmentation_distance_threshold)
 {
   pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
@@ -129,28 +130,22 @@ bool PCLFunctions::planeSegmentation(
 
 void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
-  // int initial_size = cloud->points.size();
   pcl::PassThrough<pcl::PointXYZRGB> ptFilter;
   ptFilter.setInputCloud(cloud);
   ptFilter.setFilterFieldName("z");
   // ptFilter.setFilterLimitsNegative (true);
   ptFilter.setFilterLimits(0, 0.0001);
   ptFilter.filter(*cloud);
-  // int after_size = cloud->points.size();
-  // std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
 }
 
 void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
-  // int initial_size = cloud->points.size();
   pcl::PassThrough<pcl::PointXYZ> ptFilter;
   ptFilter.setInputCloud(cloud);
   ptFilter.setFilterFieldName("z");
   // ptFilter.setFilterLimitsNegative (true);
   ptFilter.setFilterLimits(0, 0.0001);
   ptFilter.filter(*cloud);
-  // int after_size = cloud->points.size();
-  // std::cout << "Removed " << initial_size - after_size << " Number of zero points" << std::endl;
 }
 
 float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point)
@@ -185,7 +180,8 @@ void PCLFunctions::removeStatisticalOutlier(
 
 void PCLFunctions::getClosestPointsByRadius(
   const pcl::PointNormal & point,
-  const float & radius, pcl::PointCloud<pcl::PointXYZRGB>::Ptr & inputCloud,
+  const float & radius,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr & inputCloud,
   pcl::PointCloud<pcl::PointNormal>::Ptr & inputNormalCloud,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr & outputCloud,
   pcl::PointCloud<pcl::PointNormal>::Ptr & outputNormalCloud)
@@ -210,7 +206,8 @@ void PCLFunctions::getClosestPointsByRadius(
 
 void PCLFunctions::computeCloudNormal(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal, const float & cloud_normal_radius)
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal,
+  const float & cloud_normal_radius)
 {
   // std::chrono::steady_clock::time_point getSlicedCloud1 = std::chrono::steady_clock::now();
   pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(
@@ -238,7 +235,8 @@ void PCLFunctions::computeCloudNormal(
 void PCLFunctions::createSphereCloud(
   pcl::PointCloud<pcl::PointXYZ>::Ptr output_sphere_cloud,
   Eigen::Vector3f & centerpoint,
-  const float & radius, const int & resolution)
+  const float & radius,
+  const int & resolution)
 {
   float px, py, pz;
   for (float phi = 0; phi < M_PI; phi += M_PI / resolution) {
@@ -255,7 +253,8 @@ void PCLFunctions::createSphereCloud(
   output_sphere_cloud->width = output_sphere_cloud->points.size();
 }
 
-Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(pcl::PointNormal pcl_point)
+Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(
+  const pcl::PointNormal &pcl_point)
 {
   return Eigen::Vector3f(pcl_point.normal_x, pcl_point.normal_y, pcl_point.normal_z);
 }
