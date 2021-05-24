@@ -547,11 +547,14 @@ void GraspScene::loadEndEffectors()
         static_cast<float>(this->get_parameter(
           "end_effectors." + end_effector +
           ".grasp_planning_params.world_z_angle_threshold").as_double()),
-        this->get_parameter("end_effectors." + end_effector +
+        this->get_parameter(
+          "end_effectors." + end_effector +
           ".gripper_coordinate_system.grasp_stroke_direction").as_string(),
-        this->get_parameter("end_effectors." + end_effector +
+        this->get_parameter(
+          "end_effectors." + end_effector +
           ".gripper_coordinate_system.grasp_stroke_normal_direction").as_string(),
-        this->get_parameter("end_effectors." + end_effector +
+        this->get_parameter(
+          "end_effectors." + end_effector +
           ".gripper_coordinate_system.grasp_approach_direction").as_string()
       );
       std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<FingerGripper>(gripper);

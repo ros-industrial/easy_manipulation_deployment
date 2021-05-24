@@ -844,7 +844,11 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   const Eigen::Vector3f & grasp_direction)
 {
   // Create an instance of the multifinger gripper.
-  multiFingerGripper gripper(closed_center_finger_1, closed_center_finger_2);
+  multiFingerGripper gripper(
+    closed_center_finger_1,
+    closed_center_finger_2,
+    grasp_direction,
+    plane_normal);
   gripper.collides_with_world = false;
   bool is_even_1 = this->num_fingers_side_1 % 2 == 0;
   bool is_even_2 = this->num_fingers_side_2 % 2 == 0;
@@ -1160,6 +1164,69 @@ void FingerGripper::getGripperRank(std::shared_ptr<multiFingerGripper> gripper)
 }
 
 /***************************************************************************//**
+ * Function that returns the roll, pitch and yaw from coplanar points. This method
+ * accounts for coodinate systems where the z axis may not be the "downward direction" for
+ * grasp approach
+ *
+ * @param grasp_direction Vector representing the direction of gripper stroke
+ * @param grasp_direction_normal Vector representing the direction perpendicular to the stroke
+ ******************************************************************************/
+
+std::vector<double> FingerGripper::getPlanarRPY(
+  const Eigen::Vector3f & grasp_direction,
+  const Eigen::Vector3f & grasp_direction_normal)
+{
+  std::vector<double> output_vec;
+  Eigen::Vector3f x_norm;
+  Eigen::Vector3f y_norm;
+  Eigen::Vector3f z_norm;
+  bool x_filled;
+  bool y_filled;
+  bool z_filled;
+  if (this->grasp_stroke_direction == 'x') {
+    x_norm = grasp_direction.normalized();
+    x_filled = true;
+  } else if (this->grasp_stroke_direction == 'y') {
+    y_norm = grasp_direction.normalized();
+    y_filled = true;
+  } else if (this->grasp_stroke_direction == 'z') {
+    z_norm = grasp_direction.normalized();
+    z_filled = true;
+  }
+
+  if (this->grasp_stroke_normal_direction == 'x') {
+    x_norm = grasp_direction_normal.normalized();
+    x_filled = true;
+  } else if (this->grasp_stroke_normal_direction == 'y') {
+    y_norm = grasp_direction_normal.normalized();
+    y_filled = true;
+  } else if (this->grasp_stroke_normal_direction == 'z') {
+    z_norm = grasp_direction_normal.normalized();
+    z_filled = true;
+  }
+
+  if (x_filled && y_filled) {
+    z_norm = x_norm.cross(y_norm);
+  } else if (z_filled && y_filled) {
+    x_norm = y_norm.cross(z_norm);
+  } else if (x_filled && z_filled) {
+    y_norm = z_norm.cross(x_norm);
+  } else {
+    RCLCPP_ERROR(LOGGER, "RPY estimation error.");
+    throw std::runtime_error("RPY estimation error.");
+    return output_vec;
+  }
+
+  double roll = std::atan2(-z_norm(1), z_norm(2));
+  double pitch = std::asin(z_norm(0));
+  double yaw = std::atan2(-y_norm(0), x_norm(0));
+  output_vec.push_back(roll);
+  output_vec.push_back(pitch);
+  output_vec.push_back(yaw);
+  return output_vec;
+}
+
+/***************************************************************************//**
  * Function that gets the grasp pose of a target gripper based on the object.
  * Current implementation of the gripper pose orientation is in relation to the
  * Object orientation, which should be changed in the future.
@@ -1176,15 +1243,27 @@ void FingerGripper::getGraspPose(
   result_pose.pose.position.z = gripper->gripper_palm_center.z;
 
 
-  tf2::Matrix3x3 rotation_matrix(
-    object->affine_matrix(0, 0), object->affine_matrix(1, 0), object->affine_matrix(2, 0),
-    object->affine_matrix(0, 1), object->affine_matrix(1, 1), object->affine_matrix(2, 1),
-    object->affine_matrix(0, 2), object->affine_matrix(1, 2), object->affine_matrix(2, 2));
+  // tf2::Matrix3x3 rotation_matrix(
+  //   object->affine_matrix(0, 0), object->affine_matrix(1, 0), object->affine_matrix(2, 0),
+  //   object->affine_matrix(0, 1), object->affine_matrix(1, 1), object->affine_matrix(2, 1),
+  //   object->affine_matrix(0, 2), object->affine_matrix(1, 2), object->affine_matrix(2, 2));
 
-  double r, p, y;
-  rotation_matrix.getRPY(r, p, y);
+  // double r, p, y;
+  // rotation_matrix.getRPY(r, p, y);
   tf2::Quaternion quaternion_;
-  quaternion_.setRPY(0, 0, y);
+  //test
+  std::vector<double> rpy = getPlanarRPY(
+    gripper->grasping_direction,
+    gripper->grasping_normal_direction);
+  if (static_cast<int>(rpy.size()) == 3) {
+    quaternion_.setRPY(0, 0, rpy[2]);
+  } else {
+    RCLCPP_ERROR(LOGGER, "Pose estimation error. Assume 0 pose");
+    quaternion_.setRPY(0, 0, 0);
+  }
+
+  //test_end
+  // quaternion_.setRPY(0, 0, y);
 
   result_pose.pose.orientation.x = quaternion_.x();
   result_pose.pose.orientation.y = quaternion_.y();
@@ -1257,8 +1336,38 @@ void FingerGripper::resetVariables()
  ******************************************************************************/
 void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
 {
+  viewer->addCoordinateSystem(0.5);
   // std::cout << "Visualizing " << this->sorted_gripper_configs.size() << " grasps" << std::endl;
   for (auto const & multigripper : this->sorted_gripper_configs) {
+
+    //Testing
+    pcl::PointXYZ grasp_direction;
+    grasp_direction.x = multigripper->grasping_direction(0) + multigripper->gripper_palm_center.x;
+    grasp_direction.y = multigripper->grasping_direction(1) + multigripper->gripper_palm_center.y;
+    grasp_direction.z = multigripper->grasping_direction(2) + multigripper->gripper_palm_center.z;
+    pcl::PointXYZ grasp_direction_normal;
+    grasp_direction_normal.x = multigripper->grasping_normal_direction(0) +
+      multigripper->gripper_palm_center.x;
+    grasp_direction_normal.y = multigripper->grasping_normal_direction(1) +
+      multigripper->gripper_palm_center.y;
+    grasp_direction_normal.z = multigripper->grasping_normal_direction(2) +
+      multigripper->gripper_palm_center.z;
+    pcl::PointXYZ grasp_approach_direction;
+    grasp_approach_direction.x = multigripper->grasp_approach_direction(0) +
+      multigripper->gripper_palm_center.x;
+    grasp_approach_direction.y = multigripper->grasp_approach_direction(1) +
+      multigripper->gripper_palm_center.y;
+    grasp_approach_direction.z = multigripper->grasp_approach_direction(2) +
+      multigripper->gripper_palm_center.z;
+    viewer->addLine(multigripper->gripper_palm_center, grasp_direction, 0, 1, 0, "grasp_direction");
+    viewer->addLine(
+      multigripper->gripper_palm_center, grasp_direction_normal, 1, 0, 0,
+      "grasp_direction_normal");
+    viewer->addLine(
+      multigripper->gripper_palm_center, grasp_approach_direction, 0, 0, 1,
+      "grasp_approach_direction");
+
+    //End Test
     for (size_t cs_1 = 0; cs_1 < multigripper->closed_fingers_1.size(); cs_1++) {
       viewer->addSphere(
         multigripper->closed_fingers_1[cs_1]->

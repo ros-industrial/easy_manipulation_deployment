@@ -127,19 +127,33 @@ struct multiFingerGripper
   std::shared_ptr<singleFinger> base_point_2;
   /*! \brief True if colliding with world */
   bool collides_with_world;
+  /*! \brief Unit vector of grasping direction */
+  Eigen::Vector3f grasping_direction;
+  /*! \brief Unit vector perpendicular to grasping direction */
+  Eigen::Vector3f grasping_normal_direction;
+  /*! \brief Unit vector of approach direction of gripper */
+  Eigen::Vector3f grasp_approach_direction;
 
   /***************************************************************************//**
   * multiFingerGripper Constructor
   *
   * @param base_point_1_ middle single finger on side 1
   * @param base_point_2_ middle single finger on side 2
+  * @param grasping_direction_ vector representing the grasping direction
+  * @param grasping_normal_direction_ vector perpendicular to the grasping direction
   ******************************************************************************/
   multiFingerGripper(
     std::shared_ptr<singleFinger> base_point_1_,
-    std::shared_ptr<singleFinger> base_point_2_)
+    std::shared_ptr<singleFinger> base_point_2_,
+    Eigen::Vector3f grasping_direction_,
+    Eigen::Vector3f grasping_normal_direction_)
   : base_point_1(base_point_1_),
     base_point_2(base_point_2_)
   {
+    grasping_direction = grasping_direction_.normalized();
+    grasping_normal_direction = grasping_normal_direction_.normalized();
+    //grasp_approach_direction = grasping_direction.cross(grasping_normal_direction);
+    grasp_approach_direction = grasping_normal_direction.cross(grasping_direction); // Next time check which cross which
     gripper_palm_center.x = (base_point_1_->finger_point.x + base_point_2_->finger_point.x) / 2;
     gripper_palm_center.y = (base_point_1_->finger_point.y + base_point_2_->finger_point.y) / 2;
     gripper_palm_center.z = (base_point_1_->finger_point.z + base_point_2_->finger_point.z) / 2;
@@ -241,7 +255,10 @@ public:
     const float & cloud_normal_radius_,
     const float & worldXAngleThreshold_,
     const float & worldYAngleThreshold_,
-    const float & worldZAngleThreshold_);
+    const float & worldZAngleThreshold_,
+    std::string grasp_stroke_direction_,
+    std::string grasp_stroke_normal_direction_,
+    std::string grasp_approach_direction_);
 
   void generateGripperAttributes();
 
@@ -364,6 +381,10 @@ public:
 
   std::string getID() {return id;}
 
+  std::vector<double> getPlanarRPY(
+    const Eigen::Vector3f & grasp_direction,
+    const Eigen::Vector3f & grasp_direction_normal);
+
   /*! \brief Gripper ID*/
   std::string id;
   /*! \brief Total Number of finger grippers*/
@@ -396,11 +417,11 @@ public:
   const float worldYAngleThreshold;
   /*! \brief Threshold after which the object is angled to the world Z axis */
   const float worldZAngleThreshold;
-  /*! \brief Axis in the same direction as the gripper stroke */ 
+  /*! \brief Axis in the same direction as the gripper stroke */
   const char grasp_stroke_direction;
-  /*! \brief Axis normal to the direction of the gripper stroke */ 
+  /*! \brief Axis normal to the direction of the gripper stroke */
   const char grasp_stroke_normal_direction;
-  /*! \brief Axis in which the gripper approaches the object */ 
+  /*! \brief Axis in which the gripper approaches the object */
   const char grasp_approach_direction;
 
   /*! \brief Coefficients of the cutting plane through the object */
