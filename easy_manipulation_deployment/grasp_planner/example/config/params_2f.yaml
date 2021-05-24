@@ -2,7 +2,7 @@ grasp_planning_node:
   ros__parameters:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
-      epd_enabled: true
+      epd_enabled: false
       tracking_enabled: false
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
@@ -19,7 +19,7 @@ grasp_planning_node:
       cloud_normal_radius: 0.03
       fcl_voxel_size: 0.02
     end_effectors:
-      end_effector_names: [robotiq_2f, suction_cup]
+      end_effector_names: [robotiq_2f]
       robotiq_2f:
         type: finger
         num_fingers_side_1: 2
@@ -28,6 +28,10 @@ grasp_planning_node:
         distance_between_fingers_2: 0.04
         finger_thickness: 0.02
         gripper_stroke: 0.105
+        gripper_coordinate_system:
+          grasp_stroke_direction: "x"
+          grasp_stroke_normal_direction: "y"
+          grasp_approach_direction: "z"
         grasp_planning_params:
           grasp_plane_dist_limit: 0.007
           voxel_size: 0.01
@@ -36,20 +40,5 @@ grasp_planning_node:
           world_x_angle_threshold: 0.5
           world_y_angle_threshold: 0.5
           world_z_angle_threshold: 0.25
-      suction_cup:
-        type: suction
-        num_cups_length: 2
-        num_cups_breadth: 2
-        dist_between_cups_length: 0.06
-        dist_between_cups_breadth: 0.03
-        cup_radius: 0.01
-        cup_height: 0.01
-        grasp_planning_params:
-          num_sample_along_axis: 3
-          search_resolution: 0.01
-          search_angle_resolution: 4
-          weights:
-            curvature: 1.0
-            grasp_distance_to_center: 1.0
-            number_contact_points: 1.0
+
       

@@ -38,6 +38,9 @@ void MultiFingerTest::ResetVariables()
   worldXAngleThreshold = 0.5;
   worldYAngleThreshold = 0.5;
   worldZAngleThreshold = 0.25;
+  grasp_stroke_direction = "x";
+  grasp_stroke_normal_direction = "y";
+  grasp_approach_direction = "z";
 }
 
 void MultiFingerTest::LoadGripper()
@@ -57,7 +60,10 @@ void MultiFingerTest::LoadGripper()
     cloud_normal_radius,
     worldXAngleThreshold,
     worldYAngleThreshold,
-    worldZAngleThreshold);
+    worldZAngleThreshold,
+    grasp_stroke_direction,
+    grasp_stroke_normal_direction,
+    grasp_approach_direction);
   gripper_.generateGripperAttributes();
   gripper = std::make_shared<FingerGripper>(gripper_);
 }

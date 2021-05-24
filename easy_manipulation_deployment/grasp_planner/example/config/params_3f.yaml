@@ -28,6 +28,10 @@ grasp_planning_node:
         distance_between_fingers_2: 0.0
         finger_thickness: 0.01
         gripper_stroke: 0.15
+        gripper_coordinate_system:
+          grasp_stroke_direction: "x"
+          grasp_stroke_normal_direction: "y"
+          grasp_approach_direction: "z"
         grasp_planning_params:
           grasp_plane_dist_limit: 0.007
           voxel_size: 0.01

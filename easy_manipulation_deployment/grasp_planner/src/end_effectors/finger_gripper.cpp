@@ -36,6 +36,9 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
  * @param worldXAngleThreshold_ Threshold after which the object is angled to the world X axis
  * @param worldYAngleThreshold_ Threshold after which the object is angled to the world Y axis
  * @param worldZAngleThreshold_ Threshold after which the object is angled to the world Z axis
+ * @param grasp_stroke_direction_ Axis in the same direction as the gripper stroke
+ * @param grasp_stroke_normal_direction_ Axis normal to the direction of the gripper stroke
+ * @param grasp_approach_direction_ Axis in which the gripper approaches the object
  ******************************************************************************/
 
 FingerGripper::FingerGripper(
@@ -53,7 +56,10 @@ FingerGripper::FingerGripper(
   const float & cloud_normal_radius_,
   const float & worldXAngleThreshold_,
   const float & worldYAngleThreshold_,
-  const float & worldZAngleThreshold_)
+  const float & worldZAngleThreshold_,
+  std::string grasp_stroke_direction_,
+  std::string grasp_stroke_normal_direction_,
+  std::string grasp_approach_direction_)
 : id(id_),
   num_fingers_side_1(num_fingers_side_1_),
   num_fingers_side_2(num_fingers_side_2_),
@@ -68,7 +74,10 @@ FingerGripper::FingerGripper(
   cloud_normal_radius(cloud_normal_radius_),
   worldXAngleThreshold(worldXAngleThreshold_),
   worldYAngleThreshold(worldYAngleThreshold_),
-  worldZAngleThreshold(worldZAngleThreshold_)
+  worldZAngleThreshold(worldZAngleThreshold_),
+  grasp_stroke_direction(grasp_stroke_direction_[0]),
+  grasp_stroke_normal_direction(grasp_stroke_normal_direction_[0]),
+  grasp_approach_direction(grasp_approach_direction_[0])
 {
   if (num_fingers_side_1_ <= 0 || num_fingers_side_2_ <= 0) {
     RCLCPP_ERROR(LOGGER, "Each side needs to have a minimum of 1 finger");

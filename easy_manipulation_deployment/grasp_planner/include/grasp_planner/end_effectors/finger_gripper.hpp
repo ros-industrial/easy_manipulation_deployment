@@ -396,6 +396,12 @@ public:
   const float worldYAngleThreshold;
   /*! \brief Threshold after which the object is angled to the world Z axis */
   const float worldZAngleThreshold;
+  /*! \brief Axis in the same direction as the gripper stroke */ 
+  const char grasp_stroke_direction;
+  /*! \brief Axis normal to the direction of the gripper stroke */ 
+  const char grasp_stroke_normal_direction;
+  /*! \brief Axis in which the gripper approaches the object */ 
+  const char grasp_approach_direction;
 
   /*! \brief Coefficients of the cutting plane through the object */
   Eigen::Vector4f center_cutting_plane;  // grasp Plane vector coeff: a, b, c ,d

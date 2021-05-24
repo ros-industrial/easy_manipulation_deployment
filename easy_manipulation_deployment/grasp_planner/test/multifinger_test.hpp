@@ -55,6 +55,9 @@ public:
   float worldXAngleThreshold;
   float worldYAngleThreshold;
   float worldZAngleThreshold;
+  std::string grasp_stroke_direction;
+  std::string grasp_stroke_normal_direction;
+  std::string grasp_approach_direction;
 
   std::shared_ptr<FingerGripper> gripper;
   std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr;
