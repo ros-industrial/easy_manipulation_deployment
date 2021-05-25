@@ -35,7 +35,10 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::SuctionGripper")
  * @param curvature_weight_ Weights for the curvature sum of the grasp
  * @param grasp_center_distance_weight_ Weights for the grasp center distance
  * @param num_contact_points_weight_ Weights for the number of contact points
- ******************************************************************************/
+ * @param length_direction_ Axis in the direction of the length vector
+ * @param breadth_direction_ Axis in the direction of the breadth vector
+ * @param grasp_approach_direction_ Axis in which the gripper approaches the object
+ ***********************************************************************************/
 
 SuctionGripper::SuctionGripper(
   std::string id_,
@@ -51,7 +54,10 @@ SuctionGripper::SuctionGripper(
   const float & cloud_normal_radius_,
   const float & curvature_weight_,
   const float & grasp_center_distance_weight_,
-  const float & num_contact_points_weight_)
+  const float & num_contact_points_weight_,
+  std::string length_direction_,
+  std::string breadth_direction_,
+  std::string grasp_approach_direction_)
 : id(id_),
   num_cups_length(num_cups_length_),
   num_cups_breadth(num_cups_breadth_),
@@ -65,7 +71,10 @@ SuctionGripper::SuctionGripper(
   cloud_normal_radius(cloud_normal_radius_),
   curvature_weight(curvature_weight_),
   grasp_center_distance_weight(grasp_center_distance_weight_),
-  num_contact_points_weight(num_contact_points_weight_)
+  num_contact_points_weight(num_contact_points_weight_),
+  length_direction(length_direction_[0]),
+  breadth_direction(breadth_direction_[0]),
+  grasp_approach_direction(grasp_approach_direction_[0])
 {
   if (num_cups_length_ <= 0 || num_cups_breadth_ <= 0) {
     RCLCPP_ERROR(LOGGER, "Length and breadth values need to be positive numbers");
@@ -125,65 +134,6 @@ SuctionGripper::SuctionGripper(
 }
 
 /***************************************************************************//**
- * Suction Gripper Constructor
- *
- * @param id_ gripper id
- * @param num_cups_length_ Number of cups in the length vector
- * @param num_cups_breadth_ Number of cups in the breadth vector
- * @param dist_between_cups_length_ Distance between cups in the length vector
- * @param dist_between_cups_breadth_ Distance between cups in the breadth vector
- * @param cup_radius_ Radius of each suction cup
- * @param cup_height_ Height of suction cup
- * @param num_sample_along_axis_ number of samples along object axis
- * @param search_resolution_ How far of an offset along the object axis to search
- * @param search_angle_resolution_ Angle step for rotation of each grasp sample
- * @param cloud_normal_radius_ Radius of which to determine cloud normals
- ******************************************************************************/
-
-SuctionGripper::SuctionGripper(
-  std::string id_,
-  const int & num_cups_length_,
-  const int & num_cups_breadth_,
-  const float & dist_between_cups_length_,
-  const float & dist_between_cups_breadth_,
-  const float & cup_radius_,
-  const float & cup_height_,
-  const int & num_sample_along_axis_,
-  const float & search_resolution_,
-  const int & search_angle_resolution_,
-  const float & cloud_normal_radius_)
-: id(id_),
-  num_cups_length(num_cups_length_),
-  num_cups_breadth(num_cups_breadth_),
-  dist_between_cups_length(dist_between_cups_length_),
-  dist_between_cups_breadth(dist_between_cups_breadth_),
-  cup_radius(cup_radius_),
-  cup_height(cup_height_),
-  num_sample_along_axis(num_sample_along_axis_),
-  search_resolution(search_resolution_),
-  search_angle_resolution(search_angle_resolution_),
-  cloud_normal_radius(cloud_normal_radius_)
-{
-  // Intialize  maximum and minimum values of ranking variables
-  this->max_curvature = std::numeric_limits<float>::min();
-  this->min_curvature = std::numeric_limits<float>::max();
-
-  this->max_center_dist = std::numeric_limits<float>::min();
-  this->min_center_dist = std::numeric_limits<float>::max();
-
-  this->max_contact_points = std::numeric_limits<int>::min();
-  this->min_contact_points = std::numeric_limits<int>::max();
-
-  // Calculate the dimensions of the gripper
-  this->length_dim = (this->num_cups_length - 1) * this->dist_between_cups_length;
-  this->breadth_dim = (this->num_cups_breadth - 1) * this->dist_between_cups_breadth;
-
-  // Initialize default weights
-  this->curvature_weight = 1.0;
-  this->grasp_center_distance_weight = 1.0;
-  this->num_contact_points_weight = 1.0;
-}
-/***************************************************************************//**
  * Method that generates the relevant gripper attributes before grasp planning
  ******************************************************************************/
 void SuctionGripper::generateGripperAttributes()
@@ -202,21 +152,25 @@ void SuctionGripper::generateGripperAttributes()
     this->col_is_even = is_even_length;
     this->col_dist_between_cups = this->dist_between_cups_length;
     this->col_initial_gap = initial_gap_length;
+    this->col_direction = length_direction;
 
     this->row_itr = num_itr_breadth;
     this->row_is_even = is_even_breadth;
     this->row_dist_between_cups = this->dist_between_cups_breadth;
     this->row_initial_gap = initial_gap_breadth;
+    this->row_direction = breadth_direction;
   } else {
     this->col_itr = num_itr_breadth;
     this->col_is_even = is_even_breadth;
     this->col_dist_between_cups = this->dist_between_cups_breadth;
     this->col_initial_gap = initial_gap_breadth;
+    this->col_direction = breadth_direction;
 
     this->row_itr = num_itr_length;
     this->row_is_even = is_even_length;
     this->row_dist_between_cups = this->dist_between_cups_length;
     this->row_initial_gap = initial_gap_length;
+    this->row_direction = length_direction;
   }
 }
 /***************************************************************************//**
@@ -680,8 +634,8 @@ void SuctionGripper::updateMaxMinValues(
  * @param sliced_cloud_normal Normals of the sliced cloud
  * @param sample_gripper_center Center of Suction Array
  * @param object_center Center point of object
- * @param grasp_direction Vector representing the direction of grasp
- * @param object_direction Vector representing the direction of object's major axis
+ * @param row_direction Vector representing the suction array row direction
+ * @param col_direction Vector representing the suction array col direction
  * @param object_max_dim Maximum dimensions of obejct
  ******************************************************************************/
 
@@ -690,12 +644,12 @@ suctionCupArray SuctionGripper::generateGraspSample(
   const pcl::PointCloud<pcl::PointNormal>::Ptr & sliced_cloud_normal,
   const pcl::PointXYZ & sample_gripper_center,
   const pcl::PointXYZ & object_center,
-  const Eigen::Vector3f & grasp_direction,
-  const Eigen::Vector3f & object_direction,
+  const Eigen::Vector3f & row_direction,
+  const Eigen::Vector3f & col_direction,
   const float & object_max_dim)
 {
 
-  suctionCupArray grasp_sample(sample_gripper_center);
+  suctionCupArray grasp_sample(sample_gripper_center, row_direction, col_direction);
   Eigen::Vector3f sample_gripper_center_eigen = PCLFunctions::convertPCLtoEigen(
     sample_gripper_center);
   float total_contact_points = 0;
@@ -711,7 +665,7 @@ suctionCupArray SuctionGripper::generateGraspSample(
     }
     (row_updown_toggle == 0 ? row_gap = row_gap : row_gap = -row_gap);
     Eigen::Vector3f row_cen_point = MathFunctions::getPointInDirection(
-      sample_gripper_center_eigen, grasp_direction,
+      sample_gripper_center_eigen, row_direction,
       row_gap);
 
     std::vector<std::shared_ptr<singleSuctionCup>> temp_row_array;
@@ -727,7 +681,7 @@ suctionCupArray SuctionGripper::generateGraspSample(
       (col_updown_toggle == 0 ? col_gap = col_gap : col_gap = -col_gap);
 
       Eigen::Vector3f cup_vector = MathFunctions::getPointInDirection(
-        row_cen_point, object_direction,
+        row_cen_point, col_direction,
         col_gap);
 
       singleSuctionCup cup = generateSuctionCup(

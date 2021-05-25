@@ -37,6 +37,9 @@ void SuctionGripperTest::ResetVariables()
   curvature_weight = 1.0;
   grasp_center_distance_weight = 1.0;
   num_contact_points_weight = 1.0;
+  length_direction = "x";
+  breadth_direction = "y";
+  grasp_approach_direction = "z";
 }
 
 void SuctionGripperTest::LoadGripperWithWeights()
@@ -55,7 +58,10 @@ void SuctionGripperTest::LoadGripperWithWeights()
     cloud_normal_radius,
     curvature_weight,
     grasp_center_distance_weight,
-    num_contact_points_weight);
+    num_contact_points_weight,
+    length_direction,
+    breadth_direction,
+    grasp_approach_direction);
   gripper = std::make_shared<SuctionGripper>(gripper_);
 }
 

@@ -115,9 +115,18 @@ struct suctionCupArray
   float average_curvature;
   /*! \brief Angle of grasp sample */
   float grasp_angle;
+  /*! \brief Vector representing the row direction */
+  Eigen::Vector3f row_direction;
+  /*! \brief Vector representing the col direction */
+  Eigen::Vector3f col_direction;
 
-  suctionCupArray(pcl::PointXYZ gripper_center_)
+  suctionCupArray(
+    pcl::PointXYZ gripper_center_,
+    Eigen::Vector3f row_direction_,
+    Eigen::Vector3f col_direction_)
   {
+    row_direction = row_direction_;
+    col_direction = col_direction_;
     gripper_center = gripper_center_;
     total_contact_points = 0;
     rank = 0;
@@ -128,18 +137,6 @@ struct suctionCupArray
 class SuctionGripper : public EndEffector
 {
 public:
-  SuctionGripper(
-    std::string id,
-    const int & num_cups_length_,
-    const int & num_cups_breadth_,
-    const float & dist_between_cups_length_,
-    const float & dist_between_cups_breadth_,
-    const float & cup_radius_,
-    const float & cup_height_,
-    const int & num_sample_along_axis,
-    const float & search_resolution_,
-    const int & search_angle_resolution_,
-    const float & cloud_normal_radius_);
 
   SuctionGripper(
     std::string id_,
@@ -155,7 +152,10 @@ public:
     const float & cloud_normal_radius_,
     const float & curvature_weight_,
     const float & grasp_center_distance_weight_,
-    const float & num_contact_points_weight_);
+    const float & num_contact_points_weight_,
+    std::string length_direction_,
+    std::string breadth_direction_,
+    std::string grasp_approach_direction_);
 
   void generateGripperAttributes();
 
@@ -301,6 +301,15 @@ public:
   /*! \brief User Defined: Weights to determine importance of the number of
   contact points. Default is 1.0 */
   float num_contact_points_weight;
+
+  /*! \brief Axis in the direction of the length vector */
+  const char length_direction;
+  /*! \brief Axis in the direction of the breadth vector */
+  const char breadth_direction;
+  /*! \brief Axis in which the gripper approaches the object */
+  const char grasp_approach_direction;
+  
+
   /*! \brief Actual breadth dimensions of the entire suction gripper*/
   float breadth_dim;
   /*! \brief Actual length dimensions of the entire suction gripper*/
@@ -315,6 +324,8 @@ public:
   /*! \brief Initial distance between center of suction array gripper to the first suction cup in
     the column direction */
   float col_initial_gap;
+  /*! \brief Axis in the direction of the col vector */
+  char col_direction;
 
   /*! \brief True if number of cups is even in the row direction */
   bool row_is_even;
@@ -325,6 +336,8 @@ public:
   /*! \brief Initial distance between center of suction array gripper to the first suction cup in
     the row direction */
   float row_initial_gap;
+  /*! \brief Axis in the direction of the breadth vector */
+  char row_direction;
 
   // For grasp planning
   /*! \brief Maximum average curvature value, comparing all the grasp samples sampled */

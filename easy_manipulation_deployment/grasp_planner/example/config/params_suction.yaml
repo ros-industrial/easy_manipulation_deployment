@@ -2,7 +2,7 @@ grasp_planning_node:
   ros__parameters:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
-      epd_enabled: true
+      epd_enabled: false
       tracking_enabled: true
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
@@ -28,6 +28,10 @@ grasp_planning_node:
         dist_between_cups_breadth: 0.06
         cup_radius: 0.005
         cup_height: 0.01
+        gripper_coordinate_system:
+          length_direction: "x"
+          breadth_direction: "y"
+          grasp_approach_direction: "z"
         grasp_planning_params:
           num_sample_along_axis: 3
           search_resolution: 0.01

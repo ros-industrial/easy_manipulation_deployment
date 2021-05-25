@@ -591,7 +591,16 @@ void GraspScene::loadEndEffectors()
           ".grasp_planning_params.weights.grasp_distance_to_center").as_double()),
         static_cast<float>(this->get_parameter(
           "end_effectors." + end_effector +
-          ".grasp_planning_params.weights.number_contact_points").as_double()));
+          ".grasp_planning_params.weights.number_contact_points").as_double()),
+        this->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.length_direction").as_string(),
+        this->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.breadth_direction").as_string(),
+        this->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.grasp_approach_direction").as_string());
 
       std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<SuctionGripper>(gripper);
 
