@@ -137,7 +137,6 @@ struct suctionCupArray
 class SuctionGripper : public EndEffector
 {
 public:
-
   SuctionGripper(
     std::string id_,
     const int & num_cups_length_,
@@ -246,6 +245,10 @@ public:
     emd_msgs::msg::GraspMethod * grasp_method,
     const std::shared_ptr<GraspObject> & object);
 
+  std::vector<double> getPlanarRPY(
+    const Eigen::Vector3f & col_vector,
+    const Eigen::Vector3f & row_vector);
+
   geometry_msgs::msg::PoseStamped getGraspPose(
     const std::shared_ptr<suctionCupArray> & grasp,
     const std::shared_ptr<GraspObject> & object);
@@ -308,7 +311,7 @@ public:
   const char breadth_direction;
   /*! \brief Axis in which the gripper approaches the object */
   const char grasp_approach_direction;
-  
+
 
   /*! \brief Actual breadth dimensions of the entire suction gripper*/
   float breadth_dim;

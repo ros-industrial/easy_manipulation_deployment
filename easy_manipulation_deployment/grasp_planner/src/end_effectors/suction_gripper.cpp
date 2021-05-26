@@ -882,6 +882,70 @@ void SuctionGripper::getAllGraspRanks(
 }
 
 /***************************************************************************//**
+ * Function that returns the roll, pitch and yaw from coplanar points. This method
+ * accounts for coodinate systems where the z axis may not be the "downward direction" for
+ * grasp approach
+ *
+ * @param col_vector Vector representing the direction of the column array
+ * @param row_vector Vector representing the direction of the row array
+ ******************************************************************************/
+
+std::vector<double> SuctionGripper::getPlanarRPY(
+  const Eigen::Vector3f & col_vector,
+  const Eigen::Vector3f & row_vector)
+{
+  std::vector<double> output_vec;
+  Eigen::Vector3f x_norm;
+  Eigen::Vector3f y_norm;
+  Eigen::Vector3f z_norm;
+  bool x_filled = false;
+  bool y_filled = false;
+  bool z_filled = false;
+
+  if (this->col_direction == 'x') {
+    x_norm = col_vector.normalized();
+    x_filled = true;
+  } else if (this->col_direction == 'y') {
+    y_norm = col_vector.normalized();
+    y_filled = true;
+  } else if (this->col_direction == 'z') {
+    z_norm = col_vector.normalized();
+    z_filled = true;
+  }
+
+  if (this->row_direction == 'x') {
+    x_norm = row_vector.normalized();
+    x_filled = true;
+  } else if (this->row_direction == 'y') {
+    y_norm = row_vector.normalized();
+    y_filled = true;
+  } else if (this->row_direction == 'z') {
+    z_norm = row_vector.normalized();
+    z_filled = true;
+  }
+
+  if (x_filled && y_filled) {
+    z_norm = x_norm.cross(y_norm);
+  } else if (z_filled && y_filled) {
+    x_norm = y_norm.cross(z_norm);
+  } else if (x_filled && z_filled) {
+    y_norm = z_norm.cross(x_norm);
+  } else {
+    RCLCPP_ERROR(LOGGER, "RPY estimation error.");
+    throw std::runtime_error("RPY estimation error.");
+    return output_vec;
+  }
+
+  double roll = std::atan2(-z_norm(1), z_norm(2));
+  double pitch = std::asin(z_norm(0));
+  double yaw = std::atan2(-y_norm(0), x_norm(0));
+  output_vec.push_back(roll);
+  output_vec.push_back(pitch);
+  output_vec.push_back(yaw);
+  return output_vec;
+}
+
+/***************************************************************************//**
  * Method that calculate the pose of the grasp sample
  *
  * @param grasp Target Grasp
@@ -897,42 +961,47 @@ geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
   result_pose.pose.position.y = grasp->gripper_center.y;
   result_pose.pose.position.z = grasp->gripper_center.z;
 
-  if (this->num_cups_breadth == this->num_cups_length) {
+  if (this->num_cups_breadth == this->num_cups_length &&
+    this->dist_between_cups_breadth == this->dist_between_cups_length)
+  {
     result_pose.pose.orientation.x = 0;
     result_pose.pose.orientation.y = 0;
     result_pose.pose.orientation.z = 0;
     result_pose.pose.orientation.w = 1;
   } else {
-    Eigen::Matrix3f rotationMatrix;
-    rotationMatrix << cos(grasp->grasp_angle), -sin(grasp->grasp_angle), 0,
-      sin(grasp->grasp_angle), cos(grasp->grasp_angle), 0,
-      0, 0, 1;
+    // Eigen::Matrix3f rotationMatrix;
+    // rotationMatrix << cos(grasp->grasp_angle), -sin(grasp->grasp_angle), 0,
+    //   sin(grasp->grasp_angle), cos(grasp->grasp_angle), 0,
+    //   0, 0, 1;
 
-    Eigen::Matrix3f rotatedEigenVector = rotationMatrix * object->eigenvectors;
+    // Eigen::Matrix3f rotatedEigenVector = rotationMatrix * object->eigenvectors;
 
-    Eigen::Matrix4f projectionTransform_test(Eigen::Matrix4f::Identity());
-    projectionTransform_test.block<3, 3>(0, 0) = rotatedEigenVector.transpose();
-    // Can try change object->centerpoint.head
-    projectionTransform_test.block<3, 1>(
-      0,
-      3) = -1.f * (projectionTransform_test.block<3, 3>(0, 0) * object->centerpoint.head<3>());
-    Eigen::Matrix4f affine_matrix = projectionTransform_test;
+    // Eigen::Matrix4f projectionTransform_test(Eigen::Matrix4f::Identity());
+    // projectionTransform_test.block<3, 3>(0, 0) = rotatedEigenVector.transpose();
+    // // Can try change object->centerpoint.head
+    // projectionTransform_test.block<3, 1>(
+    //   0,
+    //   3) = -1.f * (projectionTransform_test.block<3, 3>(0, 0) * object->centerpoint.head<3>());
+    // Eigen::Matrix4f affine_matrix = projectionTransform_test;
 
-    Eigen::Matrix3f PointRotation;
-    PointRotation << affine_matrix(0, 0), affine_matrix(0, 1),
-      affine_matrix(0, 2),
-      affine_matrix(1, 0), affine_matrix(1, 1),
-      affine_matrix(1, 2),
-      affine_matrix(2, 0), affine_matrix(2, 1),
-      affine_matrix(2, 2);
+    // Eigen::Matrix3f PointRotation;
+    // PointRotation << affine_matrix(0, 0), affine_matrix(0, 1),
+    //   affine_matrix(0, 2),
+    //   affine_matrix(1, 0), affine_matrix(1, 1),
+    //   affine_matrix(1, 2),
+    //   affine_matrix(2, 0), affine_matrix(2, 1),
+    //   affine_matrix(2, 2);
 
-    tf2::Matrix3x3 graspRotation(PointRotation(0, 0), PointRotation(1, 0), PointRotation(2, 0),
-      PointRotation(0, 1), PointRotation(1, 1), PointRotation(2, 1),
-      PointRotation(0, 2), PointRotation(1, 2), PointRotation(2, 2));
-    double r2, p2, y2;
-    graspRotation.getRPY(r2, p2, y2);
+    // tf2::Matrix3x3 graspRotation(PointRotation(0, 0), PointRotation(1, 0), PointRotation(2, 0),
+    //   PointRotation(0, 1), PointRotation(1, 1), PointRotation(2, 1),
+    //   PointRotation(0, 2), PointRotation(1, 2), PointRotation(2, 2));
+    // double r2, p2, y2;
+    // graspRotation.getRPY(r2, p2, y2);
+
+    std::vector<double> rpy = getPlanarRPY(grasp->col_direction, grasp->row_direction);
     tf2::Quaternion quaternion_test_;
-    quaternion_test_.setRPY(0, 0, y2);
+    quaternion_test_.setRPY(0, 0, rpy[2]);
+    // quaternion_test_.setRPY(0, 0, y2);
 
     result_pose.pose.orientation.x = quaternion_test_.x();
     result_pose.pose.orientation.y = quaternion_test_.y();

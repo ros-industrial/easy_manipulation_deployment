@@ -1180,9 +1180,9 @@ std::vector<double> FingerGripper::getPlanarRPY(
   Eigen::Vector3f x_norm;
   Eigen::Vector3f y_norm;
   Eigen::Vector3f z_norm;
-  bool x_filled;
-  bool y_filled;
-  bool z_filled;
+  bool x_filled = false;
+  bool y_filled = false;
+  bool z_filled = false;
   if (this->grasp_stroke_direction == 'x') {
     x_norm = grasp_direction.normalized();
     x_filled = true;
