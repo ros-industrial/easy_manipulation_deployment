@@ -121,6 +121,8 @@ struct suctionCupArray
   Eigen::Vector3f row_direction;
   /*! \brief Vector representing the col direction */
   Eigen::Vector3f col_direction;
+  /*! \brief Array of markers representing the grasp points of all suction cups  */
+  visualization_msgs::msg::MarkerArray marker_array;
 
   suctionCupArray(
     pcl::PointXYZ gripper_center_,

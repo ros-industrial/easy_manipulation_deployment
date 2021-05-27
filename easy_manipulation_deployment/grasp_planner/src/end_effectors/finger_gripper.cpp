@@ -853,6 +853,20 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   bool is_even_1 = this->num_fingers_side_1 % 2 == 0;
   bool is_even_2 = this->num_fingers_side_2 % 2 == 0;
 
+  geometry_msgs::msg::Point cup_marker_point;
+
+  visualization_msgs::msg::Marker cup_marker;
+  cup_marker.header.frame_id = camera_frame;
+  cup_marker.ns = "";
+  cup_marker.type = cup_marker.SPHERE_LIST;
+  cup_marker.action = cup_marker.ADD;
+  cup_marker.lifetime = rclcpp::Duration::from_seconds(20);
+  cup_marker.scale.x = 0.02;
+  cup_marker.scale.y = 0.02;
+  cup_marker.scale.z = 0.02;
+  cup_marker.color.r = 1.0f;
+  cup_marker.color.a = 1.0;
+
   /* Get the angle between the vector between the grasp direction and the normal of the cutting
      plane */
 
@@ -867,10 +881,22 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   if (!is_even_1) {
     gripper.closed_fingers_1.push_back(closed_center_finger_1);
     gripper.open_fingers_1.push_back(open_center_finger_1);
+
+    // Setting coordinates of open center finger configuration into marker variable
+    cup_marker_point.x = open_center_finger_1(0);
+    cup_marker_point.y = open_center_finger_1(1);
+    cup_marker_point.z = open_center_finger_1(2);
+    cup_marker.points.push_back(cup_marker_point);
   }
   if (!is_even_2) {
     gripper.closed_fingers_2.push_back(closed_center_finger_2);
     gripper.open_fingers_2.push_back(open_center_finger_2);
+
+    // Setting coordinates of open center finger configuration into marker variable
+    cup_marker_point.x = open_center_finger_2(0);
+    cup_marker_point.y = open_center_finger_2(1);
+    cup_marker_point.z = open_center_finger_2(2);
+    cup_marker.points.push_back(cup_marker_point);
   }
 
   // Check Initial middle fingers if they collide with world
@@ -918,9 +944,16 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     finger_1_point.y = finger_1_open_temp(1);
     finger_1_point.z = finger_1_open_temp(2);
 
+    // Setting coordinates of open configuration into marker variable
+    cup_marker_point.x = finger_1_open_temp(0);
+    cup_marker_point.y = finger_1_open_temp(1);
+    cup_marker_point.z = finger_1_open_temp(2);
+    cup_marker.points.push_back(cup_marker_point);
+
     int point_index = getNearestPointIndex(
       finger_1_point,
       this->grasp_samples[plane_index]->sample_side_1->finger_nvoxel);
+
 
     // Add the finger sample to the gripper configuration
     gripper.closed_fingers_1.push_back(
@@ -961,9 +994,16 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     finger_2_point.y = finger_2_open_temp(1);
     finger_2_point.z = finger_2_open_temp(2);
 
+    // Setting coordinates of open configuration into marker variable
+    cup_marker_point.x = finger_2_open_temp(0);
+    cup_marker_point.y = finger_2_open_temp(1);
+    cup_marker_point.z = finger_2_open_temp(2);
+    cup_marker.points.push_back(cup_marker_point);
+
     int point_index_2 = getNearestPointIndex(
       finger_2_point,
       this->grasp_samples[plane_index_2]->sample_side_2->finger_nvoxel);
+
     gripper.closed_fingers_2.push_back(
       this->grasp_samples[plane_index_2]->sample_side_2->finger_samples[point_index_2]);
     gripper.closed_fingers_2_index.push_back(point_index_2);
@@ -980,6 +1020,7 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
     gripper.closed_fingers_2[gripper.closed_fingers_2.size() - 1]->angle_cos =
       MathFunctions::getAngleBetweenVectors(grasp_direction, finger_normal_2);
   }
+  gripper.marker_array.markers.push_back(cup_marker);
   return std::make_shared<multiFingerGripper>(gripper);
 }
 
@@ -1117,14 +1158,17 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllRanks(
     getGripperRank(gripper);
     std::vector<geometry_msgs::msg::PoseStamped>::iterator grasps_it;
     std::vector<std::shared_ptr<multiFingerGripper>>::iterator contacts_it;
+    std::vector<visualization_msgs::msg::MarkerArray>::iterator markers_it;
     size_t rank;
     for (rank = 0,
-      grasps_it = grasp_method->grasp_poses.begin(), contacts_it = sorted_gripper_ranks.begin();
-      rank < grasp_method->grasp_ranks.size(); ++rank, ++grasps_it, ++contacts_it)
+      grasps_it = grasp_method->grasp_poses.begin(), contacts_it = sorted_gripper_ranks.begin(),
+      markers_it = grasp_method->grasp_markers.begin();
+      rank < grasp_method->grasp_ranks.size(); ++rank, ++grasps_it, ++contacts_it, ++markers_it)
     {
       if (gripper->rank > grasp_method->grasp_ranks[rank]) {
         grasp_method->grasp_ranks.insert(grasp_method->grasp_ranks.begin() + rank, gripper->rank);
         grasp_method->grasp_poses.insert(grasps_it, gripper->pose);
+        grasp_method->grasp_markers.insert(markers_it, gripper->marker_array);
         sorted_gripper_ranks.insert(contacts_it, gripper);
         break;
       }

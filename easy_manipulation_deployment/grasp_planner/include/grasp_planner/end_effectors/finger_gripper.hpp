@@ -121,6 +121,8 @@ struct multiFingerGripper
   float rank;
   /*! \brief Pose of gripper*/
   geometry_msgs::msg::PoseStamped pose;
+  /*! \brief Array of markers representing the grasp points of open congiruation on both sides */
+  visualization_msgs::msg::MarkerArray marker_array;
   /*! \brief Centerpoint of gripper */
   pcl::PointXYZ gripper_palm_center;
   /*! \brief Middle finger on side 1 */
