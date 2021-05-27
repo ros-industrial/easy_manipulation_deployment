@@ -42,6 +42,5 @@ grasp_planning_node:
           world_z_angle_threshold: 0.25
     visualization_params:
       point_cloud_visualization: true
-      rviz_publish_grasp_markers: true
 
       

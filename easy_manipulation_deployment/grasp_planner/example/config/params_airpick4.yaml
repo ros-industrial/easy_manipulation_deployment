@@ -42,4 +42,3 @@ grasp_planning_node:
             number_contact_points: 1.0
     visualization_params:
       point_cloud_visualization: true
-      rviz_publish_grasp_markers: true
