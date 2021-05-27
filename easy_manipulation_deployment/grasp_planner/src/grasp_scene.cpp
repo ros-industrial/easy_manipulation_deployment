@@ -212,17 +212,6 @@ void GraspScene::planningInit(const U & msg)
         gripper->visualizeGrasps(viewer);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
-
-      if (this->get_parameter(
-          "visualization_params.rviz_publish_grasp_markers").as_bool() == true)
-      {
-        this->mArray =
-          gripper->publishGraspsMarker(
-          this->get_parameter(
-            "camera_parameters.camera_frame").as_string());
-        pub_marker_->publish(mArray);
-        std::cout << "Publishing Grasp Markers on RVIZ" << std::endl;
-      }
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -291,17 +280,6 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       {
         gripper->visualizeGrasps(viewer);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
-      }
-
-      if (this->get_parameter(
-          "visualization_params.rviz_publish_grasp_markers").as_bool() == true)
-      {
-        this->mArray =
-          gripper->publishGraspsMarker(
-          this->get_parameter(
-            "camera_parameters.camera_frame").as_string());
-        pub_marker_->publish(mArray);
-        std::cout << "Publishing Grasp Markers on RVIZ" << std::endl;
       }
     }
 

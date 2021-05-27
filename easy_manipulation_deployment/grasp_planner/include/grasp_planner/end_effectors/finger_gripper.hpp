@@ -348,8 +348,6 @@ public:
 
   void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
 
-  visualization_msgs::msg::MarkerArray publishGraspsMarker(std::string camera_frame);
-
   Eigen::Vector3f getPerpendicularVectorInPlane(
     Eigen::Vector3f target_vector,
     pcl::ModelCoefficients::Ptr plane);

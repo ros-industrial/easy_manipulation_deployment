@@ -169,8 +169,6 @@ public:
 
   void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
 
-  visualization_msgs::msg::MarkerArray publishGraspsMarker(std::string camera_frame);
-
   int getCentroidIndex(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud);
 

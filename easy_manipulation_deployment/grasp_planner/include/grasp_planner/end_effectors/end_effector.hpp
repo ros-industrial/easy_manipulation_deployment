@@ -23,12 +23,9 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <cassert>
 
 #include "grasp_planner/common/fcl_types.hpp"
 #include "grasp_planner/grasp_object.hpp"
-
-#include "visualization_msgs/msg/marker_array.hpp"
 
 #define UNUSED(expr) do {(void)(expr);} while (0)
 
@@ -49,14 +46,10 @@ public:
   }
   virtual void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer) {UNUSED(viewer);}
 
-  virtual visualization_msgs::msg::MarkerArray publishGraspsMarker(
-    [[maybe_unused]] std::string camera_frame) {return markerArray;}
-
   virtual std::string getID() {return id;}
 
 protected:
   std::string id;
-  visualization_msgs::msg::MarkerArray markerArray;
 
 };
 #endif  // GRASP_PLANNER__END_EFFECTORS__END_EFFECTOR_HPP_
