@@ -58,6 +58,7 @@ public:
   std::string grasp_stroke_direction;
   std::string grasp_stroke_normal_direction;
   std::string grasp_approach_direction;
+  std::string camera_frame;
 
   std::shared_ptr<FingerGripper> gripper;
   std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr;

@@ -165,7 +165,8 @@ public:
   void planGrasps(
     std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr<CollisionObject> world_collision_object);
+    std::shared_ptr<CollisionObject> world_collision_object,
+    std::string camera_frame);
 
   std::string getID() {return id;}
 
@@ -177,7 +178,8 @@ public:
   void getAllPossibleGrasps(
     const std::shared_ptr<GraspObject> & object,
     const pcl::PointXYZ & object_center,
-    const pcl::PointXYZRGB & top_point);
+    const pcl::PointXYZRGB & top_point,
+    std::string camera_frame);
 
   bool getCupContactCloud(
     pcl::PointXYZRGB contact_point,
@@ -264,7 +266,8 @@ public:
     const pcl::PointXYZ & object_center,
     const Eigen::Vector3f & grasp_direction,
     const Eigen::Vector3f & object_direction,
-    const float & object_max_dim);
+    const float & object_max_dim,
+    std::string camera_frame);
 
   int generateWeightedContactPoints(
     const int & contact_points,

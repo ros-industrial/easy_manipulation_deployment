@@ -38,11 +38,13 @@ public:
   virtual void planGrasps(
     std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr<CollisionObject> world_collision_object)
+    std::shared_ptr<CollisionObject> world_collision_object,
+    std::string camera_frame)
   {
     UNUSED(object);
     UNUSED(grasp_method);
     UNUSED(world_collision_object);
+    UNUSED(camera_frame);
   }
   virtual void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer) {UNUSED(viewer);}
 

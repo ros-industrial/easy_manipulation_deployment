@@ -194,7 +194,9 @@ void GraspScene::planningInit(const U & msg)
       grasp_method.ee_id = gripper->getID();
       grasp_method.grasp_ranks.insert(
         grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
-      gripper->planGrasps(object, &grasp_method, world_collision_object);
+      gripper->planGrasps(
+        object, &grasp_method, world_collision_object,
+        this->get_parameter("camera_parameters.camera_frame").as_string());
       grasp_method.grasp_ranks.pop_back();
       object->grasp_target.grasp_methods.push_back(grasp_method);
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
@@ -254,7 +256,9 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       grasp_method.ee_id = gripper->getID();
       grasp_method.grasp_ranks.insert(
         grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
-      gripper->planGrasps(object, &grasp_method, world_collision_object);
+      gripper->planGrasps(
+        object, &grasp_method, world_collision_object,
+        this->get_parameter("camera_parameters.camera_frame").as_string());
       grasp_method.grasp_ranks.pop_back();
       object->grasp_target.grasp_methods.push_back(grasp_method);
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();

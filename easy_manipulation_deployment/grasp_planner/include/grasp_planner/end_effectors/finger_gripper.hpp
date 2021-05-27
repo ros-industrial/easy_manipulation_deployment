@@ -298,7 +298,8 @@ public:
   void planGrasps(
     std::shared_ptr<GraspObject> object,
     emd_msgs::msg::GraspMethod * grasp_method,
-    std::shared_ptr<CollisionObject> world_collision_object);
+    std::shared_ptr<CollisionObject> world_collision_object,
+    std::string camera_frame);
 
   void resetVariables();
 
@@ -331,7 +332,8 @@ public:
   void getFingerSamples(const std::shared_ptr<GraspObject> & object);
   std::vector<std::shared_ptr<multiFingerGripper>> getAllGripperConfigs(
     const std::shared_ptr<GraspObject> & object,
-    const std::shared_ptr<CollisionObject> & world_collision_object);
+    const std::shared_ptr<CollisionObject> & world_collision_object,
+    std::string camera_frame);
 
   std::shared_ptr<multiFingerGripper> generateGripperOpenConfig(
     const std::shared_ptr<CollisionObject> & world_collision_object,
@@ -340,7 +342,8 @@ public:
     const Eigen::Vector3f & open_center_finger_1,
     const Eigen::Vector3f & open_center_finger_2,
     const Eigen::Vector3f & plane_normal_normalized,
-    const Eigen::Vector3f & grasp_direction);
+    const Eigen::Vector3f & grasp_direction,
+    std::string camera_frame);
 
   bool checkFingerCollision(
     const Eigen::Vector3f & finger_point,

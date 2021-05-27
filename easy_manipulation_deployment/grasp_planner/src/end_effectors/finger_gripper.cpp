@@ -169,7 +169,8 @@ void FingerGripper::generateGripperAttributes()
 void FingerGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
-  std::shared_ptr<CollisionObject> world_collision_object)
+  std::shared_ptr<CollisionObject> world_collision_object,
+  std::string camera_frame)
 {
   generateGripperAttributes();
   getCenterCuttingPlane(object);
@@ -193,8 +194,7 @@ void FingerGripper::planGrasps(
   getFingerSamples(object);
   getGripperClusters();
   std::vector<std::shared_ptr<multiFingerGripper>> valid_open_gripper_configs =
-    getAllGripperConfigs(object, world_collision_object);
-
+    getAllGripperConfigs(object, world_collision_object, camera_frame);
   for (auto & gripper : valid_open_gripper_configs) {
     getGraspPose(gripper, object);
   }
@@ -758,7 +758,8 @@ void FingerGripper::getGripperClusters()
 
 std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperConfigs(
   const std::shared_ptr<GraspObject> & object,
-  const std::shared_ptr<CollisionObject> & world_collision_object)
+  const std::shared_ptr<CollisionObject> & world_collision_object,
+  std::string camera_frame)
 {
   std::vector<std::shared_ptr<multiFingerGripper>> valid_open_gripper_configs;
   // Query the gripping points at the center cutting plane
@@ -811,8 +812,7 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
         std::shared_ptr<multiFingerGripper> gripper_sample = generateGripperOpenConfig(
           world_collision_object, finger_sample_1, finger_sample_2,
           open_coords[0], open_coords[1], perpendicular_grasp_direction,
-          grasp_direction);
-
+          grasp_direction, camera_frame);
         if (!gripper_sample->collides_with_world) {
           valid_open_gripper_configs.push_back(gripper_sample);
         }
@@ -841,7 +841,8 @@ std::shared_ptr<multiFingerGripper> FingerGripper::generateGripperOpenConfig(
   const Eigen::Vector3f & open_center_finger_1,
   const Eigen::Vector3f & open_center_finger_2,
   const Eigen::Vector3f & plane_normal,
-  const Eigen::Vector3f & grasp_direction)
+  const Eigen::Vector3f & grasp_direction,
+  std::string camera_frame)
 {
   // Create an instance of the multifinger gripper.
   multiFingerGripper gripper(

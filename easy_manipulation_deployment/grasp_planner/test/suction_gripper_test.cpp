@@ -847,7 +847,8 @@ TEST_F(SuctionGripperTest, generateGraspSampleTest) {
     object_center,
     grasp_direction,
     object_direction,
-    object_max_dim);
+    object_max_dim,
+    camera_frame);
 
   ASSERT_EQ(2, static_cast<int>(grasp_sample.cup_array.size()));
   ASSERT_EQ(6, static_cast<int>(grasp_sample.cup_array[0].size()));
@@ -934,7 +935,7 @@ TEST_F(SuctionGripperTest, getAllPossibleGraspsTest) {
     object->cloud,
     object->alignments[2], true);
   EXPECT_EQ(0, static_cast<int>(gripper->cup_array_samples.size()));
-  gripper->getAllPossibleGrasps(object, object_center, object_top_point);
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
   EXPECT_GT(static_cast<int>(gripper->cup_array_samples.size()), 0);
   for (auto grasp_sample : gripper->cup_array_samples) {
     EXPECT_NEAR(0, grasp_sample->rank, 0.0001);
@@ -959,7 +960,7 @@ TEST_F(SuctionGripperTest, getAllRanksTest) {
   pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(
     object->cloud,
     object->alignments[2], true);
-  gripper->getAllPossibleGrasps(object, object_center, object_top_point);
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
   EXPECT_GT(static_cast<int>(gripper->cup_array_samples.size()), 0);
   for (auto grasp_sample : gripper->cup_array_samples) {
     EXPECT_NEAR(0, grasp_sample->rank, 0.0001);

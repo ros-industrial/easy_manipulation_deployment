@@ -58,6 +58,7 @@ public:
   std::string length_direction;
   std::string breadth_direction;
   std::string grasp_approach_direction;
+  std::string camera_frame;
 
   std::shared_ptr<SuctionGripper> gripper;
   std::shared_ptr<grasp_planner::collision::CollisionObject> collision_object_ptr;

@@ -183,7 +183,8 @@ void SuctionGripper::generateGripperAttributes()
 void SuctionGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
   emd_msgs::msg::GraspMethod * grasp_method,
-  std::shared_ptr<CollisionObject> world_collision_object)
+  std::shared_ptr<CollisionObject> world_collision_object,
+  std::string camera_frame)
 {
   // RCLCPP_INFO(LOGGER, "Generate Gripper Attributes");
   generateGripperAttributes();
@@ -192,7 +193,6 @@ void SuctionGripper::planGrasps(
   object_center.x = object->centerpoint(0);
   object_center.y = object->centerpoint(1);
   object_center.z = object->centerpoint(2);
-
   // Get highest point of the object to begin grasp search
   // RCLCPP_INFO(LOGGER, "Find highest point to initialize grasp search.");
 
@@ -200,7 +200,7 @@ void SuctionGripper::planGrasps(
   pcl::PointXYZRGB object_top_point = findHighestPoint(object->cloud, 'z', false);
 
   // RCLCPP_INFO(LOGGER, "Initializing Grasp sample generation");
-  getAllPossibleGrasps(object, object_center, object_top_point);
+  getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
   getAllGraspRanks(grasp_method, object);
 }
 
@@ -215,13 +215,15 @@ void SuctionGripper::planGrasps(
 void SuctionGripper::getAllPossibleGrasps(
   const std::shared_ptr<GraspObject> & object,
   const pcl::PointXYZ & object_center,
-  const pcl::PointXYZRGB & top_point)
+  const pcl::PointXYZRGB & top_point,
+  std::string camera_frame)
 {
   auto GetBestGrasps1 = [this](
     int i,
     float slice_limit,
     const std::shared_ptr<GraspObject> & object,
     const pcl::PointXYZ & object_center,
+    std::string camera_frame,
     pcl::ModelCoefficients::Ptr & plane
     ) -> void
     {
@@ -230,7 +232,6 @@ void SuctionGripper::getAllPossibleGrasps(
       pcl::PointCloud<pcl::PointNormal>::Ptr sliced_cloud_normal(
         new pcl::PointCloud<pcl::PointNormal>);
       std::vector<std::future<void>> futures_2;
-
 
       slice_limit = slice_limit + 0.001 * i;  // How far down to slice the object cloud
 
@@ -284,14 +285,14 @@ void SuctionGripper::getAllPossibleGrasps(
             object_center,
             grasp_direction,
             object_direction,
-            object_max_dim);
+            object_max_dim,
+            camera_frame);
 
           updateMaxMinValues(
             grasp_sample.total_contact_points, grasp_sample.average_curvature,
             grasp_sample.center_dist);
 
           this->cup_array_samples.push_back(std::make_shared<suctionCupArray>(grasp_sample));
-
         }
       }
     };
@@ -326,6 +327,7 @@ void SuctionGripper::getAllPossibleGrasps(
         slice_limit,
         std::ref(object),
         std::ref(object_center),
+        std::ref(camera_frame),
         std::ref(plane)
     ));
 
@@ -646,7 +648,8 @@ suctionCupArray SuctionGripper::generateGraspSample(
   const pcl::PointXYZ & object_center,
   const Eigen::Vector3f & row_direction,
   const Eigen::Vector3f & col_direction,
-  const float & object_max_dim)
+  const float & object_max_dim,
+  std::string camera_frame)
 {
   visualization_msgs::msg::Marker cup_marker;
   cup_marker.header.frame_id = camera_frame;
