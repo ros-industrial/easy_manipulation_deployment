@@ -155,8 +155,6 @@ public:
   std::shared_ptr<grasp_planner::collision::CollisionObject> world_collision_object;
   /*! \brief PCL Visualizer  */
   pcl::visualization::PCLVisualizer::Ptr viewer;
-  /*! \brief Markers for best ranked grasp to be shown in RVIZ  */
-  visualization_msgs::msg::MarkerArray mArray;
   /*! \brief Intermediate message type for conversion to PointCloud2 message */
   sensor_msgs::msg::PointCloud2 pointcloud2;
 
@@ -167,8 +165,6 @@ public:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener;
   /*! \brief Publisher that provides the GraspTask information for the Grasp execution component */
   rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr output_pub;
-  /*! \brief Publisher that provides visualized markers of best rank grasp for RVIZ */
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pub_marker_;
   /*! \brief Subscriber that subscribes to the camera output */
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>> cloud_sub;
   /*! \brief Message filter for pointcloud message */

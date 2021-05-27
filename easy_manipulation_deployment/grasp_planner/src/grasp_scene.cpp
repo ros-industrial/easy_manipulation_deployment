@@ -69,9 +69,6 @@ GraspScene::GraspScene()
     this->create_publisher<emd_msgs::msg::GraspTask>(
     this->get_parameter(
       "grasp_output_topic").as_string(), 10);
-  pub_marker_ =
-    this->create_publisher<visualization_msgs::msg::MarkerArray>(
-    "/grasp_markers", 10);
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
   this->buffer_->setUsingDedicatedThread(true);
