@@ -205,9 +205,7 @@ void GraspScene::planningInit(const U & msg)
         std::to_string(
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
         " [ms] ");
-      if (this->get_parameter(
-          "visualization_params.point_cloud_visualization").as_bool() == true)
-      {
+      if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
         gripper->visualizeGrasps(viewer);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
@@ -276,9 +274,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       // for (auto rank : grasp_method.grasp_ranks) {
       //   std::cout << "grasp method rank: " << rank << std::endl;
       // }
-      if (this->get_parameter(
-          "visualization_params.point_cloud_visualization").as_bool() == true)
-      {
+      if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
         gripper->visualizeGrasps(viewer);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
