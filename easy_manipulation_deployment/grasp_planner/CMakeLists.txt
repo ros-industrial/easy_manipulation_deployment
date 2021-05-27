@@ -41,6 +41,7 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(cv_bridge REQUIRED) # Delete later
+find_package(visualization_msgs REQUIRED)
 
 include_directories(
   PUBLIC
@@ -92,6 +93,7 @@ ament_target_dependencies(grasp_planning_interface
         tf2_ros
         message_filters
         cv_bridge #temp
+        visualization_msgs
 )
 
 target_link_libraries(grasp_planning_interface
