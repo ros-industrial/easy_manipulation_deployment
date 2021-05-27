@@ -29,6 +29,8 @@
 // For Visualization
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 // ROS2 Libraries
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -345,6 +347,8 @@ public:
   void addPlane(float dist, Eigen::Vector4f centerpoint, Eigen::Vector4f plane_vector);
 
   void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
+
+  visualization_msgs::msg::MarkerArray publishGraspsMarker(std::string camera_frame);
 
   Eigen::Vector3f getPerpendicularVectorInPlane(
     Eigen::Vector3f target_vector,
