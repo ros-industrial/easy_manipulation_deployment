@@ -22,10 +22,10 @@ grasp_planning_node:
       end_effector_names: [robotiq_2f]
       robotiq_2f:
         type: finger
-        num_fingers_side_1: 2
-        num_fingers_side_2: 2
-        distance_between_fingers_1: 0.04
-        distance_between_fingers_2: 0.04
+        num_fingers_side_1: 1
+        num_fingers_side_2: 1
+        distance_between_fingers_1: 0.0
+        distance_between_fingers_2: 0.0
         finger_thickness: 0.02
         gripper_stroke: 0.105
         gripper_coordinate_system:
@@ -40,5 +40,8 @@ grasp_planning_node:
           world_x_angle_threshold: 0.5
           world_y_angle_threshold: 0.5
           world_z_angle_threshold: 0.25
+    visualization_params:
+      point_cloud_visualization: true
+      rviz_publish_grasp_markers: true
 
       

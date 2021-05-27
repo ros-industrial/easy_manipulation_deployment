@@ -36,3 +36,6 @@ grasp_planning_node:
             curvature: 1.0
             grasp_distance_to_center: 1.0
             number_contact_points: 1.0
+    visualization_params:
+      point_cloud_visualization: true
+      rviz_publish_grasp_markers: true

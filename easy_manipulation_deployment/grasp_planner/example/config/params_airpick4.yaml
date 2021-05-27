@@ -33,10 +33,13 @@ grasp_planning_node:
           breadth_direction: "y"
           grasp_approach_direction: "z"
         grasp_planning_params:
-          num_sample_along_axis: 3
+          num_sample_along_axis: 2
           search_resolution: 0.01
-          search_angle_resolution: 4
+          search_angle_resolution: 3
           weights:
             curvature: 1.0
             grasp_distance_to_center: 1.0
             number_contact_points: 1.0
+    visualization_params:
+      point_cloud_visualization: true
+      rviz_publish_grasp_markers: true
