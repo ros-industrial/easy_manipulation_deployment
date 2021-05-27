@@ -22,6 +22,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 rosidl_generate_interfaces( ${PROJECT_NAME}
   "msg/GraspMethod.msg"
@@ -32,6 +33,7 @@ rosidl_generate_interfaces( ${PROJECT_NAME}
   sensor_msgs
   geometry_msgs
   shape_msgs
+  visualization_msgs
 )
 
 if(BUILD_TESTING)
