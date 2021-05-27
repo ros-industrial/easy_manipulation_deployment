@@ -69,6 +69,9 @@ GraspScene::GraspScene()
     this->create_publisher<emd_msgs::msg::GraspTask>(
     this->get_parameter(
       "grasp_output_topic").as_string(), 10);
+  pub_marker_ =
+    this->create_publisher<visualization_msgs::msg::MarkerArray>(
+    "/grasp_markers", 10);
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
   this->buffer_->setUsingDedicatedThread(true);
@@ -203,7 +206,23 @@ void GraspScene::planningInit(const U & msg)
         std::to_string(
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
         " [ms] ");
-      gripper->visualizeGrasps(viewer);
+      if (this->get_parameter(
+          "visualization_params.point_cloud_visualization").as_bool() == true)
+      {
+        gripper->visualizeGrasps(viewer);
+        std::cout << "Point Cloud Viewer Visualization" << std::endl;
+      }
+
+      if (this->get_parameter(
+          "visualization_params.rviz_publish_grasp_markers").as_bool() == true)
+      {
+        this->mArray =
+          gripper->publishGraspsMarker(
+          this->get_parameter(
+            "camera_parameters.camera_frame").as_string());
+        pub_marker_->publish(mArray);
+        std::cout << "Publishing Grasp Markers on RVIZ" << std::endl;
+      }
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -267,7 +286,23 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       // for (auto rank : grasp_method.grasp_ranks) {
       //   std::cout << "grasp method rank: " << rank << std::endl;
       // }
-      gripper->visualizeGrasps(viewer);
+      if (this->get_parameter(
+          "visualization_params.point_cloud_visualization").as_bool() == true)
+      {
+        gripper->visualizeGrasps(viewer);
+        std::cout << "Point Cloud Viewer Visualization" << std::endl;
+      }
+
+      if (this->get_parameter(
+          "visualization_params.rviz_publish_grasp_markers").as_bool() == true)
+      {
+        this->mArray =
+          gripper->publishGraspsMarker(
+          this->get_parameter(
+            "camera_parameters.camera_frame").as_string());
+        pub_marker_->publish(mArray);
+        std::cout << "Publishing Grasp Markers on RVIZ" << std::endl;
+      }
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
