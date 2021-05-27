@@ -362,6 +362,51 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
 }
 
 /***************************************************************************//**
+ * Inherited method that visualizes the the best ranked suction gripper grasp in RVIZ
+ *
+ * @param camera_frame name of camera frame for current perception system
+ ******************************************************************************/
+
+visualization_msgs::msg::MarkerArray SuctionGripper::publishGraspsMarker(std::string camera_frame)
+{
+  visualization_msgs::msg::MarkerArray markerArray;
+  visualization_msgs::msg::Marker marker;
+  marker.header.frame_id = camera_frame;
+  marker.ns = "";
+  marker.type = marker.SPHERE_LIST;
+  marker.action = marker.ADD;
+  marker.lifetime = rclcpp::Duration::from_seconds(20);
+  marker.scale.x = 0.02;
+  marker.scale.y = 0.02;
+  marker.scale.z = 0.02;
+  marker.color.r = 1.0f;
+  marker.color.a = 1.0;
+
+  geometry_msgs::msg::Point p;
+
+  // Best Ranked suction grasp is shown in RVIZ
+
+  if (this->cup_array_samples.size() > 0) {
+    for (auto suction_cup_array : this->cup_array_samples) {
+      std::cout << "RANK: " << suction_cup_array->rank << std::endl;
+      for (auto row : suction_cup_array->cup_array) {
+        for (auto cup : row) {
+          p.x = cup->cup_center.x;
+          p.y = cup->cup_center.y;
+          p.z = cup->cup_center.z;
+          marker.points.push_back(p);
+        }
+      }
+      break;
+    }
+  } else {
+    std::cout << "No grasps found. Nothing to Visualize" << std::endl;
+  }
+  markerArray.markers.push_back(marker);
+  return markerArray;
+}
+
+/***************************************************************************//**
  * Method that gets the index of the centroid of the projected cloud
  *
  * @param cloud Projected Cloud

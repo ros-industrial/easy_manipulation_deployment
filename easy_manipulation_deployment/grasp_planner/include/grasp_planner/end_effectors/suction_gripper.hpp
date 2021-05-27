@@ -42,6 +42,8 @@
 // For Visualization
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 // ROS2 Libraries
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -166,6 +168,8 @@ public:
   std::string getID() {return id;}
 
   void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
+
+  visualization_msgs::msg::MarkerArray publishGraspsMarker(std::string camera_frame);
 
   int getCentroidIndex(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud);
