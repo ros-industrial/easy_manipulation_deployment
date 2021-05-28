@@ -69,6 +69,9 @@ GraspScene::GraspScene()
     this->create_publisher<emd_msgs::msg::GraspTask>(
     this->get_parameter(
       "grasp_output_topic").as_string(), 10);
+  // marker_pub =
+  //   this->create_publisher<visualization_msgs::msg::Marker>(
+  //     "grasp_marker", 10);
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
   this->buffer_->setUsingDedicatedThread(true);
@@ -222,6 +225,7 @@ void GraspScene::planningInit(const U & msg)
   }
   viewer->removeShape("original_cloud");
   RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
+  // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
   this->output_pub->publish(grasp_task);
   this->end_effectors.clear();
   this->grasp_objects.clear();
@@ -290,6 +294,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   }
   viewer->removeShape("original_cloud");
   RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
+  // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
   this->output_pub->publish(grasp_task);
   this->end_effectors.clear();
   this->grasp_objects.clear();

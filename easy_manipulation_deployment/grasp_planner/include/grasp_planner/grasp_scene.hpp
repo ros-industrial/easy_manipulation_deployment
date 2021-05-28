@@ -165,6 +165,8 @@ public:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener;
   /*! \brief Publisher that provides the GraspTask information for the Grasp execution component */
   rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr output_pub;
+  // /*! \brief Publisher that provides markers for RVIZ */
+  // rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
   /*! \brief Subscriber that subscribes to the camera output */
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>> cloud_sub;
   /*! \brief Message filter for pointcloud message */
