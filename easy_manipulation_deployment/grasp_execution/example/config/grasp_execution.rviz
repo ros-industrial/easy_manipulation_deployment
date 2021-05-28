@@ -393,18 +393,6 @@ Visualization Manager:
       Trail Step Size: 1
       Trajectory Topic: /display_planned_path
       Value: true
-    - Class: rviz_default_plugins/MarkerArray
-      Enabled: true
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /grasp_markers
-      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -437,6 +425,18 @@ Visualization Manager:
         Value: /camera/pointcloud
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /grasp_marker
       Value: true
   Enabled: true
   Global Options:
