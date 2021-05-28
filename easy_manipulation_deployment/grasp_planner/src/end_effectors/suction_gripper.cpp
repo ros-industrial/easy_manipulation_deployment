@@ -651,24 +651,24 @@ suctionCupArray SuctionGripper::generateGraspSample(
   const float & object_max_dim,
   std::string camera_frame)
 {
-  visualization_msgs::msg::Marker cup_marker;
-  cup_marker.header.frame_id = camera_frame;
-  cup_marker.ns = "";
-  cup_marker.type = cup_marker.SPHERE_LIST;
-  cup_marker.action = cup_marker.ADD;
-  cup_marker.lifetime = rclcpp::Duration::from_seconds(20);
-  cup_marker.scale.x = 0.02;
-  cup_marker.scale.y = 0.02;
-  cup_marker.scale.z = 0.02;
-  cup_marker.color.r = 1.0f;
-  cup_marker.color.a = 1.0;
-
 
   suctionCupArray grasp_sample(sample_gripper_center, row_direction, col_direction);
   Eigen::Vector3f sample_gripper_center_eigen = PCLFunctions::convertPCLtoEigen(
     sample_gripper_center);
   float total_contact_points = 0;
   float total_curvature = 0;
+
+  grasp_sample.marker.header.frame_id = camera_frame;
+  grasp_sample.marker.ns = "";
+  grasp_sample.marker.type = grasp_sample.marker.SPHERE_LIST;
+  grasp_sample.marker.action = grasp_sample.marker.ADD;
+  grasp_sample.marker.lifetime = rclcpp::Duration::from_seconds(20);
+  grasp_sample.marker.scale.x = 0.02;
+  grasp_sample.marker.scale.y = 0.02;
+  grasp_sample.marker.scale.z = 0.02;
+  grasp_sample.marker.color.r = 1.0f;
+  grasp_sample.marker.color.a = 1.0;
+
   for (int row = 0, row_updown_toggle = 0; row < this->row_itr; row += row_updown_toggle ^= 1) {
 
     // Get the constant gap between rows in each column
@@ -712,7 +712,7 @@ suctionCupArray SuctionGripper::generateGraspSample(
 
       total_curvature += cup.curvature_sum;
 
-      cup_marker.points.push_back(cup_marker_point);
+      grasp_sample.marker.points.push_back(cup_marker_point);
       temp_row_array.push_back(std::make_shared<singleSuctionCup>(cup));
     }
     grasp_sample.cup_array.push_back(temp_row_array);
@@ -721,7 +721,6 @@ suctionCupArray SuctionGripper::generateGraspSample(
   grasp_sample.total_curvature = total_curvature;
   grasp_sample.center_dist = pcl::geometry::distance(sample_gripper_center, object_center);
   grasp_sample.average_curvature = grasp_sample.total_curvature / grasp_sample.total_contact_points;
-  grasp_sample.marker_array.markers.push_back(cup_marker);
 
   return grasp_sample;
 }
@@ -886,21 +885,23 @@ void SuctionGripper::getAllGraspRanks(
       sorted_grasps.push_back(grasp);
       grasp_method->grasp_ranks.push_back(grasp->rank);
       grasp_method->grasp_poses.push_back(grasp_pose);
-      grasp_method->grasp_markers.push_back(grasp->marker_array);
+      grasp_method->grasp_markers.push_back(grasp->marker);
     } else {
       std::vector<std::shared_ptr<suctionCupArray>>::iterator grasp_it;
       std::vector<geometry_msgs::msg::PoseStamped>::iterator pose_it;
-      std::vector<visualization_msgs::msg::MarkerArray>::iterator marker_it;
+      std::vector<visualization_msgs::msg::Marker>::iterator markers_it;
+
       int index;
       for (index = 0, pose_it = grasp_method->grasp_poses.begin(), grasp_it = sorted_grasps.begin(),
-        marker_it = grasp_method->grasp_markers.begin();
+        markers_it = grasp_method->grasp_markers.begin();
         index < static_cast<int>(grasp_method->grasp_ranks.size());
-        ++index, ++pose_it, ++marker_it, ++grasp_it)
+        ++index, ++pose_it, ++grasp_it, ++markers_it)
       {
         if (grasp->rank > grasp_method->grasp_ranks[index]) {
           sorted_grasps.insert(grasp_it, grasp);
           grasp_method->grasp_ranks.insert(grasp_method->grasp_ranks.begin() + index, grasp->rank);
           grasp_method->grasp_poses.insert(pose_it, grasp_pose);
+          grasp_method->grasp_markers.insert(markers_it, grasp->marker);
           break;
         }
       }
