@@ -43,7 +43,6 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
 #include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 // ROS2 Libraries
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -122,7 +121,7 @@ struct suctionCupArray
   /*! \brief Vector representing the col direction */
   Eigen::Vector3f col_direction;
   /*! \brief Array of markers representing the grasp points of all suction cups  */
-  visualization_msgs::msg::MarkerArray marker_array;
+  visualization_msgs::msg::Marker marker;
 
   suctionCupArray(
     pcl::PointXYZ gripper_center_,

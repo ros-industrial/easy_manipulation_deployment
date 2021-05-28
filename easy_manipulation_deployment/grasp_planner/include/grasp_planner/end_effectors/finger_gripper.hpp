@@ -30,7 +30,6 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
 #include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 // ROS2 Libraries
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -121,8 +120,8 @@ struct multiFingerGripper
   float rank;
   /*! \brief Pose of gripper*/
   geometry_msgs::msg::PoseStamped pose;
-  /*! \brief Array of markers representing the grasp points of open congiruation on both sides */
-  visualization_msgs::msg::MarkerArray marker_array;
+  /*! \brief Marker representing the grasp points of open configuration on both sides */
+  visualization_msgs::msg::Marker marker;
   /*! \brief Centerpoint of gripper */
   pcl::PointXYZ gripper_palm_center;
   /*! \brief Middle finger on side 1 */

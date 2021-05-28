@@ -33,7 +33,7 @@
 #include <message_filters/subscriber.h>
 
 // Marker Array library
-#include "visualization_msgs/msg/marker_array.hpp"
+#include "visualization_msgs/msg/marker.hpp"
 
 // Other libraries
 #include <emd_msgs/msg/grasp_target.hpp>
