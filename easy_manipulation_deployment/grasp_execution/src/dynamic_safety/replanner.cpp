@@ -73,8 +73,12 @@ void Replanner::update(
     current_state_->setJointPositions(msg->name[i], {msg->position[i]});
 
     const auto & jm = current_state_->getJointModel(msg->name[i]);
-    current_state_->setJointVelocities(jm, &(msg->velocity[i]));
-    current_state_->setJointEfforts(jm, &(msg->effort[i]));
+    if (!msg->velocity.empty()) {
+      current_state_->setJointVelocities(jm, &(msg->velocity[i]));
+    }
+    if (!msg->effort.empty()) {
+      current_state_->setJointEfforts(jm, &(msg->effort[i]));
+    }
   }
   scene_->setCurrentState(*current_state_);
 }

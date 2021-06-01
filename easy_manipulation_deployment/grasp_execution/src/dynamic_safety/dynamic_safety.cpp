@@ -284,8 +284,12 @@ void DynamicSafety::_main_loop(const sensor_msgs::msg::JointState::SharedPtr & j
     current_state_->setJointPositions(joint_state_msg->name[i], {joint_state_msg->position[i]});
 
     const auto & jm = current_state_->getJointModel(joint_state_msg->name[i]);
-    current_state_->setJointVelocities(jm, &(joint_state_msg->velocity[i]));
-    current_state_->setJointEfforts(jm, &(joint_state_msg->effort[i]));
+    if (!joint_state_msg->velocity.empty()) {
+      current_state_->setJointVelocities(jm, &(joint_state_msg->velocity[i]));
+    }
+    if (!joint_state_msg->effort.empty()) {
+      current_state_->setJointEfforts(jm, &(joint_state_msg->effort[i]));
+    }
   }
   collision_checker_.update(*current_state_);
 

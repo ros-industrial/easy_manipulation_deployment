@@ -12,6 +12,12 @@
 	<origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
+ <!-- Import ur5 ros2_control description -->
+ <xacro:include filename="$(find ur5_moveit_config)/config/ur5.ros2_control.xacro" />
+
+ <xacro:arg name="initial_positions_file" default="$(find ur5_moveit_config)/config/initial_positions.yaml" />
+ <xacro:ur5_ros2_control name="UR5FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+   
  <!--xacro:include filename="$(find robotiq_85_description)/urdf/robotiq_85_gripper.urdf.xacro"/>
  <xacro:robotiq_85_gripper prefix="" parent="tool0">
 	<origin xyz="0 0 0" rpy="1.5707 -1.5707 0"/>

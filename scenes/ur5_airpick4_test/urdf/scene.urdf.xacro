@@ -12,6 +12,12 @@
 	<origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
+ <!-- Import ur5 ros2_control description -->
+ <xacro:include filename="$(find ur5_moveit_config)/config/ur5.ros2_control.xacro" />
+
+ <xacro:arg name="initial_positions_file" default="$(find ur5_moveit_config)/config/initial_positions.yaml" />
+ <xacro:ur5_ros2_control name="UR5FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+ 
  <xacro:include filename="$(find workbench_description)/urdf/table.urdf.xacro"/>
  <xacro:table prefix="" parent="world">
 	<origin xyz="0 0 0" rpy="0 0 0"/>

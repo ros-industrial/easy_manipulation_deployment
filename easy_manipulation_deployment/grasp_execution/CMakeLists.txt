@@ -45,6 +45,7 @@ ament_target_dependencies(grasp_execution_interface
 add_library(dynamic_safety
   SHARED
   src/dynamic_safety/next_point_publisher.cpp
+  src/dynamic_safety/replanner.cpp
   src/dynamic_safety/safety_zone.cpp
   src/dynamic_safety/collision_checker.cpp
   src/dynamic_safety/visualizer.cpp
@@ -74,11 +75,17 @@ ament_target_dependencies(moveit_cpp_grasp_execution_interface
 add_library(moveit_cpp_default_executor_plugin
   SHARED
   src/moveit2/executor/default_executor.cpp
+  src/moveit2/executor/ds_async_executor.cpp
 )
 ament_target_dependencies(moveit_cpp_default_executor_plugin
   moveit_ros_planning_interface
   rclcpp
 )
+
+target_link_libraries(moveit_cpp_default_executor_plugin
+  dynamic_safety
+)
+
 
 install(
   DIRECTORY include/

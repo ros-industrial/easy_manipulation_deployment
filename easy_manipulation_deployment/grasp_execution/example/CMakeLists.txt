@@ -8,6 +8,14 @@ ament_target_dependencies(demo_node
   rclcpp
 )
 
+add_executable(dynamic_safety_demo_node src/dynamic_safety_demo_node.cpp)
+target_link_libraries(dynamic_safety_demo_node
+  moveit_cpp_grasp_execution_interface
+)
+ament_target_dependencies(dynamic_safety_demo_node
+  rclcpp
+)
+
 add_executable(fake_grasp_pose_publisher src/fake_grasp_pose_publisher.cpp)
 ament_target_dependencies(fake_grasp_pose_publisher
   emd_msgs
@@ -18,6 +26,7 @@ ament_target_dependencies(fake_grasp_pose_publisher
 
 install(TARGETS
   demo_node
+  dynamic_safety_demo_node
   fake_grasp_pose_publisher
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}

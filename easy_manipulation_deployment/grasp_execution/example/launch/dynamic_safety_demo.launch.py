@@ -1,4 +1,4 @@
-# Copyright 2020 ROS Industrial Consortium Asia Pacific
+# Copyright 2021 ROS Industrial Consortium Asia Pacific
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,10 +67,6 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
-    # moveit_cpp.yaml is passed by filename for now since it's node specific
-    grasp_execution_yaml_file_name = (get_package_share_directory('grasp_execution') +
-                                      '/config/grasp_execution.yaml')
-
     # Initial position mapping
     initial_position_path = (get_package_share_directory('grasp_execution') +
                              '/config/start_positions.yaml')
@@ -113,15 +109,19 @@ def generate_launch_description():
             'moveit_simple_controller_manager/MoveItSimpleControllerManager'
         }
 
+    # moveit_cpp.yaml is passed by filename for now since it's node specific
+    dynamic_safety_yaml_file_name = (get_package_share_directory('grasp_execution') +
+                                     '/config/dynamic_safety_demo.yaml')
+
     # MoveItCpp demo executable
-    grasp_execution_demo_node = Node(
-        name='grasp_execution_node',
+    dynamic_safety_demo_node = Node(
+        name='dynamic_safety_demo_node',
         package='grasp_execution',
         # TODO(henningkayser): add debug argument
         # prefix='xterm -e gdb --args',
-        executable='demo_node',
+        executable='dynamic_safety_demo_node',
         output='screen',
-        parameters=[grasp_execution_yaml_file_name,
+        parameters=[dynamic_safety_yaml_file_name,
                     robot_description,
                     robot_description_semantic,
                     kinematics_yaml,
@@ -182,7 +182,7 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         rviz_node,
-        grasp_execution_demo_node,
+        dynamic_safety_demo_node,
         ros2_control_node,
         ]
         + load_controllers
