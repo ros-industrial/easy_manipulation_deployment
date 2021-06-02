@@ -78,6 +78,15 @@ MoveitCppGraspExecution::MoveitCppGraspExecution(
     executor_loader_->createUnmanagedInstance(
       "grasp_execution/DefaultExecutor"));
   default_executor_->load(moveit_cpp_, "");
+
+  // Initialized octomap if specified
+  bool load_octomap;
+  grasp_execution::declare_or_get_param<bool>(
+    load_octomap, "load_octomap", node, node->get_logger(), false);
+  if (load_octomap) {
+    moveit_cpp_->getPlanningSceneMonitor()->startWorldGeometryMonitor(
+      "/collision_object", "/planning_scene_world", load_octomap);
+  }
 }
 
 MoveitCppGraspExecution::~MoveitCppGraspExecution()

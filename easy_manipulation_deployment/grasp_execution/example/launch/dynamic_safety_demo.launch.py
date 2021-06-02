@@ -109,6 +109,13 @@ def generate_launch_description():
             'moveit_simple_controller_manager/MoveItSimpleControllerManager'
         }
 
+    # Octomap Integration
+    octomap_config = {'octomap_frame': '/camera_color_optical_frame',
+                      'octomap_resolution': 0.04,
+                      'max_range': 2.0}
+
+    octomap_updater_config = load_yaml('grasp_execution', 'config/sensors_3d.yaml')
+
     # moveit_cpp.yaml is passed by filename for now since it's node specific
     dynamic_safety_yaml_file_name = (get_package_share_directory('grasp_execution') +
                                      '/config/dynamic_safety_demo.yaml')
@@ -127,6 +134,8 @@ def generate_launch_description():
                     kinematics_yaml,
                     ompl_planning_pipeline_config,
                     trajectory_execution,
+                    octomap_config,
+                    octomap_updater_config,
                     moveit_controller]
         )
 

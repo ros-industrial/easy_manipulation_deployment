@@ -20,6 +20,9 @@ dynamic_safety_demo_node:
       max_velocity_scaling_factor: 1.0
       max_acceleration_scaling_factor: 1.0
 
+    # Load octomap
+    load_octomap: true
+
     # Dynamic safety parameters
     rate: 20
     allow_replan: true
