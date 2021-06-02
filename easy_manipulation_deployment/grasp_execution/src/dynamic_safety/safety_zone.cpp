@@ -24,7 +24,7 @@ bool SafetyZone::verify()
 {
   // check if vector strictly increasing
   for (int i = 0; i < 3; i++) {
-    if (zone_[i] > zone_[i + 1]) { \
+    if (zone_[i] > zone_[i + 1]) {
       return false;
     }
   }
