@@ -11,6 +11,11 @@ controller_manager:
 
 ur10_arm_controller:
   ros__parameters:
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
     joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
