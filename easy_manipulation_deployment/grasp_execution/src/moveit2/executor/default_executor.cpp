@@ -56,7 +56,11 @@ bool DefaultExecutor::run(
 
   // ALWAYS BLOCKING !!!
   auto status = trajectory_execution_manager_->waitForExecution();
-  return status == moveit_controller_manager::ExecutionStatus::SUCCEEDED;
+
+  // Allow timeout
+  // TODO(anyone): fix doesn't finish in time problem.
+  return (status == moveit_controller_manager::ExecutionStatus::SUCCEEDED) ||
+         (status == moveit_controller_manager::ExecutionStatus::TIMED_OUT);
 }
 
 }  // namespace moveit2

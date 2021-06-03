@@ -117,11 +117,6 @@ public:
   {
     double clearance = CLEARANCE;
 
-    // Disable trajectory duration monitoring for now
-    // TODO(Briancbn): remove this when unplanned delay fixed.
-    this->moveit_cpp_->getTrajectoryExecutionManagerNonConst()->
-    enableExecutionDurationMonitoring(false);
-
     // Get home state
     moveit::core::RobotStatePtr home_state(get_curr_state());
 
