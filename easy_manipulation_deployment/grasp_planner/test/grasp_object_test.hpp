@@ -14,8 +14,8 @@
 // limitations under the License.
 
 
-#ifndef PCL_FUNCTIONS_TEST_HPP_
-#define PCL_FUNCTIONS_TEST_HPP_
+#ifndef GRASP_OBJECT_TEST_HPP_
+#define GRASP_OBJECT_TEST_HPP_
 
 #include <gtest/gtest.h>
 
@@ -30,17 +30,20 @@
 #include <vector>
 #include <limits>
 
-#include "grasp_planner/end_effectors/finger_gripper.hpp"
-#include "grasp_planner/common/pcl_functions.hpp"
-#include "grasp_planner/common/fcl_types.hpp"
 #include "grasp_planner/grasp_object.hpp"
 
-class PCLFunctionsTest : public ::testing::Test
+class GraspObjectTest : public ::testing::Test
 {
 public:
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr rectangle_cloud;
-  PCLFunctionsTest();
-  void GenerateCloud(float length, float breadth, float height);
+  std::shared_ptr<GraspObject> object;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr object_cloud;
+  Eigen::Vector3f world_x{1, 0, 0};
+  Eigen::Vector3f world_y{0, 1, 0};
+  Eigen::Vector3f world_z{0, 0, 1};
+
+  GraspObjectTest();
+  void GenerateObjectCloud(float length, float breadth, float height);
+
   void SetUp(void)
   {
     std::cout << "Setup" << std::endl;
@@ -51,4 +54,4 @@ public:
   }
 };
 
-#endif  // PCL_FUNCTIONS_TEST_HPP_
+#endif  // GRASP_OBJECT_TEST_HPP_

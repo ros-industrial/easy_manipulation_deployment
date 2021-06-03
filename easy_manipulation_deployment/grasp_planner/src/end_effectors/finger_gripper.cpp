@@ -1148,7 +1148,6 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllRanks(
     std::vector<geometry_msgs::msg::PoseStamped>::iterator grasps_it;
     std::vector<std::shared_ptr<multiFingerGripper>>::iterator contacts_it;
     std::vector<visualization_msgs::msg::Marker>::iterator markers_it;
-
     size_t rank;
     for (rank = 0,
       grasps_it = grasp_method->grasp_poses.begin(), contacts_it = sorted_gripper_ranks.begin(),
@@ -1248,7 +1247,7 @@ std::vector<double> FingerGripper::getPlanarRPY(
   } else {
     RCLCPP_ERROR(LOGGER, "RPY estimation error.");
     throw std::runtime_error("RPY estimation error.");
-    return output_vec;
+    return {0, 0, 0};
   }
 
   double roll = std::atan2(-z_norm(1), z_norm(2));
@@ -1289,12 +1288,7 @@ void FingerGripper::getGraspPose(
   std::vector<double> rpy = getPlanarRPY(
     gripper->grasping_direction,
     gripper->grasping_normal_direction);
-  if (static_cast<int>(rpy.size()) == 3) {
-    quaternion_.setRPY(0, 0, rpy[2]);
-  } else {
-    RCLCPP_ERROR(LOGGER, "Pose estimation error. Assume 0 pose");
-    quaternion_.setRPY(0, 0, 0);
-  }
+  quaternion_.setRPY(0, 0, rpy[2]);
 
   //test_end
   // quaternion_.setRPY(0, 0, y);
@@ -1363,15 +1357,21 @@ void FingerGripper::resetVariables()
 {
 }
 
+// LCOV_EXCL_START
 /***************************************************************************//**
  * Inherited method that visualizes the required grasps
  *
  * @param viewer Projected Cloud Visualizer
  ******************************************************************************/
-void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
+void FingerGripper::visualizeGrasps(
+  pcl::visualization::PCLVisualizer::Ptr viewer,
+  std::shared_ptr<GraspObject> object)
 {
-  viewer->addCoordinateSystem(0.5);
-  // std::cout << "Visualizing " << this->sorted_gripper_configs.size() << " grasps" << std::endl;
+  PCLVisualizer::centerCamera(object->cloud, viewer);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 255, 0,
+    0);
+
+  viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud_" + object->object_name);
   for (auto const & multigripper : this->sorted_gripper_configs) {
 
     //Testing
@@ -1430,11 +1430,21 @@ void FingerGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewe
 
       viewer->addSphere(os_point_2, 0.01, 0, 1.0, 0, "finger_point_os_2" + std::to_string(os_2));
     }
+
+    viewer->addCoordinateSystem(0.5);
+    viewer->addCube(
+      object->bboxTransform, object->bboxQuaternion,
+      object->maxPoint.x - object->minPoint.x,
+      object->maxPoint.y - object->minPoint.y,
+      object->maxPoint.z - object->minPoint.z, "bbox_" + object->object_name);
     viewer->spin();
     viewer->close();
     viewer->removeAllShapes();
   }
+  viewer->removeAllPointClouds();
+  viewer->removeAllCoordinateSystems();
 }
+// LCOV_EXCL_STOP
 
 /***************************************************************************//**
  * Method that generates the grasp sample for a particular plane vector

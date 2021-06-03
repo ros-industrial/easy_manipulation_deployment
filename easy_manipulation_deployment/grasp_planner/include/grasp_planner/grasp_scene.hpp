@@ -53,10 +53,6 @@
 #include <vector>
 #include <limits>
 
-// For uuid
-#include <random>
-#include <sstream>
-
 #include "rclcpp/rclcpp.hpp"
 
 // Custom Libraries
@@ -65,7 +61,6 @@
 #include "grasp_planner/grasp_object.hpp"
 #include "grasp_planner/common/conversions.hpp"
 #include "grasp_planner/common/pcl_functions.hpp"
-#include "grasp_planner/common/pcl_visualizer.hpp"
 #include "grasp_planner/common/fcl_functions.hpp"
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("GraspScene");
@@ -91,8 +86,6 @@ public:
   void loadEndEffectors();
   void processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
   void createWorldCollision(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
-
-  std::string generate_task_id();
 
   // void EPDCreateWorldCollisionObject(
   //   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);

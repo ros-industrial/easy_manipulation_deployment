@@ -57,6 +57,7 @@
 #include "grasp_planner/common/fcl_functions.hpp"
 #include "grasp_planner/common/math_functions.hpp"
 #include "grasp_planner/end_effectors/end_effector.hpp"
+#include "grasp_planner/common/pcl_visualizer.hpp"
 
 /*! \brief General Struct for a single finger in a gripper sample  */
 struct singleFinger
@@ -350,7 +351,9 @@ public:
 
   void addPlane(float dist, Eigen::Vector4f centerpoint, Eigen::Vector4f plane_vector);
 
-  void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
+  void visualizeGrasps(
+    pcl::visualization::PCLVisualizer::Ptr viewer,
+    std::shared_ptr<GraspObject> object);
 
   Eigen::Vector3f getPerpendicularVectorInPlane(
     Eigen::Vector3f target_vector,

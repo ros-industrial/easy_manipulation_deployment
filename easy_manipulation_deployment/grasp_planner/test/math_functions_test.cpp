@@ -92,3 +92,50 @@ TEST(MathFunctionTest, getPointInDirectionTestNegDir)
   EXPECT_NEAR(0, point_2(1), 0.0001);
   EXPECT_NEAR(0, point_2(2), 0.0001);
 }
+
+TEST(MathFunctionTest, getRotatedVectorTestXRot)
+{
+  Eigen::Vector3f direction{0, 0, 1};
+  Eigen::Vector3f direction2{1, 0, 0};
+  Eigen::Vector3f result = MathFunctions::getRotatedVector(
+    direction, 1.57079632679, 'x');
+  EXPECT_NEAR(0, direction.dot(result), 0.0001);
+  EXPECT_NEAR(0, direction2.dot(result), 0.0001);
+}
+
+TEST(MathFunctionTest, getRotatedVectorTestYRot)
+{
+  Eigen::Vector3f direction{1, 0, 0};
+  Eigen::Vector3f direction2{0, 1, 0};
+  Eigen::Vector3f result = MathFunctions::getRotatedVector(
+    direction, 1.57079632679, 'y');
+  EXPECT_NEAR(0, direction.dot(result), 0.0001);
+  EXPECT_NEAR(0, direction2.dot(result), 0.0001);
+}
+
+TEST(MathFunctionTest, getRotatedVectorTestZRot)
+{
+  Eigen::Vector3f direction{0, 1, 0};
+  Eigen::Vector3f direction2{0, 0, 1};
+  Eigen::Vector3f result = MathFunctions::getRotatedVector(
+    direction, 1.57079632679, 'z');
+  EXPECT_NEAR(0, direction.dot(result), 0.0001);
+  EXPECT_NEAR(0, direction2.dot(result), 0.0001);
+}
+
+TEST(MathFunctionTest, getRotatedVectorTestWrongRot)
+{
+  Eigen::Vector3f direction{0, 1, 0};
+  Eigen::Vector3f direction2{0, 0, 1};
+  EXPECT_THROW(
+    MathFunctions::getRotatedVector(
+      direction, 1.57079632679, 'o'), std::invalid_argument);
+}
+
+TEST(MathFunctionTest, generateTaskIdTest)
+{
+  for (int i = 0; i < 10; i++) {
+    EXPECT_FALSE(MathFunctions::generate_task_id() == MathFunctions::generate_task_id());
+  }
+
+}

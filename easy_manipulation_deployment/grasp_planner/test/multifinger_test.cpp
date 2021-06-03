@@ -239,6 +239,58 @@ TEST_F(MultiFingerTest, FingerSidesZero)
   EXPECT_NO_THROW(LoadGripper());
 }
 
+TEST_F(MultiFingerTest, FingerDistZero)
+{
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0;
+  EXPECT_NO_THROW(LoadGripper());
+
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_NO_THROW(LoadGripper());
+
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.01;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 1;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0;
+  EXPECT_NO_THROW(LoadGripper());
+}
+
 TEST_F(MultiFingerTest, FingerSidesNeg)
 {
   ResetVariables();
@@ -320,6 +372,17 @@ TEST_F(MultiFingerTest, GripperStrokeNeg)
   ResetVariables();
   gripper_stroke = -0.1;
   EXPECT_THROW(LoadGripper(), std::invalid_argument);
+}
+
+TEST_F(MultiFingerTest, ThicknessMoreThanStroke)
+{
+  ResetVariables();
+  gripper_stroke = 0.005;
+  EXPECT_THROW(LoadGripper(), std::invalid_argument);
+
+  gripper_stroke = 0.02;
+  finger_thickness = 0.01;
+  EXPECT_NO_THROW(LoadGripper());
 }
 
 TEST_F(MultiFingerTest, AddPlaneTestInside1)
@@ -482,6 +545,7 @@ TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedOdd)
   EXPECT_NEAR(0.02, gripper->cutting_plane_distances[2], 0.00001);
 }
 
+
 TEST_F(MultiFingerTest, addCuttingPlanesEqualAlignedEven)
 {
   GenerateObjectHorizontal();
@@ -560,6 +624,30 @@ TEST_F(MultiFingerTest, addCuttingPlanesSameDistDiffFingersEvenOdd)
   EXPECT_NEAR(0.02, gripper->cutting_plane_distances[4], 0.00001);
   EXPECT_NEAR(-0.04, gripper->cutting_plane_distances[5], 0.00001);
   EXPECT_NEAR(0.04, gripper->cutting_plane_distances[6], 0.00001);
+}
+
+TEST_F(MultiFingerTest, addCuttingPlanesWithExisting)
+{
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 3;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->addCuttingPlanes(object->centerpoint, gripper->center_cutting_plane, 1, 1, 0.01, 0.01);
+  ASSERT_EQ(2, static_cast<int>(gripper->plane_1_index.size()));
+  ASSERT_EQ(3, static_cast<int>(gripper->plane_2_index.size()));
+  EXPECT_EQ(1, gripper->plane_1_index[0]);
+  EXPECT_EQ(2, gripper->plane_1_index[1]);
+  EXPECT_EQ(0, gripper->plane_2_index[0]);
+  EXPECT_EQ(1, gripper->plane_2_index[1]);
+  EXPECT_EQ(2, gripper->plane_2_index[2]);
+  ASSERT_EQ(3, static_cast<int>(gripper->cutting_plane_distances.size()));
+  EXPECT_EQ(0, gripper->cutting_plane_distances[0]);
+  EXPECT_NEAR(-0.01, gripper->cutting_plane_distances[1], 0.00001);
+  EXPECT_NEAR(0.01, gripper->cutting_plane_distances[2], 0.00001);
 }
 
 TEST_F(MultiFingerTest, addCuttingPlanesDiffDistDiffFingersOddEven)
@@ -954,91 +1042,112 @@ TEST_F(MultiFingerTest, GetCuttingPlaneEvenOddDiffDist)
 // Disabled tests for CI/CD
 TEST_F(MultiFingerTest, GetGraspCloudTest)
 {
-  // GenerateObjectHorizontal();
-  // ResetVariables();
-  // num_fingers_side_1 = 3;
-  // num_fingers_side_2 = 2;
-  // distance_between_fingers_1 = 0.06;
-  // distance_between_fingers_2 = 0.02;
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.02;
 
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_TRUE(gripper->getGraspCloud(object));
 
-  // ASSERT_EQ(5, static_cast<int>(gripper->grasp_samples.size()));
-  // EXPECT_TRUE(gripper->grasp_samples[0]->plane_intersects_object);
-  // EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[1]->plane_intersects_object));
-  // EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[2]->plane_intersects_object));
+  ASSERT_EQ(5, static_cast<int>(gripper->grasp_samples.size()));
+  EXPECT_TRUE(gripper->grasp_samples[0]->plane_intersects_object);
+  EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[1]->plane_intersects_object));
+  EXPECT_FALSE(static_cast<int>(gripper->grasp_samples[2]->plane_intersects_object));
 
-  // EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[3]->plane_intersects_object));
-  // EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[4]->plane_intersects_object));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[3]->plane_intersects_object));
+  EXPECT_TRUE(static_cast<int>(gripper->grasp_samples[4]->plane_intersects_object));
+}
+
+TEST_F(MultiFingerTest, GetGraspCloudTestFalse)
+{
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 2;
+  distance_between_fingers_2 = 2;
+
+
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  ASSERT_FALSE(gripper->getGraspCloud(object));
+
+  for (auto & sample : gripper->grasp_samples) {
+    ASSERT_FALSE(sample->plane_intersects_object);
+  }
+
 }
 
 // Disabled tests for CI/CD
 TEST_F(MultiFingerTest, InitialSamplePointsTestHorizontal)
 {
-  // GenerateObjectHorizontal();
-  // ResetVariables();
-  // num_fingers_side_1 = 3;
-  // num_fingers_side_2 = 2;
-  // distance_between_fingers_1 = 0.06;
-  // distance_between_fingers_2 = 0.02;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 3;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.06;
+  distance_between_fingers_2 = 0.02;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
 
-  // ASSERT_TRUE(gripper->getInitialSamplePoints(object));
-  // EXPECT_GE(gripper->grasp_samples[0]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[0]->sample_side_2->start_index, 0);
+  ASSERT_TRUE(gripper->getInitialSamplePoints(object));
+  EXPECT_GE(gripper->grasp_samples[0]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[0]->sample_side_2->start_index, 0);
 
-  // EXPECT_LT(gripper->grasp_samples[1]->sample_side_1->start_index, 0);
-  // EXPECT_LT(gripper->grasp_samples[1]->sample_side_2->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[1]->sample_side_1->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[1]->sample_side_2->start_index, 0);
 
-  // EXPECT_LT(gripper->grasp_samples[2]->sample_side_1->start_index, 0);
-  // EXPECT_LT(gripper->grasp_samples[2]->sample_side_2->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[2]->sample_side_1->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[2]->sample_side_2->start_index, 0);
 
-  // EXPECT_GE(gripper->grasp_samples[3]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[3]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[3]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[3]->sample_side_2->start_index, 0);
 
-  // EXPECT_GE(gripper->grasp_samples[4]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[4]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[4]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[4]->sample_side_2->start_index, 0);
 }
 
 TEST_F(MultiFingerTest, InitialSamplePointsTestVertical)
 {
-  // GenerateObjectVertical();
-  // ResetVariables();
-  // num_fingers_side_1 = 2;
-  // num_fingers_side_2 = 4;
-  // distance_between_fingers_1 = 0.01;
-  // distance_between_fingers_2 = 0.04;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
-  // gripper->getInitialSamplePoints(object);
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 2;
+  num_fingers_side_2 = 4;
+  distance_between_fingers_1 = 0.01;
+  distance_between_fingers_2 = 0.04;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
 
-  // ASSERT_EQ(6, static_cast<int>(gripper->grasp_samples.size()));
+  ASSERT_EQ(6, static_cast<int>(gripper->grasp_samples.size()));
 
-  // EXPECT_GE(gripper->grasp_samples[0]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[0]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[0]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[0]->sample_side_2->start_index, 0);
 
-  // EXPECT_GE(gripper->grasp_samples[1]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[1]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[1]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[1]->sample_side_2->start_index, 0);
 
-  // EXPECT_GE(gripper->grasp_samples[2]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[2]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[2]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[2]->sample_side_2->start_index, 0);
 
-  // EXPECT_GE(gripper->grasp_samples[3]->sample_side_1->start_index, 0);
-  // EXPECT_GE(gripper->grasp_samples[3]->sample_side_2->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[3]->sample_side_1->start_index, 0);
+  EXPECT_GE(gripper->grasp_samples[3]->sample_side_2->start_index, 0);
 
-  // EXPECT_LT(gripper->grasp_samples[4]->sample_side_1->start_index, 0);
-  // EXPECT_LT(gripper->grasp_samples[4]->sample_side_2->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[4]->sample_side_1->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[4]->sample_side_2->start_index, 0);
 
-  // EXPECT_LT(gripper->grasp_samples[5]->sample_side_1->start_index, 0);
-  // EXPECT_LT(gripper->grasp_samples[5]->sample_side_2->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[5]->sample_side_1->start_index, 0);
+  EXPECT_LT(gripper->grasp_samples[5]->sample_side_2->start_index, 0);
 }
 
 TEST_F(MultiFingerTest, GetInitialSampleCloudTest)
@@ -1558,195 +1667,196 @@ TEST_F(MultiFingerTest, getNearestPlaneIndexTest)
 // Disabled tests for CI/CD
 TEST_F(MultiFingerTest, getNearestPointIndexTest)
 {
-  // GenerateObjectVertical();
-  // ResetVariables();
-  // num_fingers_side_1 = 4;
-  // num_fingers_side_2 = 2;
-  // distance_between_fingers_1 = 0.02;
-  // distance_between_fingers_2 = 0.01;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
-  // gripper->getInitialSamplePoints(object);
-  // gripper->getInitialSampleCloud(object);
-  // gripper->voxelizeSampleCloud();
-  // gripper->getMaxMinValues(object);
-  // gripper->getFingerSamples(object);
-  // EXPECT_EQ(static_cast<int>(gripper->gripper_clusters.size()), 0);
-  // gripper->getGripperClusters();
-  // pcl::PointNormal midpoint;
-  // midpoint.x = 0.005;
-  // midpoint.y = 0.025;
-  // midpoint.z = 0.01;
-  // EXPECT_GT(gripper->getNearestPointIndex(midpoint, object->cloud_normal), 0);
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  EXPECT_EQ(static_cast<int>(gripper->gripper_clusters.size()), 0);
+  gripper->getGripperClusters();
+  pcl::PointNormal midpoint;
+  midpoint.x = 0.005;
+  midpoint.y = 0.025;
+  midpoint.z = 0.01;
+  EXPECT_GT(gripper->getNearestPointIndex(midpoint, object->cloud_normal), 0);
 
-  // pcl::PointNormal origin;
-  // origin.x = 0;
-  // origin.y = 0;
-  // origin.z = 0;
-  // EXPECT_EQ(gripper->getNearestPointIndex(origin, object->cloud_normal), 0);
+  pcl::PointNormal origin;
+  origin.x = 0;
+  origin.y = 0;
+  origin.z = 0;
+  EXPECT_EQ(gripper->getNearestPointIndex(origin, object->cloud_normal), 0);
 
-  // pcl::PointNormal bottom_corner;
-  // midpoint.x = 0.01;
-  // midpoint.y = 0.05;
-  // midpoint.z = 0.02;
-  // EXPECT_EQ(
-  //   gripper->getNearestPointIndex(midpoint, object->cloud_normal),
-  //   static_cast<int>(object->cloud_normal->points.size()) - 1);
+  pcl::PointNormal bottom_corner;
+  midpoint.x = 0.01;
+  midpoint.y = 0.05;
+  midpoint.z = 0.02;
+  EXPECT_EQ(
+    gripper->getNearestPointIndex(midpoint, object->cloud_normal),
+    static_cast<int>(object->cloud_normal->points.size()) - 1);
 }
 
 // Disabled tests for CI/CD
 TEST_F(MultiFingerTest, generateGripperOpenConfigTest)
 {
-  // GenerateObjectHorizontal();
-  // ResetVariables();
-  // num_fingers_side_1 = 4;
-  // num_fingers_side_2 = 2;
-  // distance_between_fingers_1 = 0.02;
-  // distance_between_fingers_2 = 0.01;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
-  // gripper->getInitialSamplePoints(object);
-  // gripper->getInitialSampleCloud(object);
-  // gripper->voxelizeSampleCloud();
-  // gripper->getMaxMinValues(object);
-  // gripper->getFingerSamples(object);
-  // gripper->getGripperClusters();
+  GenerateObjectHorizontal();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
 
-  // Eigen::Vector3f closed_finger_point_1(0.005, 0.025, 0.025);
-  // Eigen::Vector3f closed_finger_point_2(0.005, 0.025, -0.005);
-  // pcl::PointNormal finger_point_1;
-  // finger_point_1.x = closed_finger_point_1(0);
-  // finger_point_1.y = closed_finger_point_1(1);
-  // finger_point_1.z = closed_finger_point_1(2);
+  Eigen::Vector3f closed_finger_point_1(0.005, 0.025, 0.025);
+  Eigen::Vector3f closed_finger_point_2(0.005, 0.025, -0.005);
+  pcl::PointNormal finger_point_1;
+  finger_point_1.x = closed_finger_point_1(0);
+  finger_point_1.y = closed_finger_point_1(1);
+  finger_point_1.z = closed_finger_point_1(2);
 
-  // pcl::PointNormal finger_point_2;
-  // finger_point_2.x = closed_finger_point_2(0);
-  // finger_point_2.y = closed_finger_point_2(1);
-  // finger_point_2.z = closed_finger_point_2(2);
+  pcl::PointNormal finger_point_2;
+  finger_point_2.x = closed_finger_point_2(0);
+  finger_point_2.y = closed_finger_point_2(1);
+  finger_point_2.z = closed_finger_point_2(2);
 
-  // Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
-  //   closed_finger_point_1, closed_finger_point_2).direction();
+  Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
+    closed_finger_point_1, closed_finger_point_2).direction();
 
-  // auto finger_1 = std::make_shared<singleFinger>(
-  //   finger_point_1,
-  //   0, 0, 0, 0
-  // );
-  // auto finger_2 = std::make_shared<singleFinger>(
-  //   finger_point_2,
-  //   0, 0, 0, 0
-  // );
-  // Eigen::Vector3f perpendicular_grasp_direction = gripper->getGripperPlane(
-  //   finger_1,
-  //   finger_2,
-  //   grasp_direction,
-  //   object
-  // );
+  auto finger_1 = std::make_shared<singleFinger>(
+    finger_point_1,
+    0, 0, 0, 0
+  );
+  auto finger_2 = std::make_shared<singleFinger>(
+    finger_point_2,
+    0, 0, 0, 0
+  );
+  Eigen::Vector3f perpendicular_grasp_direction = gripper->getGripperPlane(
+    finger_1,
+    finger_2,
+    grasp_direction,
+    object
+  );
 
-  // std::vector<Eigen::Vector3f> open_coords = gripper->getOpenFingerCoordinates(
-  //   grasp_direction,
-  //   closed_finger_point_1,
-  //   closed_finger_point_2);
+  std::vector<Eigen::Vector3f> open_coords = gripper->getOpenFingerCoordinates(
+    grasp_direction,
+    closed_finger_point_1,
+    closed_finger_point_2);
 
-  // GenerateObjectCollision(0.01, 0.05, 0.02);
-  // std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
-  //   collision_object_ptr, finger_1, finger_2,
-  //   open_coords[0], open_coords[1], perpendicular_grasp_direction,
-  //   grasp_direction);
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
+    collision_object_ptr, finger_1, finger_2,
+    open_coords[0], open_coords[1], perpendicular_grasp_direction,
+    grasp_direction, "camera_frame");
 
-  // EXPECT_FALSE(gripper_sample->collides_with_world);
-  // EXPECT_EQ(4, static_cast<int>(gripper_sample->closed_fingers_1.size()));
-  // EXPECT_EQ(4, static_cast<int>(gripper_sample->open_fingers_1.size()));
-  // EXPECT_EQ(2, static_cast<int>(gripper_sample->closed_fingers_2.size()));
-  // EXPECT_EQ(2, static_cast<int>(gripper_sample->open_fingers_2.size()));
+  EXPECT_FALSE(gripper_sample->collides_with_world);
+  EXPECT_EQ(4, static_cast<int>(gripper_sample->closed_fingers_1.size()));
+  EXPECT_EQ(4, static_cast<int>(gripper_sample->open_fingers_1.size()));
+  EXPECT_EQ(2, static_cast<int>(gripper_sample->closed_fingers_2.size()));
+  EXPECT_EQ(2, static_cast<int>(gripper_sample->open_fingers_2.size()));
 
-  // EXPECT_EQ(0, gripper_sample->closed_fingers_1[0]->plane_index);
-  // EXPECT_EQ(1, gripper_sample->closed_fingers_1[1]->plane_index);
-  // EXPECT_EQ(2, gripper_sample->closed_fingers_1[2]->plane_index);
-  // EXPECT_EQ(3, gripper_sample->closed_fingers_1[3]->plane_index);
+  EXPECT_EQ(0, gripper_sample->closed_fingers_1[0]->plane_index);
+  EXPECT_EQ(1, gripper_sample->closed_fingers_1[1]->plane_index);
+  EXPECT_EQ(2, gripper_sample->closed_fingers_1[2]->plane_index);
+  EXPECT_EQ(3, gripper_sample->closed_fingers_1[3]->plane_index);
 
-  // EXPECT_EQ(4, gripper_sample->closed_fingers_2[0]->plane_index);
-  // EXPECT_EQ(5, gripper_sample->closed_fingers_2[1]->plane_index);
+  EXPECT_EQ(4, gripper_sample->closed_fingers_2[0]->plane_index);
+  EXPECT_EQ(5, gripper_sample->closed_fingers_2[1]->plane_index);
 }
 
 // Disabled tests for CI/CD
 TEST_F(MultiFingerTest, generateGripperOpenConfigTestCollision)
 {
-  // GenerateObjectVertical();
-  // ResetVariables();
-  // num_fingers_side_1 = 4;
-  // num_fingers_side_2 = 2;
-  // distance_between_fingers_1 = 0.02;
-  // distance_between_fingers_2 = 0.01;
-  // gripper_stroke = 0.03;
-  // ASSERT_NO_THROW(LoadGripper());
-  // gripper->getCenterCuttingPlane(object);
-  // gripper->getCuttingPlanes(object);
-  // gripper->getGraspCloud(object);
-  // gripper->getInitialSamplePoints(object);
-  // gripper->getInitialSampleCloud(object);
-  // gripper->voxelizeSampleCloud();
-  // gripper->getMaxMinValues(object);
-  // gripper->getFingerSamples(object);
-  // gripper->getGripperClusters();
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 4;
+  num_fingers_side_2 = 3;
+  distance_between_fingers_1 = 0.02;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
 
-  // Eigen::Vector3f closed_finger_point_1(0.005, 0.025, 0.025);
-  // Eigen::Vector3f closed_finger_point_2(0.005, 0.025, 0.0);
-  // pcl::PointNormal finger_point_1;
-  // finger_point_1.x = closed_finger_point_1(0);
-  // finger_point_1.y = closed_finger_point_1(1);
-  // finger_point_1.z = closed_finger_point_1(2);
+  Eigen::Vector3f closed_finger_point_1(0.005, 0.025, 0.025);
+  Eigen::Vector3f closed_finger_point_2(0.005, 0.025, 0.0);
+  pcl::PointNormal finger_point_1;
+  finger_point_1.x = closed_finger_point_1(0);
+  finger_point_1.y = closed_finger_point_1(1);
+  finger_point_1.z = closed_finger_point_1(2);
 
-  // pcl::PointNormal finger_point_2;
-  // finger_point_2.x = closed_finger_point_2(0);
-  // finger_point_2.y = closed_finger_point_2(1);
-  // finger_point_2.z = closed_finger_point_2(2);
+  pcl::PointNormal finger_point_2;
+  finger_point_2.x = closed_finger_point_2(0);
+  finger_point_2.y = closed_finger_point_2(1);
+  finger_point_2.z = closed_finger_point_2(2);
 
-  // Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
-  //   closed_finger_point_1, closed_finger_point_2).direction();
+  Eigen::Vector3f grasp_direction = Eigen::ParametrizedLine<float, 3>::Through(
+    closed_finger_point_1, closed_finger_point_2).direction();
 
-  // auto finger_1 = std::make_shared<singleFinger>(
-  //   finger_point_1,
-  //   0, 0, 0, 0
-  // );
-  // auto finger_2 = std::make_shared<singleFinger>(
-  //   finger_point_2,
-  //   0, 0, 0, 0
-  // );
-  // Eigen::Vector3f perpendicular_grasp_direction = gripper->getGripperPlane(
-  //   finger_1,
-  //   finger_2,
-  //   grasp_direction,
-  //   object
-  // );
+  auto finger_1 = std::make_shared<singleFinger>(
+    finger_point_1,
+    0, 0, 0, 0
+  );
+  auto finger_2 = std::make_shared<singleFinger>(
+    finger_point_2,
+    0, 0, 0, 0
+  );
+  Eigen::Vector3f perpendicular_grasp_direction = gripper->getGripperPlane(
+    finger_1,
+    finger_2,
+    grasp_direction,
+    object
+  );
 
-  // std::vector<Eigen::Vector3f> open_coords = gripper->getOpenFingerCoordinates(
-  //   grasp_direction,
-  //   closed_finger_point_1,
-  //   closed_finger_point_2);
+  std::vector<Eigen::Vector3f> open_coords = gripper->getOpenFingerCoordinates(
+    grasp_direction,
+    closed_finger_point_1,
+    closed_finger_point_2);
 
-  // GenerateObjectCollision(0.01, 0.05, 0.02);
-  // std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
-  //   collision_object_ptr, finger_1, finger_2,
-  //   open_coords[0], open_coords[1], perpendicular_grasp_direction,
-  //   grasp_direction);
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::shared_ptr<multiFingerGripper> gripper_sample = gripper->generateGripperOpenConfig(
+    collision_object_ptr, finger_1, finger_2,
+    open_coords[0], open_coords[1], perpendicular_grasp_direction,
+    grasp_direction, "camera_frame");
 
-  // EXPECT_TRUE(gripper_sample->collides_with_world);
-  // EXPECT_EQ(4, static_cast<int>(gripper_sample->closed_fingers_1.size()));
-  // EXPECT_EQ(4, static_cast<int>(gripper_sample->open_fingers_1.size()));
-  // EXPECT_EQ(2, static_cast<int>(gripper_sample->closed_fingers_2.size()));
-  // EXPECT_EQ(2, static_cast<int>(gripper_sample->open_fingers_2.size()));
+  EXPECT_TRUE(gripper_sample->collides_with_world);
+  EXPECT_EQ(4, static_cast<int>(gripper_sample->closed_fingers_1.size()));
+  EXPECT_EQ(4, static_cast<int>(gripper_sample->open_fingers_1.size()));
+  EXPECT_EQ(3, static_cast<int>(gripper_sample->closed_fingers_2.size()));
+  EXPECT_EQ(3, static_cast<int>(gripper_sample->open_fingers_2.size()));
 
-  // EXPECT_EQ(0, gripper_sample->closed_fingers_1[0]->plane_index);
-  // EXPECT_EQ(1, gripper_sample->closed_fingers_1[1]->plane_index);
-  // EXPECT_EQ(2, gripper_sample->closed_fingers_1[2]->plane_index);
-  // EXPECT_EQ(3, gripper_sample->closed_fingers_1[3]->plane_index);
+  EXPECT_EQ(1, gripper_sample->closed_fingers_1[0]->plane_index);
+  EXPECT_EQ(2, gripper_sample->closed_fingers_1[1]->plane_index);
+  EXPECT_EQ(3, gripper_sample->closed_fingers_1[2]->plane_index);
+  EXPECT_EQ(4, gripper_sample->closed_fingers_1[3]->plane_index);
 
-  // EXPECT_EQ(4, gripper_sample->closed_fingers_2[0]->plane_index);
-  // EXPECT_EQ(5, gripper_sample->closed_fingers_2[1]->plane_index);
+  EXPECT_EQ(0, gripper_sample->closed_fingers_2[0]->plane_index);
+  EXPECT_EQ(1, gripper_sample->closed_fingers_2[1]->plane_index);
+  EXPECT_EQ(2, gripper_sample->closed_fingers_2[2]->plane_index);
 }
 
 TEST_F(MultiFingerTest, getAllGripperConfigsTest)
@@ -1828,9 +1938,140 @@ TEST_F(MultiFingerTest, getGripperRankTest)
   }
 }
 
+TEST_F(MultiFingerTest, getPlanarRPYTestXYZ)
+{
+  ResetVariables();
+  ASSERT_NO_THROW(LoadGripper());
+
+  std::vector<double> output = gripper->getPlanarRPY({1, 0, 0}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({0, 1, 0}, {-1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[2])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, 0, -1}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[1])), 0.00001);
+
+  std::vector<double> output4 = gripper->getPlanarRPY({1, 0, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output4[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output4[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output4[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output4[0])), 0.00001);
+}
+
+TEST_F(MultiFingerTest, getPlanarRPYTestYZX)
+{
+
+  ResetVariables();
+  grasp_stroke_direction = "y";
+  grasp_stroke_normal_direction = "z";
+  grasp_approach_direction = "x";
+
+  ASSERT_NO_THROW(LoadGripper());
+  // Eigen::Vector3f grasp_direction{1, 0, 0};
+  // Eigen::Vector3f grasp_direction_normal{0, 1, 0};
+  std::vector<double> output = gripper->getPlanarRPY({0, 1, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output1 = gripper->getPlanarRPY({-1, 0, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output1[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output1[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output1[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output1[2])), 0.00001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({0, 1, 0}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[1])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, 0, 1}, {0, -1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[0])), 0.00001);
+}
+
+TEST_F(MultiFingerTest, getPlanarRPYTestZXY)
+{
+
+  ResetVariables();
+  grasp_stroke_direction = "z";
+  grasp_stroke_normal_direction = "x";
+  grasp_approach_direction = "y";
+
+  ASSERT_NO_THROW(LoadGripper());
+  // Eigen::Vector3f grasp_direction{1, 0, 0};
+  // Eigen::Vector3f grasp_direction_normal{0, 1, 0};
+  std::vector<double> output = gripper->getPlanarRPY({0, 0, 1}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output1 = gripper->getPlanarRPY({0, 0, 1}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output1[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output1[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output1[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output1[2])), 0.00001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({1, 0, 0}, {0, 0, -1});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[1])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, -1, 0}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[0])), 0.00001);
+}
+
 TEST_F(MultiFingerTest, getGraspPoseTest)
 {
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.0;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr, camera_frame);
+  for (auto & sample : finger_samples) {
+    gripper->getGraspPose(sample, object);
+    EXPECT_EQ(sample->gripper_palm_center.x, sample->pose.pose.position.x);
+    EXPECT_EQ(sample->gripper_palm_center.y, sample->pose.pose.position.y);
+    EXPECT_EQ(sample->gripper_palm_center.z, sample->pose.pose.position.z);
+
+    EXPECT_EQ(0, sample->pose.pose.orientation.x);
+    EXPECT_EQ(0, sample->pose.pose.orientation.y);
+    EXPECT_GT(std::abs(sample->pose.pose.orientation.z), 0);
+    EXPECT_GT(std::abs(sample->pose.pose.orientation.w), 0);
+  }
 }
+
 
 TEST_F(MultiFingerTest, getAllRanksTest)
 {
@@ -1854,4 +2095,58 @@ TEST_F(MultiFingerTest, getAllRanksTest)
   GenerateObjectCollision(0.01, 0.05, 0.02);
   std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
   finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr, camera_frame);
+  for (auto & sample : finger_samples) {
+    gripper->getGraspPose(sample, object);
+  }
+
+  emd_msgs::msg::GraspMethod grasp_method;
+  grasp_method.ee_id = gripper->getID();
+  grasp_method.grasp_ranks.insert(
+    grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
+  gripper->getAllRanks(finger_samples, &grasp_method);
+  grasp_method.grasp_ranks.pop_back();
+
+  for (size_t i = 0; i < grasp_method.grasp_ranks.size(); i++) {
+    if (i != 0) {
+      EXPECT_GT(grasp_method.grasp_ranks[i - 1], grasp_method.grasp_ranks[i]);
+    }
+  }
+}
+
+TEST_F(MultiFingerTest, planGraspsTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_fingers_side_1 = 1;
+  num_fingers_side_2 = 2;
+  distance_between_fingers_1 = 0.0;
+  distance_between_fingers_2 = 0.01;
+  gripper_stroke = 0.03;
+  ASSERT_NO_THROW(LoadGripper());
+  gripper->getCenterCuttingPlane(object);
+  gripper->getCuttingPlanes(object);
+  gripper->getGraspCloud(object);
+  gripper->getInitialSamplePoints(object);
+  gripper->getInitialSampleCloud(object);
+  gripper->voxelizeSampleCloud();
+  gripper->getMaxMinValues(object);
+  gripper->getFingerSamples(object);
+  gripper->getGripperClusters();
+  GenerateObjectCollision(0.01, 0.05, 0.02);
+  std::vector<std::shared_ptr<multiFingerGripper>> finger_samples;
+  finger_samples = gripper->getAllGripperConfigs(object, collision_object_ptr, camera_frame);
+  emd_msgs::msg::GraspMethod grasp_method;
+  grasp_method.ee_id = gripper->getID();
+  grasp_method.grasp_ranks.insert(
+    grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
+
+  EXPECT_EQ(0, static_cast<int>(grasp_method.grasp_poses.size()));
+  EXPECT_EQ(1, static_cast<int>(grasp_method.grasp_ranks.size()));
+  gripper->planGrasps(
+    object, &grasp_method, collision_object_ptr,
+    "camera_frame");
+  grasp_method.grasp_ranks.pop_back();
+
+  EXPECT_GT(static_cast<int>(grasp_method.grasp_poses.size()), 0);
+  EXPECT_GT(static_cast<int>(grasp_method.grasp_ranks.size()), 0);
 }

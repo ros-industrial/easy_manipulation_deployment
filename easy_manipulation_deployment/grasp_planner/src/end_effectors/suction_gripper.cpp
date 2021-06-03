@@ -336,13 +336,21 @@ void SuctionGripper::getAllPossibleGrasps(
   }
 }
 
+// LCOV_EXCL_START
+
 /***************************************************************************//**
  * Inherited method that visualizes the required grasps
  *
  * @param viewer Projected Cloud Visualizer
  ******************************************************************************/
-void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer)
+void SuctionGripper::visualizeGrasps(
+  pcl::visualization::PCLVisualizer::Ptr viewer,
+  std::shared_ptr<GraspObject> object)
 {
+  PCLVisualizer::centerCamera(object->cloud, viewer);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 255, 0,
+    0);
+  viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud_" + object->object_name);
   if (this->cup_array_samples.size() > 0) {
     for (auto suction_cup_array : this->cup_array_samples) {
       int counter = 0;
@@ -354,6 +362,12 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
           counter++;
         }
       }
+      viewer->addCoordinateSystem(0.5);
+      viewer->addCube(
+        object->bboxTransform, object->bboxQuaternion,
+        object->maxPoint.x - object->minPoint.x,
+        object->maxPoint.y - object->minPoint.y,
+        object->maxPoint.z - object->minPoint.z, "bbox_" + object->object_name);
       viewer->spin();
       viewer->close();
       viewer->removeAllShapes();
@@ -361,7 +375,11 @@ void SuctionGripper::visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr view
   } else {
     std::cout << "No grasps found. Nothing to Visualize" << std::endl;
   }
+  viewer->removeAllPointClouds();
+  viewer->removeAllCoordinateSystems();
 }
+
+// LCOV_EXCL_STOP
 
 /***************************************************************************//**
  * Method that gets the index of the centroid of the projected cloud
@@ -960,9 +978,7 @@ std::vector<double> SuctionGripper::getPlanarRPY(
   } else if (x_filled && z_filled) {
     y_norm = z_norm.cross(x_norm);
   } else {
-    RCLCPP_ERROR(LOGGER, "RPY estimation error.");
-    throw std::runtime_error("RPY estimation error.");
-    return output_vec;
+    return {0, 0, 0};
   }
 
   double roll = std::atan2(-z_norm(1), z_norm(2));
@@ -1044,6 +1060,7 @@ geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
   return result_pose;
 }
 
+// LCOV_EXCL_START
 
 /***************************************************************************//**
  * Provides the cloud representing the contact with suction gripper
@@ -1097,3 +1114,5 @@ std::vector<int> SuctionGripper::getCupContactIndices(
   kdtree.radiusSearch(contact_point, radius, kd_radius_search, kd_sq_dist);
   return kd_radius_search;
 }
+
+// LCOV_EXCL_STOP

@@ -187,9 +187,8 @@ void GraspScene::planningInit(const U & msg)
   loadEndEffectors();
 
   emd_msgs::msg::GraspTask grasp_task;
-  grasp_task.task_id = generate_task_id();
+  grasp_task.task_id = MathFunctions::generate_task_id();
   for (auto object : this->grasp_objects) {
-    // PCLFunctions::centerCamera(object->cloud, viewer);
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     for (auto gripper : this->end_effectors) {
       std::chrono::steady_clock::time_point grasp_begin = std::chrono::steady_clock::now();
@@ -209,7 +208,7 @@ void GraspScene::planningInit(const U & msg)
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
         " [ms] ");
       if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
-        gripper->visualizeGrasps(viewer);
+        gripper->visualizeGrasps(viewer, object);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
     }
@@ -221,9 +220,7 @@ void GraspScene::planningInit(const U & msg)
         std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
       " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
-    viewer->removeAllPointClouds();
   }
-  viewer->removeShape("original_cloud");
   RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
   // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
   this->output_pub->publish(grasp_task);
@@ -240,7 +237,6 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   RCLCPP_INFO(LOGGER, "Camera Point Cloud Received!");
   processPointCloud(msg);
   createWorldCollision(msg);
-  PCLVisualizer::centerCamera(this->cloud, viewer);
   this->grasp_objects = extractObjects(
     this->get_parameter("camera_parameters.camera_frame").as_string(),
     static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()),
@@ -248,9 +244,8 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   loadEndEffectors();
   PCLVisualizer::viewerAddRGBCloud(cloud, "original_cloud", viewer);
   emd_msgs::msg::GraspTask grasp_task;
-  grasp_task.task_id = generate_task_id();
+  grasp_task.task_id = MathFunctions::generate_task_id();
   for (auto object : this->grasp_objects) {
-    PCLVisualizer::centerCamera(object->cloud, viewer);
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     for (auto gripper : this->end_effectors) {
       std::chrono::steady_clock::time_point grasp_begin = std::chrono::steady_clock::now();
@@ -279,7 +274,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       //   std::cout << "grasp method rank: " << rank << std::endl;
       // }
       if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
-        gripper->visualizeGrasps(viewer);
+        gripper->visualizeGrasps(viewer, object);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
     }
@@ -292,7 +287,6 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
   }
-  viewer->removeShape("original_cloud");
   RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
   // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
   this->output_pub->publish(grasp_task);
@@ -300,6 +294,7 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
   this->grasp_objects.clear();
 }
 
+// LCOV_EXCL_START
 /****************************************************************************************//**
  * Not used
  *******************************************************************************************/
@@ -324,6 +319,7 @@ void GraspScene::getCameraPosition()
     std::cout << "Camera in side view\n";
   }
 }
+// LCOV_EXCL_STOP
 
 /****************************************************************************************//**
  * Function that processes the Objects in a point cloud scene and outputs a vector
@@ -344,16 +340,20 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
 {
   RCLCPP_INFO(LOGGER, "Extracting Objects from point cloud");
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
-  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>);
-  std::vector<pcl::PointIndices> clusterIndices;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ecExtractor;
+  // pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>);
+  // std::vector<pcl::PointIndices> clusterIndices;
+  // pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ecExtractor;
 
-  tree->setInputCloud(cloud);
-  ecExtractor.setClusterTolerance(cluster_tolerance);
-  ecExtractor.setMinClusterSize(min_cluster_size);
-  ecExtractor.setSearchMethod(tree);
-  ecExtractor.setInputCloud(cloud);
-  ecExtractor.extract(clusterIndices);
+  // tree->setInputCloud(cloud);
+  // ecExtractor.setClusterTolerance(cluster_tolerance);
+  // ecExtractor.setMinClusterSize(min_cluster_size);
+  // ecExtractor.setSearchMethod(tree);
+  // ecExtractor.setInputCloud(cloud);
+  // ecExtractor.extract(clusterIndices);
+
+  std::vector<pcl::PointIndices> clusterIndices = PCLFunctions::extractPointCloudClusters(
+    cloud, cluster_tolerance, min_cluster_size);
+
   if (clusterIndices.empty()) {
     std::cout << "No objects. " << std::endl;
   } else {
@@ -383,15 +383,6 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
       object->grasp_target.target_shape = object->getObjectShape();
       object->grasp_target.target_pose = object->getObjectPose(camera_frame);
       grasp_objects.push_back(object);
-
-      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 255, 0,
-        0);
-      viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud_" + object->object_name);
-      viewer->addCube(
-        object->bboxTransform, object->bboxQuaternion,
-        object->maxPoint.x - object->minPoint.x,
-        object->maxPoint.y - object->minPoint.y,
-        object->maxPoint.z - object->minPoint.z, "bbox_" + object->object_name);
     }
   }
   RCLCPP_INFO(LOGGER, "Extracted " + std::to_string(grasp_objects.size()) + " from point cloud");
@@ -440,15 +431,6 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
     object->grasp_target.target_shape = object->getObjectShape();
     object->grasp_target.target_pose = object->getObjectPose(camera_frame);
     grasp_objects.push_back(object);
-
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb2(object->cloud, 255, 0,
-      0);
-    viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud_" + object->object_name);
-    viewer->addCube(
-      object->bboxTransform, object->bboxQuaternion,
-      object->maxPoint.x - object->minPoint.x,
-      object->maxPoint.y - object->minPoint.y,
-      object->maxPoint.z - object->minPoint.z, "bbox_" + object->object_name);
   }
   RCLCPP_INFO(LOGGER, "EPD detected " + std::to_string(grasp_objects.size()) + " objects.");
   return grasp_objects;
@@ -625,6 +607,8 @@ void GraspScene::loadEndEffectors()
   RCLCPP_INFO(LOGGER, "All End Effectors Loaded");
 }
 
+// LCOV_EXCL_START
+
 /***************************************************************************//**
  * Function that prints Pose
  * @param _pose target Pose to print
@@ -654,6 +638,8 @@ void GraspScene::printPose(const geometry_msgs::msg::PoseStamped & _pose)
   std::cout << "Frame ID: " << _pose.header.frame_id << std::endl;
   printPose(_pose.pose);
 }
+
+// LCOV_EXCL_STOP
 
 /***************************************************************************//**
  * Function that processes an input sensor_msgs pointcloud2 message.
@@ -703,43 +689,8 @@ void GraspScene::createWorldCollision(const sensor_msgs::msg::PointCloud2::Const
   octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
   this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
     this->org_cloud, sensor_origin, 0.01);
-  PCLFunctions::planeSegmentation(
-    this->cloud, this->cloud_plane_removed, this->cloud_table,
-    this->segmentation_max_iterations,
-    segmentation_distance_threshold);
-}
-
-/****************************************************************************************//**
- * Function that generates a unique ID for Grasp Tasks. Returns the unique ID
- *******************************************************************************************/
-std::string GraspScene::generate_task_id()
-{
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> dis(0, 15);
-  static std::uniform_int_distribution<> dis2(8, 11);
-  std::stringstream ss;
-  int i;
-  ss << std::hex;
-  for (i = 0; i < 8; i++) {
-    ss << dis(gen);
-  }
-  ss << "-";
-  for (i = 0; i < 4; i++) {
-    ss << dis(gen);
-  }
-  ss << "-4";
-  for (i = 0; i < 3; i++) {
-    ss << dis(gen);
-  }
-  ss << "-";
-  ss << dis2(gen);
-  for (i = 0; i < 3; i++) {
-    ss << dis(gen);
-  }
-  ss << "-";
-  for (i = 0; i < 12; i++) {
-    ss << dis(gen);
-  }
-  return ss.str();
+  // PCLFunctions::planeSegmentation(
+  //   this->cloud, this->cloud_plane_removed, this->cloud_table,
+  //   this->segmentation_max_iterations,
+  //   segmentation_distance_threshold);
 }

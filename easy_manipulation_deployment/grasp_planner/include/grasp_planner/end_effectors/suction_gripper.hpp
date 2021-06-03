@@ -68,6 +68,7 @@
 #include "grasp_planner/common/fcl_functions.hpp"
 #include "grasp_planner/common/math_functions.hpp"
 #include "grasp_planner/end_effectors/end_effector.hpp"
+#include "grasp_planner/common/pcl_visualizer.hpp"
 
 
 /*! \brief Struct for a single suction cup */
@@ -169,7 +170,9 @@ public:
 
   std::string getID() {return id;}
 
-  void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer);
+  void visualizeGrasps(
+    pcl::visualization::PCLVisualizer::Ptr viewer,
+    std::shared_ptr<GraspObject> object);
 
   int getCentroidIndex(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud);

@@ -101,3 +101,12 @@ Eigen::Vector3f MathFunctions::getRotatedVector(
   }
   return result_vector;
 }
+
+/****************************************************************************************//**
+ * Function that generates a unique ID for Grasp Tasks. Returns the unique ID
+ *******************************************************************************************/
+std::string MathFunctions::generate_task_id()
+{
+  boost::uuids::uuid uuid = boost::uuids::random_generator()();
+  return boost::uuids::to_string(uuid);
+}

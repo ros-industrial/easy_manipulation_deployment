@@ -14,17 +14,13 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "multifinger_test.cpp"
-#include "suction_gripper_test.cpp"
-#include "math_functions_test.cpp"
-#include "pcl_functions_test.cpp"
-#include "fcl_functions_test.cpp"
-#include "grasp_object_test.cpp"
-#include "grasp_scene_test.cpp"
+#include "grasp_scene_test.hpp"
 
-int
-main(int argc, char ** argv)
+GraspSceneTest::GraspSceneTest()
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+}
+
+TEST_F(GraspSceneTest, initTest)
+{
+
 }

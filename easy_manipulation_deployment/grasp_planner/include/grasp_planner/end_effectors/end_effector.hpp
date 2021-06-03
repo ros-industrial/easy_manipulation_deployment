@@ -46,7 +46,13 @@ public:
     UNUSED(world_collision_object);
     UNUSED(camera_frame);
   }
-  virtual void visualizeGrasps(pcl::visualization::PCLVisualizer::Ptr viewer) {UNUSED(viewer);}
+  virtual void visualizeGrasps(
+    pcl::visualization::PCLVisualizer::Ptr viewer,
+    std::shared_ptr<GraspObject> object)
+  {
+    UNUSED(viewer);
+    UNUSED(object);
+  }
 
   virtual std::string getID() {return id;}
 

@@ -128,44 +128,6 @@ bool PCLFunctions::planeSegmentation(
   return true;
 }
 
-void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
-{
-  pcl::PassThrough<pcl::PointXYZRGB> ptFilter;
-  ptFilter.setInputCloud(cloud);
-  ptFilter.setFilterFieldName("z");
-  // ptFilter.setFilterLimitsNegative (true);
-  ptFilter.setFilterLimits(0, 0.0001);
-  ptFilter.filter(*cloud);
-}
-
-void PCLFunctions::removeAllZeros(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
-{
-  pcl::PassThrough<pcl::PointXYZ> ptFilter;
-  ptFilter.setInputCloud(cloud);
-  ptFilter.setFilterFieldName("z");
-  // ptFilter.setFilterLimitsNegative (true);
-  ptFilter.setFilterLimits(0, 0.0001);
-  ptFilter.filter(*cloud);
-}
-
-float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point)
-{
-  return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
-         std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
-}
-
-float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointNormal const & point)
-{
-  return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
-         std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
-}
-
-float PCLFunctions::pointToPlane(Eigen::Vector3f & plane, pcl::PointNormal const & point)
-{
-  return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
-         std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
-}
-
 void PCLFunctions::removeStatisticalOutlier(
   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud,
   float threshold)
@@ -209,7 +171,6 @@ void PCLFunctions::computeCloudNormal(
   pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal,
   const float & cloud_normal_radius)
 {
-  // std::chrono::steady_clock::time_point getSlicedCloud1 = std::chrono::steady_clock::now();
   pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(
     new pcl::search::KdTree<pcl::PointXYZRGB>());
   pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::PointNormal> normal_estimation;
@@ -218,12 +179,6 @@ void PCLFunctions::computeCloudNormal(
   normal_estimation.setSearchMethod(tree);
   normal_estimation.setRadiusSearch(cloud_normal_radius);
   normal_estimation.compute(*cloud_normal);
-  // NormalEstimation only fills with normals the output
-  // std::chrono::steady_clock::time_point getSlicedCloud2 = std::chrono::steady_clock::now();
-  // std::cout << "Grasp planning time for computeCloudNormal " <<
-  //   std::chrono::duration_cast<std::chrono::milliseconds>(
-  //   getSlicedCloud2 -
-  //   getSlicedCloud1).count() << "[ms]" << std::endl;
 
   for (size_t i = 0; i < cloud_normal->points.size(); ++i) {
     cloud_normal->points[i].x = cloud->points[i].x;
@@ -232,29 +187,44 @@ void PCLFunctions::computeCloudNormal(
   }
 }
 
-void PCLFunctions::createSphereCloud(
-  pcl::PointCloud<pcl::PointXYZ>::Ptr output_sphere_cloud,
-  Eigen::Vector3f & centerpoint,
-  const float & radius,
-  const int & resolution)
-{
-  float px, py, pz;
-  for (float phi = 0; phi < M_PI; phi += M_PI / resolution) {
-    pz = radius * cos(phi);
-    for (float theta = 0; theta < 2 * M_PI; theta += 2 * M_PI / resolution) {
-      px = radius * sin(phi) * cos(theta) + centerpoint(0);
-      py = radius * sin(phi) * sin(theta) + centerpoint(1);
-      pcl::PointXYZ point {px, py, pz + centerpoint(2)};
-      output_sphere_cloud->points.push_back(point);
-    }
-  }
-  output_sphere_cloud->is_dense = true;
-  output_sphere_cloud->height = 1;
-  output_sphere_cloud->width = output_sphere_cloud->points.size();
-}
-
 Eigen::Vector3f PCLFunctions::convertPCLNormaltoEigen(
   const pcl::PointNormal & pcl_point)
 {
   return Eigen::Vector3f(pcl_point.normal_x, pcl_point.normal_y, pcl_point.normal_z);
 }
+
+std::vector<pcl::PointIndices> PCLFunctions::extractPointCloudClusters(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  float cluster_tolerance,
+  int min_cluster_size)
+{
+  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>);
+  std::vector<pcl::PointIndices> clusterIndices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ecExtractor;
+
+  tree->setInputCloud(cloud);
+  ecExtractor.setClusterTolerance(cluster_tolerance);
+  ecExtractor.setMinClusterSize(min_cluster_size);
+  ecExtractor.setSearchMethod(tree);
+  ecExtractor.setInputCloud(cloud);
+  ecExtractor.extract(clusterIndices);
+  return clusterIndices;
+}
+
+// float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointXYZRGB const & point)
+// {
+//   return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
+//          std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
+// }
+
+// float PCLFunctions::pointToPlane(Eigen::Vector4f & plane, pcl::PointNormal const & point)
+// {
+//   return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
+//          std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
+// }
+
+// float PCLFunctions::pointToPlane(Eigen::Vector3f & plane, pcl::PointNormal const & point)
+// {
+//   return std::abs(plane(0) * point.x + plane(1) * point.y + plane(2) * point.z + plane(3)) /
+//          std::sqrt(std::pow(plane(0), 2) + std::pow(plane(1), 2) + std::pow(plane(2), 2));
+// }

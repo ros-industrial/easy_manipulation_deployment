@@ -19,6 +19,11 @@
 // Other Libraries
 #include <Eigen/Core>
 
+// For uuid
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/random_generator.hpp"
+#include "boost/uuid/uuid_io.hpp"
+
 namespace MathFunctions
 {
 float normalize(
@@ -44,6 +49,9 @@ Eigen::Vector3f getRotatedVector(
   const Eigen::Vector3f & target_vector,
   const float & angle,
   const char & axis);
+
+std::string generate_task_id();
+
 }  // namespace MathFunctions
 
 #endif  // GRASP_PLANNER__COMMON__MATH_FUNCTIONS_HPP_

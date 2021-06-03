@@ -63,6 +63,7 @@ GraspObject::GraspObject(
   grasp_target.target_type = object_name_;
 }
 
+// LCOV_EXCL_START
 /***************************************************************************//**
  * Add bounding box to PCL Viewer
  * @param viewer PCL Visualizer
@@ -76,6 +77,7 @@ void GraspObject::add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr 
     this->maxPoint.y - this->minPoint.y,
     this->maxPoint.z - this->minPoint.z, "bbox_" + std::to_string(pos));
 }
+// LCOV_EXCL_STOP
 
 /***************************************************************************//**
  * Generate the 3 dimensional bounding box of an object using Principle
@@ -127,9 +129,13 @@ void GraspObject::get_object_bb()
  ******************************************************************************/
 void GraspObject::getObjectDimensions()
 {
-  this->dimensions[0] = abs(this->maxPoint.x - this->minPoint.x);
-  this->dimensions[1] = abs(this->maxPoint.y - this->minPoint.y);
-  this->dimensions[2] = abs(this->maxPoint.z - this->minPoint.z);
+  // this->dimensions[0] = abs(this->maxPoint.x - this->minPoint.x);
+  // this->dimensions[1] = abs(this->maxPoint.y - this->minPoint.y);
+  // this->dimensions[2] = abs(this->maxPoint.z - this->minPoint.z);
+
+  this->dimensions[0] = this->maxPoint.x - this->minPoint.x;
+  this->dimensions[1] = this->maxPoint.y - this->minPoint.y;
+  this->dimensions[2] = this->maxPoint.z - this->minPoint.z;
 }
 
 /***************************************************************************//**

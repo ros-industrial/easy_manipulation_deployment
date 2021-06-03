@@ -952,8 +952,8 @@ TEST_F(SuctionGripperTest, getAllRanksTest) {
   cup_radius = 0.005;
   CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
   ASSERT_NO_THROW(LoadGripperWithWeights());
-  gripper->generateGripperAttributes();
-  pcl::PointXYZ object_center;
+
+  pcl::PointXYZ object_center; gripper->generateGripperAttributes();
   object_center.x = object->centerpoint(0);
   object_center.y = object->centerpoint(1);
   object_center.z = object->centerpoint(2);
@@ -971,10 +971,220 @@ TEST_F(SuctionGripperTest, getAllRanksTest) {
   for (auto grasp_sample : gripper->cup_array_samples) {
     EXPECT_GT(grasp_sample->rank, 0);
   }
+
+  for (size_t i = 0; i < grasp_method.grasp_ranks.size(); i++) {
+    if (i != 0) {
+      EXPECT_GE(grasp_method.grasp_ranks[i - 1], grasp_method.grasp_ranks[i]);
+    }
+  }
+}
+
+TEST_F(SuctionGripperTest, getGraspPoseTestSymmetrical) {
+  ResetVariables();
+  Eigen::Vector3f centerpoint{0.0125, 0.08, 0.04};
+  num_cups_length = 2;
+  num_cups_breadth = 2;
+  dist_between_cups_length = 0.03;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+
+  pcl::PointXYZ object_center; gripper->generateGripperAttributes();
+  object_center.x = object->centerpoint(0);
+  object_center.y = object->centerpoint(1);
+  object_center.z = object->centerpoint(2);
+  pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(
+    object->cloud,
+    object->alignments[2], true);
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
+
+  for (auto sample : gripper->cup_array_samples) {
+    geometry_msgs::msg::PoseStamped grasp_pose = gripper->getGraspPose(sample, object);
+    EXPECT_EQ(0, grasp_pose.pose.orientation.x);
+    EXPECT_EQ(0, grasp_pose.pose.orientation.y);
+    EXPECT_EQ(0, grasp_pose.pose.orientation.z);
+    EXPECT_EQ(1, grasp_pose.pose.orientation.w);
+
+    EXPECT_EQ(sample->gripper_center.x, grasp_pose.pose.position.x);
+    EXPECT_EQ(sample->gripper_center.y, grasp_pose.pose.position.y);
+    EXPECT_EQ(sample->gripper_center.z, grasp_pose.pose.position.z);
+  }
 }
 
 TEST_F(SuctionGripperTest, getGraspPoseTest) {
-  // TODO: Glenn
+  ResetVariables();
+  Eigen::Vector3f centerpoint{0.0125, 0.08, 0.04};
+  num_cups_length = 2;
+  num_cups_breadth = 3;
+  dist_between_cups_length = 0.01;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+
+  pcl::PointXYZ object_center; gripper->generateGripperAttributes();
+  object_center.x = object->centerpoint(0);
+  object_center.y = object->centerpoint(1);
+  object_center.z = object->centerpoint(2);
+  pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(
+    object->cloud,
+    object->alignments[2], true);
+  gripper->getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
+
+  for (auto sample : gripper->cup_array_samples) {
+    geometry_msgs::msg::PoseStamped grasp_pose = gripper->getGraspPose(sample, object);
+    EXPECT_EQ(0, grasp_pose.pose.orientation.x);
+    EXPECT_EQ(0, grasp_pose.pose.orientation.y);
+    EXPECT_GE(std::abs(grasp_pose.pose.orientation.z), 0);
+    EXPECT_GE(std::abs(grasp_pose.pose.orientation.w), 0);
+
+    EXPECT_EQ(sample->gripper_center.x, grasp_pose.pose.position.x);
+    EXPECT_EQ(sample->gripper_center.y, grasp_pose.pose.position.y);
+    EXPECT_EQ(sample->gripper_center.z, grasp_pose.pose.position.z);
+  }
+}
+
+TEST_F(SuctionGripperTest, getPlanarRPYTestXYZ)
+{
+  ResetVariables();
+  num_cups_length = 6;
+  num_cups_breadth = 2;
+  dist_between_cups_length = 0.02;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+
+  std::vector<double> output = gripper->getPlanarRPY({1, 0, 0}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({0, 1, 0}, {-1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[2])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, 0, -1}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[1])), 0.00001);
+
+  std::vector<double> output4 = gripper->getPlanarRPY({1, 0, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output4[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output4[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output4[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output4[0])), 0.00001);
+}
+
+TEST_F(SuctionGripperTest, getPlanarRPYTestYZX)
+{
+  ResetVariables();
+  num_cups_length = 6;
+  num_cups_breadth = 2;
+  dist_between_cups_length = 0.02;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  length_direction = "y";
+  breadth_direction = "z";
+  grasp_approach_direction = "x";
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+
+  std::vector<double> output = gripper->getPlanarRPY({0, 1, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output1 = gripper->getPlanarRPY({-1, 0, 0}, {0, 0, 1});
+  EXPECT_NEAR(0.0, static_cast<float>(output1[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output1[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output1[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output1[2])), 0.00001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({0, 1, 0}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[1])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, 0, 1}, {0, -1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[0])), 0.00001);
+}
+
+TEST_F(SuctionGripperTest, getPlanarRPYTestZXY)
+{
+  ResetVariables();
+  num_cups_length = 6;
+  num_cups_breadth = 2;
+  dist_between_cups_length = 0.02;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  length_direction = "z";
+  breadth_direction = "x";
+  grasp_approach_direction = "y";
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+
+  std::vector<double> output = gripper->getPlanarRPY({0, 0, 1}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output[2]), 0.0001);
+
+  std::vector<double> output1 = gripper->getPlanarRPY({0, 0, 1}, {0, 1, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output1[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output1[1]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output1[2])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output1[2])), 0.00001);
+
+  std::vector<double> output2 = gripper->getPlanarRPY({1, 0, 0}, {0, 0, -1});
+  EXPECT_NEAR(0.0, static_cast<float>(output2[0]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output2[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output2[1])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output2[1])), 0.00001);
+
+  std::vector<double> output3 = gripper->getPlanarRPY({0, -1, 0}, {1, 0, 0});
+  EXPECT_NEAR(0.0, static_cast<float>(output3[1]), 0.0001);
+  EXPECT_NEAR(0.0, static_cast<float>(output3[2]), 0.0001);
+  EXPECT_GT(std::abs(static_cast<float>(output3[0])), 0);
+  EXPECT_NEAR(1.5708, std::abs(static_cast<float>(output3[0])), 0.00001);
+}
+
+TEST_F(SuctionGripperTest, planGraspsTest)
+{
+  GenerateObjectVertical();
+  ResetVariables();
+  num_cups_length = 6;
+  num_cups_breadth = 2;
+  dist_between_cups_length = 0.02;
+  dist_between_cups_breadth = 0.03;
+  cup_radius = 0.005;
+  Eigen::Vector3f centerpoint{0.0125, 0.08, 0.04};
+  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
+  ASSERT_NO_THROW(LoadGripperWithWeights());
+  gripper->generateGripperAttributes();
+  GenerateObjectCollision(0.06, 0.01, 0.03);
+
+  emd_msgs::msg::GraspMethod grasp_method;
+  grasp_method.ee_id = gripper->getID();
+  grasp_method.grasp_ranks.insert(
+    grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
+  EXPECT_EQ(0, static_cast<int>(grasp_method.grasp_poses.size()));
+  EXPECT_EQ(1, static_cast<int>(grasp_method.grasp_ranks.size()));
+  gripper->planGrasps(
+    object, &grasp_method, collision_object_ptr,
+    "camera_frame");
+  grasp_method.grasp_ranks.pop_back();
+  object->grasp_target.grasp_methods.push_back(grasp_method);
+
+  EXPECT_GT(static_cast<int>(grasp_method.grasp_poses.size()), 0);
+  EXPECT_GT(static_cast<int>(grasp_method.grasp_ranks.size()), 0);
 }
 
 // pcl::PointXYZRGB centerpoint_;
