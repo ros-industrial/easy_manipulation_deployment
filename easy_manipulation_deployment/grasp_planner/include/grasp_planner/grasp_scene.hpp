@@ -77,9 +77,9 @@ public:
     float cluster_tolerance,
     int min_cluster_size);
   std::vector<std::shared_ptr<GraspObject>> processEPDObjects(
-    std::vector<epd_msgs::msg::LocalizedObject> objects,
-    std::string camera_frame,
-    float cloud_normal_radius);
+    const std::vector<epd_msgs::msg::LocalizedObject> & objects,
+    const std::string camera_frame,
+    const float & cloud_normal_radius);
   void printPose(const geometry_msgs::msg::PoseStamped & _pose);
   void printPose(const geometry_msgs::msg::Pose & _pose);
   void planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);

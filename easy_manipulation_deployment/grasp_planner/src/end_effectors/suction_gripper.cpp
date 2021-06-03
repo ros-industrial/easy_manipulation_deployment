@@ -138,8 +138,8 @@ SuctionGripper::SuctionGripper(
  ******************************************************************************/
 void SuctionGripper::generateGripperAttributes()
 {
-  float is_even_breadth = (this->num_cups_breadth % 2 == 0);
-  float is_even_length = (this->num_cups_length % 2 == 0);
+  bool is_even_breadth = (this->num_cups_breadth % 2 == 0);
+  bool is_even_length = (this->num_cups_length % 2 == 0);
   float num_itr_breadth = floor(this->num_cups_breadth / 2) + 1;
   float num_itr_length = floor(this->num_cups_length / 2) + 1;
   float initial_gap_breadth = this->dist_between_cups_breadth /
@@ -174,11 +174,12 @@ void SuctionGripper::generateGripperAttributes()
   }
 }
 /***************************************************************************//**
- * Inherited method that visualizes the required grasps
+ * Inherited method that plans the required grasps
  *
  * @param object Grasp Object
  * @param grasp_method Grasp method output for all possible grasps
  * @param world_collision_object FCL collision object of the world
+ * @param camera_frame tf frame representing camera
  ******************************************************************************/
 void SuctionGripper::planGrasps(
   std::shared_ptr<GraspObject> object,
@@ -205,11 +206,12 @@ void SuctionGripper::planGrasps(
 }
 
 /***************************************************************************//**
- * Inherited method that visualizes the required grasps
+ * Inherited method that gets all possible grasp samples
  *
  * @param object Grasp Object
  * @param object_center PCL centroid point of the object
  * @param top_point Highest point on object
+ * @param camera_frame tf frame representing camera
  ******************************************************************************/
 
 void SuctionGripper::getAllPossibleGrasps(
@@ -342,6 +344,7 @@ void SuctionGripper::getAllPossibleGrasps(
  * Inherited method that visualizes the required grasps
  *
  * @param viewer Projected Cloud Visualizer
+ * @param object Grasp Object to visualize
  ******************************************************************************/
 void SuctionGripper::visualizeGrasps(
   pcl::visualization::PCLVisualizer::Ptr viewer,
@@ -532,6 +535,7 @@ void SuctionGripper::getStartingPlane(
  * @param bottom_limit Bottom limit for passthrough filter
  * @param sliced_cloud Resultant sliced cloud
  * @param sliced_cloud_normal Resultant sliced cloud
+ * @param height_axis Current axis on which the height axis represents(WIP)
  ******************************************************************************/
 
 void SuctionGripper::getSlicedCloud(
@@ -599,11 +603,10 @@ int SuctionGripper::getContactPoints(
   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & input_cloud,
   const pcl::PointCloud<pcl::PointNormal>::Ptr & sliced_cloud_normal,
   const pcl::PointXYZ & centerpoint,
-  float * curvature_sum)
+  float & curvature_sum)
 {
   //pcl::PointCloud<pcl::PointXYZ>::Ptr disk_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   // std::vector<int> points_inside;
-  float temp_curvature_sum = 0;
   int num_contact_points = 0;
   for (int i = 0; i < static_cast<int>(input_cloud->points.size()); i++) {
     // Using circle equation, determine if current cloud point is in contact with the suction cup
@@ -611,10 +614,9 @@ int SuctionGripper::getContactPoints(
       pow((input_cloud->points[i].y - centerpoint.y), 2) - pow(this->cup_radius, 2);
     if (inside_cup <= 0) {
       num_contact_points++;
-      temp_curvature_sum += sliced_cloud_normal->points[i].curvature;
+      curvature_sum += sliced_cloud_normal->points[i].curvature;
     }
   }
-  *curvature_sum = temp_curvature_sum;
   return num_contact_points;
 }
 
@@ -656,7 +658,8 @@ void SuctionGripper::updateMaxMinValues(
  * @param object_center Center point of object
  * @param row_direction Vector representing the suction array row direction
  * @param col_direction Vector representing the suction array col direction
- * @param object_max_dim Maximum dimensions of obejct
+ * @param object_max_dim Maximum dimensions of object
+ * @param camera_frame tf frame representing camera
  ******************************************************************************/
 
 suctionCupArray SuctionGripper::generateGraspSample(
@@ -766,12 +769,10 @@ singleSuctionCup SuctionGripper::generateSuctionCup(
   float cup_object_center_dist = pcl::geometry::distance(cup_point, object_center);
 
   // Check how many points of the projected pointcloud land on a suction cup.
-  float * curvature_sum_ptr;
-  float curvature_sum;
-  curvature_sum_ptr = &curvature_sum;
+  float curvature_sum = 0;
 
   int contact_points = getContactPoints(
-    projected_cloud, sliced_cloud_normal, cup_point, curvature_sum_ptr);
+    projected_cloud, sliced_cloud_normal, cup_point, curvature_sum);
 
   int weighted_contact_points = generateWeightedContactPoints(
     contact_points,
@@ -828,7 +829,6 @@ int SuctionGripper::generateWeightedContactPoints(
  * @param object_axis Vector representing the object
  * @param offset Offset from centroid of sliced cloud
  * @param slice_centroid Center point of sliced cloud
- * @param height_axis Axis along which to add the
  ******************************************************************************/
 
 
@@ -1006,53 +1006,15 @@ geometry_msgs::msg::PoseStamped SuctionGripper::getGraspPose(
   result_pose.pose.position.y = grasp->gripper_center.y;
   result_pose.pose.position.z = grasp->gripper_center.z;
 
-  if (this->num_cups_breadth == this->num_cups_length &&
-    this->dist_between_cups_breadth == this->dist_between_cups_length)
-  {
-    result_pose.pose.orientation.x = 0;
-    result_pose.pose.orientation.y = 0;
-    result_pose.pose.orientation.z = 0;
-    result_pose.pose.orientation.w = 1;
-  } else {
-    // Eigen::Matrix3f rotationMatrix;
-    // rotationMatrix << cos(grasp->grasp_angle), -sin(grasp->grasp_angle), 0,
-    //   sin(grasp->grasp_angle), cos(grasp->grasp_angle), 0,
-    //   0, 0, 1;
+  std::vector<double> rpy = getPlanarRPY(grasp->col_direction, grasp->row_direction);
+  tf2::Quaternion quaternion_test_;
+  quaternion_test_.setRPY(0, 0, rpy[2]);
 
-    // Eigen::Matrix3f rotatedEigenVector = rotationMatrix * object->eigenvectors;
+  result_pose.pose.orientation.x = quaternion_test_.x();
+  result_pose.pose.orientation.y = quaternion_test_.y();
+  result_pose.pose.orientation.z = quaternion_test_.z();
+  result_pose.pose.orientation.w = quaternion_test_.w();
 
-    // Eigen::Matrix4f projectionTransform_test(Eigen::Matrix4f::Identity());
-    // projectionTransform_test.block<3, 3>(0, 0) = rotatedEigenVector.transpose();
-    // // Can try change object->centerpoint.head
-    // projectionTransform_test.block<3, 1>(
-    //   0,
-    //   3) = -1.f * (projectionTransform_test.block<3, 3>(0, 0) * object->centerpoint.head<3>());
-    // Eigen::Matrix4f affine_matrix = projectionTransform_test;
-
-    // Eigen::Matrix3f PointRotation;
-    // PointRotation << affine_matrix(0, 0), affine_matrix(0, 1),
-    //   affine_matrix(0, 2),
-    //   affine_matrix(1, 0), affine_matrix(1, 1),
-    //   affine_matrix(1, 2),
-    //   affine_matrix(2, 0), affine_matrix(2, 1),
-    //   affine_matrix(2, 2);
-
-    // tf2::Matrix3x3 graspRotation(PointRotation(0, 0), PointRotation(1, 0), PointRotation(2, 0),
-    //   PointRotation(0, 1), PointRotation(1, 1), PointRotation(2, 1),
-    //   PointRotation(0, 2), PointRotation(1, 2), PointRotation(2, 2));
-    // double r2, p2, y2;
-    // graspRotation.getRPY(r2, p2, y2);
-
-    std::vector<double> rpy = getPlanarRPY(grasp->col_direction, grasp->row_direction);
-    tf2::Quaternion quaternion_test_;
-    quaternion_test_.setRPY(0, 0, rpy[2]);
-    // quaternion_test_.setRPY(0, 0, y2);
-
-    result_pose.pose.orientation.x = quaternion_test_.x();
-    result_pose.pose.orientation.y = quaternion_test_.y();
-    result_pose.pose.orientation.z = quaternion_test_.z();
-    result_pose.pose.orientation.w = quaternion_test_.w();
-  }
   const auto clock = std::chrono::system_clock::now();
   result_pose.header.frame_id = object->object_frame;
   result_pose.header.stamp.sec = std::chrono::duration_cast<std::chrono::seconds>(

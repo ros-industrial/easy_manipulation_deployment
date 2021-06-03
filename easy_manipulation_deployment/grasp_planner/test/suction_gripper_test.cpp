@@ -690,9 +690,9 @@ TEST_F(SuctionGripperTest, getContactPointsTest) {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
   gripper->projectCloudToPlane(sliced_cloud, plane, projected_cloud);
 
-  float * curvature_sum_ptr;
   float curvature_sum;
-  curvature_sum_ptr = &curvature_sum;
+  // float * curvature_sum_ptr;
+  // curvature_sum_ptr = &curvature_sum;
 
   pcl::PointXYZ full_cup_point;
   full_cup_point.x = 0.025;
@@ -710,11 +710,11 @@ TEST_F(SuctionGripperTest, getContactPointsTest) {
   no_cup_point.z = 0.04;
 
   int full_contact_points = gripper->getContactPoints(
-    projected_cloud, sliced_cloud_normal, full_cup_point, curvature_sum_ptr);
+    projected_cloud, sliced_cloud_normal, full_cup_point, curvature_sum);
   int half_contact_points = gripper->getContactPoints(
-    projected_cloud, sliced_cloud_normal, half_cup_point, curvature_sum_ptr);
+    projected_cloud, sliced_cloud_normal, half_cup_point, curvature_sum);
   int no_contact_points = gripper->getContactPoints(
-    projected_cloud, sliced_cloud_normal, no_cup_point, curvature_sum_ptr);
+    projected_cloud, sliced_cloud_normal, no_cup_point, curvature_sum);
 
   EXPECT_TRUE(full_contact_points > half_contact_points);
   EXPECT_TRUE(full_contact_points > 0);
@@ -976,39 +976,6 @@ TEST_F(SuctionGripperTest, getAllRanksTest) {
     if (i != 0) {
       EXPECT_GE(grasp_method.grasp_ranks[i - 1], grasp_method.grasp_ranks[i]);
     }
-  }
-}
-
-TEST_F(SuctionGripperTest, getGraspPoseTestSymmetrical) {
-  ResetVariables();
-  Eigen::Vector3f centerpoint{0.0125, 0.08, 0.04};
-  num_cups_length = 2;
-  num_cups_breadth = 2;
-  dist_between_cups_length = 0.03;
-  dist_between_cups_breadth = 0.03;
-  cup_radius = 0.005;
-  CreateSphereCloud(centerpoint, 0.08, 50, 0.25, 1, 0.5);
-  ASSERT_NO_THROW(LoadGripperWithWeights());
-
-  pcl::PointXYZ object_center; gripper->generateGripperAttributes();
-  object_center.x = object->centerpoint(0);
-  object_center.y = object->centerpoint(1);
-  object_center.z = object->centerpoint(2);
-  pcl::PointXYZRGB object_top_point = gripper->findHighestPoint(
-    object->cloud,
-    object->alignments[2], true);
-  gripper->getAllPossibleGrasps(object, object_center, object_top_point, camera_frame);
-
-  for (auto sample : gripper->cup_array_samples) {
-    geometry_msgs::msg::PoseStamped grasp_pose = gripper->getGraspPose(sample, object);
-    EXPECT_EQ(0, grasp_pose.pose.orientation.x);
-    EXPECT_EQ(0, grasp_pose.pose.orientation.y);
-    EXPECT_EQ(0, grasp_pose.pose.orientation.z);
-    EXPECT_EQ(1, grasp_pose.pose.orientation.w);
-
-    EXPECT_EQ(sample->gripper_center.x, grasp_pose.pose.position.x);
-    EXPECT_EQ(sample->gripper_center.y, grasp_pose.pose.position.y);
-    EXPECT_EQ(sample->gripper_center.z, grasp_pose.pose.position.z);
   }
 }
 

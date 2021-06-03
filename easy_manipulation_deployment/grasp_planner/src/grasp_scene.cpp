@@ -398,9 +398,9 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
  *******************************************************************************************/
 
 std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
-  std::vector<epd_msgs::msg::LocalizedObject> objects,
-  std::string camera_frame,
-  float cloud_normal_radius)
+  const std::vector<epd_msgs::msg::LocalizedObject> & objects,
+  const std::string camera_frame,
+  const float & cloud_normal_radius)
 {
   RCLCPP_INFO(LOGGER, "Processing Objects detected by EPD...");
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
@@ -490,7 +490,8 @@ void GraspScene::EPDCreateWorldCollisionObject(
   PCLFunctions::voxelizeCloud<pcl::PointCloud<pcl::PointXYZRGB>::Ptr,
     pcl::VoxelGrid<pcl::PointXYZRGB>>(scene_cloud, this->fcl_voxel_size, this->org_cloud);
   this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
-    this->org_cloud, sensor_origin, 0.01);
+    this->org_cloud, sensor_origin,
+    static_cast<float>(this->get_parameter("point_cloud_params.octomap_resolution").as_double()));
 }
 
 /***************************************************************************//**
@@ -688,7 +689,9 @@ void GraspScene::createWorldCollision(const sensor_msgs::msg::PointCloud2::Const
     msg->header.stamp);
   octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
   this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
-    this->org_cloud, sensor_origin, 0.01);
+    this->org_cloud, sensor_origin,
+    static_cast<float>(this->get_parameter("point_cloud_params.octomap_resolution").as_double()));
+
   // PCLFunctions::planeSegmentation(
   //   this->cloud, this->cloud_plane_removed, this->cloud_table,
   //   this->segmentation_max_iterations,

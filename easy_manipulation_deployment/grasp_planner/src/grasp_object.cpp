@@ -31,12 +31,16 @@ GraspObject::GraspObject(
 : object_frame(object_frame_),
   cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_projected(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  cloud_normal(new pcl::PointCloud<pcl::PointNormal>())
+  cloud_normal(new pcl::PointCloud<pcl::PointNormal>()),
+  centerpoint(centerpoint_),
+  object_name("unknown_object"),
+  max_grasp_samples(1)
 {
   cloud = cloud_;
-  centerpoint = centerpoint_;
-  max_grasp_samples = 1;
   this->grasp_target.target_type = "unknown_object";
+  // centerpoint = centerpoint_;
+  // max_grasp_samples = 1;
+  // object_name = "unknown_object";
 }
 
 /***************************************************************************//**
@@ -55,29 +59,17 @@ GraspObject::GraspObject(
 : object_frame(object_frame_),
   cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_projected(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  cloud_normal(new pcl::PointCloud<pcl::PointNormal>())
+  cloud_normal(new pcl::PointCloud<pcl::PointNormal>()),
+  centerpoint(centerpoint_),
+  object_name(object_name_),
+  max_grasp_samples(1)
 {
   cloud = cloud_;
-  centerpoint = centerpoint_;
-  max_grasp_samples = 1;
   grasp_target.target_type = object_name_;
+  // centerpoint = centerpoint_;
+  // max_grasp_samples = 1;
+  // object_name = object_name_;
 }
-
-// LCOV_EXCL_START
-/***************************************************************************//**
- * Add bounding box to PCL Viewer
- * @param viewer PCL Visualizer
- ******************************************************************************/
-
-void GraspObject::add_bb_viewer(int pos, pcl::visualization::PCLVisualizer::Ptr viewer)
-{
-  viewer->addCube(
-    this->bboxTransform, this->bboxQuaternion,
-    this->maxPoint.x - this->minPoint.x,
-    this->maxPoint.y - this->minPoint.y,
-    this->maxPoint.z - this->minPoint.z, "bbox_" + std::to_string(pos));
-}
-// LCOV_EXCL_STOP
 
 /***************************************************************************//**
  * Generate the 3 dimensional bounding box of an object using Principle

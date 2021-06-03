@@ -242,7 +242,7 @@ public:
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & input_cloud,
     const pcl::PointCloud<pcl::PointNormal>::Ptr & sliced_cloud_normal,
     const pcl::PointXYZ & centerpoint,
-    float * curvature_sum);
+    float & curvature_sum);
 
   void updateMaxMinValues(
     const int & num_contact_points,

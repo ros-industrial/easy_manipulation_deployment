@@ -134,6 +134,8 @@ FingerGripper::FingerGripper(
     throw std::invalid_argument("Invalid value for field.");
   }
   this->num_fingers_total = this->num_fingers_side_1 + this->num_fingers_side_2;
+
+  generateGripperAttributes();
 }
 
 /***************************************************************************//**
@@ -172,7 +174,6 @@ void FingerGripper::planGrasps(
   std::shared_ptr<CollisionObject> world_collision_object,
   std::string camera_frame)
 {
-  generateGripperAttributes();
   getCenterCuttingPlane(object);
   getCuttingPlanes(object);
   if (!this->getGraspCloud(object)) {
@@ -520,7 +521,6 @@ bool FingerGripper::getInitialSamplePoints(const std::shared_ptr<GraspObject> & 
         }
         sample->sample_side_1->start_index = first_point_index;
         sample->sample_side_2->start_index = second_point_index;
-      } else {
       }
     }
   } else {  // Object in the Y axis
@@ -570,7 +570,7 @@ void FingerGripper::getInitialSampleCloud(const std::shared_ptr<GraspObject> & o
           sample->grasp_plane_ncloud->points[sample->sample_side_2->start_index],
           this->finger_thickness, object->cloud, object->cloud_normal,
           sample->sample_side_2->finger_cloud, sample->sample_side_2->finger_ncloud);
-      } else {}
+      }
     };
   for (auto & sample : this->grasp_samples) {
     futures.push_back(
@@ -705,7 +705,6 @@ void FingerGripper::getFingerSamples(const std::shared_ptr<GraspObject> & object
               std::ref(centroid_point),
               std::ref(sample)));
         }
-      } else {
       }
     };
   for (auto & sample : this->grasp_samples) {
@@ -744,7 +743,7 @@ void FingerGripper::getGripperClusters()
         // Finger cloud on side 2 on this plane is part of the gripper
         this->gripper_clusters.push_back(this->grasp_samples[i]->sample_side_2->finger_samples);
       }
-    } else {}
+    }
   }
 }
 

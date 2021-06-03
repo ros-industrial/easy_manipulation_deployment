@@ -53,7 +53,7 @@ void PCLFunctions::SensorMsgtoPCLPointCloud2(
   const sensor_msgs::msg::PointCloud2 & pc2,
   pcl::PCLPointCloud2 & pcl_pc2)
 {
-  try {    /* */
+  try {
     pcl_pc2.header.stamp = pc2.header.stamp.nanosec / 1000ull;
     pcl_pc2.header.seq = 0;
     pcl_pc2.header.frame_id = pc2.header.frame_id;
@@ -136,7 +136,6 @@ void PCLFunctions::removeStatisticalOutlier(
   sor.setInputCloud(cloud);
   sor.setMeanK(10);
   sor.setStddevMulThresh(threshold);
-  // sor.setStddevMulThresh (0.7);
   sor.filter(*cloud);
 }
 
