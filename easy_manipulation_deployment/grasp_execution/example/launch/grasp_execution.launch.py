@@ -113,6 +113,9 @@ def generate_launch_description():
             'moveit_simple_controller_manager/MoveItSimpleControllerManager'
         }
 
+    joint_limits_yaml = load_yaml('ur5_moveit_config', 'config/joint_limits.yaml')
+    joint_limits = {'robot_description_planning': joint_limits_yaml}
+
     # MoveItCpp demo executable
     grasp_execution_demo_node = Node(
         name='grasp_execution_node',
@@ -124,6 +127,7 @@ def generate_launch_description():
         parameters=[grasp_execution_yaml_file_name,
                     robot_description,
                     robot_description_semantic,
+                    joint_limits,
                     kinematics_yaml,
                     ompl_planning_pipeline_config,
                     trajectory_execution,
