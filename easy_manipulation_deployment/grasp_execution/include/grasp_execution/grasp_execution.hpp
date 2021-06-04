@@ -31,6 +31,7 @@
 
 #include "grasp_execution/utils.hpp"
 #include "emd_msgs/msg/grasp_task.hpp"
+#include "emd_msgs/srv/grasp_request.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
@@ -42,7 +43,8 @@ class GraspExecutionInterface
 public:
   GraspExecutionInterface(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic = "grasp_request",
+    const std::string & grasp_task_topic = "grasp_tasks",
+    const std::string & grasp_req_topic = "grasp_requests",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0
   );
@@ -74,7 +76,8 @@ public:
     const emd_msgs::msg::GraspTask::SharedPtr & msg) = 0;
 
   virtual void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg) = 0;
+    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    bool blocking = false) = 0;
 
   virtual geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const = 0;
 
@@ -184,6 +187,7 @@ protected:
 
 private:
   rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
+  rclcpp::Service<emd_msgs::srv::GraspRequest>::SharedPtr grasp_req_service_;
 };
 
 }  // namespace grasp_execution

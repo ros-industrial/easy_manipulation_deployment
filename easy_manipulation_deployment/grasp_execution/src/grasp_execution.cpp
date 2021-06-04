@@ -16,6 +16,8 @@
 #include <string>
 #include <utility>
 
+#include "grasp_execution/utils.hpp"
+
 #include "grasp_execution/grasp_execution.hpp"
 
 namespace grasp_execution
@@ -24,6 +26,7 @@ namespace grasp_execution
 GraspExecutionInterface::GraspExecutionInterface(
   const rclcpp::Node::SharedPtr & node,
   const std::string & grasp_task_topic,
+  const std::string & grasp_req_topic,
   size_t planning_concurrency,
   size_t execution_concurrency
 )
@@ -39,6 +42,20 @@ GraspExecutionInterface::GraspExecutionInterface(
       order_schedule(std::move(msg));
     }
   );
+  grasp_req_service_ = node_->create_service<emd_msgs::srv::GraspRequest>(
+    grasp_req_topic,
+    [ = ](
+      const std::shared_ptr<rmw_request_id_t> req_header,
+      const std::shared_ptr<emd_msgs::srv::GraspRequest::Request> req,
+      const std::shared_ptr<emd_msgs::srv::GraspRequest::Response> res) -> void
+    {
+      (void)req_header;
+      auto task = std::make_unique<emd_msgs::msg::GraspTask>();
+      task->task_id = gen_uuid();
+      task->grasp_targets = req->grasp_targets;
+      order_schedule(std::move(task), true);
+      res->success = true;
+    });
 }
 
 GraspExecutionInterface::~GraspExecutionInterface()

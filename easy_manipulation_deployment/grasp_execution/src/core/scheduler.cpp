@@ -110,11 +110,14 @@ void Scheduler::Impl::stop_finished_worker()
     // Check if there are on going tasks
     if (worker.execution_thread) {
       // Check if the ongoing tasks is finished
-      auto status = worker.execution_future.wait_for(std::chrono::nanoseconds(0));
-      if (status == std::future_status::ready) {
-        worker.execution_thread->join();
-        worker.execution_thread.reset();
+      if (worker.execution_future.valid()) {
+        auto status = worker.execution_future.wait_for(std::chrono::nanoseconds(0));
+        if (status != std::future_status::ready) {
+          continue;
+        }
       }
+      worker.execution_thread->join();
+      worker.execution_thread.reset();
     }
   }
 }

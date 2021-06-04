@@ -21,9 +21,8 @@ class DynamicSafetyDemo : public grasp_execution::moveit2::MoveitCppGraspExecuti
 {
 public:
   explicit DynamicSafetyDemo(
-    const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic)
-  : MoveitCppGraspExecution(node, grasp_task_topic, 1, 1),
+    const rclcpp::Node::SharedPtr & node)
+  : MoveitCppGraspExecution(node),
     node_(node)
   {}
 
@@ -99,7 +98,7 @@ int main(int argc, char ** argv)
   rclcpp::Node::SharedPtr node =
     rclcpp::Node::make_shared("dynamic_safety_demo_node", "", node_options);
 
-  DynamicSafetyDemo demo(node, "grasp_tasks");
+  DynamicSafetyDemo demo(node);
 
   demo.init("manipulator", "ee_palm");
 

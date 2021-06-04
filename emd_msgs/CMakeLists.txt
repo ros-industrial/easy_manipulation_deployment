@@ -28,6 +28,7 @@ rosidl_generate_interfaces( ${PROJECT_NAME}
   "msg/GraspMethod.msg"
   "msg/GraspTarget.msg"
   "msg/GraspTask.msg"
+  "srv/GraspRequest.srv"
   DEPENDENCIES
   std_msgs
   sensor_msgs

@@ -1,6 +1,6 @@
 grasp_planning_node:
   ros__parameters:
-    grasp_output_topic: "/grasp_tasks"
+    grasp_output_topic: "grasp_requests"
     easy_perception_deployment:
       epd_enabled: false
       tracking_enabled: false
@@ -42,6 +42,6 @@ grasp_planning_node:
           world_y_angle_threshold: 0.5
           world_z_angle_threshold: 0.25
     visualization_params:
-      point_cloud_visualization: true
+      point_cloud_visualization: false
 
       

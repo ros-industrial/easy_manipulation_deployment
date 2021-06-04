@@ -35,18 +35,22 @@ static const float CLEARANCE = 0.1;
 
 static const char GRASP_TASK_TOPIC[] = "grasp_tasks";
 
+static const char GRASP_REQUEST_TOPIC[] = "grasp_requests";
+
 class Demo : public moveit2::MoveitCppGraspExecution
 {
 public:
   explicit Demo(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic)
-  : MoveitCppGraspExecution(node, grasp_task_topic, 1, 1),
+    const std::string & grasp_task_topic,
+    const std::string & grasp_request_topic)
+  : MoveitCppGraspExecution(node, grasp_task_topic, grasp_request_topic, 1, 1),
     node_(node)
   {}
 
   void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg) override
+    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    bool blocking = false) override
   {
     // target id will be "#<shape>-<task_id>-<target-index>"
 
@@ -97,6 +101,12 @@ public:
           break;
         default:
           break;
+      }
+
+      if (blocking) {
+        // Wait for the job to finish
+        bool result;
+        planning_scheduler.wait_till_complete(target_id, result);
       }
     }
   }
@@ -260,7 +270,8 @@ int main(int argc, char ** argv)
   rclcpp::Node::SharedPtr node =
     rclcpp::Node::make_shared("grasp_execution_demo_node", "", node_options);
 
-  grasp_execution::Demo demo(node, grasp_execution::GRASP_TASK_TOPIC);
+  grasp_execution::Demo demo(
+    node, grasp_execution::GRASP_TASK_TOPIC, grasp_execution::GRASP_REQUEST_TOPIC);
 
   demo.init("manipulator", "ee_palm");
 

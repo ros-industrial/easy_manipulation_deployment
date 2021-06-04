@@ -23,6 +23,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "emd_msgs/msg/grasp_task.hpp"
+#include "emd_msgs/srv/grasp_request.hpp"
 
 #include "grasp_execution/utils.hpp"
 
@@ -38,6 +39,7 @@ public:
     geometry_msgs::msg::PoseStamped grasp_pose, object_pose;
     grasp_pose.header.stamp = this->now();
 
+    declare_parameter("interface");
     declare_parameter("frame_id");
     declare_parameter("grasp_pose");
     declare_parameter("object_pose");
@@ -52,6 +54,7 @@ public:
 
     double delay;
 
+    get_parameter_or<std::string>("interface", interface, "topic");
     get_parameter_or<std::string>("frame_id", frame_id, "base_link");
     get_parameter_or<std::vector<double>>(
       "grasp_pose", grasp_pose_vector, grasp_pose_vector);
@@ -105,41 +108,44 @@ public:
 
     grasp_pose.header.stamp = object_pose.header.stamp = this->now();
 
-    request_.task_id = gen_uuid();
+    request.task_id = gen_uuid();
 
-    request_.grasp_targets.resize(1);
-    request_.grasp_targets[0].target_shape = object_shape;
-    request_.grasp_targets[0].target_pose = object_pose;
+    request.grasp_targets.resize(1);
+    request.grasp_targets[0].target_shape = object_shape;
+    request.grasp_targets[0].target_pose = object_pose;
 
-    request_.grasp_targets[0].grasp_methods.resize(1);
+    request.grasp_targets[0].grasp_methods.resize(1);
 
-    auto & grasp_method = request_.grasp_targets[0].grasp_methods[0];
+    auto & grasp_method = request.grasp_targets[0].grasp_methods[0];
 
     grasp_method.ee_id = "robotiq_2f_gripper";
     grasp_method.grasp_poses.push_back(grasp_pose);
     grasp_method.grasp_ranks = {1.0};
 
-    publisher_ =
-      this->create_publisher<emd_msgs::msg::GraspTask>("grasp_tasks", 10);
+    if (interface == "topic") {
+      publisher_ =
+        this->create_publisher<emd_msgs::msg::GraspTask>("grasp_tasks", 10);
 
-    rclcpp::sleep_for(
-      std::chrono::milliseconds(
-        static_cast<int>(2.0 * 1000)));
+      rclcpp::sleep_for(
+        std::chrono::milliseconds(
+          static_cast<int>(2.0 * 1000)));
 
-    RCLCPP_INFO(this->get_logger(), "Sending fake grasp pose");
+      RCLCPP_INFO(this->get_logger(), "Sending fake grasp pose");
 
-    print_pose(grasp_pose);
-    print_pose(object_pose);
+      print_pose(grasp_pose);
+      print_pose(object_pose);
 
-    publisher_->publish(request_);
+      publisher_->publish(request);
 
-    rclcpp::sleep_for(std::chrono::milliseconds(500));
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
+    }
   }
+  emd_msgs::msg::GraspTask request;
+
+  std::string interface;
 
 private:
   rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr publisher_;
-
-  emd_msgs::msg::GraspTask request_;
 
   float delay_;
 };
@@ -149,7 +155,34 @@ private:
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  std::make_shared<grasp_execution::FakeGraspPosePublisher>();
+  auto node = std::make_shared<grasp_execution::FakeGraspPosePublisher>();
+  if (node->interface == "service") {
+    auto client = node->create_client<emd_msgs::srv::GraspRequest>("grasp_requests");
+
+    // Waiting for service to appear.
+    while (!client->wait_for_service(std::chrono::seconds(1))) {
+      if (!rclcpp::ok()) {
+        RCLCPP_ERROR(node->get_logger(), "client interrupted while waiting for service to appear.");
+        return 1;
+      }
+      RCLCPP_INFO(node->get_logger(), "waiting for service to appear...");
+    }
+
+    auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
+    req->grasp_targets = node->request.grasp_targets;
+    auto result_future = client->async_send_request(req);
+    if (rclcpp::spin_until_future_complete(node, result_future) !=
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(node->get_logger(), "service call failed :(");
+      return 1;
+    }
+    auto result = result_future.get();
+    RCLCPP_INFO(
+      node->get_logger(), "End in %s!!",
+      (result->success) ? "SUCCESS" : "FAILURE");
+  }
+
   rclcpp::shutdown();
   return 0;
 }

@@ -41,6 +41,8 @@
 #include <epd_msgs/msg/epd_object_localization.hpp>
 #include <epd_msgs/msg/epd_object_tracking.hpp>
 #include <epd_msgs/msg/localized_object.hpp>
+#include <emd_msgs/srv/grasp_request.hpp>
+
 
 // Temp
 #include <opencv2/opencv.hpp>
@@ -156,8 +158,10 @@ public:
   std::shared_ptr<tf2_ros::Buffer> buffer_;
   /*! \brief Tf listener to listen for frame transforms */
   std::shared_ptr<tf2_ros::TransformListener> tf_listener;
-  /*! \brief Publisher that provides the GraspTask information for the Grasp execution component */
-  rclcpp::Publisher<emd_msgs::msg::GraspTask>::SharedPtr output_pub;
+  /*! \brief Client that provides the GraspRequest information for the Grasp execution component */
+  rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedPtr output_client;
+  /*! \brief Futures for GraspRequest request */
+  std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
   // /*! \brief Publisher that provides markers for RVIZ */
   // rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
   /*! \brief Subscriber that subscribes to the camera output */

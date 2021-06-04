@@ -65,10 +65,9 @@ GraspScene::GraspScene()
   table_coeff(new pcl::ModelCoefficients),
   viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
 {
-  output_pub =
-    this->create_publisher<emd_msgs::msg::GraspTask>(
-    this->get_parameter(
-      "grasp_output_topic").as_string(), 10);
+  output_client =
+    this->create_client<emd_msgs::srv::GraspRequest>(
+    this->get_parameter("grasp_output_topic").as_string());
   // marker_pub =
   //   this->create_publisher<visualization_msgs::msg::Marker>(
   //     "grasp_marker", 10);
@@ -221,11 +220,33 @@ void GraspScene::planningInit(const U & msg)
       " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
   }
-  RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
+
+  // RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
   // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
-  this->output_pub->publish(grasp_task);
+  // this->output_pub->publish(grasp_task);
+
+  RCLCPP_INFO(LOGGER, "Sending Grasp Request to grasp execution module");
+  auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
+  req->grasp_targets = grasp_task.grasp_targets;
+  // std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
+  if (!this->result_future.valid()) {
+    RCLCPP_INFO(LOGGER, "Client Not started");
+    this->result_future = output_client->async_send_request(req);
+  } else if (this->result_future.wait_for(std::chrono::nanoseconds(0)) ==
+    std::future_status::timeout)
+  {
+    RCLCPP_INFO(LOGGER, " Grasp Execution still Ongoing");
+  } else {
+    auto result = this->result_future.get();
+    RCLCPP_INFO(
+      LOGGER, "Grasp Execution completed! STATUS: %s!!",
+      (result->success) ? "SUCCESS" : "FAILURE");
+    this->result_future = output_client->async_send_request(req);
+  }
+
   this->end_effectors.clear();
   this->grasp_objects.clear();
+  RCLCPP_INFO(LOGGER, "Exit Callback");
 }
 
 /****************************************************************************************//**
@@ -287,11 +308,30 @@ void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedP
       " [ms] ");
     grasp_task.grasp_targets.push_back(object->grasp_target);
   }
-  RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
+
   // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
-  this->output_pub->publish(grasp_task);
+  // this->output_pub->publish(grasp_task);
+
+  RCLCPP_INFO(LOGGER, "Sending Grasp Request to grasp execution module");
+  auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
+  req->grasp_targets = grasp_task.grasp_targets;
+  if (!this->result_future.valid()) {
+    RCLCPP_INFO(LOGGER, "Client Not started");
+    this->result_future = output_client->async_send_request(req);
+  } else if (this->result_future.wait_for(std::chrono::nanoseconds(0)) ==
+    std::future_status::timeout)
+  {
+    RCLCPP_INFO(LOGGER, " Grasp Execution still Ongoing");
+  } else {
+    auto result = this->result_future.get();
+    RCLCPP_INFO(
+      LOGGER, "Grasp Execution completed! STATUS: %s!!",
+      (result->success) ? "SUCCESS" : "FAILURE");
+    this->result_future = output_client->async_send_request(req);
+  }
   this->end_effectors.clear();
   this->grasp_objects.clear();
+  RCLCPP_INFO(LOGGER, "Exit Callback");
 }
 
 // LCOV_EXCL_START

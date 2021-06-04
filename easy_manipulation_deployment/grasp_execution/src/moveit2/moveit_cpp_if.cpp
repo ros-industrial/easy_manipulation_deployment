@@ -50,11 +50,12 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("grasp_execution");
 
 MoveitCppGraspExecution::MoveitCppGraspExecution(
   const rclcpp::Node::SharedPtr & node,
-  const std::string & grasp_poses_topic,
+  const std::string & grasp_task_topic,
+  const std::string & grasp_req_topic,
   size_t planning_concurrency,
   size_t execution_concurrency)
 : GraspExecutionInterface(
-    node, grasp_poses_topic, planning_concurrency, execution_concurrency),
+    node, grasp_task_topic, grasp_req_topic, planning_concurrency, execution_concurrency),
   moveit_cpp_(std::make_shared<moveit::planning_interface::MoveItCpp>(node_))
 {
   // let RViz display query PlanningScene
@@ -192,6 +193,14 @@ void MoveitCppGraspExecution::register_target_objects(
     const auto & target = msg->grasp_targets[i];
     const auto target_id =
       this->gen_target_object_id(msg, i);
+
+    // Check if object already exists
+    {    // Lock PlanningScene
+      planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+      if (scene->getWorld()->getObject(target_id)) {
+        continue;
+      }
+    }    // Unlock PlanningScene
 
     prompt_job_start(
       LOGGER, target_id,

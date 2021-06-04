@@ -28,12 +28,12 @@ GraspObject::GraspObject(
   std::string object_frame_,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
   Eigen::Vector4f centerpoint_)
-: object_frame(object_frame_),
+: object_name("unknown_object"),
+  object_frame(object_frame_),
   cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_projected(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_normal(new pcl::PointCloud<pcl::PointNormal>()),
   centerpoint(centerpoint_),
-  object_name("unknown_object"),
   max_grasp_samples(1)
 {
   cloud = cloud_;
@@ -56,12 +56,12 @@ GraspObject::GraspObject(
   std::string object_name_, std::string object_frame_,
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_,
   Eigen::Vector4f centerpoint_)
-: object_frame(object_frame_),
+: object_name(object_name_),
+  object_frame(object_frame_),
   cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_projected(new pcl::PointCloud<pcl::PointXYZRGB>()),
   cloud_normal(new pcl::PointCloud<pcl::PointNormal>()),
   centerpoint(centerpoint_),
-  object_name(object_name_),
   max_grasp_samples(1)
 {
   cloud = cloud_;

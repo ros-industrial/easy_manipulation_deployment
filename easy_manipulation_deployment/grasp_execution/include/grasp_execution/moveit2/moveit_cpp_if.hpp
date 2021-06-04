@@ -67,7 +67,8 @@ class MoveitCppGraspExecution : public GraspExecutionInterface
 public:
   explicit MoveitCppGraspExecution(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_poses_topic = "grasp_request",
+    const std::string & grasp_task_topic = "grasp_tasks",
+    const std::string & grasp_req_topic = "grasp_requests",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0);
 
@@ -81,7 +82,8 @@ public:
     const std::string & controller_name = "");
 
   void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr &) override {}
+    const emd_msgs::msg::GraspTask::SharedPtr &,
+    bool) override {}
 
   void register_target_objects(
     const emd_msgs::msg::GraspTask::SharedPtr & msg) override;
