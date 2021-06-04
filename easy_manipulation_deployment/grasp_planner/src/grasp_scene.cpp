@@ -67,7 +67,7 @@ GraspScene::GraspScene()
 {
   output_client =
     this->create_client<emd_msgs::srv::GraspRequest>(
-    this->get_parameter("grasp_output_topic").as_string());
+    this->get_parameter("grasp_output_service").as_string());
   // marker_pub =
   //   this->create_publisher<visualization_msgs::msg::Marker>(
   //     "grasp_marker", 10);

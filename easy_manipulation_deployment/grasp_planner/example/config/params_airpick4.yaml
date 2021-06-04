@@ -1,6 +1,6 @@
 grasp_planning_node:
   ros__parameters:
-    grasp_output_topic: "/grasp_tasks"
+    grasp_output_service: "grasp_requests"
     easy_perception_deployment:
       epd_enabled: false
       tracking_enabled: true
