@@ -1,6 +1,6 @@
 # Easy Manipulation Deployment 
 
-<img src="./images/emd_logo.png"  width="20%" height="20%">
+<img src="./images/emd_logo.png"  width="10%" height="10%">
 <br><br><br>
 
 
@@ -24,8 +24,9 @@ It is recommended to run this package on **ROS2 Foxy**.
 ---
 ## Full Documentation/Wiki
 
-[Check out the full documentation here](https://easy-manipulation-deployment-docs.readthedocs.io/)
-[Check out the API documentation here](https://tanjpg.github.io/emd_docs/html/index.html)
+[Check out the Full Documentation here](https://easy-manipulation-deployment-docs.readthedocs.io/)
+
+[Check out the API Documentation here](https://tanjpg.github.io/emd_docs/html/index.html)
 
 ---
 ## Components
@@ -36,19 +37,19 @@ An algorithmic based grasp planner that plans grasps in 3D space. Highly configu
 
 Two Finger Gripper
 
-<img src="./images/two_finger.png"  width="30%" height="30%"> 
+<img src="./images/two_finger.png"  width="10%" height="10%"> 
 
 Three Finger Gripper
 
-<img src="./images/three_finger.png"  width="30%" height="30%"> 
+<img src="./images/three_finger.png"  width="10%" height="10%"> 
 
 Single Suction Cup
 
-<img src="./images/single_suction.png"  width="30%" height="30%"> 
+<img src="./images/single_suction.png"  width="10%" height="10%"> 
 
 2x2 Suction Array
 
-<img src="./images/2x2_array.png"  width="30%" height="30%"> 
+<img src="./images/2x2_array.png"  width="10%" height="10%"> 
 
 
 ### 2) Grasp Execution
