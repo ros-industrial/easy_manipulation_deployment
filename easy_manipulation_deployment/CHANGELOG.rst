@@ -8,5 +8,5 @@
 * Added a more comprehensive configuration file for grasp planner to account for multifinger/suction array support, and point cloud support
 * Added Ranking Algorithm that supports Multifinger gripper and suction cup array for Grasp Planner support
 * Added unit tests for all added features for grasp planner
-* Updated documentation for all new features for grasp planner
+* Removed all documentation to a separate repository (Both doxygen and sphinx)
 * Contributors: Glenn Tan, Chen Bainian, Khairul Amin, Chia Tse En
