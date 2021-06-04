@@ -54,5 +54,5 @@ dynamic_safety_demo_node:
 
     visualizer:
       publish_frequency: 10
-      steo: 0.1
+      step: 0.1
       topic: "/dynamic_safety/displayed_state"

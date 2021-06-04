@@ -27,12 +27,6 @@
 namespace grasp_execution
 {
 
-static const char PLANNING_GROUP[] = "manipulator";
-
-static const char EE_LINK[] = "ee_palm";
-
-static const float CLEARANCE = 0.1;
-
 static const char GRASP_TASK_TOPIC[] = "grasp_tasks";
 
 static const char GRASP_REQUEST_TOPIC[] = "grasp_requests";
@@ -115,15 +109,33 @@ public:
     const emd_msgs::msg::GraspTarget::SharedPtr & target,
     const std::string & target_id)
   {
-    double clearance = CLEARANCE;
-
     // Get home state
     moveit::core::RobotStatePtr home_state(get_curr_state());
 
     // TODO(Briancbn): select grasp method based on end effector availability
+    double clearance;
+    std::string ee_link = "";
+    std::string planning_group = "";
     auto & grasp_method = target->grasp_methods[0];
-    std::string ee_link = EE_LINK;
-    std::string planning_group = PLANNING_GROUP;
+    const std::string & ee_brand = grasp_method.ee_id;
+
+    // Select the group based on ee brand name
+    for (auto & group : get_workcell_context().groups) {
+      for (auto & ee : group.second.end_effectors) {
+        if (ee.second.brand == ee_brand) {
+          ee_link = ee.second.link;
+          clearance = ee.second.clearance;
+          planning_group = group.first;
+          break;
+        }
+      }
+    }
+
+    // Exit if brand name not found.
+    if (ee_link.empty()) {
+      RCLCPP_ERROR(node_->get_logger(), "End effector brand: %s", ee_brand.c_str());
+    }
+
     auto release_pose = get_curr_pose(ee_link);
 
     // TODO(Briancbn): iterate to find the valid grasp_pose within grasp_method
@@ -268,7 +280,9 @@ int main(int argc, char ** argv)
   grasp_execution::Demo demo(
     node, grasp_execution::GRASP_TASK_TOPIC, grasp_execution::GRASP_REQUEST_TOPIC);
 
-  demo.init("manipulator", "ee_palm");
+  const std::string workcell_context_path =
+    node->get_parameter("workcell_context").as_string();
+  demo.init_from_yaml(workcell_context_path);
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);

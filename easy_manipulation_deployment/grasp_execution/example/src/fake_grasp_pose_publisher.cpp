@@ -47,6 +47,7 @@ public:
     declare_parameter("delay");
 
     std::string frame_id;
+    std::string ee_id;
 
     std::vector<double> grasp_pose_vector{-0.1, 0.4, 0.07, M_PI, 0, 0};
     std::vector<double> object_pose_vector{-0.1, 0.4, 0.05, 0, 0, 0};
@@ -64,6 +65,8 @@ public:
 
     get_parameter_or<std::vector<double>>(
       "object_dimensions", object_dimensions, object_dimensions);
+
+    get_parameter_or<std::string>("ee_id", ee_id, "robotiq_2f");
 
     get_parameter_or<double>(
       "delay", delay, 2.0);
@@ -118,7 +121,7 @@ public:
 
     auto & grasp_method = request.grasp_targets[0].grasp_methods[0];
 
-    grasp_method.ee_id = "robotiq_2f_gripper";
+    grasp_method.ee_id = ee_id;
     grasp_method.grasp_poses.push_back(grasp_pose);
     grasp_method.grasp_ranks = {1.0};
 

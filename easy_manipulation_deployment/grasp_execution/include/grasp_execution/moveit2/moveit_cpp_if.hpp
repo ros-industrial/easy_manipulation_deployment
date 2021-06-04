@@ -43,23 +43,11 @@ namespace moveit2
 
 struct JmgContext
 {
-  JmgContext() {}
-
-  JmgContext(
-    const std::string & _name,
-    const moveit::planning_interface::MoveItCppPtr _moveit_cpp,
-    const std::string & _ee_link)
-  {
-    ee_link = _ee_link;
-    planner = std::make_shared<moveit::planning_interface::PlanningComponent>(
-      _name, _moveit_cpp);
-  }
-
-  // TODO(Briancbn): Replace with end-effector abstraction class
-  std::string ee_link;
   moveit::planning_interface::PlanningComponentPtr planner;
   std::deque<robot_trajectory::RobotTrajectoryPtr> traj;
   std::unordered_map<std::string, Executor::UniquePtr> executors;
+  std::unordered_map<std::string, gripper::GripperDriver::UniquePtr> grippers;
+  WorkcellContext::Gripper default_ee;
 };
 
 class MoveitCppGraspExecution : public GraspExecutionInterface
@@ -74,9 +62,34 @@ public:
 
   ~MoveitCppGraspExecution();
 
-  virtual bool init(
+  /// Documentation inherited
+  bool init(const std::string & planning_group) override;
+
+  /// Documentation inherited
+  bool init_from_yaml(const std::string & path) override;
+
+  /// Documentation inherited
+  bool load_execution_method(
+    const std::string & group_name,
+    const std::string & execution_method,
+    const std::string & execution_plugin,
+    const std::string & execution_controller = "") override;
+
+  /// Documentation inherited
+  bool load_ee(
+    const std::string & group_name,
+    const std::string & ee_name,
+    const std::string & ee_brand,
+    const std::string & ee_link,
+    double ee_clearance,
+    const std::string & ee_driver_plugin,
+    const std::string & ee_driver_controller = "") override;
+
+  [[deprecated("Replaced by init(group_name) and load_ee, "
+      "which has an improved interface")]]
+  bool init(
     const std::string & planning_group,
-    const std::string & _ee_link = "",
+    const std::string & _ee_link,
     const std::string & execution_method = "default",
     const std::string & execution_type = "",
     const std::string & controller_name = "");

@@ -16,6 +16,7 @@
   
   <build_depend>tf2</build_depend>
   <build_depend>tf2_ros</build_depend>
+  <depend>yaml_cpp_vendor</depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -23,6 +24,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <grasp_execution plugin="${prefix}/moveit_cpp_default_executor_plugin.xml"/>
+    <grasp_execution plugin="${prefix}/grasp_execution_default_plugins.xml"/>
   </export>
 </package>

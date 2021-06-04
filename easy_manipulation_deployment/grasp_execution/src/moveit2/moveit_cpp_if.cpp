@@ -102,16 +102,15 @@ MoveitCppGraspExecution::~MoveitCppGraspExecution()
   moveit_cpp_.reset();
 }
 
-bool MoveitCppGraspExecution::init(
-  const std::string & planning_group,
-  const std::string & _ee_link,
-  const std::string & execution_method,
-  const std::string & execution_type,
-  const std::string & controller_name)
+bool MoveitCppGraspExecution::init(const std::string & planning_group)
 {
   prompt_job_start(
     LOGGER, "",
     "Initializing planning group: [" + planning_group + "].");
+  if (!GraspExecutionInterface::init(planning_group)) {
+    return false;
+  }
+
   // Check if planner is already registered
   if (arms_.find(planning_group) == arms_.end()) {
     // Print out basic planning group info for debugging
@@ -143,44 +142,161 @@ bool MoveitCppGraspExecution::init(
         (joint_model_group->isChain() ? "Yes" : "No"),
         (joint_model_group->isEndEffector() ? "Yes" : "No"));
 
-      // Initializing planner
+      // Initialize another moveit2 Joint Model Group context
       arms_.emplace(
         planning_group,
-        moveit2::JmgContext{planning_group, moveit_cpp_,
-          (_ee_link.empty() ? link_names.back() : _ee_link)});
+        moveit2::JmgContext());
 
-      if (_ee_link != link_names.back()) {
-        RCLCPP_WARN(
-          LOGGER,
-          MOVEIT_CONSOLE_COLOR_YELLOW
-          "Assuming [%s] is rigidly attached to end_link [%s]"
-          MOVEIT_CONSOLE_COLOR_RESET, _ee_link.c_str(), link_names.back().c_str());
+      // Initialize planner
+      arms_[planning_group].planner =
+        std::make_shared<moveit::planning_interface::PlanningComponent>(
+        planning_group, moveit_cpp_);
+
+      // Initialize gripper
+      arms_[planning_group].default_ee.link = link_names.back();
+      arms_[planning_group].default_ee.brand = "dummy";
+
+      // Initialize dummy gripper driver
+      auto dummy_gripper_driver = std::unique_ptr<gripper::GripperDriver>(
+        gripper_driver_loader_->createUnmanagedInstance("grasp_execution/DummyGripperDriver"));
+      dummy_gripper_driver->load("");
+      arms_[planning_group].grippers["dummy"] = std::move(dummy_gripper_driver);
+
+      prompt_job_end(LOGGER, true);
+      return true;
+    }
+  } else {
+    RCLCPP_WARN(LOGGER, "Planning Group [%s] already exist", planning_group.c_str());
+    prompt_job_end(LOGGER, false);
+    return false;
+  }
+}
+
+bool MoveitCppGraspExecution::init_from_yaml(const std::string & path)
+{
+  if (!GraspExecutionInterface::init_from_yaml(path)) {
+    return false;
+  }
+
+  for (auto & itr : this->get_workcell_context().groups) {
+    // Initialize group (note: repeated group context loading will be ignored).
+    if (!this->init(itr.first)) {
+      return false;
+    }
+    const auto & group_name = itr.first;
+    const auto & group = itr.second;
+
+    // Initialize executors.
+    // (note: repeated executor context loading will be ignored).
+    for (auto & itr2 : group.executors) {
+      if (!this->load_execution_method(
+          group_name, itr2.first, itr2.second.plugin, itr2.second.controller))
+      {
+        return false;
       }
     }
 
-  } else {
-    RCLCPP_WARN(
-      LOGGER,
-      MOVEIT_CONSOLE_COLOR_YELLOW
-      "Planning Group [%s] already exist"
-      MOVEIT_CONSOLE_COLOR_RESET, planning_group.c_str());
+    // Initialize gripper
+    // (note: repeated gripper context loading will be ignored)
+    for (auto & ee : group.end_effectors) {
+      if (!this->load_ee(
+          group_name, ee.first,
+          ee.second.brand, ee.second.link, ee.second.clearance,
+          ee.second.driver.plugin, ee.second.driver.controller))
+      {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool MoveitCppGraspExecution::load_execution_method(
+  const std::string & group_name,
+  const std::string & execution_method,
+  const std::string & execution_plugin,
+  const std::string & execution_controller)
+{
+  if (!GraspExecutionInterface::load_execution_method(
+      group_name, execution_method, execution_plugin, execution_controller))
+  {
+    return false;
+  }
+
+  // Check if arms are initialized
+  if (arms_.find(group_name) == arms_.end()) {
+    // Otherwise call the init function
+    if (!this->init(group_name)) {
+      return false;
+    }
   }
 
   // Initialize customized execution method
   if (execution_method != "default" && !execution_method.empty()) {
     auto customized_executor = std::unique_ptr<grasp_execution::moveit2::Executor>(
-      executor_loader_->createUnmanagedInstance(execution_type));
-    customized_executor->load(moveit_cpp_, controller_name);
-    arms_[planning_group].executors[execution_method] = std::move(customized_executor);
-
-    RCLCPP_INFO(
-      LOGGER,
-      "Load non-default execution method [%s] with plugin [%s].",
-      execution_method.c_str(), execution_type.c_str());
+      executor_loader_->createUnmanagedInstance(execution_plugin));
+    customized_executor->load(moveit_cpp_, execution_controller);
+    arms_[group_name].executors[execution_method] = std::move(customized_executor);
   }
-  prompt_job_end(LOGGER, true);
   return true;
 }
+
+bool MoveitCppGraspExecution::load_ee(
+  const std::string & group_name,
+  const std::string & ee_name,
+  const std::string & ee_brand,
+  const std::string & ee_link,
+  double ee_clearance,
+  const std::string & ee_driver_plugin,
+  const std::string & ee_driver_controller)
+{
+  if (!GraspExecutionInterface::load_ee(
+      group_name, ee_name, ee_brand, ee_link, ee_clearance,
+      ee_driver_plugin, ee_driver_controller))
+  {
+    return false;
+  }
+
+  // Check if arms are initialized
+  if (arms_.find(group_name) == arms_.end()) {
+    // Otherwise call the init function
+    if (!this->init(group_name)) {
+      return false;
+    }
+  }
+
+  // Initialize customized execution method
+  auto gripper_driver = std::unique_ptr<gripper::GripperDriver>(
+    gripper_driver_loader_->createUnmanagedInstance(ee_driver_plugin));
+  gripper_driver->load(ee_driver_controller);
+  gripper_driver->activate();
+  arms_[group_name].grippers[ee_brand] = std::move(gripper_driver);
+  return true;
+}
+
+bool MoveitCppGraspExecution::init(
+  const std::string & planning_group,
+  const std::string & ee_link,
+  const std::string & execution_method,
+  const std::string & execution_type,
+  const std::string & controller_name)
+{
+  bool result = this->init(planning_group);
+  // Reset the default ee link
+  std::string & default_ee_link = arms_[planning_group].default_ee.link;
+  if (ee_link != default_ee_link) {
+    RCLCPP_WARN(
+      LOGGER,
+      MOVEIT_CONSOLE_COLOR_YELLOW
+      "Assuming [%s] is rigidly attached to end_link [%s]"
+      MOVEIT_CONSOLE_COLOR_RESET, ee_link.c_str(), default_ee_link.c_str());
+    default_ee_link = ee_link;
+  }
+
+  this->load_execution_method(execution_method, execution_type, controller_name);
+  return result;
+}
+
 
 void MoveitCppGraspExecution::register_target_objects(
   const emd_msgs::msg::GraspTask::SharedPtr & msg)
@@ -295,7 +411,7 @@ bool MoveitCppGraspExecution::move_to(
   bool execute)
 {
   auto & arm = arms_[planning_group];
-  const auto & ee_link = (link.empty() ? arm.ee_link : link);
+  const auto & ee_link = (link.empty() ? arm.default_ee.link : link);
 
   // Flag for planning
   bool result = false;
@@ -549,7 +665,8 @@ double MoveitCppGraspExecution::cartesian_to(
   if (const moveit::core::JointModelGroup * jmg =
     start_state.getJointModelGroup(planning_group))
   {
-    const std::string & link_name = (_link.empty() ? arms_[planning_group].ee_link : _link);
+    const std::string & link_name =
+      (_link.empty() ? arms_[planning_group].default_ee.link : _link);
 
     EigenSTL::vector_Isometry3d waypoints(_waypoints.size());
 

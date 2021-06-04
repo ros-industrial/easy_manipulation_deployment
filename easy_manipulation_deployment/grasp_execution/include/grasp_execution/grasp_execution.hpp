@@ -22,16 +22,20 @@
 #include <utility>
 #include <vector>
 
+#include "grasp_execution/context.hpp"
+#include "grasp_execution/exception.hpp"
+#include "grasp_execution/gripper/gripper_driver.hpp"
 #include "grasp_execution/core/scheduler.hpp"
+#include "grasp_execution/utils.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
-#include "grasp_execution/utils.hpp"
 #include "emd_msgs/msg/grasp_task.hpp"
 #include "emd_msgs/srv/grasp_request.hpp"
+#include "pluginlib/class_loader.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
@@ -50,6 +54,115 @@ public:
   );
 
   virtual ~GraspExecutionInterface();
+
+  /// Initialize group.
+  /**
+   * Create an empty planning group.
+   * \param[in] planning_group group name.
+   * \return true if initialized succesfully, otherwise false.
+   */
+  virtual bool init(const std::string & planning_group)
+  {
+    workcell_context_->init_group(planning_group);
+    return true;
+  }
+
+  /// Initialize context from yaml.
+  /**
+   * YAML configuration file format.
+   * ```yaml
+   * workcell:
+   *   - group: manipulator1
+   *     prefix: ur3e_
+   *     executors:
+   *       default:
+   *         plugin: grasp_execution/DefaultExecutor
+   *       <custom-executor>:
+   *         plugin: <package-name>/<plugin-name>
+   *         controller: <controller-name>
+   *     end_effectors:
+   *       - brand: robotiq_85_2f_gripper
+   *         link: ur3e_gripper_link
+   *         driver:
+   *           plugin: <package-name>/<plugin-name>
+   *           controller: <controller-name>
+   *
+   *   - group: manipulator2
+   *     prefix: ur5_
+   *     executors:
+   *       default:
+   *         plugin: grasp_execution/DefaultExecutor
+   *       <custom-executor>:
+   *         plugin: <package-name>/<plugin-name>
+   *         controller: <controller-name>
+   *     end_effectors:
+   *       - brand: vg10_gripper
+   *         link: ur5_gripper_link
+   *         driver:
+   *           plugin: <package-name>/<plugin-name>
+   *           controller: <controller-name>
+   * ```
+   *
+   * \param[in] path file path to the yaml configuration.
+   * \return true if loaded successfully, otherwise false.
+   */
+  virtual bool init_from_yaml(const std::string & path)
+  {
+    try {
+      workcell_context_->init_from_yaml(path);
+      return true;
+    } catch (const ContextLoadingException & ex) {
+      RCLCPP_ERROR(rclcpp::get_logger("grasp_execution"), ex.what());
+      return false;
+    }
+  }
+
+  /// Load execution method for a group.
+  /**
+   * This method can be called multiple times to load multiple
+   * execution method.
+   * \param[in] group_name group name.
+   * \param[in] execution_method execution method name.
+   * \param[in] execution_plugin execution method plugin name.
+   * \param[in] execution_controller execution method controller.
+   * \return true if loaded succesfully, otherwise false
+   */
+  virtual bool load_execution_method(
+    const std::string & group_name,
+    const std::string & execution_method,
+    const std::string & execution_plugin,
+    const std::string & execution_controller = "")
+  {
+    workcell_context_->load_execution_method(
+      group_name, execution_method, execution_plugin, execution_controller);
+    return true;
+  }
+
+  /// Load end effector for a group.
+  /**
+   * This method can be called multiple times to load multiple
+   * end effectors method.
+   * \param[in] group_name group name.
+   * \param[in] ee_brand end effector brand.
+   * \param[in] ee_link end effector link for planning.
+   * \param[in] ee_driver_plugin end effector driver plugin.
+   * \param[in] ee_driver_controller end effector driver controller.
+   * \return true if loaded succesfully, otherwise false
+   */
+  virtual bool load_ee(
+    const std::string & group_name,
+    const std::string & ee_brand,
+    const std::string & ee_name,
+    const std::string & ee_link,
+    double ee_clearance,
+    const std::string & ee_driver_plugin,
+    const std::string & ee_driver_controller = "")
+  {
+    workcell_context_->load_ee(
+      ee_name, group_name, ee_brand, ee_link, ee_clearance,
+      ee_driver_plugin, ee_driver_controller);
+    return true;
+  }
 
   bool default_plan_pre_grasp(
     const std::string & planning_group,
@@ -78,6 +191,11 @@ public:
   virtual void order_schedule(
     const emd_msgs::msg::GraspTask::SharedPtr & msg,
     bool blocking = false) = 0;
+
+  const WorkcellContext & get_workcell_context() const
+  {
+    return *workcell_context_;
+  }
 
   virtual geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const = 0;
 
@@ -185,9 +303,14 @@ protected:
   core::Scheduler planning_scheduler;
   core::Scheduler execution_scheduler;
 
+  std::shared_ptr<pluginlib::ClassLoader<
+      grasp_execution::gripper::GripperDriver>> gripper_driver_loader_;
+
 private:
   rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
   rclcpp::Service<emd_msgs::srv::GraspRequest>::SharedPtr grasp_req_service_;
+
+  std::unique_ptr<WorkcellContext> workcell_context_;
 };
 
 }  // namespace grasp_execution

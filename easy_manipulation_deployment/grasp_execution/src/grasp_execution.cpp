@@ -15,6 +15,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "grasp_execution/utils.hpp"
 
@@ -34,8 +35,15 @@ GraspExecutionInterface::GraspExecutionInterface(
   tf_buffer_(std::make_shared<tf2_ros::Buffer>(node_->get_clock())),
   tf_listener_(*tf_buffer_),
   planning_scheduler(planning_concurrency),
-  execution_scheduler(execution_concurrency)
+  execution_scheduler(execution_concurrency),
+  workcell_context_(std::make_unique<WorkcellContext>())
 {
+  // Initialize Gripper Driver loader
+  gripper_driver_loader_ = std::make_shared<pluginlib::ClassLoader<
+        gripper::GripperDriver>>(
+    "grasp_execution",
+    "grasp_execution::gripper::GripperDriver");
+
   grasp_task_sub_ = node_->create_subscription<emd_msgs::msg::GraspTask>(
     grasp_task_topic, 10,
     [ = ](emd_msgs::msg::GraspTask::UniquePtr msg) {
