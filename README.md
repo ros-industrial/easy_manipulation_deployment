@@ -1,11 +1,13 @@
 # Easy Manipulation Deployment 
 
-<img src="./docs/sphinx/source/images/logo.png"  width="10%" height="10%">
+<img src="./images/emd_logo.png"  width="20%" height="20%">
 <br><br><br>
 
 
 [![Build Status](https://github.com/ros-industrial/easy_manipulation_deployment/workflows/CI/badge.svg?branch=master)](https://github.com/ros-industrial/easy_manipulation_deployment/actions)
+
 [![License](https://img.shields.io/github/license/ros-industrial/easy_manipulation_deployment.svg)](https://github.com/ros-industrial/easy_manipulation_deployment/blob/master/LICENSE)
+
 [![codecov](https://codecov.io/gh/ros-industrial/easy_manipulation_deployment/branch/master/graph/badge.svg)](https://codecov.io/gh/ros-industrial/easy_manipulation_deployment)
 
 <br>
@@ -22,15 +24,40 @@ It is recommended to run this package on **ROS2 Foxy**.
 ---
 ## Full Documentation/Wiki
 
-[Check out the full documentation here](https://easy-manipulation-deployment-tanjpg.readthedocs.io/)
+[Check out the full documentation here](https://easy-manipulation-deployment-docs.readthedocs.io/)
+[Check out the API documentation here](https://tanjpg.github.io/emd_docs/html/index.html)
+
+---
+## Components
+
+### 1) Grasp Planner
+
+An algorithmic based grasp planner that plans grasps in 3D space. Highly configurable and currently supports multifinger parallel grippers and suction cup arrays.
+
+Two Finger Gripper
+
+<img src="./images/two_finger.png"  width="30%" height="30%"> 
+
+Three Finger Gripper
+
+<img src="./images/three_finger.png"  width="30%" height="30%"> 
+
+Single Suction Cup
+
+<img src="./images/single_suction.png"  width="30%" height="30%"> 
+
+2x2 Suction Array
+
+<img src="./images/2x2_array.png"  width="30%" height="30%"> 
 
 
-| Components        | Status  |
-| ----------------- |:-------:|
-| Workcell Builder  | Updated |
-| Grasp Planner     | Updated |
-| Grasp Execution   | WIP     |
-| Tutorials         | WIP     |
+### 2) Grasp Execution
+
+A Moveit2 Based Grasp Execution package that incorporates real time dynamic safety components
+
+### 3) Workcell Builder
+
+A GUI based solution for ease of generation of robotic workcell simulations
 
 ---
 ## Acknowledgements
