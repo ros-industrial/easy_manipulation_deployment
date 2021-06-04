@@ -4,11 +4,11 @@
 <br><br><br>
 
 
-[![Build Status](https://github.com/ros-industrial/easy_manipulation_deployment/workflows/CI/badge.svg?branch=master)](https://github.com/ros-industrial/easy_manipulation_deployment/actions)
+[![Build Status](https://github.com/tanjpg/easy_manipulation_deployment/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/tanjpg/easy_manipulation_deployment/actions/workflows/build.yml)
 
 [![License](https://img.shields.io/github/license/ros-industrial/easy_manipulation_deployment.svg)](https://github.com/ros-industrial/easy_manipulation_deployment/blob/master/LICENSE)
 
-[![codecov](https://codecov.io/gh/ros-industrial/easy_manipulation_deployment/branch/master/graph/badge.svg)](https://codecov.io/gh/ros-industrial/easy_manipulation_deployment)
+[![codecov](https://codecov.io/gh/tanjpg/easy_manipulation_deployment/branch/develop/graph/badge.svg)](https://codecov.io/gh/tanjpg/easy_manipulation_deployment)
 
 <br>
 
