@@ -1,8 +1,3 @@
-# Build only merge request and default branch.
-# save time for quick demo pushes
-include:
-  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
-
 # Build with moveit
 foxy-moveit2:
   image:
@@ -20,12 +15,14 @@ foxy-moveit2:
     ISOLATION: "shell"
     ROS_DISTRO: "foxy"
     CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+    TARGET_CMAKE_ARGS: "-DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage'"
 
   script:
     - .industrial_ci/gitlab.sh
-  
-  # after_script:
-  #   - bash <(curl -s https://codecov.io/bash)
+
+  after_script:
+    - ./coverage.sh ci
+    - bash <(curl -s https://codecov.io/bash) -f ./coverage.info
 
 # Build Documentation
 sphinx-docs:
@@ -75,7 +72,7 @@ doxygen-docs:
 
   script:
     - (cd docs/doxygen && doxygen)
-  
+
   artifacts:
     paths:
       - docs/doxygen/html/
