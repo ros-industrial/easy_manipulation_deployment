@@ -74,7 +74,7 @@ doxygen-docs:
     - apt-get -y -qq install doxygen
 
   script:
-    - (cd docs/doxygen && doxygen grasp_planner)
+    - (cd docs/doxygen && doxygen)
   
   artifacts:
     paths:

@@ -15,35 +15,29 @@ Workcell Builder
 
 Loading of custom environment objects
 ---------------------------------------
-
 This feature allows users to upload already existing object_description folders available online, rather than having to always create objects from scratch whenever initializing a scene. 
 
 
 Multi robot support
 ---------------------
-
 Future updates will support adding multiple robots into the scene
 
 
 Real Time Visualization of workcell building 
 ---------------------------------------------
-
 3D visualization of the workcell will be included in the future for users to be able to visualize real time the changes made while in the GUI.
-
 
 Grasp Planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-Multi finger gripper support
+Cross gripper ranking system
 -----------------------------
+Grasp planner will output the best rank across different gripper types
 
-Grasp planning will be available for multi-fingered grippers
 
-Suction array support
+Grasp Execution
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Eye In Hand support
 -----------------------------
-Grasp planning will be available for suction array grippers
-
-Improved algorithm
---------------------
-Grasp planning algorithm will be improved for both stability and accuracy
+Grasp Execution will support eye-in-hand configuration (camera attached to robot arm)

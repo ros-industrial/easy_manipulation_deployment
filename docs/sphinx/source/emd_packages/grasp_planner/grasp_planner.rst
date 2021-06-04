@@ -7,73 +7,67 @@
 
 Grasp Planner
 ========================================================
+Overview
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The Easy Manipulation Deployment Grasp Planner is an Algorithmic Based Point Cloud Grasp Planner that provides a 4 DOF Grasp Pose for 
+both Multifinger End Effectors and Suction Array End Effectors.
 
-.. rubric:: Methodology
-
-The methodology for the grasp planner can be broken down into several steps.
-
-.. rubric:: 1) Point Cloud filtering
-.. rubric:: 2) Plane Segmentation
-.. rubric:: 3) Object Segmentation
-.. rubric:: 4) Grasp Area determination
-.. rubric:: 5) Grasp point determination
-.. rubric:: 6) Grasp Ranking
-.. rubric:: 7) Best Final Grasp
-
-.. image:: ../../images/grasp_planner/grasp_planner_introduction.png
+.. image:: ../../images/grasp_planner/emd_planner_support.png
    :align: center
 
-.. rubric:: 1) Point Cloud filtering
+Benefits of EMD Grasp Planner
+---------------------------------------------------------------------
 
-Raw pointclouds generally include areas that are unnecessary and include alot of noise. Therefore, the user given the option to filter to an area of 
-the raw pointcloud that they may want to focus on. This is shown later in the :ref:`Grasp Planner Configuration page <grasp_planner_configuration>`   
-  
-Once the desired area of the pointcloud is specified, noise within specified pointcloud is then removed. This is done through a 
-`StatisticalOutlierRemoval filter<https://pcl.readthedocs.io/en/latest/statistical_outlier.html>`__
+The Grasp Planner aims to **eliminate** the following issues that users would face when deploying Machine Learning based Grasp Planners:
 
-.. |Before_statis| image:: ../../images/grasp_planner/grasp_planner_before_statisticaloutlier.png
-  :align: middle
+**1. Long training times and tedious Dataset acquisition and labelling**
 
-.. |After_statis| image:: ../../images/grasp_planner/grasp_planner_after_statisticaloutlier.png
-  :align: middle
+Current datasets available such as the `Cornell Grasping Dataset <https://www.cs.cornell.edu/home/llee/data/>`_ and `Jacquard Grasping Dataset <https://jacquard.liris.cnrs.fr/>`_ generally account for two finger grippers and is training on general objects.
+For custom use cases, datasets need to be generated and hand labelled which requires huge amount of time and manual labour. Semantic description of multifinger grippers and suction arrays may be hard to determine as well.
 
-+-----------------------+---------------------+
-| Before Noise Removal  | After Noise Removal |
-+=======================+=====================+
-||Before_statis|        ||After_statis|       |
-+-----------------------+---------------------+
+The Grasp Planner presented in this ROS2 package requires zero datasets and training, and supports multifingered parallel grippers as well as suction cup arrays.
 
-.. rubric:: 2) Plane Segmentation
+**2. Lack of On-The-Fly End Effector Switching**
+
+In high mix, low volume pick-and-place scenarios, different end effectors may be needed for different types of objects. Changing of end effectors would then mean that the user would need to collect a 
+whole new dataset, relabel and retrain the dataset and models before use. 
+
+The Grasp Planner presented in this ROS2 package allows for on-the-fly end effector switching through a simple configuration file that is highly customizable and understandable.
 
 
-.. rubric:: 3) Object Segmentation
-
-Every individual object within the filtered pointcloud is segmented and the grasp planner does planning for each object.
-
-.. rubric:: 4) Grasp Area determination
-
-Area of which the planner will take into account for determining grasp points depending on the number of fingers/number of suction cups
-
-.. rubric:: 5) Grasp point determination
-
-Exact points of where the middle of the finger/suction cup should be for that specific grasp
-
-.. rubric:: 6) Grasp Ranking
-
-There are many possibe grasping configurations that the grasp planner has taken into account. The quality of those grasps are then ranked based of a metric.
-The metrics of the individual end-effector types can be found on their respective pages
-  
-:ref:`Finger Grasps <grasp_planner_finger>` and :ref:`Suction Grasps <grasp_planner_suction>`
-   
-.. rubric:: 7) Best Final Grasp
-
-The pose of the top ranked grasp is then published for :ref:`Grasp Execution <grasp_execution_demo>`
-
+Before running the Grasp Planner
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Recommended information to read before running the Grasp Planner
 
 .. toctree::
    :maxdepth: 2
-   
-   grasp_planner_before
+
+   grasp_planner_theory
+   grasp_planner_parameters
+
+
+Running the Grasp Planner
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. toctree::
+   :maxdepth: 2
+
    grasp_planner_run
+
+Useful information 
+^^^^^^^^^^^^^^^^^^^^^
+Information that you may need for further customization of the package.
+
+.. toctree::
+   :maxdepth: 2
+
+   grasp_planner_input
+   grasp_planner_output
+
+
+Acknowledgements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Initial inspiration for grasp planning algorithim was provided by the following paper, and have been repurposed to support multiple fingers as well as suction cup arrays
+
+`Fast Geometry-based Computation of Grasping Points on Three-dimensional Point Clouds <https://www.researchgate.net/publication/331358070_Fast_Geometry-based_Computation_of_Grasping_Points_on_Three-dimensional_Point_Clouds>`_
 

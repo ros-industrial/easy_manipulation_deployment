@@ -69,7 +69,8 @@ the contents of the ``.yaml`` file should be as followed:
                 world_y_angle_threshold: 0.5
                 world_z_angle_threshold: 0.25
       
-.. tip:: For more indepth information on how to configure the ``.yaml`` file for your own end-effector. Head on over to :ref:`grasp_planner_configuration`
+.. tip:: For more indepth information on how to configure the ``.yaml`` file for your own end-effector.
+         Head on over to :ref:`grasp_planner_parameters`
 
 Running the Grasp Planner
 -------------------------
@@ -119,7 +120,7 @@ The package will then show the following when waiting for the perception topic
 .. note:: This step uses the epd_rosbag as an example, you can provide your own stream of pointcloud/EPD data or use the camera_rosbag(uses /pointcloud topic), found in the rosbag folder as well.
 
 
-.. tip:: More information on acceptable message types can be found in :ref:`grasp_planner_msgs`
+.. tip:: More information on acceptable message types can be found in :ref:`grasp_planner_output`
 
 
 .. rubric:: epd_rosbag

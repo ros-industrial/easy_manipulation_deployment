@@ -8,105 +8,47 @@
 Download Instructions
 ========================================================
 
-One of the key features of this package is its modularity, meaning that each of the three components can be run together or separately (with some differences in initial installations)
+One of the key features of this package it is semi-modular.
+
+ROS projects generally revolve around usage of URDFs to setup an environment of a robotic workcell.
+Workcell Builder eases this process by implementing a GUI to generate your desired workcell environment and can be used for other projects as well!
+
+Grasp Planner and Grasp Execution pipeline work hand in hand to provide a seamless pick and place solution with
+the workcell environment created by Workcell Builder.
+
+.. note:: Grasp Execution requires a robotic workcell to be set up, so do install the whole EMD package if a pick and place solution is what you're looking for! 
+
 
 Installing a perception package
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**This package will not work without a perception source.** If you do not have your own perception package, check out the `easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ package.
 
-Installing complete easy_manipulation_deployment suite
+The Easy Manipulation Deployment(EMD) package, specifically Grasp Planner, subscribes to either a topic with PointCloud2 message type *OR* 
+topics from `easy_perception_deployment(EPD) <https://github.com/ros-industrial/easy_perception_deployment/>`_ package.
+
+.. warning:: EMD is dependent on a perception source. If your camera driver does not provide any PointCloud2 message type topics, do check out the `EPD <https://github.com/ros-industrial/easy_perception_deployment/>`_ package!
+
+Here :ref:`grasp_planner_input` is a link for more information to determine which perception input fits best for your requirements.
+
+Installing complete Easy Manipulation Deployment suite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Build and install EMD dependencies 
----------------------------------------------
-
-.. rubric:: PCL
-
-- Build and install PCL from source in a seperate workspace
-
-.. code-block:: bash
-
-   cd 
-
-   git clone https://github.com/PointCloudLibrary/pcl.git
-
-   cd ~/pcl && mkdir build && cd build
-
-   cmake -DCMAKE_BUILD_TYPE=Release ..
-
-   sudo make -j4
-
-   sudo make install
-
-   cd
-
-.. note:: Do take note that the current implementation uses PCL 1.11 which is built from source. If there are any conflicts with PCL in your other projects,
-          it may be due to incompatible PCL release between debian and source. 
-
-          Do the following steps to remove the source version of PCL..
-
-          .. code-block:: shell
-
-            cd ~/pcl && mkdir build && cd build
-
-            sudo make uninstall
-
+Installing Easy Manipulation Deployment dependencies
+------------------------------------------------------------
 
 .. rubric:: Moveit2
 
-- Build and install moveit2 from source in a separate workspace
+Follow this link `Moveit2 <https://moveit.ros.org/install-moveit2/source/>`_ to build Moveit2 from source.
 
-.. code-block:: bash
+.. note:: The following *Major* EMD dependencies do not require to be built from source and
+          will be installed with rosdep install in the steps below.
 
-   mkdir -p ~/moveit2_ws/src
+          .. rubric:: Pointcloud Library (PCL) | version: 1.10
 
-   cd ~/moveit2_ws
-   
-   curl --output moveit2.repos \
-     https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos
-  
-   vcs import src < moveit2.repos
-   
-   cd ~/moveit2_ws/src/moveit2/ && git checkout 2499a72f7388a371905eaef72685fcfaae04335a && cd ~/moveit2_ws
-
-   source /opt/ros/foxy/setup.bash
-   
-   rosdep install --from-paths src --ignore-src -yr --rosdistro "${ROS_DISTRO}"
-   
-   colcon build
+          .. rubric:: The Flexible Collision Library (FCL) | version: 0.5
 
 
-Build and Install easy_manipulation_deployment
-----------------------------------------------
 
-.. code-block:: bash
-
-   mkdir -p ~/workcell_ws/src
-
-   cd ~/workcell_ws/src
-
-   git clone https://github.com/ros-industrial/easy_manipulation_deployment.git
-   
-   mv easy_manipulation_deployment/assets/ .
-
-   mv easy_manipulation_deployment/scenes/ .
-   
-   cd ~/workcell_ws
-   
-   source /opt/ros/foxy/setup.bash
-   
-   rosdep install --from-paths src --ignore-src -yr --rosdistro "${ROS_DISTRO}"
-   
-   source ~/moveit2_ws/install/setup.bash
-
-   colcon build
-
-   source install/setup.bash
-   
-
-
-   
 Installing only the Workcell Builder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -121,6 +63,8 @@ Installing only the Workcell Builder
    mv easy_manipulation_deployment/assets/ .
 
    mv easy_manipulation_deployment/scenes/ .
+
+   mv easy_manipulation_deployment/easy_manipulation_deployment/workcell_builder ./easy_manipulation_deployment
    
    find ./easy_manipulation_deployment -mindepth 1 ! -regex '^./easy_manipulation_deployment/workcell_builder\(/.*\)?' -delete
 
@@ -134,9 +78,8 @@ Installing only the Workcell Builder
 
    source install/setup.bash
 
-
-Installing only the Grasp Planner
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installing entire Easy Manipulation Deployment package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -145,22 +88,23 @@ Installing only the Grasp Planner
    cd ~/workcell_ws/src
 
    git clone https://github.com/ros-industrial/easy_manipulation_deployment.git
+   
+   mv easy_manipulation_deployment/assets/ .
 
-   find ./easy_manipulation_deployment -mindepth 1 ! -regex '^./easy_manipulation_deployment/grasp_planner\(/.*\)?' ! -regex '^./easy_manipulation_deployment/custom_msgs\(/.*\)?' -delete
+   mv easy_manipulation_deployment/scenes/ .
 
+   mv easy_manipulation_deployment/easy_manipulation_deployment/workcell_builder ./easy_manipulation_deployment
+   
    cd ~/workcell_ws
-
+   
    source /opt/ros/foxy/setup.bash
    
    rosdep install --from-paths src --ignore-src -yr --rosdistro "${ROS_DISTRO}"
+   
+   source ~/ws_moveit2/install/setup.bash
 
    colcon build
 
    source install/setup.bash
 
-
-Installing only Grasp Execution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Instructions coming soon**
 

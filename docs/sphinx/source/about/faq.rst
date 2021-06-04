@@ -8,13 +8,12 @@ Workcell Builder
 
 *How many Robots are supported in workcell generation?*
 -----------------------------------------------------------
-
-The current Workcell Builder only supports **one robot and one end effector**. Future plans may involve supporting multiple grippers
+The current Workcell Builder only supports **one robot and one end effector**. Future plans may involve supporting multiple grippers and robots. You can still manually add them in the scene URDF/SRDF.
 
 *I have my own object_description folders for existing objects that I want to to load into the scene. How do I load it into the Workcell Builder?*
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-It is currently not possible to load your own objects into the scene. You need to create it in the GUI. Object loading features will be included in the future versions of this package very soon.
+It is currently not possible to load your own objects into the scene. You need to create it in the GUI. Object loading features will be included in the future versions of this package.
 
 *Can I create my own robot and end effector from the Workcell builder?*
 --------------------------------------------------------------------------
@@ -33,12 +32,10 @@ Grasp Planner
 *Can I use my own perception system with this package*
 --------------------------------------------------------
 
-Yes! While it is highly recommended to use the `easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ package for seamless integration, you can use your own perception system, but make sure to follow the :ref:`Grasp Planner Message Definitions`
-
-*Can I use a 3D camera to plan grasps?*
---------------------------------------------
-
-Yes you can, but make sure that the camera is able to generate depth images for grasp planning. **This package does not currently support point clouds**.
+Yes! While it is highly recommended to use the
+`easy_perception_deployment <https://github.com/ros-industrial/easy_perception_deployment/>`_ package for
+seamless integration, you can use your own perception system, but make sure to
+follow the :ref:`grasp_planner_input`
 
 *Is it possible to do a side grasp rather than a top down grasp?*
 -------------------------------------------------------------------

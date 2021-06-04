@@ -15,7 +15,9 @@ This package was tested with the `easy_perception_deployment <https://github.com
    :caption: About
    :name: sec-general
 
-   about/index
+   about/overview
+   about/faq
+   about/future_plans
 
 .. toctree::
    :maxdepth: 1
@@ -27,19 +29,18 @@ This package was tested with the `easy_perception_deployment <https://github.com
 
 .. toctree::
    :maxdepth: 1
+   :caption: Individual Package Details
+   
+   emd_packages/workcell_builder/workcell_builder
+   emd_packages/grasp_planner/grasp_planner
+   emd_packages/grasp_execution/grasp_execution_demo
+
+.. toctree::
+   :maxdepth: 1
    :caption: Tutorials
    :name: sec-tutorials
 
    tutorial/emd_example
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Individual Package Details
-   
-   emd_packages/workcell_builder/workcell_builder
-   emd_packages/grasp_execution/grasp_execution_demo
-   emd_packages/grasp_planner/grasp_planner
-   
-   
 
 
