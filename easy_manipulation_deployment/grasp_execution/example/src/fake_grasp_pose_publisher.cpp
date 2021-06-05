@@ -106,7 +106,6 @@ public:
     rclcpp::sleep_for(
       std::chrono::milliseconds(static_cast<int>(delay * 1000)));
 
-
     grasp_pose.header.frame_id = object_pose.header.frame_id = frame_id;
 
     grasp_pose.header.stamp = object_pose.header.stamp = this->now();

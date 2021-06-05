@@ -9,7 +9,6 @@
     <arg name="debug" default="$(arg debug)" />
   </include>
   
-  
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find robotiq_85_moveit_config)/launch/default_warehouse_db.launch" if="$(arg demo)"/>
   
