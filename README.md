@@ -15,11 +15,11 @@
 ### This ROS2 package provides a modular and easy to deploy manipulation pipeline that integrates perception elements to establish an end-to-end pick and place task
 <br>
 
+<img src="./images/grasp_planner.gif"  width="50%" height="50%"> <img src="./images/grasp_execution.gif"  width="50%" height="50%">
+
 This package was tested with the [easy_perception_deployment](https://github.com/ros-industrial/easy_perception_deployment) ROS2 package, but any other perception system that provides the same ROS2 message in the right topic can work with this package as well. 
 
 It is recommended to run this package on **ROS2 Foxy**.
-
-**Note that this package is currently in its Alpha release, therefore many components are currently under heavy development and are subject to change.**
 
 ---
 ## Full Documentation/Wiki
