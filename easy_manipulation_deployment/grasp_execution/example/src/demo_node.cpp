@@ -53,7 +53,6 @@ public:
 
     // -------------------------------------------------------------
 
-
     for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
       auto grasp_target = std::make_shared<emd_msgs::msg::GraspTarget>(msg->grasp_targets[i]);
 
