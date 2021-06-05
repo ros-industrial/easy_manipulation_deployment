@@ -1,0 +1,4 @@
+string target_type
+geometry_msgs/PoseStamped target_pose
+shape_msgs/SolidPrimitive target_shape
+GraspMethod[] grasp_methods

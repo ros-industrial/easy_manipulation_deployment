@@ -1,0 +1,29 @@
+<library path="grasp_execution_default_plugins">
+  <class
+    name="grasp_execution/DefaultExecutor"
+    type="grasp_execution::moveit2::DefaultExecutor"
+    base_class_type="grasp_execution::moveit2::Executor">
+    <description>
+      Default Executor for moveit2 grasp execution interface.
+    </description>
+  </class>
+  <class
+    name="grasp_execution/DummyGripperDriver"
+    type="grasp_execution::gripper::DummyGripperDriver"
+    base_class_type="grasp_execution::gripper::GripperDriver">
+    <description>
+      Dummy gripper driver serves as an example that does nothing.
+    </description>
+  </class>
+
+  <!-- Dynamic Safety Plugin -->
+  <class
+    name="grasp_execution/DynamicSafetyAsyncExecutor"
+    type="grasp_execution::moveit2::DynamicSafetyAsyncExecutor"
+    base_class_type="grasp_execution::moveit2::Executor">
+    <description>
+      Asynchronous Executor for moveit2 grasp execution interface with dynamic safety capability
+    </description>
+  </class>
+</library>
+

@@ -1,0 +1,10 @@
+<library path="moveit_cpp_default_executor_plugin">
+  <class
+    name="grasp_execution/DefaultExecutor"
+    type="grasp_execution::moveit2::DefaultExecutor"
+    base_class_type="grasp_execution::moveit2::Executor">
+    <description>
+      Default Executor for moveit2 grasp execution interface.
+    </description>
+  </class>
+</library>

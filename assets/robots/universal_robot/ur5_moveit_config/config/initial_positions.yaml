@@ -1,0 +1,8 @@
+# Default initial positions for the ur5 arm's ros2_control fake system
+initial_positions:
+  shoulder_pan_joint: 0.0
+  shoulder_lift_joint: 0.0
+  elbow_joint: 0.0
+  wrist_1_joint: 0.0
+  wrist_2_joint: 0.0
+  wrist_3_joint: 0.0

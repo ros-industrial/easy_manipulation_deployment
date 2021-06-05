@@ -1,0 +1,29 @@
+table:
+  child_link: table
+  links:
+    table:
+      visual:
+        name: None
+        geometry:
+          filepath: /home/rosi5/emd_ws/src/assets/environment/table_description/meshes/visual/table.stl
+          scale:
+            scale_x: 0.001
+            scale_y: 0.001
+            scale_z: 0.001
+        material:
+          name: aluminum
+          r: 0.549
+          g: 0.557
+          b: 0.529
+          a: 1
+      collision:
+        name: None
+        geometry:
+          filepath: /home/rosi5/emd_ws/src/assets/environment/table_description/meshes/collision/table.stl
+          scale:
+            scale_x: 0.001
+            scale_y: 0.001
+            scale_z: 0.001
+  table_base_joint:
+    ext_joint_type: fixed
+    child_link: table

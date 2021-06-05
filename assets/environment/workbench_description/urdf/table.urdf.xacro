@@ -1,0 +1,25 @@
+<?xml version="1.0" ?> 
+<robot xmlns:xacro="http://wiki.ros.org/xacro"> 
+<xacro:macro name="table" params="parent *origin prefix"> 
+	<link name="table_${prefix}">
+	  <visual name="None_${prefix}">
+	    <geometry>
+	      <mesh filename="package://workbench_description/meshes/visual/table.stl" scale="0.001000 0.001000 0.001000"/>
+	    </geometry>
+	    <material name="aluminum">
+	      <color rgba="0.549000 0.557000 0.529000 1.000000"/>
+	    </material>
+	  </visual>
+	  <collision name="None_${prefix}">
+	    <geometry>
+	      <mesh filename="package://workbench_description/meshes/collision/table.stl" scale="0.001000 0.001000 0.001000"/>
+	    </geometry>
+	  </collision>
+	</link>
+	<joint name="table_base_joint_${prefix}" type="fixed">
+	  <xacro:insert_block name="origin" />
+	  <parent link="${parent}"/>
+	  <child link="table_${prefix}"/>
+	</joint>
+</xacro:macro>
+</robot> 

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+
+<robot name="airpick_4_vacuum_gripper" xmlns:xacro="http://ros.org/wiki/xacro">
+    
+    <xacro:macro name="airpick_4_vacuum_gripper" params="prefix parent *origin">
+
+        <joint name="${prefix}gripper_base_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${prefix}gripper_base_link"/>
+            <xacro:insert_block name="origin"/>
+        </joint>
+
+       <link name="${prefix}gripper_base_link">
+            <visual>
+                <geometry>
+                    <mesh filename="package://onrobot_airpick4_description/meshes/airpick4.stl" scale="0.001000 0.001000 0.001000"/>
+                </geometry>
+            </visual>
+            <!--collision>
+                <geometry>
+                    <mesh filename="package://onrobot_airpick4_description/meshes/airpick4.stl" scale="0.001000 0.001000 0.001000"/>
+                </geometry>
+            </collision-->
+        </link>
+
+</xacro:macro>
+</robot>
+

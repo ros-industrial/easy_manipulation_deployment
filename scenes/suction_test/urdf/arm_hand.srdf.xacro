@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="suction_test">
+
+  <xacro:include filename="$(find ur5_moveit_config)/config/ur5.srdf.xacro" />
+
+  <xacro:include filename="$(find single_suction_moveit_config)/config/single_suction_gripper.srdf.xacro" />
+
+  <xacro:ur5/>
+
+  <xacro:single_suction_gripper/>
+
+  <disable_collisions link1="wrist_fixture" link2="base_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="shoulder_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="upper_arm_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="forearm_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="wrist_1_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="wrist_2_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="wrist_3_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="ee_link" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="base" reason="Never" />
+  <disable_collisions link1="wrist_fixture" link2="tool0" reason="Never" />
+
+
+</robot>

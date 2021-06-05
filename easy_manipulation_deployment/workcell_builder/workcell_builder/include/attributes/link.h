@@ -1,0 +1,41 @@
+// Copyright 2020 Advanced Remanufacturing and Technology Centre
+// Copyright 2020 ROS-Industrial Consortium Asia Pacific Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+
+#ifndef ATTRIBUTES__LINK_H_
+#define ATTRIBUTES__LINK_H_
+
+#include <string>
+#include <vector>
+
+#include "attributes/collision.h"
+#include "attributes/inertia.h"
+#include "attributes/visual.h"
+
+
+class Link
+{
+public:
+  std::string name;
+  std::vector < Visual > visual_vector;
+  std::vector < Collision > collision_vector;
+  std::vector < Inertial > inertial_vector;
+
+  bool is_visual;
+  bool is_collision;
+  bool is_inertial;
+};
+
+#endif  // ATTRIBUTES__LINK_H_

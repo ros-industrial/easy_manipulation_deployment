@@ -1,0 +1,71 @@
+robot:
+  name: ur5
+  brand: universal_robot
+  filepath: ""
+  base_link: base_link
+  ee_link: tool0
+  links:
+    - base_link
+    - shoulder_link
+    - upper_arm_link
+    - forearm_link
+    - wrist_1_link
+    - wrist_2_link
+    - wrist_3_link
+    - ee_link
+    - base
+    - tool0
+end_effector:
+  name: robotiq_85
+  brand: robotiq_85_gripper
+  filepath: /home/rosi5/emd_ws/src/assets/end_effectors/robotiq_85_gripper/robotiq_85_description
+  base_link: gripper_base_link
+  robot_link: tool0
+  ee_type: finger
+  attributes:
+    fingers: 2
+  origin:
+    x: 0
+    y: 0
+    z: 0
+    roll: 0
+    pitch: -1.5707
+    yaw: 0
+  links:
+    - gripper_base_link
+    - gripper_finger1_knuckle_link
+    - gripper_finger2_knuckle_link
+    - gripper_finger1_finger_link
+    - gripper_finger2_finger_link
+    - gripper_finger1_inner_knuckle_link
+    - gripper_finger2_inner_knuckle_link
+    - gripper_finger1_finger_tip_link
+    - gripper_finger2_finger_tip_link
+objects:
+  table:
+    child_link: table
+    links:
+      table:
+        visual:
+          name: table
+          geometry:
+            filepath: /home/rosi/error_check_ws/src/assets/environment/table_description/meshes/visual/table.stl
+            scale:
+              scale_x: 0.001
+              scale_y: 0.001
+              scale_z: 0.001
+        collision:
+          name: None
+          geometry:
+            filepath: /home/rosi/error_check_ws/src/assets/environment/table_description/meshes/visual/table.stl
+            scale:
+              scale_x: 0.001
+              scale_y: 0.001
+              scale_z: 0.001
+    table_base_joint:
+      ext_joint_type: fixed
+      child_link: table
+external joints:
+  table:
+    parent object: world
+    parent link: world
