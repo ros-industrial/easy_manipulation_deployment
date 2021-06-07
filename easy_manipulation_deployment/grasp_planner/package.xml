@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>grasp_planner</name>
-  <version>2.0.0</version>
+  <version>0.1.0</version>
   <description>A package that provides a visual representation of the pointcloud grasping results and publishes
                a pose for the grasp_execution package</description>
   <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng Glenn</maintainer>
