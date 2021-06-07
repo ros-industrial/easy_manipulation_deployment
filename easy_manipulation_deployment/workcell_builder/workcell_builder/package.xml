@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>workcell_builder</name>
-  <version>0.0.0</version>
-  
+  <version>0.1.0</version>
+
   <description>A ROS2 package that provides a GUI for workcell building</description>
   <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng Glenn</maintainer>
   <license>Apache License 2.0</license>
-  
+
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>yaml-cpp</build_depend>
   <build_depend>boost</build_depend>
