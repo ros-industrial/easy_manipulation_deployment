@@ -1,3 +1,8 @@
+# Build only merge request and default branch.
+# save time for quick demo pushes
+include:
+  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
+
 # Build with moveit
 foxy-moveit2:
   image:
