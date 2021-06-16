@@ -55,11 +55,11 @@ sphinx-docs:
     - make -C docs/sphinx html
     - make -C docs/sphinx latexpdf
     # Run Doc8 Lint
-    # - doc8 docs/sphinx --ignore-path docs/sphinx/build --max-line-length 999
+    - doc8 docs/sphinx --ignore-path docs/sphinx/build --max-line-length 999
     # Check Spelling
-    # - make -C docs/sphinx spelling
-    # - find . -name *.spelling -exec cat {} \;
-    # - sh -c "! find . -name *.spelling | grep -q ."
+    - make -C docs/sphinx spelling
+    - find . -name *.spelling -exec cat {} \;
+    - sh -c "! find . -name *.spelling | grep -q ."
 
   artifacts:
     paths:
