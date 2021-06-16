@@ -9,11 +9,15 @@ jobs:
         env:
           - ROS_DISTRO: foxy
             ROS_REPO: main
-            DOCKER_IMAGE: "tanjpg/easy_manipulation_deployment:ci"
             AFTER_INIT_EMBED: "ici_source_setup /opt/moveit2/install"
+            TARGET_CMAKE_ARGS: "-DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage'"
+            AFTER_SCRIPT: "./coverage.sh ci"
+            ISOLATION: "shell" 
     env:
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-    runs-on: ubuntu-latest
+      CCACHE_DIR: /github/home/.ccache 
+    runs-on: ubuntu-20.04
+    container:
+      image: docker://tanjpg/easy_manipulation_deployment:ci
     steps:
       - uses: actions/checkout@v2
       # step up caching
@@ -26,4 +30,5 @@ jobs:
         env: ${{matrix.env}}
       - uses: codecov/codecov-action@v1
         with:
+          files: ./coverage.info
           fail_ci_if_error: true
