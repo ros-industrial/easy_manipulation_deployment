@@ -1,0 +1,38 @@
+name: Doxygen-Doc
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  doxygen-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Doxygen
+      run: |
+        sudo apt update
+        sudo apt install -y -qq doxygen
+
+    - name: Build API documentation
+      run: |
+        (cd docs/doxygen && doxygen)
+
+    - name: Upload Artifacts
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: doxygen-doc
+        path: docs/doxygen/html
+        retention-days: 5
+
+    - name: Deploy
+      if: ${{ github.event_name == 'push' }}
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-page-api
+        folder: docs/doxygen/html
