@@ -1,0 +1,69 @@
+name: Sphinx-Doc
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  sphinx-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install Sphinx dependencies
+      run: |
+        sudo apt update && sudo apt install -y enchant graphviz
+        python -m pip install --upgrade setuptools
+        python -m pip install --upgrade doc8 pyenchant sphinx-rtd-theme sphinxcontrib-spelling
+        sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq texlive-latex-recommended \
+          texlive-latex-extra texlive-fonts-recommended latexmk
+
+    - name: Check Sphinx spelling
+      # show list of misspelled words
+      run: |
+        mkdir docs/sphinx/build
+        make -C docs/sphinx spelling
+        if [[ -s "docs/sphinx/build/spelling/index.spelling" ]]; then
+          cat "docs/sphinx/build/spelling/index.spelling"
+        fi
+    - name: Build Sphinx documentation
+      run: |
+        make -C docs/sphinx html
+        make -C docs/sphinx latexpdf
+    - name: Lint generated Sphinx documentation
+      run: |
+        doc8 docs/sphinx --ignore-path docs/sphinx/build --max-line-length 999
+    - name: Warnings and spelling errors fail the build
+      run: |
+        if [[ -s "docs/sphinx/build/warnings_and_errors.log" ]]; then
+          cat "docs/sphinx/build/warnings_and_errors.log"
+          false
+        fi
+        if [[ -s "docs/sphinx/spelling/index.spelling" ]]; then
+          cat "_build/spelling/index.spelling"
+          false
+        fi
+
+    - name: Upload Artifacts
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: sphinx-doc
+        path: |
+          docs/sphinx/build/latex/emd.pdf
+          docs/sphinx/build/html
+        retention-days: 5
+
+    - name: Deploy
+      if: ${{ github.event_name == 'push' }}
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-page
+        folder: docs/sphinx/build/html
