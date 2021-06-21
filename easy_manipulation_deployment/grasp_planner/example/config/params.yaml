@@ -2,7 +2,7 @@ grasp_planning_node:
   ros__parameters:
     grasp_output_topic: "/grasp_tasks"
     easy_perception_deployment:
-      epd_enabled: true
+      epd_enabled: false
       tracking_enabled: false
       epd_topic: "/processor/epd_localize_output"
     camera_parameters:
@@ -10,8 +10,8 @@ grasp_planning_node:
       camera_frame: "camera_color_optical_frame"
     point_cloud_params:
       passthrough_filter_limits_x: [-0.50, 0.50]
-      passthrough_filter_limits_y: [-0.15, 0.40]
-      passthrough_filter_limits_z: [0.01, 0.70]      
+      passthrough_filter_limits_y: [-0.15, 0.10]
+      passthrough_filter_limits_z: [0.01, 0.70]
       segmentation_max_iterations: 50
       segmentation_distance_threshold: 0.01
       cluster_tolerance: 0.01

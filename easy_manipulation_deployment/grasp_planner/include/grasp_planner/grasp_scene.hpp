@@ -66,76 +66,84 @@
 #include "grasp_planner/common/fcl_functions.hpp"
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("GraspScene");
-
+namespace grasp_planner
+{
+template<class T>
 /*! \brief General Class for a grasp scene*/
-class GraspScene : public rclcpp::Node
+class GraspScene
 {
 public:
-  void getCameraPosition();
-  std::vector<std::shared_ptr<GraspObject>> extractObjects(
-    std::string camera_frame,
-    float cloud_normal_radius,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-    float cluster_tolerance,
-    int min_cluster_size);
-  std::vector<std::shared_ptr<GraspObject>> processEPDObjects(
-    const std::vector<epd_msgs::msg::LocalizedObject> & objects,
-    const std::string camera_frame,
-    const float & cloud_normal_radius);
-  void printPose(const geometry_msgs::msg::PoseStamped & _pose);
-  void printPose(const geometry_msgs::msg::Pose & _pose);
-  void planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
-  void loadEndEffectors();
+  /*! \brief GraspScene Set Up */
+  void setup(std::string topic_name);
+
+  /*! \brief GraspScene Set Up */
+  void startPlanning(const typename T::ConstSharedPtr & msg);
+
+  /*! \brief Method to process direct Point Clouds */
   void processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
-  void createWorldCollision(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg);
 
-  // void EPDCreateWorldCollisionObject(
-  //   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
-  template<typename T>
-  void EPDCreateWorldCollisionObject(
-    const T & msg);
-  // void planning_init_epd(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
-  template<typename U>
-  void planningInit(const U & msg);
-  void EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg);
-  void EPDLocalizationCallback(const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg);
+  /*! \brief Method to create collision objects from Point Clouds */
+  void createWorldCollision(const typename T::ConstSharedPtr & msg);
 
-  ~GraspScene();
-  GraspScene();
+  /*! \brief General method to extract grasp objects from Point Clouds */
+  void extractObjects(const typename T::ConstSharedPtr & msg);
 
-  // Filter Variables
-  /*! \brief Upper limit for passthrough filter in the x direction */
-  const float ptFilter_Ulimit_x;
-  /*! \brief Lower limit for passthrough filter in the x direction */
-  const float ptFilter_Llimit_x;
-  /*! \brief Upper limit for passthrough filter in the y direction */
-  const float ptFilter_Ulimit_y;
-  /*! \brief Lower limit for passthrough filter in the y direction */
-  const float ptFilter_Llimit_y;
-  /*! \brief Upper limit for passthrough filter in the z direction */
-  const float ptFilter_Ulimit_z;
-  /*! \brief Lower limit for passthrough filter in the z direction */
-  const float ptFilter_Llimit_z;
+  /*! \brief Method to extract grasp objects from Point Clouds for Direct Camera workflow */
+  void extractObjectsDirect();
 
-  // Plane segmentation Variables
-  /*! \brief Max iteration for Pointcloud Plane Segmentation */
-  const int segmentation_max_iterations;
-  /*! \brief Distance threshhold for Pointcloud Plane Segmentation */
-  const float segmentation_distance_threshold;
+  /*! \brief Method to extract grasp objects from Point Clouds for EPD-EMD workflow */
+  void extractObjectsEPD(const std::vector<epd_msgs::msg::LocalizedObject> & objects);
 
-  // Object clustering Variables
-  /*! \brief Tolerance when doing point cloud clustering for object segmentation */
-  const float cluster_tolerance;
-  /*! \brief Minimum size of a cluster to constitute as an object cluster */
-  const int min_cluster_size;
-  /*! \brief Voxel size for fcl collision object generation */
-  const float fcl_voxel_size;
+  /*! \brief Method to load existing end effectors */
+  void loadEndEffectors();
 
+  /*! \brief Method to generate Grasp Task for Grasp Execution tasks */
+  emd_msgs::msg::GraspTask generateGraspTask();
 
-  /*! \brief  */
-  std::string incloudfile;
-  /*! \brief  */
-  std::string outcloudfile;
+  /*! \brief Method to make a request to the Grasp Execution Service */
+  void sendToExecution(const emd_msgs::msg::GraspTask & grasp_task);
+
+  /*! \brief Method to print PoseStamped variables */
+  void printPose(const geometry_msgs::msg::PoseStamped & _pose);
+
+  /*! \brief Method to print Pose variables */
+  void printPose(const geometry_msgs::msg::Pose & _pose);
+
+  /*! \brief Not used */
+  void getCameraPosition();
+
+  /*! \brief GraspScene Constructor */
+  GraspScene(const rclcpp::Node::SharedPtr & node_)
+  : cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    cloud_plane_removed(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    org_cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    cloud_table(new pcl::PointCloud<pcl::PointXYZRGB>()),
+    table_coeff(new pcl::ModelCoefficients),
+    viewer(new pcl::visualization::PCLVisualizer("Cloud viewer")),
+    node(node_)
+  {
+    rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+
+    this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
+    this->buffer_->setUsingDedicatedThread(true);
+    this->tf_listener = std::make_shared<tf2_ros::TransformListener>(
+      *buffer_, node, false);
+
+    auto create_timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
+      node->get_node_base_interface(),
+      node->get_node_timers_interface());
+
+    this->buffer_->setCreateTimerInterface(create_timer_interface);
+    // setup(topic_name);
+  }
+
+  /*! \brief GraspScene Destructor */
+  ~GraspScene() {}
+
+  /*! \brief Subscriber that subscribes to perception output */
+  std::shared_ptr<message_filters::Subscriber<T>> perception_sub;
+  /*! \brief Message filter for perception output */
+  std::shared_ptr<tf2_ros::MessageFilter<T>> tf_perception_sub;
   /*! \brief Input cloud */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
   /*! \brief Input cloud without the plane */
@@ -162,27 +170,13 @@ public:
   rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedPtr output_client;
   /*! \brief Futures for GraspRequest request */
   std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
-  // /*! \brief Publisher that provides markers for RVIZ */
-  // rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
-  /*! \brief Subscriber that subscribes to the camera output */
-  std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>> cloud_sub;
-  /*! \brief Message filter for pointcloud message */
-  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>> tf_cloud_sub;
   /*! \brief Vector of objects in the scene to be picked */
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
-  /*! \brief Subscriber that subscribes to the EPD precision 2 output */
-  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>
-  epd_localize_sub;
-  /*! \brief Message filter for EPD precision 2 message */
-  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectLocalization>> tf_epd_localize_sub;
-  /*! \brief Subscriber that subscribes to the EPD precision 3 output */
-  std::shared_ptr<message_filters::Subscriber<epd_msgs::msg::EPDObjectTracking>> epd_tracking_sub;
-  /*! \brief Message filter for EPD precision 3 message */
-  std::shared_ptr<tf2_ros::MessageFilter<epd_msgs::msg::EPDObjectTracking>> tf_epd_tracking_sub;
   /*! \brief Vector of End effectors available */
   std::vector<std::shared_ptr<EndEffector>> end_effectors;
 
-
+  rclcpp::Node::SharedPtr node;
 };
+}
 
 #endif  // GRASP_PLANNER__GRASP_SCENE_HPP_

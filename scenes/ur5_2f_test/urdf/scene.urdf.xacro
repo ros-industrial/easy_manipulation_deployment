@@ -31,7 +31,7 @@
  <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
  <xacro:arg name="use_nominal_extrinsics" default="true" />
  <xacro:sensor_d415 parent="table_" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
-    <origin xyz="-0.58 0.225 0.65" rpy="3.14159 1.57079506 0"/>
+    <origin xyz="-0.58 0.12 0.655" rpy="0 1.57079506 0"/>
  </xacro:sensor_d415>
 
 

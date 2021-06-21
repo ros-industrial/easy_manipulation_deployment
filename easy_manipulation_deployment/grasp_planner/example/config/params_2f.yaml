@@ -10,8 +10,8 @@ grasp_planning_node:
       camera_frame: "camera_color_optical_frame"
     point_cloud_params:
       passthrough_filter_limits_x: [-0.50, 0.50]
-      passthrough_filter_limits_y: [-0.15, 0.40]
-      passthrough_filter_limits_z: [0.01, 0.70]      
+      passthrough_filter_limits_y: [-0.15, 0.10]
+      passthrough_filter_limits_z: [0.01, 0.70]
       segmentation_max_iterations: 50
       segmentation_distance_threshold: 0.01
       cluster_tolerance: 0.01
@@ -28,7 +28,7 @@ grasp_planning_node:
         distance_between_fingers_1: 0.0
         distance_between_fingers_2: 0.0
         finger_thickness: 0.02
-        gripper_stroke: 0.105
+        gripper_stroke: 0.09
         gripper_coordinate_system:
           grasp_stroke_direction: "x"
           grasp_stroke_normal_direction: "y"
@@ -42,6 +42,6 @@ grasp_planning_node:
           world_y_angle_threshold: 0.5
           world_z_angle_threshold: 0.25
     visualization_params:
-      point_cloud_visualization: false
+      point_cloud_visualization: true
 
       

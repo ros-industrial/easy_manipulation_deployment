@@ -16,177 +16,52 @@
 // Main PCL files
 #include "grasp_planner/grasp_scene.hpp"
 
-/****************************************************************************************//**
- * GraspScene constructor
- *******************************************************************************************/
-GraspScene::GraspScene()
-: Node(
-    "grasp_planning_node",
-    rclcpp::NodeOptions()
-    .allow_undeclared_parameters(true)
-    .automatically_declare_parameters_from_overrides(true)),
-  ptFilter_Ulimit_x(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
-    as_double_array()[1])),
-  ptFilter_Llimit_x(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_x").
-    as_double_array()[0])),
-  ptFilter_Ulimit_y(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
-    as_double_array()[1])),
-  ptFilter_Llimit_y(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_y").
-    as_double_array()[0])),
-  ptFilter_Ulimit_z(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
-    as_double_array()[1])),
-  ptFilter_Llimit_z(
-    static_cast<float>(this->get_parameter("point_cloud_params.passthrough_filter_limits_z").
-    as_double_array()[0])),
-  segmentation_max_iterations(
-    this->get_parameter(
-      "point_cloud_params.segmentation_max_iterations").as_int()),
-  segmentation_distance_threshold(
-    static_cast<float>(this->get_parameter(
-      "point_cloud_params.segmentation_distance_threshold").as_double())),
-  cluster_tolerance(
-    static_cast<float>(this->get_parameter(
-      "point_cloud_params.cluster_tolerance").as_double())),
-  min_cluster_size(
-    this->get_parameter(
-      "point_cloud_params.min_cluster_size").as_int()),
-  fcl_voxel_size(
-    static_cast<float>(this->get_parameter(
-      "point_cloud_params.fcl_voxel_size").as_double())),
-  cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  cloud_plane_removed(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  org_cloud(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  cloud_table(new pcl::PointCloud<pcl::PointXYZRGB>()),
-  table_coeff(new pcl::ModelCoefficients),
-  viewer(new pcl::visualization::PCLVisualizer("Cloud viewer"))
+/***************************************************************************//**
+ * Function that calls the grasp execution service after all grasp plans are
+ * generated.
+ * @param grasp_task Grasp Task to send
+ ******************************************************************************/
+template<typename T>
+void grasp_planner::GraspScene<T>::sendToExecution(
+  const emd_msgs::msg::GraspTask & grasp_task)
 {
-  output_client =
-    this->create_client<emd_msgs::srv::GraspRequest>(
-    this->get_parameter("grasp_output_service").as_string());
-  // marker_pub =
-  //   this->create_publisher<visualization_msgs::msg::Marker>(
-  //     "grasp_marker", 10);
-  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
-  this->buffer_ = std::make_shared<tf2_ros::Buffer>(clock);
-  this->buffer_->setUsingDedicatedThread(true);
-  this->tf_listener = std::make_shared<tf2_ros::TransformListener>(
-    *buffer_, this, false);
-
-  auto create_timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
-    this->get_node_base_interface(),
-    this->get_node_timers_interface());
-
-  this->buffer_->setCreateTimerInterface(create_timer_interface);
-  if (this->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
-    if (this->get_parameter("easy_perception_deployment.tracking_enabled").as_bool()) {
-      RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Tracking input....");
-      this->epd_tracking_sub = std::make_shared<
-        message_filters::Subscriber<epd_msgs::msg::EPDObjectTracking>>(
-        this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
-
-      this->tf_epd_tracking_sub = std::make_shared<tf2_ros::MessageFilter<
-            epd_msgs::msg::EPDObjectTracking>>(
-        *buffer_, "base_link", 5,
-        this->get_node_logging_interface(),
-        this->get_node_clock_interface(),
-        std::chrono::seconds(1));
-
-      this->tf_epd_tracking_sub->connectInput(*epd_tracking_sub);
-      this->tf_epd_tracking_sub->registerCallback(
-        std::bind(
-          &GraspScene::EPDTrackingCallback, this,
-          std::placeholders::_1));
+  if (grasp_task.grasp_targets.size() > 0) {
+    RCLCPP_INFO(LOGGER, "Sending Grasp Request to grasp execution module");
+    auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
+    req->grasp_targets = grasp_task.grasp_targets;
+    if (!this->result_future.valid()) {
+      RCLCPP_INFO(LOGGER, "Client Not started");
+      this->result_future = output_client->async_send_request(req);
+    } else if (this->result_future.wait_for(std::chrono::nanoseconds(0)) ==
+      std::future_status::timeout)
+    {
+      RCLCPP_INFO(LOGGER, "Grasp Execution still Ongoing");
     } else {
-      RCLCPP_INFO(LOGGER, "Using Easy Perception Deployment Object Localization input....");
-      this->epd_localize_sub = std::make_shared<
-        message_filters::Subscriber<epd_msgs::msg::EPDObjectLocalization>>(
-        this, this->get_parameter("easy_perception_deployment.epd_topic").as_string());
-
-      this->tf_epd_localize_sub = std::make_shared<tf2_ros::MessageFilter<
-            epd_msgs::msg::EPDObjectLocalization>>(
-        *buffer_, "base_link", 5,
-        this->get_node_logging_interface(),
-        this->get_node_clock_interface(),
-        std::chrono::seconds(1));
-
-      this->tf_epd_localize_sub->connectInput(*epd_localize_sub);
-      this->tf_epd_localize_sub->registerCallback(
-        std::bind(
-          &GraspScene::EPDLocalizationCallback, this,
-          std::placeholders::_1));
+      auto result = this->result_future.get();
+      RCLCPP_INFO(
+        LOGGER, "Grasp Execution completed! STATUS: %s!!",
+        (result->success) ? "SUCCESS" : "FAILURE");
+      this->result_future = output_client->async_send_request(req);
     }
   } else {
-    RCLCPP_INFO(LOGGER, "Using Direct Camera Input....");
-    this->cloud_sub = std::make_shared<
-      message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
-      this, this->get_parameter("camera_parameters.point_cloud_topic").as_string());
-
-    this->tf_cloud_sub = std::make_shared<tf2_ros::MessageFilter<
-          sensor_msgs::msg::PointCloud2>>(
-      *buffer_, "base_link", 5,
-      this->get_node_logging_interface(),
-      this->get_node_clock_interface(),
-      std::chrono::seconds(1));
-
-    this->tf_cloud_sub->connectInput(*cloud_sub);
-
-    this->tf_cloud_sub->registerCallback(
-      std::bind(
-        &GraspScene::planning_init, this,
-        std::placeholders::_1));
+    RCLCPP_ERROR(LOGGER, "No grasp tasks generated, Skipping request to grasp execution...");
   }
-
-  RCLCPP_INFO(LOGGER, "waiting....");
+  this->end_effectors.clear();
+  this->grasp_objects.clear();
 }
 
 /****************************************************************************************//**
- * GraspScene Destructor
- *******************************************************************************************/
-
-GraspScene::~GraspScene()
-{}
-
-/****************************************************************************************//**
- * General Callback function for EPD-EMD pipeline for Object Localization
+ * Method to generate Grasp Tasks for manipulation
  * @param msg Input message
  *******************************************************************************************/
-void GraspScene::EPDLocalizationCallback(
-  const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+template<typename T>
+emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
 {
-  planningInit(msg);
-}
-
-/****************************************************************************************//**
- * General Callback function for EPD-EMD pipeline for Object Tracking
- * @param msg Input message
- *******************************************************************************************/
-void GraspScene::EPDTrackingCallback(const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg)
-{
-  planningInit(msg);
-}
-
-/****************************************************************************************//**
- * General Callback function for EPD-EMD pipeline for tracking and localization
- * @param msg Input message
- *******************************************************************************************/
-template<typename U>
-void GraspScene::planningInit(const U & msg)
-{
-  RCLCPP_INFO(LOGGER, "EPD input received!");
-  EPDCreateWorldCollisionObject(msg);
-  this->grasp_objects = processEPDObjects(
-    msg->objects,
-    this->get_parameter("camera_parameters.camera_frame").as_string(),
-    static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()));
-  loadEndEffectors();
-
   emd_msgs::msg::GraspTask grasp_task;
   grasp_task.task_id = MathFunctions::generate_task_id();
+
+  if (this->grasp_objects.size() == 0) {return grasp_task;}
+
   for (auto object : this->grasp_objects) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     for (auto gripper : this->end_effectors) {
@@ -197,189 +72,185 @@ void GraspScene::planningInit(const U & msg)
         grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
       gripper->planGrasps(
         object, &grasp_method, world_collision_object,
-        this->get_parameter("camera_parameters.camera_frame").as_string());
+        node->get_parameter("camera_parameters.camera_frame").as_string());
       grasp_method.grasp_ranks.pop_back();
-      object->grasp_target.grasp_methods.push_back(grasp_method);
+
+      if (grasp_method.grasp_ranks.size() > 0) {
+        object->grasp_target.grasp_methods.push_back(grasp_method);
+      } else {
+        RCLCPP_ERROR(
+          LOGGER, "For Object " + object->grasp_target.target_type +
+          ", no grasp methods can be found with end effector " + gripper->getID());
+        continue;
+      }
+
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
       RCLCPP_INFO(
         LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
         std::to_string(
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
         " [ms] ");
-      if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
+      if (node->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
         gripper->visualizeGrasps(viewer, object);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
       }
     }
 
+    if (object->grasp_target.grasp_methods.size() > 0) {
+      grasp_task.grasp_targets.push_back(object->grasp_target);
+    } else {
+      RCLCPP_ERROR(
+        LOGGER, "For Object " + object->grasp_target.target_type +
+        ", no grasp methods can be found with any given " +
+        " end effectors provided. ");
+      continue;
+    }
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     RCLCPP_INFO(
       LOGGER, "Grasp planning time for object " + object->object_name + " " +
       std::to_string(
         std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
       " [ms] ");
-    grasp_task.grasp_targets.push_back(object->grasp_target);
   }
-
-  // RCLCPP_INFO(LOGGER, "Publishing to grasp execution module");
-  // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
-  // this->output_pub->publish(grasp_task);
-
-  RCLCPP_INFO(LOGGER, "Sending Grasp Request to grasp execution module");
-  auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
-  req->grasp_targets = grasp_task.grasp_targets;
-  // std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
-  if (!this->result_future.valid()) {
-    RCLCPP_INFO(LOGGER, "Client Not started");
-    this->result_future = output_client->async_send_request(req);
-  } else if (this->result_future.wait_for(std::chrono::nanoseconds(0)) ==
-    std::future_status::timeout)
-  {
-    RCLCPP_INFO(LOGGER, " Grasp Execution still Ongoing");
-  } else {
-    auto result = this->result_future.get();
-    RCLCPP_INFO(
-      LOGGER, "Grasp Execution completed! STATUS: %s!!",
-      (result->success) ? "SUCCESS" : "FAILURE");
-    this->result_future = output_client->async_send_request(req);
-  }
-
-  this->end_effectors.clear();
-  this->grasp_objects.clear();
-  RCLCPP_INFO(LOGGER, "Exit Callback");
+  return grasp_task;
 }
 
-/****************************************************************************************//**
- * Callback function for direct camera pipeline for EMD
- * @param msg Input message
- *******************************************************************************************/
-void GraspScene::planning_init(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
+/***************************************************************************//**
+ * Method that loads all available end effector based on the parameter files
+ ******************************************************************************/
+template<typename T>
+void grasp_planner::GraspScene<T>::loadEndEffectors()
 {
-  RCLCPP_INFO(LOGGER, "Camera Point Cloud Received!");
-  processPointCloud(msg);
-  createWorldCollision(msg);
-  this->grasp_objects = extractObjects(
-    this->get_parameter("camera_parameters.camera_frame").as_string(),
-    static_cast<float>(this->get_parameter("point_cloud_params.cloud_normal_radius").as_double()),
-    cloud_plane_removed, cluster_tolerance, min_cluster_size);
-  loadEndEffectors();
-  PCLVisualizer::viewerAddRGBCloud(cloud, "original_cloud", viewer);
-  emd_msgs::msg::GraspTask grasp_task;
-  grasp_task.task_id = MathFunctions::generate_task_id();
-  for (auto object : this->grasp_objects) {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    for (auto gripper : this->end_effectors) {
-      std::chrono::steady_clock::time_point grasp_begin = std::chrono::steady_clock::now();
-      emd_msgs::msg::GraspMethod grasp_method;
-      grasp_method.ee_id = gripper->getID();
-      grasp_method.grasp_ranks.insert(
-        grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
-      gripper->planGrasps(
-        object, &grasp_method, world_collision_object,
-        this->get_parameter("camera_parameters.camera_frame").as_string());
-      grasp_method.grasp_ranks.pop_back();
-      object->grasp_target.grasp_methods.push_back(grasp_method);
-      std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
-      // std::cout << "Grasp planning time for " << grasp_method.ee_id << " : " <<
-      //   std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count() <<
-      //   "[ms]" << std::endl;
-      RCLCPP_INFO(
-        LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
-        std::to_string(
-          std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
-        " [ms] ");
-      RCLCPP_INFO(
-        LOGGER, std::to_string(grasp_method.grasp_ranks.size()) +
-        " Grasp Samples have been generated.");
-      // for (auto rank : grasp_method.grasp_ranks) {
-      //   std::cout << "grasp method rank: " << rank << std::endl;
-      // }
-      if (this->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
-        gripper->visualizeGrasps(viewer, object);
-        std::cout << "Point Cloud Viewer Visualization" << std::endl;
-      }
+  std::vector<std::string> end_effector_array = node->get_parameter(
+    "end_effectors.end_effector_names").as_string_array();
+  for (std::string end_effector : end_effector_array) {
+    std::string end_effector_type =
+      node->get_parameter("end_effectors." + end_effector + ".type").as_string();
+    RCLCPP_INFO(LOGGER, "Loading " + end_effector_type + " gripper " + end_effector);
+    if (end_effector_type.compare("finger") == 0) {
+      FingerGripper gripper(
+        end_effector,
+        node->get_parameter("end_effectors." + end_effector + ".num_fingers_side_1").as_int(),
+        node->get_parameter("end_effectors." + end_effector + ".num_fingers_side_2").as_int(),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".distance_between_fingers_1").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".distance_between_fingers_2").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".finger_thickness").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_stroke").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.voxel_size").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.grasp_rank_weight_1").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.grasp_rank_weight_2").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.grasp_plane_dist_limit").as_double()),
+        static_cast<float>(node->get_parameter(
+          "point_cloud_params.cloud_normal_radius").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.world_x_angle_threshold").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.world_y_angle_threshold").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.world_z_angle_threshold").as_double()),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.grasp_stroke_direction").as_string(),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.grasp_stroke_normal_direction").as_string(),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.grasp_approach_direction").as_string()
+      );
+      std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<FingerGripper>(gripper);
+      this->end_effectors.push_back(gripper_ptr);
+    } else if (end_effector_type.compare("suction") == 0) {
+      SuctionGripper gripper(
+        end_effector,
+        node->get_parameter("end_effectors." + end_effector + ".num_cups_length").as_int(),
+        node->get_parameter("end_effectors." + end_effector + ".num_cups_breadth").as_int(),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector + ".dist_between_cups_length").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector + ".dist_between_cups_breadth").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector + ".cup_radius").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector + ".cup_height").as_double()),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.num_sample_along_axis").as_int(),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.search_resolution").as_double()),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.search_angle_resolution").as_int(),
+        static_cast<float>(node->get_parameter(
+          "point_cloud_params.cloud_normal_radius").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.weights.curvature").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.weights.grasp_distance_to_center").as_double()),
+        static_cast<float>(node->get_parameter(
+          "end_effectors." + end_effector +
+          ".grasp_planning_params.weights.number_contact_points").as_double()),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.length_direction").as_string(),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.breadth_direction").as_string(),
+        node->get_parameter(
+          "end_effectors." + end_effector +
+          ".gripper_coordinate_system.grasp_approach_direction").as_string());
+
+      std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<SuctionGripper>(gripper);
+
+      this->end_effectors.push_back(gripper_ptr);
     }
-
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    RCLCPP_INFO(
-      LOGGER, "Grasp planning time for object " + object->object_name + " " +
-      std::to_string(
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
-      " [ms] ");
-    grasp_task.grasp_targets.push_back(object->grasp_target);
   }
-
-  // this->marker_pub->publish(grasp_task.grasp_targets[0].grasp_methods[0].grasp_markers[0]);
-  // this->output_pub->publish(grasp_task);
-
-  RCLCPP_INFO(LOGGER, "Sending Grasp Request to grasp execution module");
-  auto req = std::make_shared<emd_msgs::srv::GraspRequest::Request>();
-  req->grasp_targets = grasp_task.grasp_targets;
-  if (!this->result_future.valid()) {
-    RCLCPP_INFO(LOGGER, "Client Not started");
-    this->result_future = output_client->async_send_request(req);
-  } else if (this->result_future.wait_for(std::chrono::nanoseconds(0)) ==
-    std::future_status::timeout)
-  {
-    RCLCPP_INFO(LOGGER, " Grasp Execution still Ongoing");
-  } else {
-    auto result = this->result_future.get();
-    RCLCPP_INFO(
-      LOGGER, "Grasp Execution completed! STATUS: %s!!",
-      (result->success) ? "SUCCESS" : "FAILURE");
-    this->result_future = output_client->async_send_request(req);
-  }
-  this->end_effectors.clear();
-  this->grasp_objects.clear();
-  RCLCPP_INFO(LOGGER, "Exit Callback");
+  RCLCPP_INFO(LOGGER, "All End Effectors Loaded");
 }
 
-// LCOV_EXCL_START
-/****************************************************************************************//**
- * Not used
- *******************************************************************************************/
-void GraspScene::getCameraPosition()
-{
-  Eigen::Vector3f worldZVector(0, 0, 1);
-  Eigen::Vector3f table_normal_vector(this->table_coeff->values[0],
-    this->table_coeff->values[1],
-    this->table_coeff->values[2]);
-
-  float cos_world_table = std::abs(
-    (table_normal_vector.dot(worldZVector)) /
-    (table_normal_vector.norm() * worldZVector.norm()));
-
-  std::cout << table_normal_vector(0) << " , " << table_normal_vector(1) << " , " <<
-    table_normal_vector(2) << std::endl;
-
-  // Compute initial points accordingly
-  if (cos_world_table > 0.9) {
-    std::cout << "Camera in top view\n";
-  } else {
-    std::cout << "Camera in side view\n";
-  }
-}
-// LCOV_EXCL_STOP
 
 /****************************************************************************************//**
  * Function that processes the Objects in a point cloud scene and outputs a vector
  * of GraspObjects
- * @param camera_frame name of camera frame for current perception system
- * @param cloud_normal_radius radius around each pointcloud point when determining normals
- * @param cloud Input cloud of the scene
- * @param cluster_tolerance Cluster tolerance for object segmentation
- * @param min_cluster_size Number of points for a cluster to be determined as an object cluster
  *******************************************************************************************/
-
-std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
-  std::string camera_frame,
-  float cloud_normal_radius,
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-  float cluster_tolerance,
-  int min_cluster_size)
+template<>
+void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::extractObjectsDirect()
 {
   RCLCPP_INFO(LOGGER, "Extracting Objects from point cloud");
-  std::vector<std::shared_ptr<GraspObject>> grasp_objects;
+
+  std::string camera_frame = node->get_parameter("camera_parameters.camera_frame").as_string();
+
+  int min_cluster_size = node->get_parameter(
+    "point_cloud_params.min_cluster_size").as_int();
+
+  float cloud_normal_radius = static_cast<float>(node->get_parameter(
+      "point_cloud_params.cloud_normal_radius").as_double());
+
+  float cluster_tolerance = static_cast<float>(node->get_parameter(
+      "point_cloud_params.cluster_tolerance").as_double());
+
   // pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>);
   // std::vector<pcl::PointIndices> clusterIndices;
   // pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ecExtractor;
@@ -392,19 +263,18 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
   // ecExtractor.extract(clusterIndices);
 
   std::vector<pcl::PointIndices> clusterIndices = PCLFunctions::extractPointCloudClusters(
-    cloud, cluster_tolerance, min_cluster_size);
+    this->cloud_plane_removed, cluster_tolerance, min_cluster_size);
 
   if (clusterIndices.empty()) {
-    std::cout << "No objects. " << std::endl;
+    RCLCPP_ERROR(LOGGER, "No Objects can be extracted");
   } else {
     std::vector<pcl::PointIndices>::const_iterator it = clusterIndices.begin();
-    // int objectNumber = 0;
     for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it) {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr objectCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       for (std::vector<int>::const_iterator pit = it->indices.begin();
         pit != it->indices.end(); ++pit)
       {
-        objectCloud->points.push_back(cloud->points[*pit]);
+        objectCloud->points.push_back(this->cloud_plane_removed->points[*pit]);
       }
 
       objectCloud->width = objectCloud->points.size();
@@ -415,35 +285,39 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::extractObjects(
       Eigen::Vector4f centroid;
       pcl::compute3DCentroid(*objectCloud, centroid);
       std::shared_ptr<GraspObject> object = std::make_shared<GraspObject>(
-        camera_frame, objectCloud,
+        camera_frame,
+        objectCloud,
         centroid);
       PCLFunctions::computeCloudNormal(objectCloud, object->cloud_normal, cloud_normal_radius);
       object->get_object_bb();
       object->get_object_world_angles();
       object->grasp_target.target_shape = object->getObjectShape();
       object->grasp_target.target_pose = object->getObjectPose(camera_frame);
-      grasp_objects.push_back(object);
+      this->grasp_objects.push_back(object);
     }
   }
-  RCLCPP_INFO(LOGGER, "Extracted " + std::to_string(grasp_objects.size()) + " from point cloud");
-  return grasp_objects;
+  RCLCPP_INFO(
+    LOGGER, "Extracted " + std::to_string(
+      this->grasp_objects.size()) + " from point cloud");
 }
 
 /****************************************************************************************//**
  * Function that processes the Objects detected by EPD and outputs a vector
  * of GraspObjects
  * @param objects EPD detected objects
- * @param camera_frame name of camera frame for current perception system
- * @param cloud_normal_radius radius around each pointcloud point when determining normals
  *******************************************************************************************/
-
-std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
-  const std::vector<epd_msgs::msg::LocalizedObject> & objects,
-  const std::string camera_frame,
-  const float & cloud_normal_radius)
+template<typename T>
+void grasp_planner::GraspScene<T>::extractObjectsEPD(
+  const std::vector<epd_msgs::msg::LocalizedObject> & objects)
 {
   RCLCPP_INFO(LOGGER, "Processing Objects detected by EPD...");
-  std::vector<std::shared_ptr<GraspObject>> grasp_objects;
+
+  std::string camera_frame = node->get_parameter(
+    "camera_parameters.camera_frame").as_string();
+
+  float cloud_normal_radius = static_cast<float>(node->get_parameter(
+      "point_cloud_params.cloud_normal_radius").as_double());
+
   for (auto raw_object : objects) {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objectCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::PCLPointCloud2 * pcl_pc2(new pcl::PCLPointCloud2);
@@ -470,10 +344,53 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
     object->get_object_world_angles();
     object->grasp_target.target_shape = object->getObjectShape();
     object->grasp_target.target_pose = object->getObjectPose(camera_frame);
-    grasp_objects.push_back(object);
+    this->grasp_objects.push_back(object);
   }
-  RCLCPP_INFO(LOGGER, "EPD detected " + std::to_string(grasp_objects.size()) + " objects.");
-  return grasp_objects;
+  RCLCPP_INFO(LOGGER, "EPD detected " + std::to_string(this->grasp_objects.size()) + " objects.");
+}
+
+/****************************************************************************************//**
+ * Method to Extract Grasp Objects
+ * @param msg Input message
+ *******************************************************************************************/
+template<>
+void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::extractObjects(
+  const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
+{
+  extractObjectsDirect();
+}
+
+template<>
+void grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization>::extractObjects(
+  const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
+{
+  extractObjectsEPD(msg->objects);
+}
+
+template<>
+void grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking>::extractObjects(
+  const epd_msgs::msg::EPDObjectTracking::ConstSharedPtr & msg)
+{
+  extractObjectsEPD(msg->objects);
+}
+
+/***************************************************************************//**
+ * Function that converts a sensor_msg pointcloud2 message into an FCL compatible
+ * collision object.
+ * @param msg Pointcloud input
+ ******************************************************************************/
+template<>
+void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::createWorldCollision(
+  const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
+{
+  geometry_msgs::msg::TransformStamped sensorToWorldTf =
+    this->buffer_->lookupTransform(
+    "base_link", msg->header.frame_id,
+    msg->header.stamp);
+  octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
+  this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
+    this->org_cloud, sensor_origin,
+    static_cast<float>(node->get_parameter("point_cloud_params.octomap_resolution").as_double()));
 }
 
 /***************************************************************************//**
@@ -481,12 +398,9 @@ std::vector<std::shared_ptr<GraspObject>> GraspScene::processEPDObjects(
  * collision object
  * @param msg EPD input
  ******************************************************************************/
-
-// void GraspScene::EPDCreateWorldCollisionObject(
-//   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
 template<typename T>
-void GraspScene::EPDCreateWorldCollisionObject(
-  const T & msg)
+void grasp_planner::GraspScene<T>::createWorldCollision(
+  const typename T::ConstSharedPtr & msg)
 {
   // auto ppx = camera_info.k.at(2);
   // auto fx = camera_info.k.at(0);
@@ -514,12 +428,18 @@ void GraspScene::EPDCreateWorldCollisionObject(
 
   PCLFunctions::passthroughFilter(
     scene_cloud,
-    this->ptFilter_Ulimit_x,
-    this->ptFilter_Llimit_x,
-    this->ptFilter_Ulimit_y,
-    this->ptFilter_Llimit_y,
-    this->ptFilter_Ulimit_z,
-    this->ptFilter_Llimit_z);
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+    as_double_array()[0]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+    as_double_array()[0]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+    as_double_array()[0]));
   PCLFunctions::removeStatisticalOutlier(scene_cloud, 1.0);
 
   geometry_msgs::msg::TransformStamped sensorToWorldTf =
@@ -527,125 +447,128 @@ void GraspScene::EPDCreateWorldCollisionObject(
     "base_link", msg->header.frame_id,
     msg->header.stamp);
   octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
-  PCLFunctions::voxelizeCloud<pcl::PointCloud<pcl::PointXYZRGB>::Ptr,
-    pcl::VoxelGrid<pcl::PointXYZRGB>>(scene_cloud, this->fcl_voxel_size, this->org_cloud);
+
+  PCLFunctions::voxelizeCloud
+  <pcl::PointCloud<pcl::PointXYZRGB>::Ptr, pcl::VoxelGrid<pcl::PointXYZRGB>>(
+    scene_cloud,
+    static_cast<float>(node->get_parameter(
+      "point_cloud_params.fcl_voxel_size").as_double()),
+    this->org_cloud);
+
   this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
     this->org_cloud, sensor_origin,
-    static_cast<float>(this->get_parameter("point_cloud_params.octomap_resolution").as_double()));
+    static_cast<float>(node->get_parameter("point_cloud_params.octomap_resolution").as_double()));
 }
 
 /***************************************************************************//**
- * Method that loads all available end effector based on the parameter files
+ * Function that processes an input sensor_msgs pointcloud2 message.
+ * Includes Conversion to PCL Pointcloud2 type, undergoing passthrough filtering,
+ * Removing statistical outlier, downsampling and plane segmentation.
+ * @param msg Pointcloud input
  ******************************************************************************/
-void GraspScene::loadEndEffectors()
+template<typename T>
+void grasp_planner::GraspScene<T>::processPointCloud(
+  const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
 {
-  std::vector<std::string> end_effector_array = this->get_parameter(
-    "end_effectors.end_effector_names").as_string_array();
-  for (std::string end_effector : end_effector_array) {
-    std::string end_effector_type =
-      this->get_parameter("end_effectors." + end_effector + ".type").as_string();
-    RCLCPP_INFO(LOGGER, "Loading " + end_effector_type + " gripper " + end_effector);
-    if (end_effector_type.compare("finger") == 0) {
-      FingerGripper gripper(
-        end_effector,
-        this->get_parameter("end_effectors." + end_effector + ".num_fingers_side_1").as_int(),
-        this->get_parameter("end_effectors." + end_effector + ".num_fingers_side_2").as_int(),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".distance_between_fingers_1").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".distance_between_fingers_2").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".finger_thickness").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_stroke").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.voxel_size").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.grasp_rank_weight_1").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.grasp_rank_weight_2").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.grasp_plane_dist_limit").as_double()),
-        static_cast<float>(this->get_parameter(
-          "point_cloud_params.cloud_normal_radius").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.world_x_angle_threshold").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.world_y_angle_threshold").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.world_z_angle_threshold").as_double()),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.grasp_stroke_direction").as_string(),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.grasp_stroke_normal_direction").as_string(),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.grasp_approach_direction").as_string()
-      );
-      std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<FingerGripper>(gripper);
-      this->end_effectors.push_back(gripper_ptr);
-    } else if (end_effector_type.compare("suction") == 0) {
-      SuctionGripper gripper(
-        end_effector,
-        this->get_parameter("end_effectors." + end_effector + ".num_cups_length").as_int(),
-        this->get_parameter("end_effectors." + end_effector + ".num_cups_breadth").as_int(),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector + ".dist_between_cups_length").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector + ".dist_between_cups_breadth").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector + ".cup_radius").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector + ".cup_height").as_double()),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.num_sample_along_axis").as_int(),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.search_resolution").as_double()),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.search_angle_resolution").as_int(),
-        static_cast<float>(this->get_parameter(
-          "point_cloud_params.cloud_normal_radius").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.weights.curvature").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.weights.grasp_distance_to_center").as_double()),
-        static_cast<float>(this->get_parameter(
-          "end_effectors." + end_effector +
-          ".grasp_planning_params.weights.number_contact_points").as_double()),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.length_direction").as_string(),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.breadth_direction").as_string(),
-        this->get_parameter(
-          "end_effectors." + end_effector +
-          ".gripper_coordinate_system.grasp_approach_direction").as_string());
+  RCLCPP_INFO(LOGGER, "Processing Point Cloud... ");
+  pcl::PCLPointCloud2 * pcl_pc2(new pcl::PCLPointCloud2);
+  PCLFunctions::SensorMsgtoPCLPointCloud2(*msg, *pcl_pc2);
+  pcl::fromPCLPointCloud2(*pcl_pc2, *(this->cloud));
+  RCLCPP_INFO(LOGGER, "Applying Passthrough filters");
+  PCLFunctions::passthroughFilter(
+    this->cloud,
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_x").
+    as_double_array()[0]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_y").
+    as_double_array()[0]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+    as_double_array()[1]),
+    static_cast<float>(node->get_parameter("point_cloud_params.passthrough_filter_limits_z").
+    as_double_array()[0]));
+  RCLCPP_INFO(LOGGER, "Removing Statistical Outlier");
+  PCLFunctions::removeStatisticalOutlier(this->cloud, 1.0);
+  RCLCPP_INFO(LOGGER, "Downsampling Point Cloud");
+  PCLFunctions::voxelizeCloud
+  <pcl::PointCloud<pcl::PointXYZRGB>::Ptr, pcl::VoxelGrid<pcl::PointXYZRGB>>(
+    this->cloud,
+    static_cast<float>(node->get_parameter(
+      "point_cloud_params.fcl_voxel_size").as_double()),
+    this->org_cloud);
+  RCLCPP_INFO(LOGGER, "Segmenting plane");
+  PCLFunctions::planeSegmentation(
+    this->cloud, this->cloud_plane_removed, this->cloud_table,
+    node->get_parameter(
+      "point_cloud_params.segmentation_max_iterations").as_int(),
+    static_cast<float>(node->get_parameter(
+      "point_cloud_params.segmentation_distance_threshold").as_double()));
+  RCLCPP_INFO(LOGGER, "Point cloud successfully processed!");
+}
 
-      std::shared_ptr<EndEffector> gripper_ptr = std::make_shared<SuctionGripper>(gripper);
+/****************************************************************************************//**
+ * General Callback function for Direct Point Cloud pipeline for tracking and localization
+ * @param msg Input message
+ *******************************************************************************************/
+template<>
+void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
+  const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
+{
+  RCLCPP_INFO(LOGGER, "Perception input received!");
+  processPointCloud(msg);
+  createWorldCollision(msg);
+  extractObjects(msg);
+  loadEndEffectors();
+  emd_msgs::msg::GraspTask grasp_task = generateGraspTask();
+  sendToExecution(grasp_task);
+  RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
+}
 
-      this->end_effectors.push_back(gripper_ptr);
-    }
-  }
-  RCLCPP_INFO(LOGGER, "All End Effectors Loaded");
+/****************************************************************************************//**
+ * General Callback function for EPD-EMD pipeline for tracking and localization
+ * @param msg Input message
+ *******************************************************************************************/
+template<typename T>
+void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPtr & msg)
+{
+  RCLCPP_INFO(LOGGER, "Perception input received!");
+  createWorldCollision(msg);
+  extractObjects(msg);
+  loadEndEffectors();
+  emd_msgs::msg::GraspTask grasp_task = generateGraspTask();
+  sendToExecution(grasp_task);
+  RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
+}
+
+/******************************************************************************************//**
+ * Method to set up all communication methods with perception system for EPD Tracking input
+ *********************************************************************************************/
+template<typename T>
+void grasp_planner::GraspScene<T>::setup(std::string topic_name)
+{
+  this->output_client =
+    this->node->create_client<emd_msgs::srv::GraspRequest>(
+    this->node->get_parameter("grasp_output_service").as_string());
+
+  RCLCPP_INFO(LOGGER, "Listening to: " + topic_name + "...");
+  this->perception_sub = std::make_shared<
+    message_filters::Subscriber<T>>(
+    node, topic_name);
+
+  this->tf_perception_sub = std::make_shared<tf2_ros::MessageFilter<T>>(
+    *buffer_, "base_link", 5,
+    node->get_node_logging_interface(),
+    node->get_node_clock_interface(),
+    std::chrono::seconds(1));
+
+  this->tf_perception_sub->connectInput(*perception_sub);
+
+  this->tf_perception_sub->registerCallback(
+    &grasp_planner::GraspScene<T>::startPlanning, this);
+
+  RCLCPP_INFO(LOGGER, "waiting....");
 }
 
 // LCOV_EXCL_START
@@ -654,7 +577,9 @@ void GraspScene::loadEndEffectors()
  * Function that prints Pose
  * @param _pose target Pose to print
  ******************************************************************************/
-void GraspScene::printPose(const geometry_msgs::msg::Pose & _pose)
+template<typename T>
+void grasp_planner::GraspScene<T>::printPose(
+  const geometry_msgs::msg::Pose & _pose)
 {
   std::cout << "Position:" << std::endl;
 
@@ -674,66 +599,41 @@ void GraspScene::printPose(const geometry_msgs::msg::Pose & _pose)
  * Function that prints PoseStamped messages
  * @param _pose target PoseStamped pose to print
  ******************************************************************************/
-void GraspScene::printPose(const geometry_msgs::msg::PoseStamped & _pose)
+template<typename T>
+void grasp_planner::GraspScene<T>::printPose(const geometry_msgs::msg::PoseStamped & _pose)
 {
   std::cout << "Frame ID: " << _pose.header.frame_id << std::endl;
   printPose(_pose.pose);
 }
 
+/****************************************************************************************//**
+ * Not used
+ *******************************************************************************************/
+template<typename T>
+void grasp_planner::GraspScene<T>::getCameraPosition()
+{
+  Eigen::Vector3f worldZVector(0, 0, 1);
+  Eigen::Vector3f table_normal_vector(this->table_coeff->values[0],
+    this->table_coeff->values[1],
+    this->table_coeff->values[2]);
+
+  float cos_world_table = std::abs(
+    (table_normal_vector.dot(worldZVector)) /
+    (table_normal_vector.norm() * worldZVector.norm()));
+
+  std::cout << table_normal_vector(0) << " , " << table_normal_vector(1) << " , " <<
+    table_normal_vector(2) << std::endl;
+
+  // Compute initial points accordingly
+  if (cos_world_table > 0.9) {
+    std::cout << "Camera in top view\n";
+  } else {
+    std::cout << "Camera in side view\n";
+  }
+}
+
 // LCOV_EXCL_STOP
 
-/***************************************************************************//**
- * Function that processes an input sensor_msgs pointcloud2 message.
- * Includes Conversion to PCL Pointcloud2 type, undergoing passthrough filtering,
- * Removing statistical outlier, downsampling and plane segmentation.
- * @param msg Pointcloud input
- ******************************************************************************/
-void GraspScene::processPointCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
-{
-  RCLCPP_INFO(LOGGER, "Processing Point Cloud... ");
-  pcl::PCLPointCloud2 * pcl_pc2(new pcl::PCLPointCloud2);
-  PCLFunctions::SensorMsgtoPCLPointCloud2(*msg, *pcl_pc2);
-  pcl::fromPCLPointCloud2(*pcl_pc2, *(this->cloud));
-  RCLCPP_INFO(LOGGER, "Applying Passthrough filters");
-  PCLFunctions::passthroughFilter(
-    this->cloud,
-    this->ptFilter_Ulimit_x,
-    this->ptFilter_Llimit_x,
-    this->ptFilter_Ulimit_y,
-    this->ptFilter_Llimit_y,
-    this->ptFilter_Ulimit_z,
-    this->ptFilter_Llimit_z);
-  RCLCPP_INFO(LOGGER, "Removing Statistical Outlier");
-  PCLFunctions::removeStatisticalOutlier(this->cloud, 1.0);
-  RCLCPP_INFO(LOGGER, "Downsampling Point Cloud");
-  PCLFunctions::voxelizeCloud<pcl::PointCloud<pcl::PointXYZRGB>::Ptr,
-    pcl::VoxelGrid<pcl::PointXYZRGB>>(this->cloud, this->fcl_voxel_size, this->org_cloud);
-  RCLCPP_INFO(LOGGER, "Segmenting plane");
-  PCLFunctions::planeSegmentation(
-    this->cloud, this->cloud_plane_removed, this->cloud_table,
-    this->segmentation_max_iterations,
-    segmentation_distance_threshold);
-  RCLCPP_INFO(LOGGER, "Point cloud successfully processed!");
-}
-
-/***************************************************************************//**
- * Function that converts a sensor_msg pointcloud2 message into an FCL compatible
- * collision object.
- * @param msg Pointcloud input
- ******************************************************************************/
-void GraspScene::createWorldCollision(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
-{
-  geometry_msgs::msg::TransformStamped sensorToWorldTf =
-    this->buffer_->lookupTransform(
-    "base_link", msg->header.frame_id,
-    msg->header.stamp);
-  octomap::point3d sensor_origin = octomap::pointTfToOctomap(sensorToWorldTf.transform.translation);
-  this->world_collision_object = FCLFunctions::createCollisionObjectFromPointCloudRGB(
-    this->org_cloud, sensor_origin,
-    static_cast<float>(this->get_parameter("point_cloud_params.octomap_resolution").as_double()));
-
-  // PCLFunctions::planeSegmentation(
-  //   this->cloud, this->cloud_plane_removed, this->cloud_table,
-  //   this->segmentation_max_iterations,
-  //   segmentation_distance_threshold);
-}
+template class grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>;
+template class grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization>;
+template class grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking>;

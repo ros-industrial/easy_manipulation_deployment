@@ -341,15 +341,12 @@ void FingerGripper::addCuttingPlanesEqualAligned(
 
     } else {
       if (curr_min_size < min_fingers) {  // Plane still contains fingers on both side
-        // std::cout << "Add to both" << std::endl;
         addPlane(gap, centerpoint, plane_vector, true, true);
         curr_min_size++;
       } else {  // Plane only contains fingers on the side with more fingers
         if (side_1_max) {
-          // std::cout << "Add to side 1" << std::endl;
           addPlane(gap, centerpoint, plane_vector, true, false);
         } else {
-          // std::cout << "Add to side 2" << std::endl;
           addPlane(gap, centerpoint, plane_vector, false, true);
         }
       }
@@ -765,12 +762,6 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
   if (this->grasp_samples[0]->plane_intersects_object) {
     for (auto & finger_sample_1 : this->grasp_samples[0]->sample_side_1->finger_samples) {
       for (auto & finger_sample_2 : this->grasp_samples[0]->sample_side_2->finger_samples) {
-        // Eigen::Vector3f centerpoint_side1_vector(finger_sample_1->finger_point.x,
-        //   finger_sample_1->finger_point.y,
-        //   finger_sample_1->finger_point.z);
-        // Eigen::Vector3f centerpoint_side2_vector(finger_sample_2->finger_point.x,
-        //   finger_sample_2->finger_point.y,
-        //   finger_sample_2->finger_point.z);
         Eigen::Vector3f centerpoint_side1_vector =
           PCLFunctions::convertPCLtoEigen(finger_sample_1->finger_point);
         Eigen::Vector3f centerpoint_side2_vector =
@@ -817,6 +808,15 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllGripperCon
         }
       }
     }
+    if (valid_open_gripper_configs.empty()) {
+      RCLCPP_ERROR(
+        LOGGER,
+        "All Possible Grasp sample collides with something in the scene! No grasps available");
+    }
+  } else {
+    RCLCPP_ERROR(
+      LOGGER,
+      "Center Cutting plane does not intersect object, no grasp plans can be made.");
   }
   return valid_open_gripper_configs;
 }
