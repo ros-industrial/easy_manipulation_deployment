@@ -22,8 +22,6 @@ jobs:
         sudo apt update && sudo apt install -y enchant graphviz
         python -m pip install --upgrade setuptools
         python -m pip install --upgrade doc8 pyenchant sphinx-rtd-theme sphinxcontrib-spelling
-        sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq texlive-latex-recommended \
-          texlive-latex-extra texlive-fonts-recommended latexmk
 
     - name: Check Sphinx spelling
       # show list of misspelled words
@@ -36,7 +34,6 @@ jobs:
     - name: Build Sphinx documentation
       run: |
         make -C docs/sphinx html
-        make -C docs/sphinx latexpdf
     - name: Lint generated Sphinx documentation
       run: |
         doc8 docs/sphinx --ignore-path docs/sphinx/build --max-line-length 999
