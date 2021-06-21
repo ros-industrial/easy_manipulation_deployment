@@ -50,20 +50,3 @@ jobs:
           cat "_build/spelling/index.spelling"
           false
         fi
-
-    - name: Upload Artifacts
-      if: ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: sphinx-doc
-        path: |
-          docs/sphinx/build/latex/emd.pdf
-          docs/sphinx/build/html
-        retention-days: 5
-
-    - name: Deploy
-      if: ${{ github.event_name == 'push' }}
-      uses: JamesIves/github-pages-deploy-action@4.1.4
-      with:
-        branch: gh-pages
-        folder: docs/sphinx/build/html

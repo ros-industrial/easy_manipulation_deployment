@@ -34,5 +34,5 @@ jobs:
       if: ${{ github.event_name == 'push' }}
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
-        branch: gh-pages-api
+        branch: gh-pages
         folder: docs/doxygen/html
