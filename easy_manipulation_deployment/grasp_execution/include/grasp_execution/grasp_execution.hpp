@@ -159,7 +159,7 @@ public:
     const std::string & ee_driver_controller = "")
   {
     workcell_context_->load_ee(
-      ee_name, group_name, ee_brand, ee_link, ee_clearance,
+      group_name, ee_name, ee_brand, ee_link, ee_clearance,
       ee_driver_plugin, ee_driver_controller);
     return true;
   }
