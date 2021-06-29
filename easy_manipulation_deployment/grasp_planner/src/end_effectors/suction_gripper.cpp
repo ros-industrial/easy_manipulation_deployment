@@ -949,27 +949,74 @@ std::vector<double> SuctionGripper::getPlanarRPY(
   bool y_filled = false;
   bool z_filled = false;
 
-  if (this->col_direction == 'x') {
-    x_norm = col_vector.normalized();
-    x_filled = true;
-  } else if (this->col_direction == 'y') {
-    y_norm = col_vector.normalized();
-    y_filled = true;
-  } else if (this->col_direction == 'z') {
-    z_norm = col_vector.normalized();
-    z_filled = true;
-  }
+  auto setDirectionVector = [&](
+    const char axis,
+    const Eigen::Vector3f grasp_direction,
+    bool & x_filled,
+    bool & y_filled,
+    bool & z_filled,
+    Eigen::Vector3f & x_norm,
+    Eigen::Vector3f & y_norm,
+    Eigen::Vector3f & z_norm) -> void
+    {
+      auto getDirectionVector = [&](
+        Eigen::Vector3f global_vector,
+        Eigen::Vector3f direction_vector) -> Eigen::Vector3f
+        {
+          Eigen::Vector3f direction_vector_temp;
+          if (direction_vector.dot(global_vector) > 0) {
+            direction_vector_temp = grasp_direction;
+          } else {
+            direction_vector_temp(0) = -grasp_direction(0);
+            direction_vector_temp(1) = -grasp_direction(1);
+            direction_vector_temp(2) = -grasp_direction(2);
+          }
+          return direction_vector_temp.normalized();
+        };
+      Eigen::Vector3f grasp_direction_temp;
+      if (axis == 'x') {
+        x_filled = true;
+        x_norm = getDirectionVector({1, 0, 0}, grasp_direction);
+      } else if (axis == 'y') {
+        y_filled = true;
+        y_norm = getDirectionVector({0, 1, 0}, grasp_direction);
+      } else if (axis == 'z') {
+        z_filled = true;
+        z_norm = getDirectionVector({0, 0, 1}, grasp_direction);
+      }
+    };
 
-  if (this->row_direction == 'x') {
-    x_norm = row_vector.normalized();
-    x_filled = true;
-  } else if (this->row_direction == 'y') {
-    y_norm = row_vector.normalized();
-    y_filled = true;
-  } else if (this->row_direction == 'z') {
-    z_norm = row_vector.normalized();
-    z_filled = true;
-  }
+  // if (this->col_direction == 'x') {
+  //   x_norm = col_vector.normalized();
+  //   x_filled = true;
+  // } else if (this->col_direction == 'y') {
+  //   y_norm = col_vector.normalized();
+  //   y_filled = true;
+  // } else if (this->col_direction == 'z') {
+  //   z_norm = col_vector.normalized();
+  //   z_filled = true;
+  // }
+
+  // if (this->row_direction == 'x') {
+  //   x_norm = row_vector.normalized();
+  //   x_filled = true;
+  // } else if (this->row_direction == 'y') {
+  //   y_norm = row_vector.normalized();
+  //   y_filled = true;
+  // } else if (this->row_direction == 'z') {
+  //   z_norm = row_vector.normalized();
+  //   z_filled = true;
+  // }
+
+  setDirectionVector(
+    this->col_direction, col_vector,
+    x_filled, y_filled, z_filled,
+    x_norm, y_norm, z_norm);
+
+  setDirectionVector(
+    this->row_direction, row_vector,
+    x_filled, y_filled, z_filled,
+    x_norm, y_norm, z_norm);
 
   if (x_filled && y_filled) {
     z_norm = x_norm.cross(y_norm);

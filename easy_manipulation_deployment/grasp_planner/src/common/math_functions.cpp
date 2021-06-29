@@ -77,6 +77,18 @@ Eigen::Vector3f MathFunctions::getPointInDirection(
   return base_point + distance * direction_normalized;
 }
 
+MathFunctions::Point MathFunctions::getPointInfo(
+  const Eigen::Vector3f & target_point,
+  const Eigen::Vector3f & vector_direction,
+  const Eigen::Vector3f & point_on_vector)
+{
+  Eigen::Vector3f target_vector = target_point - point_on_vector;
+  float projection_distance = vector_direction.dot(target_vector);
+  Eigen::Vector3f projected_point = MathFunctions::getPointInDirection(
+    point_on_vector, vector_direction, projection_distance);
+  float perpendicular_distance = (projected_point - target_point).norm();
+  return Point(vector_direction, point_on_vector, projection_distance, perpendicular_distance);
+}
 Eigen::Vector3f MathFunctions::getRotatedVector(
   const Eigen::Vector3f & target_vector,
   const float & angle,

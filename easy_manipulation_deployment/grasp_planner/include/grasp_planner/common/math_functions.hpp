@@ -24,8 +24,30 @@
 #include "boost/uuid/random_generator.hpp"
 #include "boost/uuid/uuid_io.hpp"
 
+#include <pcl/point_types.h>
 namespace MathFunctions
 {
+
+struct Point
+{
+  Eigen::Vector3f reference_vector;
+  Eigen::Vector3f reference_point;
+  float projection_distance;
+  float perpendicular_distance;
+  int index;
+  pcl::PointNormal pcl_npoint;
+  Point(
+    Eigen::Vector3f reference_vector_,
+    Eigen::Vector3f reference_point_,
+    float projection_distance_,
+    float perpendicular_distance_)
+  {
+    reference_vector = reference_vector_;
+    reference_point = reference_point_;
+    projection_distance = projection_distance_;
+    perpendicular_distance = perpendicular_distance_;
+  }
+};
 float normalize(
   const float & target,
   const float & min,
@@ -49,6 +71,11 @@ Eigen::Vector3f getRotatedVector(
   const Eigen::Vector3f & target_vector,
   const float & angle,
   const char & axis);
+
+MathFunctions::Point getPointInfo(
+  const Eigen::Vector3f & target_point,
+  const Eigen::Vector3f & vector_direction,
+  const Eigen::Vector3f & point_on_vector);
 
 std::string generate_task_id();
 

@@ -46,7 +46,6 @@ void grasp_planner::GraspScene<T>::sendToExecution(
   } else {
     RCLCPP_ERROR(LOGGER, "No grasp tasks generated, Skipping request to grasp execution...");
   }
-  this->end_effectors.clear();
   this->grasp_objects.clear();
 }
 
@@ -63,13 +62,16 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
   if (this->grasp_objects.size() == 0) {return grasp_task;}
 
   for (auto object : this->grasp_objects) {
+    loadEndEffectors();
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     for (auto gripper : this->end_effectors) {
       std::chrono::steady_clock::time_point grasp_begin = std::chrono::steady_clock::now();
+
       emd_msgs::msg::GraspMethod grasp_method;
       grasp_method.ee_id = gripper->getID();
       grasp_method.grasp_ranks.insert(
         grasp_method.grasp_ranks.begin(), std::numeric_limits<float>::min());
+
       gripper->planGrasps(
         object, &grasp_method, world_collision_object,
         node->get_parameter("camera_parameters.camera_frame").as_string());
@@ -81,15 +83,17 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
         RCLCPP_ERROR(
           LOGGER, "For Object " + object->grasp_target.target_type +
           ", no grasp methods can be found with end effector " + gripper->getID());
-        continue;
+        // continue;
       }
 
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
+
       RCLCPP_INFO(
         LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
         std::to_string(
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
         " [ms] ");
+
       if (node->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
         gripper->visualizeGrasps(viewer, object);
         std::cout << "Point Cloud Viewer Visualization" << std::endl;
@@ -121,6 +125,7 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
 template<typename T>
 void grasp_planner::GraspScene<T>::loadEndEffectors()
 {
+  this->end_effectors.clear();
   std::vector<std::string> end_effector_array = node->get_parameter(
     "end_effectors.end_effector_names").as_string_array();
   for (std::string end_effector : end_effector_array) {
@@ -520,7 +525,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
   processPointCloud(msg);
   createWorldCollision(msg);
   extractObjects(msg);
-  loadEndEffectors();
+  // loadEndEffectors();
   emd_msgs::msg::GraspTask grasp_task = generateGraspTask();
   sendToExecution(grasp_task);
   RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
@@ -536,7 +541,7 @@ void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPt
   RCLCPP_INFO(LOGGER, "Perception input received!");
   createWorldCollision(msg);
   extractObjects(msg);
-  loadEndEffectors();
+  // loadEndEffectors();
   emd_msgs::msg::GraspTask grasp_task = generateGraspTask();
   sendToExecution(grasp_task);
   RCLCPP_INFO(LOGGER, "Grasp Planning complete.");

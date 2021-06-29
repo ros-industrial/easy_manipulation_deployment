@@ -210,18 +210,23 @@ void FingerGripper::planGrasps(
 
 void FingerGripper::getCenterCuttingPlane(const std::shared_ptr<GraspObject> & object)
 {
-  /*! \brief First we find the vector representing the major axis of the object */
-  pcl::PointXYZ gradient_vector = pcl::PointXYZ(
-    object->axis(0) - object->centerpoint(0),
-    object->axis(1) - object->centerpoint(1), object->axis(2) - object->centerpoint(2));
+  /*! \brief First we find the normal of the cutting plane */
+  Eigen::Vector3f centerpoint(
+    object->centerpoint(0),
+    object->centerpoint(1),
+    object->centerpoint(2));
+  Eigen::Vector3f center_minor = object->minor_axis - centerpoint;
+  Eigen::Vector3f center_grasp = object->grasp_axis - centerpoint;
+  Eigen::Vector3f gradient_vector = center_minor.cross(center_grasp);
 
-  /*! \brief The major axis of the object acts as the normal of the cutting plane.
-  Create the cutting plane that goes through the center of the object. */
-  float a = gradient_vector.x;
-  float b = gradient_vector.y;
-  float c = gradient_vector.z;
+  /*! \brief Create the cutting plane that goes through the center of the object. */
+  float a = gradient_vector(0);
+  float b = gradient_vector(1);
+  float c = gradient_vector(2);
   float d =
-    -((a * object->centerpoint(0)) + (b * object->centerpoint(1)) + (c * object->centerpoint(2)));
+    -((a * object->centerpoint(0)) +
+    (b * object->centerpoint(1)) +
+    (c * object->centerpoint(2)));
   Eigen::Vector4f grasp_plane_vector(a, b, c, d);
   Eigen::Vector3f grasp_plane_normal_(a, b, c);
 
@@ -270,7 +275,6 @@ void FingerGripper::getCuttingPlanes(const std::shared_ptr<GraspObject> & object
 
   /*! \brief If both sides are odd or both even, the spacing for planes is consistent */
   if (both_sides_even || both_sides_odd) {
-    // std::cout << "Both sides even or odd" << std::endl;
     if (this->distance_between_fingers_1 == this->distance_between_fingers_2) {
       addCuttingPlanesEqualAligned(
         object->centerpoint, this->center_cutting_plane,
@@ -498,48 +502,62 @@ bool FingerGripper::getGraspCloud(const std::shared_ptr<GraspObject> & object)
  ******************************************************************************/
 bool FingerGripper::getInitialSamplePoints(const std::shared_ptr<GraspObject> & object)
 {
-  // Object in the X axis
-  if (object->objectWorldCosX > this->worldXAngleThreshold) {
-    // std::cout << "It is oriented with the X axis\n";
-    for (auto & sample : this->grasp_samples) {
-      int first_point_index, second_point_index;
-      float minY = std::numeric_limits<float>::max();
-      float maxY = -std::numeric_limits<float>::min();
-      if (sample->plane_intersects_object) {
-        for (size_t i = 0; i < sample->grasp_plane_ncloud->points.size(); ++i) {
-          if (sample->grasp_plane_ncloud->points[i].y < minY) {
-            minY = sample->grasp_plane_ncloud->points[i].y;
-            first_point_index = i;
-          }
-          if (sample->grasp_plane_ncloud->points[i].y > maxY) {
-            maxY = sample->grasp_plane_ncloud->points[i].y;
-            second_point_index = i;
-          }
-        }
-        sample->sample_side_1->start_index = first_point_index;
-        sample->sample_side_2->start_index = second_point_index;
+  pcl::PointNormal centerpoint;
+  centerpoint.x = object->centerpoint(0);
+  centerpoint.y = object->centerpoint(1);
+  centerpoint.z = object->centerpoint(2);
+
+  Eigen::Vector3f centerpoint_eigen(
+    object->centerpoint(0),
+    object->centerpoint(1),
+    object->centerpoint(2));
+
+  for (auto & sample : this->grasp_samples) {
+    int first_point_index, second_point_index;
+    float min_dist = std::numeric_limits<float>::max();
+    // float min_linepoint_factor = std::numeric_limits<float>::max();
+    float max_dist = 0;
+    // float max_linepoint_factor = std::numeric_limits<float>::max();
+    std::vector<MathFunctions::Point> point_vector;
+    if (sample->plane_intersects_object) {
+      for (size_t i = 0; i < sample->grasp_plane_ncloud->points.size(); ++i) {
+
+        Eigen::Vector3f point(
+          sample->grasp_plane_ncloud->points[i].x,
+          sample->grasp_plane_ncloud->points[i].y,
+          sample->grasp_plane_ncloud->points[i].z);
+
+        MathFunctions::Point point_temp = MathFunctions::getPointInfo(
+          point,
+          object->grasp_axis,
+          centerpoint_eigen);
+        point_temp.index = i;
+        point_temp.pcl_npoint = sample->grasp_plane_ncloud->points[i];
+        point_vector.push_back(point_temp);
       }
-    }
-  } else {  // Object in the Y axis
-    // std::cout << "It is oriented with the Y axis\n";
-    for (auto & sample : this->grasp_samples) {
-      int first_point_index, second_point_index;
-      float minX = std::numeric_limits<float>::max();
-      float maxX = -std::numeric_limits<float>::min();
-      if (sample->plane_intersects_object) {
-        for (size_t i = 0; i < sample->grasp_plane_ncloud->points.size(); ++i) {
-          if (sample->grasp_plane_ncloud->points[i].x < minX) {
-            minX = sample->grasp_plane_ncloud->points[i].x;
-            first_point_index = i;
-          }
-          if (sample->grasp_plane_ncloud->points[i].x > maxX) {
-            maxX = sample->grasp_plane_ncloud->points[i].x;
-            second_point_index = i;
-          }
+
+      // Sort point vector according to its perpendicular distance from the direction vector
+      std::sort(
+        point_vector.begin(), point_vector.end(),
+        [](MathFunctions::Point a, MathFunctions::Point b)
+        {return a.perpendicular_distance < b.perpendicular_distance;});
+
+      // Get the first 1/3 of points in the sorted vector (1/3 pts closest to the vector)
+      int resize_size = static_cast<int>(point_vector.size() / 3);
+
+      for (int i = 0; i < resize_size; i++) {
+        if (point_vector[i].projection_distance < min_dist) {
+          min_dist = point_vector[i].projection_distance;
+          first_point_index = point_vector[i].index;
         }
-        sample->sample_side_1->start_index = first_point_index;
-        sample->sample_side_2->start_index = second_point_index;
+
+        if (point_vector[i].projection_distance > max_dist) {
+          max_dist = point_vector[i].projection_distance;
+          second_point_index = point_vector[i].index;
+        }
       }
+      sample->sample_side_1->start_index = first_point_index;
+      sample->sample_side_2->start_index = second_point_index;
     }
   }
   return true;
@@ -1215,27 +1233,55 @@ std::vector<double> FingerGripper::getPlanarRPY(
   bool x_filled = false;
   bool y_filled = false;
   bool z_filled = false;
-  if (this->grasp_stroke_direction == 'x') {
-    x_norm = grasp_direction.normalized();
-    x_filled = true;
-  } else if (this->grasp_stroke_direction == 'y') {
-    y_norm = grasp_direction.normalized();
-    y_filled = true;
-  } else if (this->grasp_stroke_direction == 'z') {
-    z_norm = grasp_direction.normalized();
-    z_filled = true;
-  }
 
-  if (this->grasp_stroke_normal_direction == 'x') {
-    x_norm = grasp_direction_normal.normalized();
-    x_filled = true;
-  } else if (this->grasp_stroke_normal_direction == 'y') {
-    y_norm = grasp_direction_normal.normalized();
-    y_filled = true;
-  } else if (this->grasp_stroke_normal_direction == 'z') {
-    z_norm = grasp_direction_normal.normalized();
-    z_filled = true;
-  }
+  Eigen::Vector3f grasp_direction_normal_temp;
+  auto setDirectionVector = [&](
+    const char axis,
+    const Eigen::Vector3f grasp_direction,
+    bool & x_filled,
+    bool & y_filled,
+    bool & z_filled,
+    Eigen::Vector3f & x_norm,
+    Eigen::Vector3f & y_norm,
+    Eigen::Vector3f & z_norm) -> void
+    {
+      auto getDirectionVector = [&](
+        Eigen::Vector3f global_vector,
+        Eigen::Vector3f direction_vector) -> Eigen::Vector3f
+        {
+          Eigen::Vector3f direction_vector_temp;
+          if (direction_vector.dot(global_vector) > 0) {
+            direction_vector_temp = grasp_direction;
+          } else {
+            direction_vector_temp(0) = -grasp_direction(0);
+            direction_vector_temp(1) = -grasp_direction(1);
+            direction_vector_temp(2) = -grasp_direction(2);
+          }
+          return direction_vector_temp.normalized();
+        };
+      Eigen::Vector3f grasp_direction_temp;
+      if (axis == 'x') {
+        x_filled = true;
+        x_norm = getDirectionVector({1, 0, 0}, grasp_direction);
+      } else if (axis == 'y') {
+        y_filled = true;
+        y_norm = getDirectionVector({0, 1, 0}, grasp_direction);
+      } else if (axis == 'z') {
+        z_filled = true;
+        z_norm = getDirectionVector({0, 0, 1}, grasp_direction);
+      }
+    };
+  //End Lambda
+
+  setDirectionVector(
+    this->grasp_stroke_direction, grasp_direction,
+    x_filled, y_filled, z_filled,
+    x_norm, y_norm, z_norm);
+
+  setDirectionVector(
+    this->grasp_stroke_normal_direction, grasp_direction_normal,
+    x_filled, y_filled, z_filled,
+    x_norm, y_norm, z_norm);
 
   if (x_filled && y_filled) {
     z_norm = x_norm.cross(y_norm);
@@ -1252,6 +1298,7 @@ std::vector<double> FingerGripper::getPlanarRPY(
   double roll = std::atan2(-z_norm(1), z_norm(2));
   double pitch = std::asin(z_norm(0));
   double yaw = std::atan2(-y_norm(0), x_norm(0));
+
   output_vec.push_back(roll);
   output_vec.push_back(pitch);
   output_vec.push_back(yaw);
@@ -1274,23 +1321,12 @@ void FingerGripper::getGraspPose(
   result_pose.pose.position.y = gripper->gripper_palm_center.y;
   result_pose.pose.position.z = gripper->gripper_palm_center.z;
 
-
-  // tf2::Matrix3x3 rotation_matrix(
-  //   object->affine_matrix(0, 0), object->affine_matrix(1, 0), object->affine_matrix(2, 0),
-  //   object->affine_matrix(0, 1), object->affine_matrix(1, 1), object->affine_matrix(2, 1),
-  //   object->affine_matrix(0, 2), object->affine_matrix(1, 2), object->affine_matrix(2, 2));
-
-  // double r, p, y;
-  // rotation_matrix.getRPY(r, p, y);
   tf2::Quaternion quaternion_;
-  //test
+
   std::vector<double> rpy = getPlanarRPY(
     gripper->grasping_direction,
     gripper->grasping_normal_direction);
   quaternion_.setRPY(0, 0, rpy[2]);
-
-  //test_end
-  // quaternion_.setRPY(0, 0, y);
 
   result_pose.pose.orientation.x = quaternion_.x();
   result_pose.pose.orientation.y = quaternion_.y();
@@ -1371,8 +1407,8 @@ void FingerGripper::visualizeGrasps(
     0);
 
   viewer->addPointCloud<pcl::PointXYZRGB>(object->cloud, rgb2, "cloud_" + object->object_name);
-  for (auto const & multigripper : this->sorted_gripper_configs) {
 
+  for (auto const & multigripper : this->sorted_gripper_configs) {
     //Testing
     pcl::PointXYZ grasp_direction;
     grasp_direction.x = multigripper->grasping_direction(0) + multigripper->gripper_palm_center.x;
@@ -1430,12 +1466,26 @@ void FingerGripper::visualizeGrasps(
       viewer->addSphere(os_point_2, 0.01, 0, 1.0, 0, "finger_point_os_2" + std::to_string(os_2));
     }
 
-    viewer->addCoordinateSystem(0.5);
+    viewer->addCoordinateSystem(0.1);
     viewer->addCube(
       object->bboxTransform, object->bboxQuaternion,
       object->maxPoint.x - object->minPoint.x,
       object->maxPoint.y - object->minPoint.y,
       object->maxPoint.z - object->minPoint.z, "bbox_" + object->object_name);
+
+
+    for (size_t i = 0; i < this->grasp_samples.size(); i++) {
+      viewer->addSphere(
+        this->grasp_samples[i]->grasp_plane_ncloud->points[
+          this->grasp_samples[i]->sample_side_1->start_index],
+        0.01, 1.0, 0, 1.0, "sample_side_1 " + std::to_string(i));
+
+      viewer->addSphere(
+        this->grasp_samples[i]->grasp_plane_ncloud->points[
+          this->grasp_samples[i]->sample_side_2->start_index],
+        0.01, 1.0, 0, 1.0, "sample_side_2 " + std::to_string(i));
+    }
+
     viewer->spin();
     viewer->close();
     viewer->removeAllShapes();
@@ -1537,24 +1587,29 @@ Eigen::Vector3f FingerGripper::getGripperPlane(
   const Eigen::Vector3f & grasp_direction,
   const std::shared_ptr<GraspObject> & object)
 {
-  pcl::PointXYZ parallel_object_vector = pcl::PointXYZ(
-    object->eigenvectors.col(0)(0) - object->centerpoint(0),
-    object->eigenvectors.col(0)(1) - object->centerpoint(1), object->eigenvectors.col(0)(
-      2) - object->centerpoint(2));
+  Eigen::Vector3f centerpoint(
+    object->centerpoint(0),
+    object->centerpoint(1),
+    object->centerpoint(2));
 
-  Eigen::Vector3f point_on_plane;
-  point_on_plane(0) = (finger_sample_1->finger_point.x + finger_sample_2->finger_point.x) / 2;
-  point_on_plane(1) = (finger_sample_1->finger_point.y + finger_sample_2->finger_point.y) / 2;
-  point_on_plane(2) = (finger_sample_1->finger_point.z + finger_sample_2->finger_point.z) / 2;
+  Eigen::Vector3f gradient_vector = object->minor_axis - centerpoint;
+
+  pcl::PointXYZ parallel_object_vector;
+  parallel_object_vector.x = gradient_vector(0);
+  parallel_object_vector.y = gradient_vector(1);
+  parallel_object_vector.z = gradient_vector(2);
+
   pcl::ModelCoefficients::Ptr parallel_object_plane(new pcl::ModelCoefficients);
   parallel_object_plane->values.resize(4);
-  parallel_object_plane->values[0] = parallel_object_vector.x;
-  parallel_object_plane->values[1] = parallel_object_vector.y;
-  parallel_object_plane->values[2] = parallel_object_vector.z;
-  parallel_object_plane->values[3] = -((parallel_object_vector.x * point_on_plane(0)) +
-    (parallel_object_vector.y * point_on_plane(1)) +
-    (parallel_object_vector.z * point_on_plane(2)));
+  parallel_object_plane->values[0] = gradient_vector(0);
+  parallel_object_plane->values[1] = gradient_vector(1);
+  parallel_object_plane->values[2] = gradient_vector(2);
+  parallel_object_plane->values[3] =
+    -((gradient_vector(0) * centerpoint(0)) +
+    (gradient_vector(1) * centerpoint(1)) +
+    (gradient_vector(2) * centerpoint(2)));
   Eigen::Vector3f perpendicular_grasp_direction = getPerpendicularVectorInPlane(
     grasp_direction, parallel_object_plane);
+
   return perpendicular_grasp_direction;
 }
