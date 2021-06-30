@@ -410,15 +410,15 @@ template<typename T>
 void grasp_planner::GraspScene<T>::createWorldCollision(
   const typename T::ConstSharedPtr & msg)
 {
-  // auto ppx = camera_info.k.at(2);
-  // auto fx = camera_info.k.at(0);
-  // auto ppy = camera_info.k.at(5);
-  // auto fy = camera_info.k.at(4);
+  auto ppx = msg->ppx;
+  auto fx = msg->fx;
+  auto ppy = msg->ppy;
+  auto fy = msg->fy;
 
-  float ppx = 323.3077697753906;
-  float fx = 610.3740844726562;
-  float ppy = 235.43516540527344;
-  float fy = 609.8685913085938;
+  // float ppx = 323.3077697753906;
+  // float fx = 610.3740844726562;
+  // float ppy = 235.43516540527344;
+  // float fy = 609.8685913085938;
   cv_bridge::CvImagePtr cv_ptr;
   cv_ptr = cv_bridge::toCvCopy(msg->depth_image, sensor_msgs::image_encodings::TYPE_16UC1);
   cv::Mat depth_img = cv_ptr->image;
@@ -524,7 +524,7 @@ template<>
 void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
   const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
 {
-  RCLCPP_INFO(LOGGER, "Perception input received!");
+  RCLCPP_INFO(LOGGER, "Perception input received! Direct planning workflow chosen");
   processPointCloud(msg);
   createWorldCollision(msg);
   extractObjects(msg);
@@ -541,7 +541,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
 template<typename T>
 void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPtr & msg)
 {
-  RCLCPP_INFO(LOGGER, "Perception input received!");
+  RCLCPP_INFO(LOGGER, "Perception input received! EPD workflow chosen");
   createWorldCollision(msg);
   extractObjects(msg);
   // loadEndEffectors();
@@ -549,6 +549,7 @@ void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPt
   sendToExecution(grasp_task);
   RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
 }
+  /*! \brief First we find the normal of the cutting plane */
 
 /******************************************************************************************//**
  * Method to set up all communication methods with perception system for EPD Tracking input
