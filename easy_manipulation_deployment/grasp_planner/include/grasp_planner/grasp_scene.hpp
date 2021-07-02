@@ -103,6 +103,9 @@ public:
   /*! \brief Method to make a request to the Grasp Execution Service */
   void sendToExecution(const emd_msgs::msg::GraspTask & grasp_task);
 
+  /*! \brief Grasp object pose rectification due to Point Cloud limitations */
+  void objectPoseRectification(emd_msgs::msg::GraspTask & grasp_task);
+
   /*! \brief Method to print PoseStamped variables */
   void printPose(const geometry_msgs::msg::PoseStamped & _pose);
 

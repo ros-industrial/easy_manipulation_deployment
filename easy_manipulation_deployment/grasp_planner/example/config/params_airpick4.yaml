@@ -1,6 +1,7 @@
 grasp_planning_node:
   ros__parameters:
     grasp_output_service: "grasp_requests"
+    table_to_camera_height: 0.65
     easy_perception_deployment:
       epd_enabled: false
       tracking_enabled: true

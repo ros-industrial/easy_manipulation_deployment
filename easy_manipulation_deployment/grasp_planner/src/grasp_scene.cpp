@@ -116,6 +116,9 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
         std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
       " [ms] ");
   }
+
+  objectPoseRectification(grasp_task);
+
   return grasp_task;
 }
 
@@ -634,6 +637,19 @@ void grasp_planner::GraspScene<T>::getCameraPosition()
     std::cout << "Camera in top view\n";
   } else {
     std::cout << "Camera in side view\n";
+  }
+}
+
+template<typename T>
+void grasp_planner::GraspScene<T>::objectPoseRectification(
+  emd_msgs::msg::GraspTask & grasp_task)
+{
+  for (auto & grasp_target : grasp_task.grasp_targets) {
+    grasp_target.target_shape.dimensions[0] =
+      std::abs(
+      grasp_target.target_pose.pose.position.z -
+      static_cast<float>(node->get_parameter("table_to_camera_height").as_double()));
+    grasp_target.target_pose.pose.position.z += grasp_target.target_shape.dimensions[0] / 2;
   }
 }
 
