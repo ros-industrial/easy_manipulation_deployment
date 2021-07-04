@@ -41,6 +41,7 @@
 #include <epd_msgs/msg/epd_object_localization.hpp>
 #include <epd_msgs/msg/epd_object_tracking.hpp>
 #include <epd_msgs/msg/localized_object.hpp>
+#include "epd_msgs/srv/perception.hpp"
 #include <emd_msgs/srv/grasp_request.hpp>
 
 
@@ -102,6 +103,9 @@ public:
 
   /*! \brief Method to make a request to the Grasp Execution Service */
   void sendToExecution(const emd_msgs::msg::GraspTask & grasp_task);
+
+  /*! \brief Method to request service to trigger epd pipeline */
+  void triggerEPDPipeline();
 
   /*! \brief Grasp object pose rectification due to Point Cloud limitations */
   void objectPoseRectification(emd_msgs::msg::GraspTask & grasp_task);
@@ -171,8 +175,12 @@ public:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener;
   /*! \brief Client that provides the GraspRequest information for the Grasp execution component */
   rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedPtr output_client;
+  /*! \brief Client that triggers the EPD workflow */
+  rclcpp::Client<epd_msgs::srv::Perception>::SharedPtr epd_client;
   /*! \brief Futures for GraspRequest request */
   std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
+  /*! \brief Futures for EPD service request */
+  std::shared_future<rclcpp::Client<epd_msgs::srv::Perception>::SharedResponse> epd_result_future;
   /*! \brief Vector of objects in the scene to be picked */
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
   /*! \brief Vector of End effectors available */

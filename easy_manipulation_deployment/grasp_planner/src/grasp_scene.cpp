@@ -410,15 +410,15 @@ template<typename T>
 void grasp_planner::GraspScene<T>::createWorldCollision(
   const typename T::ConstSharedPtr & msg)
 {
-  auto ppx = msg->ppx;
-  auto fx = msg->fx;
-  auto ppy = msg->ppy;
-  auto fy = msg->fy;
+  // auto ppx = camera_info.k.at(2);
+  // auto fx = camera_info.k.at(0);
+  // auto ppy = camera_info.k.at(5);
+  // auto fy = camera_info.k.at(4);
 
-  // float ppx = 323.3077697753906;
-  // float fx = 610.3740844726562;
-  // float ppy = 235.43516540527344;
-  // float fy = 609.8685913085938;
+  float ppx = 323.3077697753906;
+  float fx = 610.3740844726562;
+  float ppy = 235.43516540527344;
+  float fy = 609.8685913085938;
   cv_bridge::CvImagePtr cv_ptr;
   cv_ptr = cv_bridge::toCvCopy(msg->depth_image, sensor_msgs::image_encodings::TYPE_16UC1);
   cv::Mat depth_img = cv_ptr->image;
@@ -524,7 +524,7 @@ template<>
 void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
   const sensor_msgs::msg::PointCloud2::ConstSharedPtr & msg)
 {
-  RCLCPP_INFO(LOGGER, "Perception input received! Direct planning workflow chosen");
+  RCLCPP_INFO(LOGGER, "Perception input received!");
   processPointCloud(msg);
   createWorldCollision(msg);
   extractObjects(msg);
@@ -541,18 +541,48 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
 template<typename T>
 void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPtr & msg)
 {
-  RCLCPP_INFO(LOGGER, "Perception input received! EPD workflow chosen");
+  RCLCPP_INFO(LOGGER, "Perception input received!");
   createWorldCollision(msg);
   extractObjects(msg);
   // loadEndEffectors();
   emd_msgs::msg::GraspTask grasp_task = generateGraspTask();
   sendToExecution(grasp_task);
   RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
+  triggerEPDPipeline();
 }
-  /*! \brief First we find the normal of the cutting plane */
 
 /******************************************************************************************//**
- * Method to set up all communication methods with perception system for EPD Tracking input
+ * Method to set up all communication methods with perception system for Direct Input
+ *********************************************************************************************/
+template<>
+void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::setup(std::string topic_name)
+{
+  this->output_client =
+    this->node->create_client<emd_msgs::srv::GraspRequest>(
+    this->node->get_parameter("grasp_output_service").as_string());
+
+  RCLCPP_INFO(LOGGER, "Listening to: " + topic_name + "...");
+  this->perception_sub = std::make_shared<
+    message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
+    node, topic_name);
+
+  this->tf_perception_sub = 
+    std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>>(
+      *buffer_, "base_link", 5,
+      node->get_node_logging_interface(),
+      node->get_node_clock_interface(),
+      std::chrono::seconds(1));
+
+  this->tf_perception_sub->connectInput(*perception_sub);
+
+  this->tf_perception_sub->registerCallback(
+    &grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning, this);
+
+  RCLCPP_INFO(LOGGER, "waiting....");
+}
+
+/******************************************************************************************//**
+ * Method to set up all communication methods with perception system for EPD-EMD input
  *********************************************************************************************/
 template<typename T>
 void grasp_planner::GraspScene<T>::setup(std::string topic_name)
@@ -560,6 +590,11 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
   this->output_client =
     this->node->create_client<emd_msgs::srv::GraspRequest>(
     this->node->get_parameter("grasp_output_service").as_string());
+
+  this->epd_client = 
+    this->node->create_client<epd_msgs::srv::Perception>(
+      "epd_perception_service");
+    //this->node->get_parameter("epd_service").as_string());
 
   RCLCPP_INFO(LOGGER, "Listening to: " + topic_name + "...");
   this->perception_sub = std::make_shared<
@@ -576,8 +611,32 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
 
   this->tf_perception_sub->registerCallback(
     &grasp_planner::GraspScene<T>::startPlanning, this);
+  
+  //First trigger to start EPD
+  triggerEPDPipeline();
 
   RCLCPP_INFO(LOGGER, "waiting....");
+}
+
+template<typename T>
+void grasp_planner::GraspScene<T>::triggerEPDPipeline()
+{
+  RCLCPP_INFO(LOGGER, "Sending trigger to EPD pipeline");
+  auto req = std::make_shared<epd_msgs::srv::Perception::Request>();
+  if (!this->epd_result_future.valid()) {
+    RCLCPP_INFO(LOGGER, "Client Not started");
+    this->epd_result_future = epd_client->async_send_request(req);
+  } else if (this->epd_result_future.wait_for(std::chrono::nanoseconds(0)) ==
+    std::future_status::timeout)
+  {
+    RCLCPP_INFO(LOGGER, "Grasp Execution still Ongoing");
+  } else {
+    auto result = this->epd_result_future.get();
+    RCLCPP_INFO(
+      LOGGER, "EPD Pipeline triggering complete. STATUS: %s!!",
+      (result->success) ? "SUCCESS" : "FAILURE");
+    this->epd_result_future = epd_client->async_send_request(req);
+  }
 }
 
 // LCOV_EXCL_START
