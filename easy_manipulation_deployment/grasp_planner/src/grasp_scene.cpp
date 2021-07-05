@@ -566,12 +566,12 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::setup(std::string
     message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
     node, topic_name);
 
-  this->tf_perception_sub = 
+  this->tf_perception_sub =
     std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>>(
-      *buffer_, "base_link", 5,
-      node->get_node_logging_interface(),
-      node->get_node_clock_interface(),
-      std::chrono::seconds(1));
+    *buffer_, "base_link", 5,
+    node->get_node_logging_interface(),
+    node->get_node_clock_interface(),
+    std::chrono::seconds(1));
 
   this->tf_perception_sub->connectInput(*perception_sub);
 
@@ -591,10 +591,10 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
     this->node->create_client<emd_msgs::srv::GraspRequest>(
     this->node->get_parameter("grasp_output_service").as_string());
 
-  this->epd_client = 
+  this->epd_client =
     this->node->create_client<epd_msgs::srv::Perception>(
-      "epd_perception_service");
-    //this->node->get_parameter("epd_service").as_string());
+    "epd_perception_service");
+  //this->node->get_parameter("epd_service").as_string());
 
   RCLCPP_INFO(LOGGER, "Listening to: " + topic_name + "...");
   this->perception_sub = std::make_shared<
@@ -611,7 +611,7 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
 
   this->tf_perception_sub->registerCallback(
     &grasp_planner::GraspScene<T>::startPlanning, this);
-  
+
   //First trigger to start EPD
   triggerEPDPipeline();
 
@@ -621,22 +621,45 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
 template<typename T>
 void grasp_planner::GraspScene<T>::triggerEPDPipeline()
 {
-  RCLCPP_INFO(LOGGER, "Sending trigger to EPD pipeline");
+  while (!epd_client->wait_for_service(std::chrono::seconds(1))) {
+    RCLCPP_INFO(LOGGER, "Waiting for EPD Service");
+  }
+  RCLCPP_INFO(LOGGER, "EPD Service found. Sending trigger to EPD pipeline");
   auto req = std::make_shared<epd_msgs::srv::Perception::Request>();
+  req->ready = true;
   if (!this->epd_result_future.valid()) {
     RCLCPP_INFO(LOGGER, "Client Not started");
     this->epd_result_future = epd_client->async_send_request(req);
   } else if (this->epd_result_future.wait_for(std::chrono::nanoseconds(0)) ==
     std::future_status::timeout)
   {
-    RCLCPP_INFO(LOGGER, "Grasp Execution still Ongoing");
-  } else {
-    auto result = this->epd_result_future.get();
-    RCLCPP_INFO(
-      LOGGER, "EPD Pipeline triggering complete. STATUS: %s!!",
-      (result->success) ? "SUCCESS" : "FAILURE");
-    this->epd_result_future = epd_client->async_send_request(req);
+    RCLCPP_INFO(LOGGER, "EPD PIpeline already Ongoing");
   }
+
+  // else {
+  //   auto result = this->epd_result_future.get();
+  //   RCLCPP_INFO(
+  //     LOGGER, "EPD Pipeline triggering complete. SATUS: %s!!",
+  //     (result->success) ? "SUCCESS" : "FAILURE");T
+  //   this->epd_result_future = epd_client->async_send_request(req);
+  // }
+
+  if (rclcpp::spin_until_future_complete(node, epd_result_future) ==
+    rclcpp::executor::FutureReturnCode::SUCCESS)
+  {
+    auto result = this->epd_result_future.get();
+    if (result->success) {
+      RCLCPP_INFO(
+        LOGGER, "EPD Pipeline triggering complete. STATUS: %s!",
+        (result->success) ? "SUCCESS" : "FAILURE");
+    } else {
+      RCLCPP_ERROR(LOGGER, "EPD has been tasked to trigger but pipeline failed");
+    }
+  } else {
+    RCLCPP_ERROR(LOGGER, "Failed to Trigger EPD Service");
+  }
+
+
 }
 
 // LCOV_EXCL_START
