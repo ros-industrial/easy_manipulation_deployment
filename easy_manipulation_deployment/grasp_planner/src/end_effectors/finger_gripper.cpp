@@ -1161,20 +1161,26 @@ std::vector<std::shared_ptr<multiFingerGripper>> FingerGripper::getAllRanks(
 {
   std::vector<std::shared_ptr<multiFingerGripper>> sorted_gripper_ranks;
   for (auto gripper : input_vector) {
+    emd_msgs::msg::OptionArray grasp_option;
+    grasp_option.options.push_back(addClosedGraspDistanceOption(gripper));
     getGripperRank(gripper);
     std::vector<geometry_msgs::msg::PoseStamped>::iterator grasps_it;
     std::vector<std::shared_ptr<multiFingerGripper>>::iterator contacts_it;
     std::vector<visualization_msgs::msg::Marker>::iterator markers_it;
+    std::vector<emd_msgs::msg::OptionArray>::iterator options_it;
     size_t rank;
     for (rank = 0,
       grasps_it = grasp_method->grasp_poses.begin(), contacts_it = sorted_gripper_ranks.begin(),
-      markers_it = grasp_method->grasp_markers.begin();
-      rank < grasp_method->grasp_ranks.size(); ++rank, ++grasps_it, ++contacts_it, ++markers_it)
+      markers_it = grasp_method->grasp_markers.begin(),
+      options_it = grasp_method->grasp_options.begin();
+      rank < grasp_method->grasp_ranks.size();
+      ++rank, ++grasps_it, ++contacts_it, ++markers_it, ++options_it)
     {
       if (gripper->rank > grasp_method->grasp_ranks[rank]) {
         grasp_method->grasp_ranks.insert(grasp_method->grasp_ranks.begin() + rank, gripper->rank);
         grasp_method->grasp_poses.insert(grasps_it, gripper->pose);
         grasp_method->grasp_markers.insert(markers_it, gripper->marker);
+        grasp_method->grasp_options.insert(options_it, grasp_option);
         sorted_gripper_ranks.insert(contacts_it, gripper);
         break;
       }
@@ -1612,4 +1618,18 @@ Eigen::Vector3f FingerGripper::getGripperPlane(
     grasp_direction, parallel_object_plane);
 
   return perpendicular_grasp_direction;
+}
+
+/***************************************************************************//**
+ * Method that generates the grasp option for closed finger distance for
+ * finger grippers
+ * @param gripper Finger gripper sample
+ ******************************************************************************/
+emd_msgs::msg::Option FingerGripper::addClosedGraspDistanceOption(
+  std::shared_ptr<multiFingerGripper> gripper)
+{
+  emd_msgs::msg::Option closed_grasp_option;
+  closed_grasp_option.header = "closed finger distance";
+  closed_grasp_option.value = gripper->closed_finger_stroke;
+  return closed_grasp_option;
 }
