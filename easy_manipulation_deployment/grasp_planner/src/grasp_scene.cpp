@@ -634,30 +634,28 @@ void grasp_planner::GraspScene<T>::triggerEPDPipeline()
     std::future_status::timeout)
   {
     RCLCPP_INFO(LOGGER, "EPD PIpeline already Ongoing");
-  }
-
-  // else {
-  //   auto result = this->epd_result_future.get();
-  //   RCLCPP_INFO(
-  //     LOGGER, "EPD Pipeline triggering complete. SATUS: %s!!",
-  //     (result->success) ? "SUCCESS" : "FAILURE");T
-  //   this->epd_result_future = epd_client->async_send_request(req);
-  // }
-
-  if (rclcpp::spin_until_future_complete(node, epd_result_future) ==
-    rclcpp::executor::FutureReturnCode::SUCCESS)
-  {
-    auto result = this->epd_result_future.get();
-    if (result->success) {
-      RCLCPP_INFO(
-        LOGGER, "EPD Pipeline triggering complete. STATUS: %s!",
-        (result->success) ? "SUCCESS" : "FAILURE");
-    } else {
-      RCLCPP_ERROR(LOGGER, "EPD has been tasked to trigger but pipeline failed");
-    }
   } else {
-    RCLCPP_ERROR(LOGGER, "Failed to Trigger EPD Service");
+    auto result = this->epd_result_future.get();
+    RCLCPP_INFO(
+      LOGGER, "EPD Pipeline triggering complete. SATUS: %s!!",
+      (result->success) ? "SUCCESS" : "FAILURE");T
+    this->epd_result_future = epd_client->async_send_request(req);
   }
+
+  // if (rclcpp::spin_until_future_complete(node, epd_result_future) ==
+  //   rclcpp::executor::FutureReturnCode::SUCCESS)
+  // {
+  //   auto result = this->epd_result_future.get();
+  //   if (result->success) {
+  //     RCLCPP_INFO(
+  //       LOGGER, "EPD Pipeline triggering complete. STATUS: %s!",
+  //       (result->success) ? "SUCCESS" : "FAILURE");
+  //   } else {
+  //     RCLCPP_ERROR(LOGGER, "EPD has been tasked to trigger but pipeline failed");
+  //   }
+  // } else {
+  //   RCLCPP_ERROR(LOGGER, "Failed to Trigger EPD Service");
+  // }
 
 
 }
