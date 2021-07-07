@@ -6,6 +6,7 @@ grasp_planning_node:
       epd_enabled: false
       tracking_enabled: true
       epd_topic: "/processor/epd_localize_output"
+      epd_service: "epd_perception_service"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"
       camera_frame: "camera_color_optical_frame"

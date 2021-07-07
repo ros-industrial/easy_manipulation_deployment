@@ -3,9 +3,10 @@ grasp_planning_node:
     grasp_output_service: "grasp_requests"
     table_to_camera_height: 0.65
     easy_perception_deployment:
-      epd_enabled: false
+      epd_enabled: true
       tracking_enabled: false
       epd_topic: "/processor/epd_localize_output"
+      epd_service: "epd_perception_service"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"
       camera_frame: "camera_color_optical_frame"
