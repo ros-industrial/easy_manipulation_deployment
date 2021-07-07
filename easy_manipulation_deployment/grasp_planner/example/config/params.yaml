@@ -5,7 +5,8 @@ grasp_planning_node:
     easy_perception_deployment:
       epd_enabled: false
       tracking_enabled: false
-      epd_topic: "/processor/epd_localize_output"
+      epd_localization_topic: "/processor/epd_localize_output"
+      epd_tracking_topic: "/processor/epd_tracking_output"
       epd_service: "epd_perception_service"
     camera_parameters:
       point_cloud_topic: "/camera/pointcloud"

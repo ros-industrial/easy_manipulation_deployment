@@ -620,7 +620,7 @@ void grasp_planner::GraspScene<T>::setup(std::string topic_name)
 
 template<typename T>
 void grasp_planner::GraspScene<T>::triggerEPDPipeline()
-{    
+{
   RCLCPP_INFO(LOGGER, "Waiting for EPD Service");
   while (!epd_client->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
