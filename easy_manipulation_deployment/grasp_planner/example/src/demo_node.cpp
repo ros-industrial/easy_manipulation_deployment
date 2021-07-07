@@ -27,26 +27,31 @@ int main(int argc, char * argv[])
 
   rclcpp::Node::SharedPtr node =
     rclcpp::Node::make_shared("grasp_planner_demo_node", "", node_options);
-
-  if (node->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
-    RCLCPP_INFO(LOGGER_DEMO, "EPD Workflow Enabled");
-    if (node->get_parameter("easy_perception_deployment.tracking_enabled").as_bool()) {
-      RCLCPP_INFO(LOGGER_DEMO, "EPD Tracking Enabled");
-      grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking> demo(node);
-      demo.setup(node->get_parameter("easy_perception_deployment.epd_topic").as_string());
-      rclcpp::spin(demo.node);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  
+  while(rclcpp::ok()){
+    if (node->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
+      RCLCPP_INFO(LOGGER_DEMO, "EPD Workflow Enabled");
+      if (node->get_parameter("easy_perception_deployment.tracking_enabled").as_bool()) {
+        RCLCPP_INFO(LOGGER_DEMO, "EPD Tracking Enabled");
+        grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking> demo(node);
+        demo.setup(node->get_parameter("easy_perception_deployment.epd_topic").as_string());
+        executor.add_node(demo.node);
+      } else {
+        RCLCPP_INFO(LOGGER_DEMO, "EPD Localization Enabled");
+        grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization> demo(node);
+        demo.setup(node->get_parameter("easy_perception_deployment.epd_topic").as_string());
+        executor.add_node(demo.node);
+      }
     } else {
-      RCLCPP_INFO(LOGGER_DEMO, "EPD Localization Enabled");
-      grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization> demo(node);
-      demo.setup(node->get_parameter("easy_perception_deployment.epd_topic").as_string());
-      rclcpp::spin(demo.node);
+      RCLCPP_INFO(LOGGER_DEMO, "Direct Workflow Enabled");
+      grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2> demo(node);
+      demo.setup(node->get_parameter("camera_parameters.point_cloud_topic").as_string());
+      executor.add_node(demo.node);
     }
-  } else {
-    RCLCPP_INFO(LOGGER_DEMO, "Direct Workflow Enabled");
-    grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2> demo(node);
-    demo.setup(node->get_parameter("camera_parameters.point_cloud_topic").as_string());
-    rclcpp::spin(demo.node);
+    executor.spin();
   }
+  
 
   // rclcpp::executors::MultiThreadedExecutor executor;
   // executor.add_node(node);
