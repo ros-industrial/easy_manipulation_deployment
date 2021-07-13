@@ -98,7 +98,6 @@ if(epd_msgs_FOUND)
     PUBLIC
     EPD_ENABLED=1
   )
-  
 else()
   ament_target_dependencies(grasp_planning_interface
         tf2
@@ -111,13 +110,11 @@ else()
         message_filters
         cv_bridge #temp
         visualization_msgs)
-   target_compile_definitions(grasp_planning_interface
+  target_compile_definitions(grasp_planning_interface
     PUBLIC
     EPD_ENABLED=0
   )
 endif()
-
-
 
 target_link_libraries(grasp_planning_interface
   ${FCL_LIBRARIES}
