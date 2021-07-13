@@ -33,7 +33,7 @@ find_package(tf2_ros REQUIRED)
 find_package(octomap REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(emd_msgs REQUIRED)
-find_package(epd_msgs REQUIRED)
+find_package(epd_msgs QUIET)
 find_package(geometry_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
@@ -81,7 +81,8 @@ get_target_property(target_options grasp_planning_interface COMPILE_OPTIONS)
 list(REMOVE_ITEM target_options "-Wpedantic")
 set_property(TARGET grasp_planning_interface PROPERTY COMPILE_OPTIONS ${target_options})
 
-ament_target_dependencies(grasp_planning_interface
+if(epd_msgs_FOUND)
+  ament_target_dependencies(grasp_planning_interface
         tf2
         rclcpp
         emd_msgs
@@ -92,8 +93,31 @@ ament_target_dependencies(grasp_planning_interface
         tf2_ros
         message_filters
         cv_bridge #temp
-        visualization_msgs
-)
+        visualization_msgs)
+  target_compile_definitions(grasp_planning_interface
+    PUBLIC
+    EPD_ENABLED=1
+  )
+  
+else()
+  ament_target_dependencies(grasp_planning_interface
+        tf2
+        rclcpp
+        emd_msgs
+        sensor_msgs
+        geometry_msgs
+        shape_msgs
+        tf2_ros
+        message_filters
+        cv_bridge #temp
+        visualization_msgs)
+   target_compile_definitions(grasp_planning_interface
+    PUBLIC
+    EPD_ENABLED=0
+  )
+endif()
+
+
 
 target_link_libraries(grasp_planning_interface
   ${FCL_LIBRARIES}

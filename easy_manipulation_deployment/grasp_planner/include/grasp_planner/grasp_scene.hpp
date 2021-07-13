@@ -38,12 +38,14 @@
 // Other libraries
 #include <emd_msgs/msg/grasp_target.hpp>
 #include <emd_msgs/msg/grasp_task.hpp>
-#include <epd_msgs/msg/epd_object_localization.hpp>
-#include <epd_msgs/msg/epd_object_tracking.hpp>
-#include <epd_msgs/msg/localized_object.hpp>
-#include "epd_msgs/srv/perception.hpp"
 #include <emd_msgs/srv/grasp_request.hpp>
 
+#if EPD_ENABLED == 1
+  #include <epd_msgs/msg/epd_object_localization.hpp>
+  #include <epd_msgs/msg/epd_object_tracking.hpp>
+  #include <epd_msgs/msg/localized_object.hpp>
+  #include "epd_msgs/srv/perception.hpp"
+#endif
 
 // Temp
 #include <opencv2/opencv.hpp>
