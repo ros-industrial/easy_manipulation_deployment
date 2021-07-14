@@ -30,12 +30,6 @@ namespace core
 
 using result_t = bool;
 
-struct Worker
-{
-  std::shared_ptr<std::thread> execution_thread;
-  std::future<result_t> execution_future;
-};
-
 namespace Workflow
 {
 
@@ -74,6 +68,8 @@ public:
 
   Workflow::Status get_status(
     const std::string & workflow_id) const;
+
+  const result_t & get_result(const std::string & workflow_id) const;
 
   class Impl;
 

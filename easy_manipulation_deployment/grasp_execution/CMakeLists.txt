@@ -17,12 +17,12 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(yaml_cpp_vendor REQUIRED)
-find_package(tinyxml2_vendor REQUIRED)
 
 include_directories(
   PUBLIC
@@ -43,8 +43,8 @@ ament_target_dependencies(grasp_execution_interface
   tf2
   tf2_ros
   tf2_geometry_msgs
+  pluginlib
   yaml_cpp_vendor
-  tinyxml2_vendor
 )
 
 add_library(dynamic_safety
@@ -129,18 +129,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
-  # ament_add_gtest(test_scheduler
-  #   test/test_scheduler.cpp
-  # )
-  # target_link_libraries(test_scheduler
-  #   grasp_execution_interface
-  # )
-  # ament_target_dependencies(test_scheduler
-  #   emd_msgs
-  #   rclcpp
-  #   tf2
-  #   tf2_ros
-  # )
+  add_subdirectory(test)
 endif()
 
 # TODO(Briancbn): convert to tests instead
