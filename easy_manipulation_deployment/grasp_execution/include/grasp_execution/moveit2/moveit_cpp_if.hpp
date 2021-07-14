@@ -99,7 +99,8 @@ public:
     bool) override {}
 
   void register_target_objects(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg) override;
+    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    const std::vector<std::string> & disabled_links = {}) override;
 
   geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const override;
 

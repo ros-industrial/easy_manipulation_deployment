@@ -186,7 +186,8 @@ public:
     const std::string & planning_group) = 0;
 
   virtual void register_target_objects(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg) = 0;
+    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    const std::vector<std::string> & disabled_links = {}) = 0;
 
   virtual void order_schedule(
     const emd_msgs::msg::GraspTask::SharedPtr & msg,

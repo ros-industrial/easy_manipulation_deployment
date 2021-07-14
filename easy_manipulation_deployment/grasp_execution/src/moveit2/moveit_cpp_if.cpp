@@ -299,7 +299,8 @@ bool MoveitCppGraspExecution::init(
 
 
 void MoveitCppGraspExecution::register_target_objects(
-  const emd_msgs::msg::GraspTask::SharedPtr & msg)
+  const emd_msgs::msg::GraspTask::SharedPtr & msg,
+  const std::vector<std::string> & disabled_links)
 {
   // Add all targets into the scene
   moveit_msgs::msg::CollisionObject temp_collision_object;
@@ -346,6 +347,11 @@ void MoveitCppGraspExecution::register_target_objects(
     {    // Lock PlanningScene
       planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
       result = scene->processCollisionObjectMsg(temp_collision_object);
+
+      if (!disabled_links.empty()) {
+        auto & acm = scene->getAllowedCollisionMatrixNonConst();
+        acm.setEntry(target_id, disabled_links, true);
+      }
     }    // Unlock PlanningScene
 
     prompt_job_end(LOGGER, result);
@@ -896,6 +902,11 @@ void MoveitCppGraspExecution::remove_object(
   {    // Lock PlanningScene
     planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
     scene->processCollisionObjectMsg(object);
+
+    auto & acm = scene->getAllowedCollisionMatrixNonConst();
+    if (acm.hasEntry(target_id)) {
+      acm.removeEntry(target_id);
+    }
   }    // Unlock PlanningScene
 }
 
