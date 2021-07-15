@@ -33,6 +33,7 @@ class DynamicSafetyAsyncExecutor : public grasp_execution::moveit2::Executor
 public:
   DynamicSafetyAsyncExecutor()
   : Executor(),
+    is_configured_(false),
     logger_(rclcpp::get_logger("dynamic_safety_async_executor"))
   {
   }
@@ -58,17 +59,27 @@ public:
     return true;
   }
 
-  bool run(
+  void configure(
     const robot_trajectory::RobotTrajectory & robot_trajectory) override
   {
     safety_officer_->configure(
       main_context_->getPlanningSceneMonitor()->getPlanningScene(),
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_trajectory),
       main_context_->getNode());
+    is_configured_ = true;
+  }
 
+  bool run(
+    const robot_trajectory::RobotTrajectory & robot_trajectory) override
+  {
+    if (!is_configured_) {
+      configure(robot_trajectory);
+    }
     safety_officer_->start();
 
     safety_officer_->wait();
+
+    is_configured_ = false;
 
     return true;
   }
@@ -79,6 +90,8 @@ private:
   moveit::planning_interface::MoveItCppPtr main_context_;
 
   grasp_execution::dynamic_safety::DynamicSafety::UniquePtr safety_officer_;
+
+  bool is_configured_;
 };
 
 }  // namespace moveit2

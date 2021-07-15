@@ -42,6 +42,9 @@ public:
 
   ~Executor() {}
 
+  virtual void configure(
+    const robot_trajectory::RobotTrajectory &) {}
+
   virtual bool run(
     const robot_trajectory::RobotTrajectory &) = 0;
 
