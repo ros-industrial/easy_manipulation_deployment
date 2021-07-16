@@ -35,7 +35,7 @@ public:
   ~DefaultExecutor() {}
 
   bool load(
-    const moveit::planning_interface::MoveItCppPtr & moveit_cpp,
+    const moveit_cpp::MoveItCppPtr & moveit_cpp,
     const std::string & /*name*/) override;
 
   bool run(

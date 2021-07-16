@@ -43,7 +43,7 @@ namespace moveit2
 
 struct JmgContext
 {
-  moveit::planning_interface::PlanningComponentPtr planner;
+  moveit_cpp::PlanningComponentPtr planner;
   std::deque<robot_trajectory::RobotTrajectoryPtr> traj;
   std::unordered_map<std::string, Executor::UniquePtr> executors;
   std::unordered_map<std::string, gripper::GripperDriver::UniquePtr> grippers;
@@ -203,14 +203,13 @@ protected:
     const robot_trajectory::RobotTrajectoryPtr & traj,
     std::ostream & _out = std::cout);
 
-  moveit::planning_interface::MoveItCppPtr moveit_cpp_;
+  moveit_cpp::MoveItCppPtr moveit_cpp_;
   std::unordered_map<std::string, moveit2::JmgContext> arms_;
   moveit2::Executor::UniquePtr default_executor_;
 
   std::shared_ptr<pluginlib::ClassLoader<
       grasp_execution::moveit2::Executor>> executor_loader_;
 };
-
 }  // namespace moveit2
 
 }  // namespace grasp_execution

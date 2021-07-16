@@ -56,7 +56,7 @@ MoveitCppGraspExecution::MoveitCppGraspExecution(
   size_t execution_concurrency)
 : GraspExecutionInterface(
     node, grasp_task_topic, grasp_req_topic, planning_concurrency, execution_concurrency),
-  moveit_cpp_(std::make_shared<moveit::planning_interface::MoveItCpp>(node_))
+  moveit_cpp_(std::make_shared<moveit_cpp::MoveItCpp>(node_))
 {
   // let RViz display query PlanningScene
   moveit_cpp_->getPlanningSceneMonitor()->providePlanningSceneService();
@@ -149,7 +149,7 @@ bool MoveitCppGraspExecution::init(const std::string & planning_group)
 
       // Initialize planner
       arms_[planning_group].planner =
-        std::make_shared<moveit::planning_interface::PlanningComponent>(
+        std::make_shared<moveit_cpp::PlanningComponent>(
         planning_group, moveit_cpp_);
 
       // Initialize gripper
@@ -458,7 +458,7 @@ bool MoveitCppGraspExecution::move_to(
 
 
     // Hardset to try 5 times
-    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
     int count = 0, max_tries = 5;
 
     while (!plan_solution && count < max_tries) {
@@ -496,7 +496,7 @@ bool MoveitCppGraspExecution::move_to(
     }
 
     // Hardset to try 5 times
-    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
     int count = 0, max_tries = 5;
 
     while (!plan_solution && count < max_tries) {
@@ -543,7 +543,7 @@ bool MoveitCppGraspExecution::move_to(
   }
 
   // Hardset to try 5 times
-  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  moveit_cpp::PlanningComponent::PlanSolution plan_solution;
   int count = 0, max_tries = 1;
 
   while (!plan_solution && count < max_tries) {
@@ -583,7 +583,7 @@ bool MoveitCppGraspExecution::move_to(
   }
 
   // Hardset to try 5 times
-  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  moveit_cpp::PlanningComponent::PlanSolution plan_solution;
   int count = 0, max_tries = 5;
 
   while (!plan_solution && count < max_tries) {

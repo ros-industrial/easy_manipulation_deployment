@@ -41,7 +41,7 @@ public:
   ~DynamicSafetyAsyncExecutor() {}
 
   bool load(
-    const moveit::planning_interface::MoveItCppPtr & moveit_cpp,
+    const moveit_cpp::MoveItCppPtr & moveit_cpp,
     const std::string & name) override
   {
     this->main_context_ = moveit_cpp;
@@ -87,7 +87,7 @@ public:
 private:
   const rclcpp::Logger logger_;
 
-  moveit::planning_interface::MoveItCppPtr main_context_;
+  moveit_cpp::MoveItCppPtr main_context_;
 
   grasp_execution::dynamic_safety::DynamicSafety::UniquePtr safety_officer_;
 
