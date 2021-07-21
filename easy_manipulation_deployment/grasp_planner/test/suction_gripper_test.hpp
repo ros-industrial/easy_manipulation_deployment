@@ -30,10 +30,10 @@
 #include <vector>
 #include <limits>
 
-#include "grasp_planner/end_effectors/suction_gripper.hpp"
-#include "grasp_planner/common/pcl_functions.hpp"
-#include "grasp_planner/common/fcl_types.hpp"
-#include "grasp_planner/grasp_object.hpp"
+#include "emd/grasp_planner/end_effectors/suction_gripper.hpp"
+#include "emd/grasp_planner/grasp_object.hpp"
+#include "emd/common/pcl_functions.hpp"
+#include "emd/common/fcl_types.hpp"
 
 class SuctionGripperTest : public ::testing::Test
 {

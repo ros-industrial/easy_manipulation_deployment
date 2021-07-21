@@ -14,8 +14,8 @@
 
 #include <string>
 
-#include "grasp_execution/context.hpp"
-#include "grasp_execution/exception.hpp"
+#include "emd/grasp_execution/context.hpp"
+#include "emd/grasp_execution/exception.hpp"
 
 namespace grasp_execution
 {

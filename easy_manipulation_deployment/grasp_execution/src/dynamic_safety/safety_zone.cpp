@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "grasp_execution/dynamic_safety/safety_zone.hpp"
+#include "emd/grasp_execution/dynamic_safety/safety_zone.hpp"
 
 namespace grasp_execution
 {

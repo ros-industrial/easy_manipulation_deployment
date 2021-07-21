@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "grasp_planner/common/fcl_functions.hpp"
+#include "emd/common/fcl_functions.hpp"
 
 
 TEST(FCLFunctionTest, CollisionTestCollide)

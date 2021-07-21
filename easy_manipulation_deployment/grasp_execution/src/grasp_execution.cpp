@@ -17,9 +17,9 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/utils.hpp"
+#include "emd/grasp_execution/utils.hpp"
 
-#include "grasp_execution/grasp_execution.hpp"
+#include "emd/grasp_execution/grasp_execution.hpp"
 
 namespace grasp_execution
 {

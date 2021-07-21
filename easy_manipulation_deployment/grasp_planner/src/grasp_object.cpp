@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "grasp_planner/grasp_object.hpp"
+#include "emd/grasp_planner/grasp_object.hpp"
 
 /***************************************************************************//**
  * Grasp Object constructor if no name is provided

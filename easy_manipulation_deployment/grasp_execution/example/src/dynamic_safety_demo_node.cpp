@@ -15,7 +15,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "grasp_execution/moveit2/moveit_cpp_if.hpp"
+#include "emd/grasp_execution/moveit2/moveit_cpp_if.hpp"
 
 class DynamicSafetyDemo : public grasp_execution::moveit2::MoveitCppGraspExecution
 {

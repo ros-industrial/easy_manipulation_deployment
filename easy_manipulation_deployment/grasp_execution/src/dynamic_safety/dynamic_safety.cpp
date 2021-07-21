@@ -16,7 +16,7 @@
 #include <string>
 #include <utility>
 
-#include "grasp_execution/dynamic_safety/dynamic_safety.hpp"
+#include "emd/grasp_execution/dynamic_safety/dynamic_safety.hpp"
 
 namespace grasp_execution
 {

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "grasp_planner/common/fcl_functions.hpp"
+#include "emd/common/fcl_functions.hpp"
 
 using namespace grasp_planner::collision;
 

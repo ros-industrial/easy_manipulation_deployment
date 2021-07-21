@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/dynamic_safety/collision_checker.hpp"
+#include "emd/grasp_execution/dynamic_safety/collision_checker.hpp"
 #include "moveit/robot_state/conversions.h"
 
 namespace grasp_execution

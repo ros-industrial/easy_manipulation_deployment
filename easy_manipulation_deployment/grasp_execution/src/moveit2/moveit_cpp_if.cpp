@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/moveit2/moveit_cpp_if.hpp"
+#include "emd/grasp_execution/moveit2/moveit_cpp_if.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 

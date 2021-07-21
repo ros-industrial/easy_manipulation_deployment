@@ -15,7 +15,7 @@
 
 
 // Main PCL files
-#include "grasp_planner/end_effectors/finger_gripper.hpp"
+#include "emd/grasp_planner/end_effectors/finger_gripper.hpp"
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("FingerGripper");
 
 /***************************************************************************//**

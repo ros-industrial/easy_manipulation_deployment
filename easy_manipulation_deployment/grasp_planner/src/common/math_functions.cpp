@@ -14,7 +14,7 @@
 // limitations under the License.
 // Main PCL files
 
-#include "grasp_planner/common/math_functions.hpp"
+#include "emd/common/math_functions.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::MathFunctions");

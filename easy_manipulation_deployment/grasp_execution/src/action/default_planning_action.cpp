@@ -16,7 +16,7 @@
 #include <string>
 #include <utility>
 
-#include "grasp_execution/grasp_execution.hpp"
+#include "emd/grasp_execution/grasp_execution.hpp"
 
 namespace grasp_execution
 {

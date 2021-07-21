@@ -15,7 +15,7 @@
 #include <memory>
 #include <utility>
 
-#include "grasp_execution/dynamic_safety/replanner.hpp"
+#include "emd/grasp_execution/dynamic_safety/replanner.hpp"
 
 namespace grasp_execution
 {

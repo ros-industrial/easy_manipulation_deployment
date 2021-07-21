@@ -14,7 +14,7 @@
 // limitations under the License.
 // Main PCL files
 
-#include "grasp_planner/common/pcl_functions.hpp"
+#include "emd/common/pcl_functions.hpp"
 
 bool PCLFunctions::passthroughFilter(
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
