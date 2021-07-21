@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#include "grasp_execution/dynamic_safety/visualizer.hpp"
+#include "emd/grasp_execution/dynamic_safety/visualizer.hpp"
 
 namespace grasp_execution
 {

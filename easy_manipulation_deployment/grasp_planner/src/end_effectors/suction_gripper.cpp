@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "grasp_planner/end_effectors/suction_gripper.hpp"
+#include "emd/grasp_planner/end_effectors/suction_gripper.hpp"
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("EMD::SuctionGripper");
 #define PI 3.14159265
 

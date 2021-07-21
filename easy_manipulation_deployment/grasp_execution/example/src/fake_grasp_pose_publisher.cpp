@@ -25,7 +25,7 @@
 #include "emd_msgs/msg/grasp_task.hpp"
 #include "emd_msgs/srv/grasp_request.hpp"
 
-#include "grasp_execution/utils.hpp"
+#include "emd/grasp_execution/utils.hpp"
 
 namespace grasp_execution
 {

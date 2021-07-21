@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "grasp_execution/core/scheduler.hpp"
+#include "emd/grasp_execution/core/scheduler.hpp"
 
 namespace grasp_execution
 {

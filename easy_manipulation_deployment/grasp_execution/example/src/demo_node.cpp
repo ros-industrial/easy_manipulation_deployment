@@ -19,8 +19,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "grasp_execution/moveit2/moveit_cpp_if.hpp"
-#include "grasp_execution/utils.hpp"
+#include "emd/grasp_execution/moveit2/moveit_cpp_if.hpp"
+#include "emd/grasp_execution/utils.hpp"
 
 #include "emd_msgs/msg/grasp_task.hpp"
 #include "emd_msgs/srv/grasp_request.hpp"

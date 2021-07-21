@@ -14,7 +14,7 @@
 // limitations under the License.
 // Main PCL files
 
-#include "grasp_planner/common/pcl_visualizer.hpp"
+#include "emd/common/pcl_visualizer.hpp"
 
 
 void PCLVisualizer::centerCamera(

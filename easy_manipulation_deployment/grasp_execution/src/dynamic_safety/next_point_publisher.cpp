@@ -15,7 +15,7 @@
 #include <memory>
 #include <string>
 
-#include "grasp_execution/dynamic_safety/next_point_publisher.hpp"
+#include "emd/grasp_execution/dynamic_safety/next_point_publisher.hpp"
 
 namespace grasp_execution
 {

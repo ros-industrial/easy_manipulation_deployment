@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // Main PCL files
-#include "grasp_planner/grasp_scene.hpp"
+#include "emd/grasp_planner/grasp_scene.hpp"
 
 /***************************************************************************//**
  * Function that calls the grasp execution service after all grasp plans are

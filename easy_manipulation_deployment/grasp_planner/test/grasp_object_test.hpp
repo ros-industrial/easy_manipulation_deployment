@@ -30,7 +30,7 @@
 #include <vector>
 #include <limits>
 
-#include "grasp_planner/grasp_object.hpp"
+#include "emd/grasp_planner/grasp_object.hpp"
 
 class GraspObjectTest : public ::testing::Test
 {

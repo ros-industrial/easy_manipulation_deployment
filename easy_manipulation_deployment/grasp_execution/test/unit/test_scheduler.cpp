@@ -18,7 +18,7 @@
 #include <limits>
 
 #include "gtest/gtest.h"
-#include "grasp_execution/core/scheduler.hpp"
+#include "emd/grasp_execution/core/scheduler.hpp"
 
 namespace test_scheduler
 {

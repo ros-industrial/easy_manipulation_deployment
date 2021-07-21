@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include "rclcpp/rclcpp.hpp"
-#include "grasp_planner/grasp_scene.hpp"
+#include "emd/grasp_planner/grasp_scene.hpp"
 
 static const rclcpp::Logger & LOGGER_DEMO = rclcpp::get_logger("DemoNode");
 int main(int argc, char * argv[])

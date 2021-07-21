@@ -16,8 +16,8 @@
 #include <string>
 #include <vector>
 
-#include "grasp_execution/dynamic_safety/dynamic_safety.hpp"
-#include "grasp_execution/moveit2/executor.hpp"
+#include "emd/grasp_execution/dynamic_safety/dynamic_safety.hpp"
+#include "emd/grasp_execution/moveit2/executor.hpp"
 #include "moveit/kinematic_constraints/utils.h"
 #include "moveit/robot_state/conversions.h"
 #include "moveit/trajectory_processing/time_optimal_trajectory_generation.h"

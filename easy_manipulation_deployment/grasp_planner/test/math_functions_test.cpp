@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "grasp_planner/common/math_functions.hpp"
+#include "emd/common/math_functions.hpp"
 
 TEST(MathFunctionTest, NormalizeTest)
 {

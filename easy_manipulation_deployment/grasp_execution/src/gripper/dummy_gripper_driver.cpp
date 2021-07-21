@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "grasp_execution/gripper/dummy_gripper_driver.hpp"
+#include "emd/grasp_execution/gripper/dummy_gripper_driver.hpp"
 
 namespace grasp_execution
 {
