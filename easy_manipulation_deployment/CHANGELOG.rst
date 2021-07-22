@@ -19,3 +19,15 @@
 * Move grasp_execution inside easy_manipulation_deployment folder
 * Add initial grasp_execution package
 * Contributors: Glenn Tan, Chen Bainian, Khairul Amin, Chia Tse En
+
+0.1.0 (2021-07-22)
+------------------
+* Fixed bug that triggers Grasp Execution when no grasp plans found.
+* Added a clearing and repopulating method in Grasp Plannerfor end effector to prevent retaining of past information
+* Fixed inconsistencies in Grasp Planner Rotation by adding additional configuration parameters to file to specify end effector tf alignments
+* Fixed initial point generation for finger grasp samples in Grasp Planner to account for object axis vector
+* Added quick dimension and pose fix to ensure grasp object collision shape is properly formed for grasp execution.
+* Added Option and OptionArray fields into the emd_msgs type, to include closed finger positions to send to Grasp Execution
+* Added EPD Tracking output support to Grasp Planner
+* Added Service based communication between EPD and EMD Grasp Planner
+* Removed epd_msgs as a required dependency for EMD, and removed epd_msgs from main repository.
