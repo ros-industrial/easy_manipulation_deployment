@@ -314,6 +314,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::extractObjectsDir
  * of GraspObjects
  * @param objects EPD detected objects
  *******************************************************************************************/
+#if EPD_ENABLED == 1
 template<typename T>
 void grasp_planner::GraspScene<T>::extractObjectsEPD(
   const std::vector<epd_msgs::msg::LocalizedObject> & objects)
@@ -356,7 +357,7 @@ void grasp_planner::GraspScene<T>::extractObjectsEPD(
   }
   RCLCPP_INFO(LOGGER, "EPD detected " + std::to_string(this->grasp_objects.size()) + " objects.");
 }
-
+#endif
 /****************************************************************************************//**
  * Method to Extract Grasp Objects
  * @param msg Input message
@@ -368,6 +369,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::extractObjects(
   extractObjectsDirect();
 }
 
+#if EPD_ENABLED == 1
 template<>
 void grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization>::extractObjects(
   const epd_msgs::msg::EPDObjectLocalization::ConstSharedPtr & msg)
@@ -381,7 +383,7 @@ void grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking>::extractObjects
 {
   extractObjectsEPD(msg->objects);
 }
-
+#endif
 /***************************************************************************//**
  * Function that converts a sensor_msg pointcloud2 message into an FCL compatible
  * collision object.
@@ -538,6 +540,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::startPlanning(
  * General Callback function for EPD-EMD pipeline for tracking and localization
  * @param msg Input message
  *******************************************************************************************/
+#if EPD_ENABLED == 1
 template<typename T>
 void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPtr & msg)
 {
@@ -550,6 +553,7 @@ void grasp_planner::GraspScene<T>::startPlanning(const typename T::ConstSharedPt
   RCLCPP_INFO(LOGGER, "Grasp Planning complete.");
   triggerEPDPipeline();
 }
+#endif
 
 /******************************************************************************************//**
  * Method to set up all communication methods with perception system for Direct Input
@@ -584,6 +588,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::setup(std::string
 /******************************************************************************************//**
  * Method to set up all communication methods with perception system for EPD-EMD input
  *********************************************************************************************/
+#if EPD_ENABLED == 1
 template<typename T>
 void grasp_planner::GraspScene<T>::setup(std::string topic_name)
 {
@@ -646,6 +651,7 @@ void grasp_planner::GraspScene<T>::triggerEPDPipeline()
     this->epd_result_future = epd_client->async_send_request(req);
   }
 }
+#endif
 
 // LCOV_EXCL_START
 
@@ -724,5 +730,7 @@ void grasp_planner::GraspScene<T>::objectPoseRectification(
 // LCOV_EXCL_STOP
 
 template class grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>;
+#if EPD_ENABLED == 1
 template class grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization>;
 template class grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking>;
+#endif

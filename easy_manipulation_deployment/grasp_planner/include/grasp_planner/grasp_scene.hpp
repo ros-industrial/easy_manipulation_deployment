@@ -94,9 +94,6 @@ public:
   /*! \brief Method to extract grasp objects from Point Clouds for Direct Camera workflow */
   void extractObjectsDirect();
 
-  /*! \brief Method to extract grasp objects from Point Clouds for EPD-EMD workflow */
-  void extractObjectsEPD(const std::vector<epd_msgs::msg::LocalizedObject> & objects);
-
   /*! \brief Method to load existing end effectors */
   void loadEndEffectors();
 
@@ -106,8 +103,15 @@ public:
   /*! \brief Method to make a request to the Grasp Execution Service */
   void sendToExecution(const emd_msgs::msg::GraspTask & grasp_task);
 
+  #if EPD_ENABLED == 1
+
+  /*! \brief Method to extract grasp objects from Point Clouds for EPD-EMD workflow */
+  void extractObjectsEPD(const std::vector<epd_msgs::msg::LocalizedObject> & objects);
+
   /*! \brief Method to request service to trigger epd pipeline */
   void triggerEPDPipeline();
+
+  #endif
 
   /*! \brief Grasp object pose rectification due to Point Cloud limitations */
   void objectPoseRectification(emd_msgs::msg::GraspTask & grasp_task);
@@ -177,13 +181,17 @@ public:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener;
   /*! \brief Client that provides the GraspRequest information for the Grasp execution component */
   rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedPtr output_client;
-  /*! \brief Client that triggers the EPD workflow */
-  rclcpp::Client<epd_msgs::srv::Perception>::SharedPtr epd_client;
   /*! \brief Futures for GraspRequest request */
   std::shared_future<rclcpp::Client<emd_msgs::srv::GraspRequest>::SharedResponse> result_future;
+
+  #if EPD_ENABLED == 1
+  /*! \brief Client that triggers the EPD workflow */
+  rclcpp::Client<epd_msgs::srv::Perception>::SharedPtr epd_client;
   /*! \brief Futures for EPD service request */
   std::shared_future<rclcpp::Client<epd_msgs::srv::Perception>::SharedResponse> epd_result_future;
   /*! \brief Vector of objects in the scene to be picked */
+  #endif
+
   std::vector<std::shared_ptr<GraspObject>> grasp_objects;
   /*! \brief Vector of End effectors available */
   std::vector<std::shared_ptr<EndEffector>> end_effectors;
