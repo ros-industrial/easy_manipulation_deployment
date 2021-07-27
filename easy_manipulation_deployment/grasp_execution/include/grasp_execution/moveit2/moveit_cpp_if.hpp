@@ -33,8 +33,6 @@
 
 #include "pluginlib/class_loader.hpp"
 
-#include "emd_msgs/msg/grasp_task.hpp"
-
 namespace grasp_execution
 {
 
@@ -55,8 +53,6 @@ class MoveitCppGraspExecution : public GraspExecutionInterface
 public:
   explicit MoveitCppGraspExecution(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic = "grasp_tasks",
-    const std::string & grasp_req_topic = "grasp_requests",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0);
 
@@ -94,12 +90,11 @@ public:
     const std::string & execution_type = "",
     const std::string & controller_name = "");
 
-  void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr &,
-    bool) override {}
-
-  void register_target_objects(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+  void register_target_object(
+    const shape_msgs::msg::SolidPrimitive & target_object_shape,
+    const geometry_msgs::msg::PoseStamped & target_object_pose,
+    const int & index,
+    const std::string & task_id,
     const std::vector<std::string> & disabled_links = {}) override;
 
   geometry_msgs::msg::Pose get_object_pose(const std::string & object_id) const override;

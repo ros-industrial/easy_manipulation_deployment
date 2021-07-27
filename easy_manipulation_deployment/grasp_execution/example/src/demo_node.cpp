@@ -22,6 +22,9 @@
 #include "grasp_execution/moveit2/moveit_cpp_if.hpp"
 #include "grasp_execution/utils.hpp"
 
+#include "emd_msgs/msg/grasp_task.hpp"
+#include "emd_msgs/srv/grasp_request.hpp"
+
 #include "moveit/macros/console_colors.h"
 
 namespace grasp_execution
@@ -36,28 +39,54 @@ class Demo : public moveit2::MoveitCppGraspExecution
 public:
   explicit Demo(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic,
-    const std::string & grasp_request_topic)
-  : MoveitCppGraspExecution(node, grasp_task_topic, grasp_request_topic, 1, 1),
+    const std::string & grasp_task_topic = "grasp_tasks",
+    const std::string & grasp_request_topic = "grasp_requests")
+  : MoveitCppGraspExecution(node, 1, 1),
     node_(node)
-  {}
+  {
+    grasp_task_sub_ = node_->create_subscription<emd_msgs::msg::GraspTask>(
+      grasp_task_topic, 10,
+      [ = ](emd_msgs::msg::GraspTask::UniquePtr msg) {
+        order_schedule(std::move(msg));
+      });
+
+    grasp_req_service_ = node_->create_service<emd_msgs::srv::GraspRequest>(
+      grasp_request_topic,
+      [ = ](
+        const std::shared_ptr<rmw_request_id_t> req_header,
+        const std::shared_ptr<emd_msgs::srv::GraspRequest::Request> req,
+        const std::shared_ptr<emd_msgs::srv::GraspRequest::Response> res) -> void
+      {
+        (void)req_header;
+        auto task = std::make_unique<emd_msgs::msg::GraspTask>();
+        task->task_id = gen_uuid();
+        task->grasp_targets = req->grasp_targets;
+        order_schedule(std::move(task), true);
+        res->success = true;
+      });
+  }
 
   void order_schedule(
     const emd_msgs::msg::GraspTask::SharedPtr & msg,
-    bool blocking = false) override
+    bool blocking = false)
   {
     // target id will be "#<shape>-<task_id>-<target-index>"
 
     // ------------------- Prepare object for grasping --------------------------
-    register_target_objects(msg);
-
+    for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
+      register_target_object(
+        msg->grasp_targets[i].target_shape,
+        msg->grasp_targets[i].target_pose,
+        i,
+        msg->task_id);
+    }
     // -------------------------------------------------------------
 
     for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
       auto grasp_target = std::make_shared<emd_msgs::msg::GraspTarget>(msg->grasp_targets[i]);
 
       auto target_id =
-        gen_target_object_id(msg, i);
+        gen_target_object_id(grasp_target->target_shape, msg->task_id, i);
 
       // Start planning workflow using planning schedule
       auto status = planning_scheduler.add_workflow(
@@ -264,6 +293,8 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
+  rclcpp::Service<emd_msgs::srv::GraspRequest>::SharedPtr grasp_req_service_;
 };
 
 }  // namespace grasp_execution

@@ -5,6 +5,7 @@ target_link_libraries(demo_node
   moveit_cpp_grasp_execution_interface
 )
 ament_target_dependencies(demo_node
+  emd_msgs
   rclcpp
 )
 

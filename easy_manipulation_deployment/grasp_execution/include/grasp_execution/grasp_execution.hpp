@@ -33,10 +33,9 @@
 #include "tf2_ros/transform_listener.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
-#include "emd_msgs/msg/grasp_task.hpp"
-#include "emd_msgs/srv/grasp_request.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "shape_msgs/msg/solid_primitive.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
 namespace grasp_execution
@@ -47,8 +46,6 @@ class GraspExecutionInterface
 public:
   GraspExecutionInterface(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic = "grasp_tasks",
-    const std::string & grasp_req_topic = "grasp_requests",
     size_t planning_concurrency = 1,
     size_t execution_concurrency = 0
   );
@@ -185,13 +182,12 @@ public:
   virtual bool home(
     const std::string & planning_group) = 0;
 
-  virtual void register_target_objects(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+  virtual void register_target_object(
+    const shape_msgs::msg::SolidPrimitive & target_object_shape,
+    const geometry_msgs::msg::PoseStamped & target_object_pose,
+    const int & index,
+    const std::string & task_id,
     const std::vector<std::string> & disabled_links = {}) = 0;
-
-  virtual void order_schedule(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg,
-    bool blocking = false) = 0;
 
   const WorkcellContext & get_workcell_context() const
   {
@@ -283,7 +279,8 @@ public:
 
 protected:
   std::string gen_target_object_id(
-    const emd_msgs::msg::GraspTask::SharedPtr & msg,
+    const shape_msgs::msg::SolidPrimitive & target_object_shape,
+    std::string task_id,
     size_t index) const;
 
   void to_frame(
@@ -308,10 +305,9 @@ protected:
       grasp_execution::gripper::GripperDriver>> gripper_driver_loader_;
 
 private:
-  rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
-  rclcpp::Service<emd_msgs::srv::GraspRequest>::SharedPtr grasp_req_service_;
-
   std::unique_ptr<WorkcellContext> workcell_context_;
+  // rclcpp::Subscription<emd_msgs::msg::GraspTask>::SharedPtr grasp_task_sub_;
+  // rclcpp::Service<emd_msgs::srv::GraspRequest>::SharedPtr grasp_req_service_;
 };
 
 }  // namespace grasp_execution
