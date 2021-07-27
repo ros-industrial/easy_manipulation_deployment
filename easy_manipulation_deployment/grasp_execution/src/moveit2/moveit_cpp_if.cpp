@@ -50,12 +50,10 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("grasp_execution");
 
 MoveitCppGraspExecution::MoveitCppGraspExecution(
   const rclcpp::Node::SharedPtr & node,
-  const std::string & grasp_task_topic,
-  const std::string & grasp_req_topic,
   size_t planning_concurrency,
   size_t execution_concurrency)
 : GraspExecutionInterface(
-    node, grasp_task_topic, grasp_req_topic, planning_concurrency, execution_concurrency),
+    node, planning_concurrency, execution_concurrency),
   moveit_cpp_(std::make_shared<moveit_cpp::MoveItCpp>(node_))
 {
   // let RViz display query PlanningScene
@@ -298,64 +296,64 @@ bool MoveitCppGraspExecution::init(
 }
 
 
-void MoveitCppGraspExecution::register_target_objects(
-  const emd_msgs::msg::GraspTask::SharedPtr & msg,
+void MoveitCppGraspExecution::register_target_object(
+  const shape_msgs::msg::SolidPrimitive & target_object_shape,
+  const geometry_msgs::msg::PoseStamped & target_object_pose,
+  const int & index,
+  const std::string & task_id,
   const std::vector<std::string> & disabled_links)
 {
   // Add all targets into the scene
   moveit_msgs::msg::CollisionObject temp_collision_object;
   temp_collision_object.operation = temp_collision_object.ADD;
 
-  for (size_t i = 0; i < msg->grasp_targets.size(); i++) {
-    const auto & target = msg->grasp_targets[i];
-    const auto target_id =
-      this->gen_target_object_id(msg, i);
+  const auto target_id =
+    this->gen_target_object_id(target_object_shape, task_id, index);
 
-    // Check if object already exists
-    {    // Lock PlanningScene
-      planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
-      if (scene->getWorld()->getObject(target_id)) {
-        continue;
-      }
-    }    // Unlock PlanningScene
+  // Check if object already exists
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    if (scene->getWorld()->getObject(target_id)) {
+      return;
+    }
+  }    // Unlock PlanningScene
 
-    prompt_job_start(
-      LOGGER, target_id,
-      "Register object in the world");
+  prompt_job_start(
+    LOGGER, target_id,
+    "Register object in the world");
 
-    temp_collision_object.id = target_id;
-    temp_collision_object.header.frame_id =
-      target.target_pose.header.frame_id;
+  temp_collision_object.id = target_id;
+  temp_collision_object.header.frame_id =
+    target_object_pose.header.frame_id;
 
-    temp_collision_object.primitives.clear();
-    temp_collision_object.primitive_poses.clear();
+  temp_collision_object.primitives.clear();
+  temp_collision_object.primitive_poses.clear();
 
-    temp_collision_object.primitives.push_back(target.target_shape);
-    temp_collision_object.primitive_poses.push_back(target.target_pose.pose);
+  temp_collision_object.primitives.push_back(target_object_shape);
+  temp_collision_object.primitive_poses.push_back(target_object_pose.pose);
 
-    // // Print out all object poses as debug information
-    // print_pose_ros(LOGGER, target.target_pose);
+  // // Print out all object poses as debug information
+  // print_pose_ros(LOGGER, target.target_pose);
 
-    auto tmp_pose = target.target_pose;
-    to_frame(target.target_pose, tmp_pose, this->robot_frame_);
+  auto tmp_pose = target_object_pose;
+  to_frame(target_object_pose, tmp_pose, this->robot_frame_);
 
-    // // Print out all object poses as debug information
-    // print_pose_ros(LOGGER, tmp_pose);
+  // // Print out all object poses as debug information
+  // print_pose_ros(LOGGER, tmp_pose);
 
-    bool result;
-    // Add object to planning scene
-    {    // Lock PlanningScene
-      planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
-      result = scene->processCollisionObjectMsg(temp_collision_object);
+  bool result;
+  // Add object to planning scene
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    result = scene->processCollisionObjectMsg(temp_collision_object);
 
-      if (!disabled_links.empty()) {
-        auto & acm = scene->getAllowedCollisionMatrixNonConst();
-        acm.setEntry(target_id, disabled_links, true);
-      }
-    }    // Unlock PlanningScene
+    if (!disabled_links.empty()) {
+      auto & acm = scene->getAllowedCollisionMatrixNonConst();
+      acm.setEntry(target_id, disabled_links, true);
+    }
+  }    // Unlock PlanningScene
 
-    prompt_job_end(LOGGER, result);
-  }
+  prompt_job_end(LOGGER, result);
 }
 
 geometry_msgs::msg::Pose MoveitCppGraspExecution::get_object_pose(

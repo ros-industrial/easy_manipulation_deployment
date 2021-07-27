@@ -26,8 +26,6 @@ namespace grasp_execution
 
 GraspExecutionInterface::GraspExecutionInterface(
   const rclcpp::Node::SharedPtr & node,
-  const std::string & grasp_task_topic,
-  const std::string & grasp_req_topic,
   size_t planning_concurrency,
   size_t execution_concurrency
 )
@@ -43,27 +41,6 @@ GraspExecutionInterface::GraspExecutionInterface(
         gripper::GripperDriver>>(
     "grasp_execution",
     "grasp_execution::gripper::GripperDriver");
-
-  grasp_task_sub_ = node_->create_subscription<emd_msgs::msg::GraspTask>(
-    grasp_task_topic, 10,
-    [ = ](emd_msgs::msg::GraspTask::UniquePtr msg) {
-      order_schedule(std::move(msg));
-    }
-  );
-  grasp_req_service_ = node_->create_service<emd_msgs::srv::GraspRequest>(
-    grasp_req_topic,
-    [ = ](
-      const std::shared_ptr<rmw_request_id_t> req_header,
-      const std::shared_ptr<emd_msgs::srv::GraspRequest::Request> req,
-      const std::shared_ptr<emd_msgs::srv::GraspRequest::Response> res) -> void
-    {
-      (void)req_header;
-      auto task = std::make_unique<emd_msgs::msg::GraspTask>();
-      task->task_id = gen_uuid();
-      task->grasp_targets = req->grasp_targets;
-      order_schedule(std::move(task), true);
-      res->success = true;
-    });
 }
 
 GraspExecutionInterface::~GraspExecutionInterface()
@@ -111,12 +88,13 @@ void GraspExecutionInterface::prompt_job_end(
 
 
 std::string GraspExecutionInterface::gen_target_object_id(
-  const emd_msgs::msg::GraspTask::SharedPtr & msg,
+  const shape_msgs::msg::SolidPrimitive & target_object_shape,
+  std::string task_id,
   size_t index) const
 {
   using shape_ns = shape_msgs::msg::SolidPrimitive;
   std::string shape_type;
-  switch (msg->grasp_targets[index].target_shape.type) {
+  switch (target_object_shape.type) {
     case shape_ns::BOX:
       shape_type = "box";
       break;
@@ -134,7 +112,7 @@ std::string GraspExecutionInterface::gen_target_object_id(
       break;
   }
   std::stringstream ss;
-  ss << "#" << shape_type << "-" << msg->task_id << "-" << index;
+  ss << "#" << shape_type << "-" << task_id << "-" << index;
   return ss.str();
 }
 
