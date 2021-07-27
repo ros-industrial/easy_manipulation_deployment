@@ -41,12 +41,11 @@ struct Point
     Eigen::Vector3f reference_point_,
     float projection_distance_,
     float perpendicular_distance_)
-  {
-    reference_vector = reference_vector_;
-    reference_point = reference_point_;
-    projection_distance = projection_distance_;
-    perpendicular_distance = perpendicular_distance_;
-  }
+  : reference_vector(reference_vector_),
+    reference_point(reference_point_),
+    projection_distance(projection_distance_),
+    perpendicular_distance(perpendicular_distance_)
+  {}
 };
 float normalize(
   const float & target,
