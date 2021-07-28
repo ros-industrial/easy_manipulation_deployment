@@ -56,7 +56,7 @@ MoveitCppGraspExecution::MoveitCppGraspExecution(
   size_t execution_concurrency)
 : GraspExecutionInterface(
     node, grasp_task_topic, grasp_req_topic, planning_concurrency, execution_concurrency),
-  moveit_cpp_(std::make_shared<moveit::planning_interface::MoveItCpp>(node_))
+  moveit_cpp_(std::make_shared<moveit_cpp::MoveItCpp>(node_))
 {
   // let RViz display query PlanningScene
   moveit_cpp_->getPlanningSceneMonitor()->providePlanningSceneService();
@@ -149,7 +149,7 @@ bool MoveitCppGraspExecution::init(const std::string & planning_group)
 
       // Initialize planner
       arms_[planning_group].planner =
-        std::make_shared<moveit::planning_interface::PlanningComponent>(
+        std::make_shared<moveit_cpp::PlanningComponent>(
         planning_group, moveit_cpp_);
 
       // Initialize gripper
@@ -299,7 +299,8 @@ bool MoveitCppGraspExecution::init(
 
 
 void MoveitCppGraspExecution::register_target_objects(
-  const emd_msgs::msg::GraspTask::SharedPtr & msg)
+  const emd_msgs::msg::GraspTask::SharedPtr & msg,
+  const std::vector<std::string> & disabled_links)
 {
   // Add all targets into the scene
   moveit_msgs::msg::CollisionObject temp_collision_object;
@@ -346,6 +347,11 @@ void MoveitCppGraspExecution::register_target_objects(
     {    // Lock PlanningScene
       planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
       result = scene->processCollisionObjectMsg(temp_collision_object);
+
+      if (!disabled_links.empty()) {
+        auto & acm = scene->getAllowedCollisionMatrixNonConst();
+        acm.setEntry(target_id, disabled_links, true);
+      }
     }    // Unlock PlanningScene
 
     prompt_job_end(LOGGER, result);
@@ -452,7 +458,7 @@ bool MoveitCppGraspExecution::move_to(
 
 
     // Hardset to try 5 times
-    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
     int count = 0, max_tries = 5;
 
     while (!plan_solution && count < max_tries) {
@@ -490,7 +496,7 @@ bool MoveitCppGraspExecution::move_to(
     }
 
     // Hardset to try 5 times
-    moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
     int count = 0, max_tries = 5;
 
     while (!plan_solution && count < max_tries) {
@@ -537,7 +543,7 @@ bool MoveitCppGraspExecution::move_to(
   }
 
   // Hardset to try 5 times
-  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  moveit_cpp::PlanningComponent::PlanSolution plan_solution;
   int count = 0, max_tries = 1;
 
   while (!plan_solution && count < max_tries) {
@@ -577,7 +583,7 @@ bool MoveitCppGraspExecution::move_to(
   }
 
   // Hardset to try 5 times
-  moveit::planning_interface::PlanningComponent::PlanSolution plan_solution;
+  moveit_cpp::PlanningComponent::PlanSolution plan_solution;
   int count = 0, max_tries = 5;
 
   while (!plan_solution && count < max_tries) {
@@ -896,6 +902,11 @@ void MoveitCppGraspExecution::remove_object(
   {    // Lock PlanningScene
     planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
     scene->processCollisionObjectMsg(object);
+
+    auto & acm = scene->getAllowedCollisionMatrixNonConst();
+    if (acm.hasEntry(target_id)) {
+      acm.removeEntry(target_id);
+    }
   }    // Unlock PlanningScene
 }
 

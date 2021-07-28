@@ -16,11 +16,52 @@
 #include "rclcpp/rclcpp.hpp"
 #include "grasp_planner/grasp_scene.hpp"
 
+static const rclcpp::Logger & LOGGER_DEMO = rclcpp::get_logger("DemoNode");
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<GraspScene>());
-  std::cout << "Shutting Down" << std::endl;
+
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+
+  rclcpp::Node::SharedPtr node =
+    rclcpp::Node::make_shared("grasp_planner_demo_node", "", node_options);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  #if EPD_ENABLED == 1
+  if (node->get_parameter("easy_perception_deployment.epd_enabled").as_bool()) {
+    RCLCPP_INFO(LOGGER_DEMO, "EPD Workflow Enabled");
+    if (node->get_parameter("easy_perception_deployment.tracking_enabled").as_bool()) {
+      RCLCPP_INFO(LOGGER_DEMO, "EPD Tracking Enabled");
+      grasp_planner::GraspScene<epd_msgs::msg::EPDObjectTracking> demo(node);
+      demo.setup(node->get_parameter("easy_perception_deployment.epd_tracking_topic").as_string());
+      executor.add_node(demo.node);
+      executor.spin();
+    } else {
+      RCLCPP_INFO(LOGGER_DEMO, "EPD Localization Enabled");
+      grasp_planner::GraspScene<epd_msgs::msg::EPDObjectLocalization> demo(node);
+      demo.setup(
+        node->get_parameter(
+          "easy_perception_deployment.epd_localization_topic").as_string());
+      executor.add_node(demo.node);
+      executor.spin();
+    }
+  } else {
+    RCLCPP_INFO(LOGGER_DEMO, "Direct Workflow Enabled");
+    grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2> demo(node);
+    demo.setup(node->get_parameter("camera_parameters.point_cloud_topic").as_string());
+    executor.add_node(demo.node);
+    executor.spin();
+  }
+  #else
+  RCLCPP_INFO(LOGGER_DEMO, "epd_msgs not found, Direct Workflow Enabled");
+  grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2> demo(node);
+  demo.setup(node->get_parameter("camera_parameters.point_cloud_topic").as_string());
+  executor.add_node(demo.node);
+  executor.spin();
+  #endif
+
   rclcpp::shutdown();
+  std::cout << "Shutting Down" << std::endl;
   return 0;
 }

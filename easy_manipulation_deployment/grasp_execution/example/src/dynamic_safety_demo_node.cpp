@@ -100,11 +100,15 @@ int main(int argc, char ** argv)
 
   DynamicSafetyDemo demo(node);
 
-  demo.init("manipulator", "ee_palm");
+  const std::string workcell_context_path =
+    node->get_parameter("workcell_context").as_string();
+  demo.init_from_yaml(workcell_context_path);
 
+/*
   demo.init(
     "manipulator", "ee_palm",
     "ds_async", "grasp_execution/DynamicSafetyAsyncExecutor", "ur5_arm_controller");
+*/
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);

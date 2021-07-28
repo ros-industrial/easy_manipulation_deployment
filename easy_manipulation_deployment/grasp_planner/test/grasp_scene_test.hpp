@@ -35,11 +35,12 @@
 class GraspSceneTest : public ::testing::Test
 {
 public:
-  std::shared_ptr<GraspScene> grasp_scene;
+  // std::shared_ptr<grasp_planner::GraspScene> grasp_scene;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr object_cloud;
   Eigen::Vector3f world_x{1, 0, 0};
   Eigen::Vector3f world_y{0, 1, 0};
   Eigen::Vector3f world_z{0, 0, 1};
+  rclcpp::Node::SharedPtr node;
 
   GraspSceneTest();
   void GenerateSceneCloud(float length, float breadth, float height);

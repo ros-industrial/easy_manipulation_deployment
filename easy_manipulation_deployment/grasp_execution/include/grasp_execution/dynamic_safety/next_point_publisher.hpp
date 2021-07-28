@@ -15,6 +15,7 @@
 #ifndef GRASP_EXECUTION__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
 #define GRASP_EXECUTION__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -210,9 +211,11 @@ private:
   void _deadline_cb(rclcpp::QOSDeadlineOfferedInfo &);
 
   // Time points for get the scaled and recalculated current time point.
-  rclcpp::Time start_time_;
-  rclcpp::Time scale_time_;
-  rclcpp::Time end_time_;
+  typedef std::chrono::steady_clock clock;
+  typedef std::chrono::time_point<clock> TimePoint;
+  TimePoint start_time_;
+  TimePoint scale_time_;
+  TimePoint end_time_;
 
   // 1 / rate.
   double period_;

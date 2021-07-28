@@ -151,7 +151,10 @@ void Visualizer::_timer_cb()
   }
   marker_msg_->header.stamp = node_->now();
 
-  pub_->publish(*marker_msg_);
+  // Check if timer_ has been reset before publishing the viz markers
+  if (pub_) {
+    pub_->publish(*marker_msg_);
+  }
 }
 
 }  // namespace dynamic_safety

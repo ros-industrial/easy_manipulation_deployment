@@ -120,6 +120,11 @@ def generate_launch_description():
     dynamic_safety_yaml_file_name = (get_package_share_directory('grasp_execution') +
                                      '/config/dynamic_safety_demo.yaml')
 
+    # Manipulator config
+    workcell_context_yaml = os.path.join(
+        get_package_share_directory('grasp_execution'), 'config', 'workcell_context.yaml')
+    workcell_context = {'workcell_context': workcell_context_yaml}
+
     # MoveItCpp demo executable
     dynamic_safety_demo_node = Node(
         name='dynamic_safety_demo_node',
@@ -136,6 +141,7 @@ def generate_launch_description():
                     trajectory_execution,
                     octomap_config,
                     octomap_updater_config,
+                    workcell_context,
                     moveit_controller]
         )
 

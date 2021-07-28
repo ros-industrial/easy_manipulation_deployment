@@ -23,7 +23,7 @@ namespace moveit2
 {
 
 bool DefaultExecutor::load(
-  const moveit::planning_interface::MoveItCppPtr & moveit_cpp,
+  const moveit_cpp::MoveItCppPtr & moveit_cpp,
   const std::string & /*name*/)
 {
   trajectory_execution_manager_ = moveit_cpp->getTrajectoryExecutionManagerNonConst();

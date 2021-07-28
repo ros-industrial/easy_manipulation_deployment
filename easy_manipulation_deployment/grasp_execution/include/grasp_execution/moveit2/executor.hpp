@@ -37,10 +37,13 @@ public:
   Executor() {}
 
   virtual bool load(
-    const moveit::planning_interface::MoveItCppPtr & moveit_cpp,
+    const moveit_cpp::MoveItCppPtr & moveit_cpp,
     const std::string & name) = 0;
 
   ~Executor() {}
+
+  virtual void configure(
+    const robot_trajectory::RobotTrajectory &) {}
 
   virtual bool run(
     const robot_trajectory::RobotTrajectory &) = 0;

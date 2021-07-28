@@ -98,7 +98,7 @@ void NextPointPublisher::start(double scale)
       break;
   }
 
-  start_time_ = node_->now();
+  start_time_ = clock::now();
   scale_time_ = start_time_;
   time_point_ = 0;
   scale_ = scale;
@@ -124,8 +124,7 @@ void NextPointPublisher::scale(double scale, double time_to_scale)
 
 void NextPointPublisher::stop()
 {
-  time_point_ =
-    ((node_->now() - scale_time_) * scale_ + (scale_time_ - start_time_)).seconds();
+  time_point_ = current_point();
   traj_->getStateAtDurationFromStart(time_point_, point_);
 
   _send_command();
@@ -147,7 +146,7 @@ void NextPointPublisher::update_traj(const robot_trajectory::RobotTrajectoryPtr 
 {
   // Deep copy trajectory
   traj_ = std::make_shared<robot_trajectory::RobotTrajectory>(*traj, true);
-  start_time_ = node_->now();
+  start_time_ = clock::now();
   scale_time_ = start_time_;
   scale_ = 1;
   time_point_ = 0;
@@ -165,8 +164,11 @@ void NextPointPublisher::run_once()
 
 const double & NextPointPublisher::current_point()
 {
-  time_point_ =
-    ((node_->now() - scale_time_) * scale_ + (scale_time_ - start_time_)).seconds();
+  time_point_ = static_cast<double>(
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      (clock::now() - scale_time_) * scale_ + (scale_time_ - start_time_)
+    ).count()
+    ) / 1e9;
   return time_point_;
 }
 
@@ -176,8 +178,7 @@ void NextPointPublisher::_next_point()
     _scale_impl(scale_ - scale_step_);
     remaining_steps_to_scale_--;
   }
-  time_point_ =
-    ((node_->now() - scale_time_) * scale_ + (scale_time_ - start_time_)).seconds();
+  time_point_ = current_point();
   // RCLCPP_INFO(LOGGER, "time point: %f", time_point_);
   if (time_point_ < traj_->getDuration()) {
     traj_->getStateAtDurationFromStart(time_point_ + period_ * scale_, point_);
@@ -207,9 +208,10 @@ void NextPointPublisher::_send_command()
 
 void NextPointPublisher::_scale_impl(double scale)
 {
-  start_time_ += (node_->now() - scale_time_) * (1.0 - scale_);
+  start_time_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+    (clock::now() - scale_time_) * (1.0 - scale_));
   scale_ = scale;
-  scale_time_ = node_->now();
+  scale_time_ = clock::now();
 }
 
 NextPointPublisher::Command NextPointPublisher::_from_string(

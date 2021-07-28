@@ -1,21 +1,17 @@
 # Easy Manipulation Deployment 
 
-<img src="./images/emd_logo.png"  width="10%" height="10%">
-<br><br><br>
-
-
-[![Build Status](https://github.com/tanjpg/easy_manipulation_deployment/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/tanjpg/easy_manipulation_deployment/actions/workflows/build.yml)
-
-[![License](https://img.shields.io/github/license/ros-industrial/easy_manipulation_deployment.svg)](https://github.com/ros-industrial/easy_manipulation_deployment/blob/master/LICENSE)
-
-[![codecov](https://codecov.io/gh/tanjpg/easy_manipulation_deployment/branch/develop/graph/badge.svg)](https://codecov.io/gh/tanjpg/easy_manipulation_deployment)
-
+<img src="./images/emd_logo.png"  width="30%" height="30%">
 <br>
+
+[![Build Status](https://github.com/ros-industrial/easy_manipulation_deployment/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/ros-industrial/easy_manipulation_deployment/actions/workflows/build.yml)
+[![Documentation Status](https://readthedocs.org/projects/easy-manipulation-deployment-docs/badge/?version=latest)](https://easy-manipulation-deployment-docs.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/github/license/ros-industrial/easy_manipulation_deployment.svg)](https://github.com/ros-industrial/easy_manipulation_deployment/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/tanjpg/easy_manipulation_deployment/branch/develop/graph/badge.svg)](https://codecov.io/gh/tanjpg/easy_manipulation_deployment)
 
 ### This ROS2 package provides a modular and easy to deploy manipulation pipeline that integrates perception elements to establish an end-to-end pick and place task
 <br>
 
-<img src="./images/grasp_planner.gif"  width="50%" height="50%"> <img src="./images/grasp_execution.gif"  width="50%" height="50%">
+<img src="./images/grasp_planner.gif"  width="20%" height="20%"> <img src="./images/grasp_execution.gif"  width="20%" height="20%">
 
 This package was tested with the [easy_perception_deployment](https://github.com/ros-industrial/easy_perception_deployment) ROS2 package, but any other perception system that provides the same ROS2 message in the right topic can work with this package as well. 
 

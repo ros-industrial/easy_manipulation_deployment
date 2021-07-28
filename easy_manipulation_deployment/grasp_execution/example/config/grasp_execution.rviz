@@ -416,7 +416,7 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
-      Style: Points
+      Style: Spheres
       Topic:
         Depth: 5
         Durability Policy: Volatile

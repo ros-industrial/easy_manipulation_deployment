@@ -103,6 +103,8 @@ struct singleFinger
 /*! \brief General Struct for a finger grasp sample  */
 struct multiFingerGripper
 {
+  /*! \brief Distance between the closed fingers when grasping object */
+  float closed_finger_stroke;
   /*! \brief Closed finger configuration on side 1 */
   std::vector<std::shared_ptr<singleFinger>> closed_fingers_1;
   /*! \brief Closed finger configuration on side 2 */
@@ -161,6 +163,9 @@ struct multiFingerGripper
     gripper_palm_center.x = (base_point_1_->finger_point.x + base_point_2_->finger_point.x) / 2;
     gripper_palm_center.y = (base_point_1_->finger_point.y + base_point_2_->finger_point.y) / 2;
     gripper_palm_center.z = (base_point_1_->finger_point.z + base_point_2_->finger_point.z) / 2;
+    closed_finger_stroke = pcl::geometry::squaredDistance(
+      base_point_1_->finger_point,
+      base_point_2_->finger_point);
     rank = 0;
   }
 };
@@ -393,6 +398,9 @@ public:
   std::vector<double> getPlanarRPY(
     const Eigen::Vector3f & grasp_direction,
     const Eigen::Vector3f & grasp_direction_normal);
+
+  emd_msgs::msg::Option addClosedGraspDistanceOption(
+    std::shared_ptr<multiFingerGripper> gripper);
 
   /*! \brief Gripper ID*/
   std::string id;
