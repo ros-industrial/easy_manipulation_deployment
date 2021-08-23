@@ -80,19 +80,19 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
       if (grasp_method.grasp_ranks.size() > 0) {
         object->grasp_target.grasp_methods.push_back(grasp_method);
       } else {
-        RCLCPP_ERROR(
-          LOGGER, "For Object " + object->grasp_target.target_type +
-          ", no grasp methods can be found with end effector " + gripper->getID());
+        RCLCPP_ERROR_STREAM(
+          LOGGER, "For Object " << object->grasp_target.target_type.c_str() <<
+            ", no grasp methods can be found with end effector " << gripper->getID());
         // continue;
       }
 
       std::chrono::steady_clock::time_point grasp_end = std::chrono::steady_clock::now();
 
-      RCLCPP_INFO(
-        LOGGER, "Grasp planning time for " + grasp_method.ee_id + " " +
-        std::to_string(
+      RCLCPP_INFO_STREAM(
+        LOGGER, "Grasp planning time for " << grasp_method.ee_id << " " <<
+          std::to_string(
           std::chrono::duration_cast<std::chrono::milliseconds>(grasp_end - grasp_begin).count()) +
-        " [ms] ");
+          " [ms] ");
 
       if (node->get_parameter("visualization_params.point_cloud_visualization").as_bool()) {
         gripper->visualizeGrasps(viewer, object);
@@ -103,18 +103,18 @@ emd_msgs::msg::GraspTask grasp_planner::GraspScene<T>::generateGraspTask()
     if (object->grasp_target.grasp_methods.size() > 0) {
       grasp_task.grasp_targets.push_back(object->grasp_target);
     } else {
-      RCLCPP_ERROR(
-        LOGGER, "For Object " + object->grasp_target.target_type +
-        ", no grasp methods can be found with any given " +
-        " end effectors provided. ");
+      RCLCPP_ERROR_STREAM(
+        LOGGER, "For Object " << object->grasp_target.target_type <<
+          ", no grasp methods can be found with any given "
+          " end effectors provided. ");
       continue;
     }
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    RCLCPP_INFO(
-      LOGGER, "Grasp planning time for object " + object->object_name + " " +
-      std::to_string(
+    RCLCPP_INFO_STREAM(
+      LOGGER, "Grasp planning time for object " << object->object_name << " " <<
+        std::to_string(
         std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) +
-      " [ms] ");
+        " [ms] ");
   }
 
   objectPoseRectification(grasp_task);
@@ -134,7 +134,7 @@ void grasp_planner::GraspScene<T>::loadEndEffectors()
   for (std::string end_effector : end_effector_array) {
     std::string end_effector_type =
       node->get_parameter("end_effectors." + end_effector + ".type").as_string();
-    RCLCPP_INFO(LOGGER, "Loading " + end_effector_type + " gripper " + end_effector);
+    RCLCPP_INFO_STREAM(LOGGER, "Loading " << end_effector_type << " gripper " << end_effector);
     if (end_effector_type.compare("finger") == 0) {
       FingerGripper gripper(
         end_effector,
@@ -304,9 +304,9 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::extractObjectsDir
       this->grasp_objects.push_back(object);
     }
   }
-  RCLCPP_INFO(
-    LOGGER, "Extracted " + std::to_string(
-      this->grasp_objects.size()) + " from point cloud");
+  RCLCPP_INFO_STREAM(
+    LOGGER, "Extracted " << std::to_string(
+      this->grasp_objects.size()) << " from point cloud");
 }
 
 /****************************************************************************************//**
@@ -565,7 +565,7 @@ void grasp_planner::GraspScene<sensor_msgs::msg::PointCloud2>::setup(std::string
     this->node->create_client<emd_msgs::srv::GraspRequest>(
     this->node->get_parameter("grasp_output_service").as_string());
 
-  RCLCPP_INFO(LOGGER, "Listening to: " + topic_name + "...");
+  RCLCPP_INFO_STREAM(LOGGER, "Listening to: " << topic_name << "...");
   this->perception_sub = std::make_shared<
     message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(
     node, topic_name);

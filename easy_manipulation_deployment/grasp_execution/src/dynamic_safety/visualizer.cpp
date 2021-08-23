@@ -76,7 +76,7 @@ void Visualizer::update_trajectory(
   marker_msg_->scale.x = 0.01;
   marker_msg_->scale.y = 0.01;
   marker_msg_->scale.z = 0.01;
-  marker_msg_->lifetime = rclcpp::Duration(1e9);
+  marker_msg_->lifetime = rclcpp::Duration::from_seconds(1);
   marker_msg_->points.resize(size);
   marker_msg_->colors.resize(size, DARK_GREY);
 

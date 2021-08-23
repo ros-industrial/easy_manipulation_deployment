@@ -4,9 +4,9 @@ include:
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
 # Build with moveit
-foxy-moveit2:
+nightly:
   image:
-    name: registry.gitlab.com/rosi-ap/rosiap_docker_images:moveit-foxy-nightly
+    name: registry.gitlab.com/rosi-ap/rosi-ap_infrastructure/rosiap_docker_images/ros:moveit-rolling-nightly
 
   cache:
     key: ${CI_JOB_NAME}
@@ -18,67 +18,71 @@ foxy-moveit2:
 
   variables:
     ISOLATION: "shell"
+    ROS_DISTRO: "rolling"
+    ROS_REPO: "main"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+
+  script:
+    - .industrial_ci/gitlab.sh
+
+foxy-coverage:
+  image:
+    name: ubuntu:20.04
+
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .ccache/
+
+  variables:
+    ISOLATION: "shell"
     ROS_DISTRO: "foxy"
     CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
     TARGET_CMAKE_ARGS: "-DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage'"
 
   script:
+    - apt-get update && apt-get install -y git
+    - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
     - .industrial_ci/gitlab.sh
 
   after_script:
     - ./coverage.sh ci
     - bash <(curl -s https://codecov.io/bash) -f ./coverage.info
 
-# Build Documentation
-sphinx-docs:
-  image: ubuntu:latest
+galactic-testing:
+  image:
+    name: ubuntu:20.04
 
-  before_script:
-    - apt-get -qq update
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .ccache/
 
-    # Install Python3 dependencies
-    - apt-get install -y -qq python3-pip python3-dev
-    - python3 -m pip install --upgrade setuptools
-
-    # Install Sphinx Latex PDF dependencies
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended latexmk
-
-    # Install Sphinx
-    - python3 -m pip install --upgrade sphinx sphinx-rtd-theme recommonmark
-
-    # Install Lint tools
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq enchant git
-    - python3 -m pip install --upgrade doc8 pyenchant sphinxcontrib-spelling
+  variables:
+    ISOLATION: "shell"
+    ROS_DISTRO: "galactic"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
 
   script:
-    # Make html and pdf
-    - make -C docs/sphinx html
-    - make -C docs/sphinx latexpdf
-    # Run Doc8 Lint
-    # - doc8 docs/sphinx --ignore-path docs/sphinx/build --max-line-length 999
-    # Check Spelling
-    # - make -C docs/sphinx spelling
-    # - find . -name *.spelling -exec cat {} \;
-    # - sh -c "! find . -name *.spelling | grep -q ."
+    - apt-get update && apt-get install -y git
+    - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
+    - .industrial_ci/gitlab.sh
 
-  artifacts:
+rolling:
+  image:
+    name: ubuntu:20.04
+
+  cache:
+    key: ${CI_JOB_NAME}
     paths:
-      - docs/sphinx/build/html/
-      - docs/sphinx/build/latex/emd.pdf
-    expire_in: 1 day
+      - .ccache/
 
-# Build API Documentation
-doxygen-docs:
-  image: ubuntu:latest
-
-  before_script:
-    - apt-get -qq update
-    - apt-get -y -qq install doxygen
+  variables:
+    ISOLATION: "shell"
+    ROS_DISTRO: "rolling"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
 
   script:
-    - (cd docs/doxygen && doxygen)
-
-  artifacts:
-    paths:
-      - docs/doxygen/html/
-    expire_in: 1 day
+    - apt-get update && apt-get install -y git
+    - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
+    - .industrial_ci/gitlab.sh
