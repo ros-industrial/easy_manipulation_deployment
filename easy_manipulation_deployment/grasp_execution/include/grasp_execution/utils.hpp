@@ -23,8 +23,12 @@
 #include "boost/uuid/random_generator.hpp"
 #include "boost/uuid/uuid_io.hpp"
 
+#include "geometry_msgs/msg/quaternion_stamped.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+
 #include "tf2_ros/buffer.h"
 #include "tf2/impl/utils.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 namespace grasp_execution
 {
@@ -88,7 +92,7 @@ inline void print_pose_ros(
 {
   std::ostringstream oss;
   print_pose(_pose, oss, _euler);
-  RCLCPP_INFO(logger, oss.str());
+  RCLCPP_INFO(logger, oss.str().c_str());
 }
 
 /// Use ROS to print PoseStamped message
@@ -100,7 +104,7 @@ inline void print_pose_ros(
   std::ostringstream oss;
   oss << std::endl;
   print_pose(_pose, oss, _euler);
-  RCLCPP_INFO(logger, oss.str());
+  RCLCPP_INFO(logger, oss.str().c_str());
 }
 
 /// Transform pose to target end reference frame

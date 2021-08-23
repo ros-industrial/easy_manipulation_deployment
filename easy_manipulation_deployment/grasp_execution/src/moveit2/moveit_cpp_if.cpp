@@ -130,7 +130,7 @@ bool MoveitCppGraspExecution::init(const std::string & planning_group)
         "Basic Info:\n"
         "Base frame: %s\n"
         "Joint Model Group: %s\n"
-        "\tDoF: %u\n"
+        "\tDoF: %lu\n"
         "\tfirst_link: %s\n"
         "\tend_link:  %s\n"
         "\tChain: %s\n"
