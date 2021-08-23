@@ -162,18 +162,28 @@ public:
   }
 
   bool default_plan_pre_grasp(
+    const float & cartesian_step_size,
+    const int & backtrack_steps,
+    const int & hybrid_max_attempts,
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const std::string & ee_link,
     const geometry_msgs::msg::PoseStamped & grasp_pose,
     double clearance);
 
   bool default_plan_transport(
+    const float & cartesian_step_size,
+    const int & backtrack_steps,
+    const int & hybrid_max_attempts,
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const std::string & ee_link,
     const geometry_msgs::msg::PoseStamped & release_pose,
     double clearance);
 
   bool default_plan_post_release(
+    const float & cartesian_step_size,
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const std::string & ee_link,
     bool home,
@@ -199,12 +209,17 @@ public:
   virtual geometry_msgs::msg::PoseStamped get_curr_pose(const std::string & link_name) const = 0;
 
   virtual bool move_to(
+    const float & cartesian_step_size,
+    const int & backtrack_steps,
+    const int & hybrid_max_attempts,
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const geometry_msgs::msg::PoseStamped & pose,
     const std::string & link,
     bool execute = true) = 0;
 
   virtual bool move_to(
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const std::string & named_state,
     bool execute = true) = 0;

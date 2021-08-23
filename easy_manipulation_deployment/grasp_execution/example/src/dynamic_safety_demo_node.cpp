@@ -30,6 +30,18 @@ public:
   {
     double clearance = 0.05;
 
+    float cartesian_step_size = static_cast<float>(node_->get_parameter(
+        "planning_strategy.cartesian_planning.move_step_length").as_double());
+
+    int backtrack_steps = node_->get_parameter(
+      "planning_strategy.cartesian_non_deterministic_hybrid.backtrack_steps").as_int();
+
+    int hybrid_max_attempts = node_->get_parameter(
+      "planning_strategy.cartesian_non_deterministic_hybrid.max_planning_tries").as_int();
+
+    int non_deterministic_max_attempts = node_->get_parameter(
+      "planning_strategy.non_deterministic.max_planning_tries").as_int();
+
     // Get home state
     moveit::core::RobotStatePtr home_state(get_curr_state());
 
@@ -42,6 +54,10 @@ public:
     bool result;
 
     result = this->default_plan_pre_grasp(
+      cartesian_step_size,
+      backtrack_steps,
+      hybrid_max_attempts,
+      non_deterministic_max_attempts,
       planning_group, ee_link, end_pose, clearance);
     prompt_job_end(node_->get_logger(), result);
     if (!result) {

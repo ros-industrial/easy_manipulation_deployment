@@ -22,6 +22,10 @@ namespace grasp_execution
 {
 
 bool GraspExecutionInterface::default_plan_pre_grasp(
+  const float & cartesian_step_size,
+  const int & backtrack_steps,
+  const int & hybrid_max_attempts,
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const std::string & ee_link,
   const geometry_msgs::msg::PoseStamped & grasp_pose,
@@ -45,7 +49,12 @@ bool GraspExecutionInterface::default_plan_pre_grasp(
 
   tf2::toMsg(base_to_ee * ee_w_clearance, pre_grasp_pose.pose);
 
-  bool result = move_to(planning_group, pre_grasp_pose, ee_link, false);
+  bool result = move_to(
+    cartesian_step_size,
+    backtrack_steps,
+    hybrid_max_attempts,
+    non_deterministic_max_attempts,
+    planning_group, pre_grasp_pose, ee_link, false);
 
   if (!result) {
     return false;
@@ -59,6 +68,10 @@ bool GraspExecutionInterface::default_plan_pre_grasp(
 }
 
 bool GraspExecutionInterface::default_plan_transport(
+  const float & cartesian_step_size,
+  const int & backtrack_steps,
+  const int & hybrid_max_attempts,
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const std::string & ee_link,
   const geometry_msgs::msg::PoseStamped & release_pose,
@@ -78,6 +91,10 @@ bool GraspExecutionInterface::default_plan_transport(
   tf2::toMsg(base_to_ee * ee_w_clearance, post_grasp_pose.pose);
 
   bool result = move_to(
+    cartesian_step_size,
+    backtrack_steps,
+    hybrid_max_attempts,
+    non_deterministic_max_attempts,
     planning_group, post_grasp_pose, ee_link, false);
 
   // bool result = cartesian_to(
@@ -101,6 +118,10 @@ bool GraspExecutionInterface::default_plan_transport(
   tf2::toMsg(base_to_ee * ee_w_clearance, pre_release_pose.pose);
 
   result = move_to(
+    cartesian_step_size,
+    backtrack_steps,
+    hybrid_max_attempts,
+    non_deterministic_max_attempts,
     planning_group, pre_release_pose, ee_link, false);
 
   if (!result) {
@@ -115,6 +136,8 @@ bool GraspExecutionInterface::default_plan_transport(
 }
 
 bool GraspExecutionInterface::default_plan_post_release(
+  const float & cartesian_step_size,
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const std::string & ee_link,
   bool home,
@@ -142,14 +165,16 @@ bool GraspExecutionInterface::default_plan_post_release(
 
   bool result = cartesian_to(
     planning_group,
-    {post_release_pose.pose}, ee_link, 0.01, 0, false);
+    {post_release_pose.pose}, ee_link, cartesian_step_size, 0, false);
 
   if (!result) {
     return false;
   }
 
   if (home) {
-    result = move_to(planning_group, "home", false);
+    result = move_to(
+      non_deterministic_max_attempts,
+      planning_group, "home", false);
   }
 
   return result;
