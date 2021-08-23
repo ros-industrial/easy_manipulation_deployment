@@ -409,6 +409,10 @@ geometry_msgs::msg::PoseStamped MoveitCppGraspExecution::get_curr_pose(
 
 
 bool MoveitCppGraspExecution::move_to(
+  const float & cartesian_step_size,
+  const int & backtrack_steps,
+  const int & hybrid_max_attempts,
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const geometry_msgs::msg::PoseStamped & pose,
   const std::string & link,
@@ -437,14 +441,13 @@ bool MoveitCppGraspExecution::move_to(
   robot_trajectory::RobotTrajectoryPtr traj;
   auto fraction = cartesian_to(
     planning_group, *arm.planner->getStartState(), {pose.pose},
-    traj, link, 0.01, 0);
+    traj, link, cartesian_step_size, 0);
 
   RCLCPP_INFO(LOGGER, "fraction: %f", fraction);
   result = (fraction == 1.0);
 
   // Strategy 2
-  size_t backtrack = 20;
-  if (!result && traj->getWayPointCount() > backtrack) {
+  if (!result && static_cast<int>(traj->getWayPointCount()) > backtrack_steps) {
     RCLCPP_INFO(
       LOGGER,
       "\nStrategy 1 failed :<\n"
@@ -452,14 +455,13 @@ bool MoveitCppGraspExecution::move_to(
       "to last viable point and start non-deterministic planning");
 
     arm.planner->setStartState(
-      traj->getWayPoint(traj->getWayPointCount() - backtrack));
+      traj->getWayPoint(traj->getWayPointCount() - backtrack_steps));
 
 
-    // Hardset to try 5 times
     moveit_cpp::PlanningComponent::PlanSolution plan_solution;
-    int count = 0, max_tries = 5;
+    int count = 0;
 
-    while (!plan_solution && count < max_tries) {
+    while (!plan_solution && count < hybrid_max_attempts) {
       arm.planner->setGoal(pose, ee_link);
       plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
       count++;
@@ -468,7 +470,7 @@ bool MoveitCppGraspExecution::move_to(
     if (plan_solution) {
       auto temp_traj = *traj;
       traj->clear();
-      traj->append(temp_traj, 0, 0, temp_traj.getWayPointCount() - backtrack);
+      traj->append(temp_traj, 0, 0, temp_traj.getWayPointCount() - backtrack_steps);
       traj->append(*plan_solution.trajectory, 0, 1);
 
       trajectory_processing::IterativeParabolicTimeParameterization time_param;
@@ -495,9 +497,9 @@ bool MoveitCppGraspExecution::move_to(
 
     // Hardset to try 5 times
     moveit_cpp::PlanningComponent::PlanSolution plan_solution;
-    int count = 0, max_tries = 5;
+    int count = 0;
 
-    while (!plan_solution && count < max_tries) {
+    while (!plan_solution && count < non_deterministic_max_attempts) {
       arm.planner->setGoal(pose, ee_link);
       plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
       count++;
@@ -525,6 +527,7 @@ bool MoveitCppGraspExecution::move_to(
 }
 
 bool MoveitCppGraspExecution::move_to(
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const moveit::core::RobotState & state,
   bool execute)
@@ -542,9 +545,9 @@ bool MoveitCppGraspExecution::move_to(
 
   // Hardset to try 5 times
   moveit_cpp::PlanningComponent::PlanSolution plan_solution;
-  int count = 0, max_tries = 1;
+  int count = 0;
 
-  while (!plan_solution && count < max_tries) {
+  while (!plan_solution && count < non_deterministic_max_attempts) {
     arm.planner->setGoal(state);
     plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
     count++;
@@ -565,6 +568,7 @@ bool MoveitCppGraspExecution::move_to(
 }
 
 bool MoveitCppGraspExecution::move_to(
+  const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const std::string & named_state,
   bool execute)
@@ -582,9 +586,9 @@ bool MoveitCppGraspExecution::move_to(
 
   // Hardset to try 5 times
   moveit_cpp::PlanningComponent::PlanSolution plan_solution;
-  int count = 0, max_tries = 5;
+  int count = 0;
 
-  while (!plan_solution && count < max_tries) {
+  while (!plan_solution && count < non_deterministic_max_attempts) {
     arm.planner->setGoal(named_state);
     plan_solution = arm.planner->plan();
     count++;

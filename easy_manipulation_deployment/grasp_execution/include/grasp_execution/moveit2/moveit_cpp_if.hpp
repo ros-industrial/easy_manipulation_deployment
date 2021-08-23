@@ -104,17 +104,23 @@ public:
   moveit::core::RobotStatePtr get_curr_state() const;
 
   bool move_to(
+    const float & cartesian_step_size,
+    const int & backtrack_steps,
+    const int & hybrid_max_attempts,
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const geometry_msgs::msg::PoseStamped & pose,
     const std::string & link,
     bool execute = true) override;
 
   bool move_to(
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const moveit::core::RobotState & state,
     bool execute = true);
 
   bool move_to(
+    const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const std::string & named_state,
     bool execute = true) override;

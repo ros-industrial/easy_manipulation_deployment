@@ -39,8 +39,8 @@ class Demo : public moveit2::MoveitCppGraspExecution
 public:
   explicit Demo(
     const rclcpp::Node::SharedPtr & node,
-    const std::string & grasp_task_topic = "grasp_tasks",
-    const std::string & grasp_request_topic = "grasp_requests")
+    const std::string & grasp_task_topic,
+    const std::string & grasp_request_topic)
   : MoveitCppGraspExecution(node, 1, 1),
     node_(node)
   {
@@ -159,6 +159,18 @@ public:
       }
     }
 
+    float cartesian_step_size = static_cast<float>(node_->get_parameter(
+        "planning_strategy.cartesian_planning.move_step_length").as_double());
+
+    int backtrack_steps = node_->get_parameter(
+      "planning_strategy.cartesian_non_deterministic_hybrid.backtrack_steps").as_int();
+
+    int hybrid_max_attempts = node_->get_parameter(
+      "planning_strategy.cartesian_non_deterministic_hybrid.max_planning_tries").as_int();
+
+    int non_deterministic_max_attempts = node_->get_parameter(
+      "planning_strategy.non_deterministic.max_planning_tries").as_int();
+
     // Exit if brand name not found.
     if (ee_link.empty()) {
       RCLCPP_ERROR(node_->get_logger(), "End effector brand: %s", ee_brand.c_str());
@@ -176,6 +188,10 @@ public:
 
     // Initial approach doesn't move down yet
     result = this->default_plan_pre_grasp(
+      cartesian_step_size,
+      backtrack_steps,
+      hybrid_max_attempts,
+      non_deterministic_max_attempts,
       planning_group, ee_link, grasp_pose, clearance);
 
     prompt_job_end(node_->get_logger(), result);
@@ -227,6 +243,10 @@ public:
     release_pose.pose.orientation = base_grasp_pose.pose.orientation;
 
     result = this->default_plan_transport(
+      cartesian_step_size,
+      backtrack_steps,
+      hybrid_max_attempts,
+      non_deterministic_max_attempts,
       planning_group, ee_link, release_pose, clearance);
 
     prompt_job_end(node_->get_logger(), result);
@@ -268,7 +288,9 @@ public:
     prompt_job_start(
       node_->get_logger(), target_id,
       "Move back to home");
-    result = move_to(planning_group, *home_state);  // Robot is above the object
+    result = move_to(
+      non_deterministic_max_attempts,
+      planning_group, *home_state);
 
     prompt_job_end(node_->get_logger(), result);
 
