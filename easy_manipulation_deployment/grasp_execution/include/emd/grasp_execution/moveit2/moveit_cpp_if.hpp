@@ -103,6 +103,16 @@ public:
 
   moveit::core::RobotStatePtr get_curr_state() const;
 
+  [[deprecated("Use the full configuration function move_to")]]
+  bool move_to(
+    const std::string & planning_group,
+    const geometry_msgs::msg::PoseStamped & pose,
+    const std::string & link,
+    bool execute = true)
+  {
+    return move_to(0.01, 20, 5, 5, planning_group, pose, link, execute);
+  }
+
   bool move_to(
     const float & cartesian_step_size,
     const int & backtrack_steps,
@@ -113,12 +123,29 @@ public:
     const std::string & link,
     bool execute = true) override;
 
+  [[deprecated("Use the full configuration function move_to")]]
+  bool move_to(
+    const std::string & planning_group,
+    const moveit::core::RobotState & state,
+    bool execute = true)
+  {
+    return move_to(5, planning_group, state, execute);
+  }
+
   bool move_to(
     const int & non_deterministic_max_attempts,
     const std::string & planning_group,
     const moveit::core::RobotState & state,
     bool execute = true);
 
+  [[deprecated("Use the full configuration function move_to")]]
+  bool move_to(
+    const std::string & planning_group,
+    const std::string & named_state,
+    bool execute = true)
+  {
+    return move_to(5, planning_group, named_state, execute);
+  }
   bool move_to(
     const int & non_deterministic_max_attempts,
     const std::string & planning_group,
