@@ -189,6 +189,39 @@ public:
     bool home,
     double clearance);
 
+  [[deprecated("Use the full configuration function for default plan actions")]]
+  bool default_plan_pre_grasp(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    const geometry_msgs::msg::PoseStamped & grasp_pose,
+    double clearance)
+  {
+    return GraspExecutionInterface::default_plan_pre_grasp(
+      0.01, 20, 5, 5, planning_group, ee_link, grasp_pose, clearance);
+  }
+
+  [[deprecated("Use the full configuration function for default plan actions")]]
+  bool default_plan_transport(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    const geometry_msgs::msg::PoseStamped & grasp_pose,
+    double clearance)
+  {
+    return GraspExecutionInterface::default_plan_transport(
+      0.01, 20, 5, 5, planning_group, ee_link, grasp_pose, clearance);
+  }
+
+  [[deprecated("Use the full configuration function for default plan actions")]]
+  bool default_plan_post_release(
+    const std::string & planning_group,
+    const std::string & ee_link,
+    bool home,
+    double clearance)
+  {
+    return GraspExecutionInterface::default_plan_post_release(
+      0.01, 5, planning_group, ee_link, home, clearance);
+  }
+
   virtual bool home(
     const std::string & planning_group) = 0;
 
