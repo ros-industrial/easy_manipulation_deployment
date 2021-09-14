@@ -62,11 +62,15 @@ public:
   void configure(
     const robot_trajectory::RobotTrajectory & robot_trajectory) override
   {
-    safety_officer_->configure(
-      main_context_->getPlanningSceneMonitor()->getPlanningScene(),
-      std::make_shared<robot_trajectory::RobotTrajectory>(robot_trajectory),
-      main_context_->getNode());
-    is_configured_ = true;
+    {  // Lock planning scene
+      planning_scene_monitor::LockedPlanningSceneRO ls(
+        main_context_->getPlanningSceneMonitorNonConst());
+      safety_officer_->configure(
+        main_context_->getPlanningSceneMonitor()->getPlanningScene(),
+        std::make_shared<robot_trajectory::RobotTrajectory>(robot_trajectory),
+        main_context_->getNode());
+      is_configured_ = true;
+    }  // unlock plannnig scene
   }
 
   bool run(
