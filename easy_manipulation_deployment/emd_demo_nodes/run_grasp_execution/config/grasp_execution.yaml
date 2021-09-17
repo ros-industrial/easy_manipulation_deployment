@@ -17,7 +17,7 @@ grasp_execution_node:
         max_planning_tries: 5
       non_deterministic:
         max_planning_tries: 5
-
+    
     planning_pipelines:
       #namespace: "moveit_cpp"  # optional, default is ~
       pipeline_names: ["ompl"]

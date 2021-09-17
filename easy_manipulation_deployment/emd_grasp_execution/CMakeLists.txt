@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(grasp_execution)
+project(emd_grasp_execution)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -114,9 +114,6 @@ if(BUILD_TESTING)
 endif()
 
 # TODO(Briancbn): convert to tests instead
-add_subdirectory(
-  example
-)
 
 ament_export_include_directories(
   include
@@ -127,7 +124,7 @@ ament_export_libraries(
   grasp_execution_default_plugins
 )
 
-pluginlib_export_plugin_description_file(grasp_execution
+pluginlib_export_plugin_description_file(emd_grasp_execution
   grasp_execution_default_plugins.xml)
 
 ament_package()

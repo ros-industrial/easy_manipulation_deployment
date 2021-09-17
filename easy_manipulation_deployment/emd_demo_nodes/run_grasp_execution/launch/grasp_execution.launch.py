@@ -1,4 +1,4 @@
-# Copyright 2021 ROS Industrial Consortium Asia Pacific
+# Copyright 2020 ROS Industrial Consortium Asia Pacific
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import yaml
 
 scene_pkg = 'ur5_2f_test'
 robot_base_link = 'base_link'
+package_name = 'run_grasp_execution'
 
 
 def to_urdf(xacro_path, urdf_path=None, mappings=None):
@@ -67,8 +68,12 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
+    # moveit_cpp.yaml is passed by filename for now since it's node specific
+    grasp_execution_yaml_file_name = (get_package_share_directory(package_name) +
+                                      '/config/grasp_execution.yaml')
+
     # Initial position mapping
-    initial_position_path = (get_package_share_directory('grasp_execution') +
+    initial_position_path = (get_package_share_directory(package_name) +
                              '/config/start_positions.yaml')
     initial_position_mappings = {
         'initial_positions_file': initial_position_path}
@@ -102,51 +107,41 @@ def generate_launch_description():
                             'trajectory_execution.allowed_goal_duration_margin': 0.5,
                             'trajectory_execution.allowed_start_tolerance': 0.01}
 
-    controllers_yaml = load_yaml('grasp_execution', 'config/controllers.yaml')
+    controllers_yaml = load_yaml(package_name, 'config/controllers.yaml')
     moveit_controller = {
         'moveit_simple_controller_manager': controllers_yaml,
         'moveit_controller_manager':
             'moveit_simple_controller_manager/MoveItSimpleControllerManager'
         }
 
-    # Octomap Integration
-    octomap_config = {'octomap_frame': '/camera_color_optical_frame',
-                      'octomap_resolution': 0.04,
-                      'max_range': 2.0}
+    joint_limits_yaml = load_yaml('ur5_moveit_config', 'config/joint_limits.yaml')
+    joint_limits = {'robot_description_planning': joint_limits_yaml}
 
-    octomap_updater_config = load_yaml('grasp_execution', 'config/sensors_3d.yaml')
-
-    # moveit_cpp.yaml is passed by filename for now since it's node specific
-    dynamic_safety_yaml_file_name = (get_package_share_directory('grasp_execution') +
-                                     '/config/dynamic_safety_demo.yaml')
-
-    # Manipulator config
     workcell_context_yaml = os.path.join(
-        get_package_share_directory('grasp_execution'), 'config', 'workcell_context.yaml')
+        get_package_share_directory(package_name), 'config', 'workcell_context.yaml')
     workcell_context = {'workcell_context': workcell_context_yaml}
 
     # MoveItCpp demo executable
-    dynamic_safety_demo_node = Node(
-        name='dynamic_safety_demo_node',
-        package='grasp_execution',
+    grasp_execution_demo_node = Node(
+        name='grasp_execution_node',
+        package=package_name,
         # TODO(henningkayser): add debug argument
         # prefix='xterm -e gdb --args',
-        executable='dynamic_safety_demo_node',
+        executable='demo_node',
         output='screen',
-        parameters=[dynamic_safety_yaml_file_name,
+        parameters=[grasp_execution_yaml_file_name,
                     robot_description,
                     robot_description_semantic,
+                    joint_limits,
                     kinematics_yaml,
                     ompl_planning_pipeline_config,
                     trajectory_execution,
-                    octomap_config,
-                    octomap_updater_config,
                     workcell_context,
                     moveit_controller]
         )
 
     # RViz
-    rviz_config_file = (get_package_share_directory('grasp_execution') +
+    rviz_config_file = (get_package_share_directory(package_name) +
                         '/config/grasp_execution.rviz')
     rviz_node = Node(
         package='rviz2',
@@ -197,7 +192,7 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         rviz_node,
-        dynamic_safety_demo_node,
+        grasp_execution_demo_node,
         ros2_control_node,
         ]
         + load_controllers

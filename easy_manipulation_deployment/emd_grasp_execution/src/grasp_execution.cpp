@@ -39,7 +39,7 @@ GraspExecutionInterface::GraspExecutionInterface(
   // Initialize Gripper Driver loader
   gripper_driver_loader_ = std::make_shared<pluginlib::ClassLoader<
         gripper::GripperDriver>>(
-    "grasp_execution",
+    "emd_grasp_execution",
     "grasp_execution::gripper::GripperDriver");
 }
 

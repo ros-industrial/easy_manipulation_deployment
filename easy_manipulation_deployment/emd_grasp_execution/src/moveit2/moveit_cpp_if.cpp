@@ -69,7 +69,7 @@ MoveitCppGraspExecution::MoveitCppGraspExecution(
   // Initialize grasp_execution executor loader
   executor_loader_ = std::make_shared<pluginlib::ClassLoader<
         grasp_execution::moveit2::Executor>>(
-    "grasp_execution",
+    "emd_grasp_execution",
     "grasp_execution::moveit2::Executor");
 
   // load default executor plugin
