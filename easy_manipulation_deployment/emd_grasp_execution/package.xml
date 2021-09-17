@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>grasp_execution</name>
+  <name>emd_grasp_execution</name>
   <version>0.1.0</version>
   <description>A collection of script to execute the result of grasp planninng</description>
   <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng Glenn</maintainer>
@@ -26,6 +26,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <grasp_execution plugin="${prefix}/grasp_execution_default_plugins.xml"/>
+    <emd_grasp_execution plugin="${prefix}/grasp_execution_default_plugins.xml"/>
   </export>
 </package>

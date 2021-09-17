@@ -34,11 +34,14 @@ static const char GRASP_TASK_TOPIC[] = "grasp_tasks";
 
 static const char GRASP_REQUEST_TOPIC[] = "grasp_requests";
 
+static const char GRASP_EXECUTION_PACKAGE[] = "emd_grasp_execution";
+
 class Demo : public moveit2::MoveitCppGraspExecution
 {
 public:
   explicit Demo(
     const rclcpp::Node::SharedPtr & node,
+    const std::string & package_name,
     const std::string & grasp_task_topic,
     const std::string & grasp_request_topic)
   : MoveitCppGraspExecution(node, 1, 1),
@@ -96,40 +99,47 @@ public:
           std::move(grasp_target),
           std::placeholders::_1));
 
-      // Check if workflow started properly
-      switch (status) {
-        case core::Workflow::Status::ONGOING:
-          RCLCPP_INFO(
-            node_->get_logger(),
-            MOVEIT_CONSOLE_COLOR_YELLOW
-            "New job [%s] started!!"
-            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
-          break;
-        case core::Workflow::Status::QUEUED:
-          RCLCPP_INFO(
-            node_->get_logger(),
-            MOVEIT_CONSOLE_COLOR_YELLOW
-            "New job [%s] started!!"
-            "No available planning worker, new job in queue."
-            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
-          break;
-        case core::Workflow::Status::INVALID:
-          RCLCPP_INFO(
-            node_->get_logger(),
-            MOVEIT_CONSOLE_COLOR_RED
-            "New job [%s] is invalid, it could be already completed, ongoing or queued."
-            "You can check with get_status(<workflow-id>), or use another <workflow-id>"
-            MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
-          break;
-        default:
-          break;
-      }
+      // Check status of workflow
+      check_status(status, target_id);
 
       if (blocking) {
         // Wait for the job to finish
         bool result;
         planning_scheduler.wait_till_complete(target_id, result);
       }
+    }
+  }
+
+  void check_status(
+    core::Workflow::Status status,
+    std::string target_id)
+  {
+    switch (status) {
+      case core::Workflow::Status::ONGOING:
+        RCLCPP_INFO(
+          node_->get_logger(),
+          MOVEIT_CONSOLE_COLOR_YELLOW
+          "New job [%s] started!!"
+          MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+        break;
+      case core::Workflow::Status::QUEUED:
+        RCLCPP_INFO(
+          node_->get_logger(),
+          MOVEIT_CONSOLE_COLOR_YELLOW
+          "New job [%s] started!!"
+          "No available planning worker, new job in queue."
+          MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+        break;
+      case core::Workflow::Status::INVALID:
+        RCLCPP_INFO(
+          node_->get_logger(),
+          MOVEIT_CONSOLE_COLOR_RED
+          "New job [%s] is invalid, it could be already completed, ongoing or queued."
+          "You can check with get_status(<workflow-id>), or use another <workflow-id>"
+          MOVEIT_CONSOLE_COLOR_RESET, target_id.c_str());
+        break;
+      default:
+        break;
     }
   }
 
@@ -329,12 +339,16 @@ int main(int argc, char ** argv)
   rclcpp::Node::SharedPtr node =
     rclcpp::Node::make_shared("grasp_execution_demo_node", "", node_options);
 
-  grasp_execution::Demo demo(
-    node, grasp_execution::GRASP_TASK_TOPIC, grasp_execution::GRASP_REQUEST_TOPIC);
-
-  const std::string workcell_context_path =
+  const std::string workcell_context_filepath =
     node->get_parameter("workcell_context").as_string();
-  demo.init_from_yaml(workcell_context_path);
+
+  grasp_execution::Demo demo(
+    node, grasp_execution::GRASP_EXECUTION_PACKAGE,
+    grasp_execution::GRASP_TASK_TOPIC, grasp_execution::GRASP_REQUEST_TOPIC);
+
+  // const std::string planning_strategies_filepath =
+  //   node->get_parameter("planning_strategy").as_string();
+  demo.init_from_yaml(workcell_context_filepath);
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
