@@ -33,8 +33,8 @@ class DynamicSafetyAsyncExecutor : public grasp_execution::moveit2::Executor
 public:
   DynamicSafetyAsyncExecutor()
   : Executor(),
-    is_configured_(false),
-    logger_(rclcpp::get_logger("dynamic_safety_async_executor"))
+    logger_(rclcpp::get_logger("dynamic_safety_async_executor")),
+    is_configured_(false)
   {
   }
 
