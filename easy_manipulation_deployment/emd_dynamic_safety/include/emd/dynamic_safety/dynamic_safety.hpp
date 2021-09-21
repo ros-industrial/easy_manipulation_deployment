@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
+#define EMD__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
 
 #include <memory>
 #include <vector>
 
-#include "emd/grasp_execution/utils.hpp"
-#include "emd/grasp_execution/dynamic_safety/safety_zone.hpp"
-#include "emd/grasp_execution/dynamic_safety/collision_checker.hpp"
-#include "emd/grasp_execution/dynamic_safety/next_point_publisher.hpp"
-#include "emd/grasp_execution/dynamic_safety/replanner.hpp"
-#include "emd/grasp_execution/dynamic_safety/visualizer.hpp"
-#include "emd/grasp_execution/core/profiler.hpp"
+#include "emd/utils.hpp"
+#include "emd/dynamic_safety/safety_zone.hpp"
+#include "emd/dynamic_safety/collision_checker.hpp"
+#include "emd/dynamic_safety/next_point_publisher.hpp"
+#include "emd/dynamic_safety/replanner.hpp"
+#include "emd/dynamic_safety/visualizer.hpp"
+#include "emd/profiler.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -117,11 +115,10 @@ private:
   std::promise<void> sig_;
   std::future<void> future_;
 
-  core::TimeProfiler<> * pf_;
+  emd::TimeProfiler<> * pf_;
 };
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
 
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__DYNAMIC_SAFETY_HPP_

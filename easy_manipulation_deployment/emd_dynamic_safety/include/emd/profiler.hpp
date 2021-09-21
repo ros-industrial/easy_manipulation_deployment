@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__CORE__PROFILER_HPP_
-#define EMD__GRASP_EXECUTION__CORE__PROFILER_HPP_
+#ifndef EMD__PROFILER_HPP_
+#define EMD__PROFILER_HPP_
 
 #include <atomic>
 #include <algorithm>
@@ -22,10 +22,8 @@
 #include <iostream>
 #include <vector>
 
-namespace grasp_execution
-{
 
-namespace core
+namespace emd
 {
 
 /// A profiler base that record data.
@@ -176,8 +174,7 @@ private:
   std::chrono::time_point<std::chrono::steady_clock> start_time;
 };
 
-}  // namespace core
+}  // namespace emd
 
-}  // namespace grasp_execution
 
-#endif  // EMD__GRASP_EXECUTION__CORE__PROFILER_HPP_
+#endif  // EMD__PROFILER_HPP_

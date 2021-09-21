@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "emd/grasp_execution/dynamic_safety/safety_zone.hpp"
+#include "emd/dynamic_safety/safety_zone.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -76,5 +74,3 @@ uint8_t SafetyZone::get_zone(double point) const
 }
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

@@ -15,10 +15,8 @@
 #include <memory>
 #include <string>
 
-#include "emd/grasp_execution/dynamic_safety/next_point_publisher.hpp"
+#include "emd/dynamic_safety/next_point_publisher.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -230,5 +228,3 @@ void NextPointPublisher::_deadline_cb(rclcpp::QOSDeadlineOfferedInfo &)
 }
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

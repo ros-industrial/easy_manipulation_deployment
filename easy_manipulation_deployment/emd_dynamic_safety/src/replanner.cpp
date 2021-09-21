@@ -15,10 +15,8 @@
 #include <memory>
 #include <utility>
 
-#include "emd/grasp_execution/dynamic_safety/replanner.hpp"
+#include "emd/dynamic_safety/replanner.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -165,5 +163,3 @@ void Replanner::_replan_internal(
 }
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

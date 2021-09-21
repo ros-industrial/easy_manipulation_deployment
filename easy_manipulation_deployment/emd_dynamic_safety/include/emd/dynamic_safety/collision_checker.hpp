@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
+#define EMD__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
 
 #include <deque>
 #include <memory>
@@ -25,9 +25,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "moveit/robot_state/robot_state.h"
 #include "moveit/planning_scene/planning_scene.h"
-
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -148,5 +145,4 @@ private:
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_

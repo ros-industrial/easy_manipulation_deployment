@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__VISUALIZER_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__VISUALIZER_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__VISUALIZER_HPP_
+#define EMD__DYNAMIC_SAFETY__VISUALIZER_HPP_
 
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "emd/grasp_execution/dynamic_safety/safety_zone.hpp"
+#include "emd/dynamic_safety/safety_zone.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "moveit/robot_trajectory/robot_trajectory.h"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -125,6 +123,5 @@ private:
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
 
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__VISUALIZER_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__VISUALIZER_HPP_
