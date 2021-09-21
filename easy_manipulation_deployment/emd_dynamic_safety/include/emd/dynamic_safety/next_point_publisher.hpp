@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
+#define EMD__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
 
 #include <chrono>
 #include <string>
@@ -24,8 +24,6 @@
 
 #include "std_msgs/msg/float64_multi_array.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -250,6 +248,5 @@ private:
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
 
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__NEXT_POINT_PUBLISHER_HPP_

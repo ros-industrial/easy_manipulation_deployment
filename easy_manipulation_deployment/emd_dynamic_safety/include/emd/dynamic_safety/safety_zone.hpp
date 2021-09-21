@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_
+#define EMD__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_
 
 #include <algorithm>
 #include <cstdint>
 #include <string>
 #include <stdexcept>
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -156,6 +154,5 @@ private:
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
 
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__SAFETY_ZONE_HPP_

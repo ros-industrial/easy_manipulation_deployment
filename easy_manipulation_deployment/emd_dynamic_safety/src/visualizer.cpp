@@ -14,10 +14,8 @@
 
 #include <memory>
 
-#include "emd/grasp_execution/dynamic_safety/visualizer.hpp"
+#include "emd/dynamic_safety/visualizer.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -158,5 +156,3 @@ void Visualizer::_timer_cb()
 }
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

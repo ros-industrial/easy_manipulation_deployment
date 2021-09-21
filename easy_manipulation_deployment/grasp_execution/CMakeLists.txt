@@ -22,6 +22,7 @@ find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(emd_dynamic_safety)
 find_package(yaml_cpp_vendor REQUIRED)
 
 include_directories(
@@ -47,22 +48,6 @@ ament_target_dependencies(grasp_execution_interface
   yaml_cpp_vendor
 )
 
-add_library(dynamic_safety
-  SHARED
-  src/dynamic_safety/next_point_publisher.cpp
-  src/dynamic_safety/replanner.cpp
-  src/dynamic_safety/safety_zone.cpp
-  src/dynamic_safety/collision_checker.cpp
-  src/dynamic_safety/visualizer.cpp
-  src/dynamic_safety/dynamic_safety.cpp
-)
-
-ament_target_dependencies(dynamic_safety
-  moveit_core
-  moveit_ros_planning
-  rclcpp
-)
-
 add_library(moveit_cpp_grasp_execution_interface
   SHARED
   src/moveit2/moveit_cpp_if.cpp
@@ -86,13 +71,9 @@ add_library(grasp_execution_default_plugins
 )
 ament_target_dependencies(grasp_execution_default_plugins
   moveit_ros_planning_interface
+  emd_dynamic_safety
   rclcpp
 )
-
-target_link_libraries(grasp_execution_default_plugins
-  dynamic_safety
-)
-
 
 install(
   DIRECTORY include/
@@ -102,7 +83,6 @@ install(
 install(
   TARGETS
   grasp_execution_interface
-  dynamic_safety
   moveit_cpp_grasp_execution_interface
   grasp_execution_default_plugins
   RUNTIME DESTINATION bin
@@ -112,6 +92,7 @@ install(
 ament_export_dependencies(
   moveit_ros_planning_interface
   emd_msgs
+  emd_dynamic_safety
   tf2
   tf2_ros
   yaml_cpp_vendor
@@ -142,7 +123,6 @@ ament_export_include_directories(
 )
 ament_export_libraries(
   grasp_execution_interface
-  dynamic_safety
   moveit_cpp_grasp_execution_interface
   grasp_execution_default_plugins
 )

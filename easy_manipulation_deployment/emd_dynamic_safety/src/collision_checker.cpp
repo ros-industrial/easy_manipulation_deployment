@@ -17,11 +17,8 @@
 #include <utility>
 #include <vector>
 
-#include "emd/grasp_execution/dynamic_safety/collision_checker.hpp"
+#include "emd/dynamic_safety/collision_checker.hpp"
 #include "moveit/robot_state/conversions.h"
-
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -361,5 +358,3 @@ void CollisionChecker::_discrete_runner_fn(int runner_id)
 }
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

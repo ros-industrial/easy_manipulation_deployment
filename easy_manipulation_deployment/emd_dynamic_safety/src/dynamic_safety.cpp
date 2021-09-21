@@ -16,10 +16,8 @@
 #include <string>
 #include <utility>
 
-#include "emd/grasp_execution/dynamic_safety/dynamic_safety.hpp"
+#include "emd/dynamic_safety/dynamic_safety.hpp"
 
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -29,29 +27,29 @@ static const rclcpp::Logger & LOGGER = rclcpp::get_logger("dynamic_safety");
 const Option & Option::load(const rclcpp::Node::SharedPtr & node)
 {
   // Load dyanmic safety parameters
-  declare_or_get_param<double>(
+  emd::declare_or_get_param<double>(
     rate,
     "rate",
     node, LOGGER);
 
   // Load dyanmic safety parameters
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     allow_replan,
     "allow_replan",
     node, LOGGER, false);
 
   // Load dyanmic safety parameters
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     visualize,
     "visualize",
     node, LOGGER, false);
 
   // Load safety zone paramters
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     safety_zone_options.manual,
     "safety_zone.manual",
     node, LOGGER);
-  declare_or_get_param<std::string>(
+  emd::declare_or_get_param<std::string>(
     safety_zone_options.unit_type,
     "safety_zone.unit_type",
     node, LOGGER, "second");  // default: "second"
@@ -64,39 +62,39 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
     safety_zone_options.unit_type = "second";
   }
   if (safety_zone_options.manual) {
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       safety_zone_options.collision_checking_deadline,
       "safety_zone.collision_checking_deadline",
       node, LOGGER);
 
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       safety_zone_options.slow_down_time,
       "safety_zone.slow_down_time",
       node, LOGGER);
 
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       safety_zone_options.replan_deadline,
       "safety_zone.replan_deadline",
       node, LOGGER);
 
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       safety_zone_options.look_ahead_time,
       "safety_zone.look_ahead_time",
       node, LOGGER);
   }
 
   // Load collision checker parameters
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     collision_checker_options.distance,
     "collision_checker.distance",
     node, LOGGER, false);  // default: false
 
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     collision_checker_options.continuous,
     "collision_checker.continuous",
     node, LOGGER, false);  // default: false
 
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     collision_checker_options.realtime,
     "collision_checker.realtime",
     node, LOGGER, false);  // default: false
@@ -104,63 +102,63 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
   if (collision_checker_options.continuous) {
     // TODO(anyone):
   } else {
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       collision_checker_options.step,
       "collision_checker.step",
       node, LOGGER);
 
-    declare_or_get_param<int>(
+    emd::declare_or_get_param<int>(
       collision_checker_options.thread_count,
       "collision_checker.thread_count",
       node, LOGGER, 1);  // default: 1
   }
 
   // Next point planner parameters
-  declare_or_get_param<std::string>(
+  emd::declare_or_get_param<std::string>(
     next_point_publisher_options.command_out_type,
     "next_point_publisher.command_out_type",
     node, LOGGER);
 
-  declare_or_get_param<std::string>(
+  emd::declare_or_get_param<std::string>(
     next_point_publisher_options.command_out_topic,
     "next_point_publisher.command_out_topic",
     node, LOGGER);
 
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     next_point_publisher_options.publish_joint_position,
     "next_point_publisher.publish_joint_position",
     node, LOGGER, true);
 
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     next_point_publisher_options.publish_joint_velocity,
     "next_point_publisher.publish_joint_velocity",
     node, LOGGER, false);
 
-  declare_or_get_param<bool>(
+  emd::declare_or_get_param<bool>(
     next_point_publisher_options.publish_joint_effort,
     "next_point_publisher.publish_joint_effort",
     node, LOGGER, false);
 
   // Replanner parameters
   if (allow_replan) {
-    declare_or_get_param<std::string>(
+    emd::declare_or_get_param<std::string>(
       replanner_options.planner_name,
       "replanner.planner_name",
       node, LOGGER);
   }
 
   if (visualize) {
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       visualizer_options.publish_frequency,
       "visualizer.publish_frequency",
       node, LOGGER, 10);
 
-    declare_or_get_param<double>(
+    emd::declare_or_get_param<double>(
       visualizer_options.step,
       "visualizer.step",
       node, LOGGER, 0.1);
 
-    declare_or_get_param<std::string>(
+    emd::declare_or_get_param<std::string>(
       visualizer_options.topic,
       "visualizer.topic",
       node, LOGGER);
@@ -201,7 +199,7 @@ void DynamicSafety::configure(
 
   benchmark_stats.clear();
 
-  pf_ = new core::TimeProfiler<>(5000);
+  pf_ = new emd::TimeProfiler<>(5000);
 
   // double period = 1 / option_.rate;
 
@@ -446,5 +444,3 @@ void DynamicSafety::_main_loop(const sensor_msgs::msg::JointState::SharedPtr & j
 
 
 }  // namespace dynamic_safety
-
-}  // namespace grasp_execution

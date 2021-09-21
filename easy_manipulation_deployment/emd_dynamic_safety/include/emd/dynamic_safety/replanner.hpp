@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__REPLANNER_HPP_
-#define EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__REPLANNER_HPP_
+#ifndef EMD__DYNAMIC_SAFETY__REPLANNER_HPP_
+#define EMD__DYNAMIC_SAFETY__REPLANNER_HPP_
 
 #include <memory>
 #include <string>
@@ -22,9 +22,6 @@
 #include "moveit/planning_pipeline/planning_pipeline.h"
 #include "moveit/kinematic_constraints/utils.h"
 #include "moveit/robot_state/conversions.h"
-
-namespace grasp_execution
-{
 
 namespace dynamic_safety
 {
@@ -95,6 +92,4 @@ private:
 
 }  // namespace dynamic_safety
 
-}  // namespace grasp_execution
-
-#endif  // EMD__GRASP_EXECUTION__DYNAMIC_SAFETY__REPLANNER_HPP_
+#endif  // EMD__DYNAMIC_SAFETY__REPLANNER_HPP_

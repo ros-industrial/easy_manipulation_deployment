@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "emd/grasp_execution/dynamic_safety/dynamic_safety.hpp"
+#include "emd/dynamic_safety/dynamic_safety.hpp"
 #include "emd/grasp_execution/moveit2/executor.hpp"
 #include "moveit/kinematic_constraints/utils.h"
 #include "moveit/robot_state/conversions.h"
@@ -45,7 +45,7 @@ public:
     const std::string & name) override
   {
     this->main_context_ = moveit_cpp;
-    auto option = grasp_execution::dynamic_safety::Option().load(main_context_->getNode());
+    auto option = dynamic_safety::Option().load(main_context_->getNode());
     const auto & command_type = option.next_point_publisher_options.command_out_type;
     if (command_type == "trajectory_msgs/JointTrajectory") {
       option.next_point_publisher_options.command_out_topic =
@@ -54,7 +54,7 @@ public:
       option.next_point_publisher_options.command_out_topic =
         name + "/command";
     }
-    safety_officer_ = std::make_unique<grasp_execution::dynamic_safety::DynamicSafety>(option);
+    safety_officer_ = std::make_unique<dynamic_safety::DynamicSafety>(option);
 
     return true;
   }
@@ -93,7 +93,7 @@ private:
 
   moveit_cpp::MoveItCppPtr main_context_;
 
-  grasp_execution::dynamic_safety::DynamicSafety::UniquePtr safety_officer_;
+  dynamic_safety::DynamicSafety::UniquePtr safety_officer_;
 
   bool is_configured_;
 };
