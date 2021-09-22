@@ -1018,24 +1018,32 @@ void MoveitCppGraspExecution::print_trajectory(
   _out << "Plannning Group: " << traj->getGroupName() << std::endl;
   _out << "Total waypoints: " << traj->getWayPointCount() << std::endl;
 
+  _out << "Joints: ";
+  for (auto & joint : traj->getGroup()->getVariableNames()) {
+    _out << joint << '\t';
+  }
+
+  _out << std::endl;
+
   _out << "t\t\tpos\t\tvel\t\taccel" << std::endl;
   int dof = traj->getGroup()->getVariableCount();
+  const std::vector<int> & idx = traj->getGroup()->getVariableIndexList();
   for (size_t i = 0; i < traj->getWayPointCount(); i++) {
     _out << traj->getWayPointDurationFromStart(i) << "\t";
     _out << "|\t";
     for (int j = 0; j < dof; j++) {
-      _out << traj->getWayPointPtr(i)->getVariablePosition(j) << "\t";
+      _out << traj->getWayPointPtr(i)->getVariablePosition(idx[j]) << "\t";
     }
     if (traj->getWayPointPtr(i)->hasVelocities()) {
       _out << "|\t";
       for (int j = 0; j < dof; j++) {
-        _out << traj->getWayPointPtr(i)->getVariableVelocity(j) << "\t";
+        _out << traj->getWayPointPtr(i)->getVariableVelocity(idx[j]) << "\t";
       }
     }
     if (traj->getWayPointPtr(i)->hasAccelerations()) {
       _out << "|\t";
       for (int j = 0; j < dof; j++) {
-        _out << traj->getWayPointPtr(i)->getVariableAcceleration(j) << "\t";
+        _out << traj->getWayPointPtr(i)->getVariableAcceleration(idx[j]) << "\t";
       }
     }
     _out << std::endl;
