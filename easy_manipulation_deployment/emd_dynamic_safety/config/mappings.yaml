@@ -1,0 +1,6 @@
+moveit:
+  collision_checking:
+    fcl: "collision_detection::CollisionDetectorFCLPluginLoader"
+    bullet: "collision_detection::CollisionDetectorBtPluginLoader"
+
+tesseract:

@@ -12,18 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "emd/dynamic_safety/visualizer.hpp"
+#include "emd/interpolate.hpp"
 
+#include "urdf/model.h"
+#include "srdfdom/model.h"
 
 namespace dynamic_safety
 {
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("dynamic_safety.visualizer");
+
 Visualizer::Visualizer()
 {
   // Dark Grey
-  DARK_GREY.r = DARK_GREY.g = DARK_GREY.b = 0.628;
+  DARK_GREY.r = DARK_GREY.g = DARK_GREY.b = static_cast<float>(0.628);
   DARK_GREY.a = 1;
 
   // Red
@@ -46,27 +54,55 @@ Visualizer::Visualizer()
 
 
 void Visualizer::configure(
-  const robot_trajectory::RobotTrajectoryPtr & rt,
   const rclcpp::Node::SharedPtr & node,
   const Option & option,
-  const SafetyZone::Option & zone_option)
+  const SafetyZone::Option & zone_option,
+  const std::string & robot_urdf,
+  const std::string & robot_srdf)
 {
+  urdf::ModelSharedPtr umodel = std::make_shared<urdf::Model>();
+  srdf::ModelSharedPtr smodel = std::make_shared<srdf::Model>();
+  if (umodel->initString(robot_urdf)) {
+    if (!smodel->initString(*umodel, robot_srdf)) {
+      RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
+      // TODO(anyone): exception handling
+    }
+  } else {
+    RCLCPP_ERROR(LOGGER, "Unable to parse URDF");
+    // TODO(anyone): exception handling
+  }
+  // Construct planning scene
+  scene_ = std::make_shared<planning_scene::PlanningScene>(umodel, smodel);
   node_ = node;
+  start_ = false;
   pub_ = node_->create_publisher<visualization_msgs::msg::Marker>(
     option.topic, 2);
   rate_ = option.publish_frequency;
   step_ = option.step;
-  update_trajectory(rt);
+  tcp_link_ = option.tcp_link;
   safety_zone_.set(zone_option);
+  visualizer_callback_group_ = node->create_callback_group(
+    rclcpp::CallbackGroupType::MutuallyExclusive);
+  rclcpp::SubscriptionOptions env_state_sub_option;
+  env_state_sub_option.callback_group = visualizer_callback_group_;
+
+  // Marker message update needs to be atomix
+  marker_msg_ = std::make_shared<visualization_msgs::msg::Marker>();
 }
 
-void Visualizer::update_trajectory(
-  const robot_trajectory::RobotTrajectoryPtr & rt)
+void Visualizer::add_trajectory(
+  const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt)
 {
-  int size = static_cast<int>(rt->getDuration() / step_);
-  marker_msg_.reset(new visualization_msgs::msg::Marker());
+  if (rt->points.empty()) {
+    // TODO(anyone): exception handling
+    return;
+  }
 
-  marker_msg_->header.frame_id = rt->getRobotModel()->getRootLinkName();
+  // Re-time trajectory
+  double full_duration = rclcpp::Duration(rt->points.back().time_from_start).seconds();
+  int state_size = static_cast<int>(full_duration / step_);
+
+  marker_msg_->header.frame_id = "world";
   marker_msg_->ns = "";
   marker_msg_->id = 0;
   marker_msg_->type = marker_msg_->SPHERE_LIST;
@@ -75,22 +111,54 @@ void Visualizer::update_trajectory(
   marker_msg_->scale.y = 0.01;
   marker_msg_->scale.z = 0.01;
   marker_msg_->lifetime = rclcpp::Duration::from_seconds(1);
-  marker_msg_->points.resize(size);
-  marker_msg_->colors.resize(size, DARK_GREY);
+  marker_msg_->points.clear();
+  marker_msg_->colors.clear();
+  auto & marker_points = marker_msg_->points;
 
-  for (int i = 0; i < size; i++) {
-    moveit::core::RobotStatePtr rs =
-      std::make_shared<moveit::core::RobotState>(rt->getRobotModel());
-    rt->getStateAtDurationFromStart(step_ * i, rs);
-    const auto & tf = rs->getGlobalLinkTransform(
-      rt->getGroup()->getLinkModels().back());
-    ASSERT_ISOMETRY(tf);  // unsanitized input, could contain a non-isometry
-    marker_msg_->points[i].x = tf.translation().x();
-    marker_msg_->points[i].y = tf.translation().y();
-    marker_msg_->points[i].z = tf.translation().z();
+  // record the starting offset
+  double time_from_start = full_duration - static_cast<double>(state_size) * step_;
+
+  size_t num_points = rt->points.size();
+  size_t before, after;
+  size_t i = 0;
+  moveit::core::RobotStatePtr rs =
+    std::make_shared<moveit::core::RobotState>(scene_->getRobotModel());
+  for (int idx = 0; idx <= state_size; idx++) {
+    for (; i < rt->points.size(); i++) {
+      if (rclcpp::Duration(rt->points[i].time_from_start).seconds() >= time_from_start) {
+        break;
+      }
+    }
+    before = std::max<size_t>(i - 1, 0);
+    after = std::min<size_t>(i, num_points - 1);
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    point.time_from_start = rclcpp::Duration::from_seconds(time_from_start);
+    emd::core::interpolate_between_points(
+      rt->points[before].time_from_start, rt->points[before],
+      rt->points[after].time_from_start, rt->points[after],
+      point.time_from_start, point);
+    for (size_t j = 0; j < rt->joint_names.size(); j++) {
+      rs->setJointPositions(rt->joint_names[j], &point.positions[j]);
+    }
+    const auto & tf = rs->getGlobalLinkTransform(tcp_link_);
+    // ASSERT_ISOMETRY(tf);  // unsanitized input, could contain a non-isometry
+    geometry_msgs::msg::Point marker_point;
+    marker_point.x = tf.translation().x();
+    marker_point.y = tf.translation().y();
+    marker_point.z = tf.translation().z();
+    marker_points.push_back(std::move(marker_point));
+    marker_msg_->colors.push_back(DARK_GREY);
+    time_from_start += step_;
   }
+
   current_time_point_ = 0;
   collision_time_point_ = -1;
+
+  // Better handling of this.
+  timer_ = node_->create_wall_timer(
+    std::chrono::nanoseconds(static_cast<int>(1e9 / rate_)),
+    std::bind(&Visualizer::_timer_cb, this),
+    visualizer_callback_group_);
 }
 
 void Visualizer::update(
@@ -101,23 +169,37 @@ void Visualizer::update(
   collision_time_point_ = collision_time_point;
 }
 
+void Visualizer::update(
+  const SafetyZone::Option & zone_option)
+{
+  safety_zone_.set(zone_option);
+}
+
 void Visualizer::start()
 {
-  timer_ = node_->create_wall_timer(
-    std::chrono::nanoseconds(static_cast<int>(1e9 / rate_)),
-    std::bind(&Visualizer::_timer_cb, this));
+  start_ = true;
+}
+
+void Visualizer::stop()
+{
+  timer_.reset();
+  start_ = false;
 }
 
 void Visualizer::reset()
 {
-  timer_.reset();
   pub_.reset();
 }
 
 void Visualizer::_timer_cb()
 {
+  if (!start_) {
+    return;
+  }
+
+  // Make the callback function atomic
   for (size_t i = 0; i < marker_msg_->colors.size(); i++) {
-    double time_point = step_ * i;
+    double time_point = step_ * static_cast<int>(i);
     if (time_point < current_time_point_ ||
       time_point >= current_time_point_ + safety_zone_.get_zone_limit(safety_zone_.REPLAN))
     {
@@ -144,7 +226,7 @@ void Visualizer::_timer_cb()
   }
 
   if (collision_time_point_ > 0) {
-    int collision_idx = static_cast<int>(collision_time_point_ / step_);
+    size_t collision_idx = static_cast<size_t>(collision_time_point_ / step_);
     marker_msg_->colors[collision_idx] = RED;
   }
   marker_msg_->header.stamp = node_->now();

@@ -70,8 +70,9 @@ public:
   std::vector<T> get() const
   {
     std::vector<T> result;
+    int itr = static_cast<int>(itr_);
     std::copy(
-      database_.begin(), database_.begin() + itr_,
+      database_.begin(), database_.begin() + itr,
       std::back_inserter(result));
     return result;
   }
@@ -158,8 +159,8 @@ public:
     double average = 0;
     double sq_average = 0;
     double temp;
-    for (size_t i = 0; i < result_database.size(); i++) {
-      temp = result_database[i].count();
+    for (int i = 0; i < static_cast<int>(result_database.size()); i++) {
+      temp = result_database[static_cast<size_t>(i)].count();
       if (!metadata_only) {
         os << "Data " << i + 1 << ": " << temp << std::endl;
       }

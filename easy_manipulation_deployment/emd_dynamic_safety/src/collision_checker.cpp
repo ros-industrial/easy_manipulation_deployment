@@ -12,315 +12,220 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "emd/dynamic_safety/collision_checker.hpp"
-#include "moveit/robot_state/conversions.h"
+#include "emd/interpolate.hpp"
+#include "emd/profiler.hpp"
+
+#ifdef EMD_DYNAMIC_SAFETY_TESSERACT
+#include "emd/dynamic_safety/collision_checker_tesseract.hpp"
+#endif  // EMD_DYNAMIC_SAFETY_TESSERACT
+
+#ifdef EMD_DYNAMIC_SAFETY_MOVEIT
+#include "emd/dynamic_safety/collision_checker_moveit.hpp"
+#endif  // EMD_DYNAMIC_SAFETY_MOVEIT
 
 namespace dynamic_safety
 {
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("dynamic_safety.collision checker");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("dynamic_safety.collision_checker");
 
-class CollisionChecker::Context
+class CollisionChecker::Impl
 {
 public:
-  // cppcheck-suppress unknownMacro
-  RCLCPP_SMART_PTR_DEFINITIONS(Context)
+  Impl() = default;
 
-  static Context::UniquePtr create(
-    const planning_scene::PlanningScenePtr & context,
-    const std::string & detector_group)
-  {
-    Context::UniquePtr new_context;
-    new_context.reset(new Context());
+  virtual ~Impl() = default;
 
-    // Deep copy planning scene
-    new_context->scene_ =
-      planning_scene::PlanningScene::clone(context);
+  void configure(
+    const CollisionCheckerOption & option,
+    const std::string & robot_urdf,
+    const std::string & robot_srdf);
 
-    // Reconstruct acm
-    new_context->acm_.reset(new collision_detection::AllowedCollisionMatrix());
+  void add_trajectory(
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt);
 
-    const auto & rm = new_context->scene_->getRobotModel();
-    // Use default collision operations in the SRDF to setup the acm
-    const std::vector<std::string> & collision_links =
-      rm->getLinkModelNamesWithCollisionGeometry();
-    new_context->acm_->setEntry(collision_links, collision_links, false);
+  void update(const sensor_msgs::msg::JointState & state);
 
-    // allow collisions for pairs that have been disabled
-    const std::vector<srdf::Model::DisabledCollision> & dc =
-      rm->getSRDF()->getDisabledCollisionPairs();
-    for (const srdf::Model::DisabledCollision & it : dc) {
-      new_context->acm_->setEntry(it.link1_, it.link2_, true);
-    }
-    // new_context->scene_->getAllowedCollisionMatrixNonConst() =
-    //    *new_context->acm_;
+  void run_once(
+    double current_time,
+    double look_ahead_time,
+    double & collision_time);
 
-    new_context->detector_group_ = detector_group;
+  void sample_typical_time_point(
+    int sample_size,
+    double look_ahead_time,
+    std::vector<double> & time_point_samples);
 
-    return new_context;
-  }
+  void stop();
 
-  // static Context::UniquePtr create(
-  //   const moveit_msgs::msg::PlanningScene::SharedPtr & context,
-  //   const std::string & detector_group) {
-  // }
+  void reset();
 
-  static Context::UniquePtr clone(
-    const Context::SharedPtr & context)
-  {
-    Context::UniquePtr cloned_context;
-    cloned_context.reset(new Context());
+protected:
+  // Main function for running discrete collision checking
+  void _runner_fn(int runner_id, bool continuous);
 
-    // Deep copy planning scene
-    cloned_context->scene_ =
-      planning_scene::PlanningScene::clone(context->scene_);
+  double step_;
+  std::vector<std::unique_ptr<CollisionCheckerContext>> contexts_;
 
-    cloned_context->detector_group_ = context->detector_group_;
-    return cloned_context;
-  }
+  trajectory_msgs::msg::JointTrajectory trajectory_;
 
-  void configure(const Option & option)
-  {
-    collision_request_.group_name = detector_group_;
-    collision_request_.distance = option.distance;
-    collision_request_.contacts = true;
-  }
+  // Duplicated trajectory to avoid data racing in continuous collision checking
+  trajectory_msgs::msg::JointTrajectory trajectory2_;
 
-  void run(const moveit::core::RobotState & state, uint8_t & result, double & distance)
-  {
-    auto & current_state = scene_->getCurrentStateNonConst();
-    for (auto & name :
-      state.getJointModelGroup(collision_request_.group_name)->getVariableNames())
-    {
-      current_state.setJointPositions(name, state.getJointPositions(name));
-    }
-    // Check robot collision
-    current_state.updateCollisionBodyTransforms();
-    // scene_->checkCollision(collision_request_, collision_result_, state);
-    result = false;
-    collision_result_.clear();
-    scene_->getCollisionEnv()->checkRobotCollision(
-      collision_request_, collision_result_, current_state);
-    distance = collision_result_.distance;
-    result |= collision_result_.collision;
-    collision_result_.print();
+  // Run result
+  // cannot use bool https://stackoverflow.com/a/25194424
+  // also bool is not thread safe
+  std::vector<uint8_t> results_;
+  std::vector<double> distances_;
 
-    collision_result_.clear();
+  double start_offset_;
+  bool continuous_;
 
-    scene_->getCollisionEnvUnpadded()->checkSelfCollision(
-      collision_request_, collision_result_, current_state, *acm_);
+  // thread handling / Synchronization variables
+  // Similar to https://stackoverflow.com/a/53274193/13517633
+  std::vector<std::shared_ptr<std::thread>> runners_;
+  std::condition_variable init_cv_;
+  std::mutex init_m_;
+  int n_active_workers_;
+  int current_iteration_;
+  int thread_count_;
 
-    distance = collision_result_.distance;
-    result |= collision_result_.collision;
-    collision_result_.print();
+  // Atomic variables to monitor collision checking progress
+  std::atomic_int itr_;
+  std::atomic_int itr_end_;
 
-    collision_result_.clear();
-  }
-
-  void update(const moveit_msgs::msg::RobotState & state_msg)
-  {
-    scene_->setCurrentState(state_msg);
-  }
-
-  Context(const Context & other) = default;
-
-  ~Context() {}
-
-private:
-  Context()
-  {
-  }
-
-  std::string detector_group_;
-
-  planning_scene::PlanningScenePtr scene_;
-
-  // collision request
-  collision_detection::CollisionRequest collision_request_;
-  collision_detection::CollisionResult collision_result_;
-  collision_detection::AllowedCollisionMatrixPtr acm_;
+  // Atomic variables to control thread starting and ending
+  std::atomic_bool started_;
 };
 
-CollisionChecker::CollisionChecker()
-: started_(false)
+void CollisionChecker::Impl::configure(
+  const CollisionCheckerOption & option,
+  const std::string & robot_urdf,
+  const std::string & robot_srdf)
 {
-}
+  contexts_.clear();
 
-CollisionChecker::~CollisionChecker()
-{
-  reset();
-}
-
-void CollisionChecker::configure(
-  const Option & option,
-  const planning_scene::PlanningScenePtr & scene,
-  const robot_trajectory::RobotTrajectoryPtr & rt)
-{
   // Create the vector of states based on the resolution set when discrete.
-  if (!option.continuous) {
-    step_ = option.step;
+  continuous_ = option.continuous;
+  step_ = option.step;
 
-    // Clear everything
-    states_.clear();
-    duration_from_start_.clear();
-    results_.clear();
-    distances_.clear();
+  // Clear everything
+  contexts_.clear();
+  runners_.clear();
 
-    double full_duration = rt->getDuration();
-    int state_size = static_cast<int>(full_duration / option.step);
-    auto temp_state = std::make_shared<moveit::core::RobotState>(scene->getRobotModel());
-    double start_offset = full_duration - static_cast<double>(state_size) * option.step;
-    for (int i = 0; i < state_size; i++) {
-      duration_from_start_.push_back(start_offset + static_cast<double>(i) * option.step);
-      rt->getStateAtDurationFromStart(duration_from_start_.back(), temp_state);
-      states_.push_back(*temp_state);
+  // Setup synchronization variables
+  started_ = true;
+
+  // Start context and runners
+  thread_count_ = option.thread_count;
+  current_iteration_ = 0;
+  for (size_t i = 0; i < option.thread_count; i++) {
+    std::unique_ptr<CollisionCheckerContext> context;
+    if (option.framework == "moveit") {
+#ifdef EMD_DYNAMIC_SAFETY_MOVEIT
+      context = std::make_unique<dynamic_safety_moveit::MoveitCollisionCheckerContext>(
+        robot_urdf, robot_srdf, option.collision_checking_plugin);
+#else
+      RCLCPP_ERROR(LOGGER, "Framework %s not defined", option.framework.c_str());
+      // TODO(anyone): exception handling
+      return;
+#endif
+    } else if (option.framework == "tesseract") {
+#ifdef EMD_DYNAMIC_SAFETY_TESSERACT
+      context = std::make_unique<dynamic_safety_tesseract::TesseractCollisionCheckerContext>(
+        robot_urdf, robot_srdf, option.collision_checking_plugin);
+#else
+      RCLCPP_ERROR(LOGGER, "Framework %s not defined", option.framework.c_str());
+      // TODO(anyone): exception handling
+      return;
+#endif
     }
-    // resize result
-    results_.resize(state_size, false);
-    distances_.resize(state_size, -1);
+    context->configure(option);
+    contexts_.push_back(std::move(context));
+    runners_.emplace_back(
+      std::make_shared<std::thread>(
+        [ = ]() -> void
+        {
+          _runner_fn(static_cast<int>(i), continuous_);
+        }));
 
-    // Clear everything
-    contexts_.clear();
-    runners_.clear();
-    // runner_ms_.clear();
-    // runner_cvs_.clear();
-    // runner_flags_.clear();
-
-    // Setup synchronization variables
-    started_ = true;
-
-    // {
-    //   std::vector<std::mutex> temp_mutex(option.thread_count);
-    //   runner_ms_.swap(temp_mutex);
-
-    //   std::deque<std::atomic_int> temp_flags_(option.thread_count);
-    //   runner_flags_.swap(temp_flags_);
-    // }
-
-    // Start context and runners
-    thread_count_ = option.thread_count;
-    current_iteration_ = 0;
-    for (int i = 0; i < option.thread_count; i++) {
-      auto context = Context::create(scene, rt->getGroupName());
-      context->configure(option);
-      contexts_.push_back(std::move(context));
-      runners_.emplace_back(
-        std::make_shared<std::thread>(
-          [ = ]() -> void
-          {
-            _discrete_runner_fn(i);
-          }));
-      // runner_cvs_.emplace_back(std::make_unique<std::condition_variable>());
-
-      // runner_flags_[i] = false;
-
-      // Setup realtime sched
-      if (option.realtime) {
-        struct sched_param param;
-        param.sched_priority = 99;
-        pthread_setschedparam(runners_[i]->native_handle(), SCHED_FIFO, &param);
-      }
+    // Setup realtime sched
+    if (option.realtime) {
+      struct sched_param param;
+      param.sched_priority = 99;
+      pthread_setschedparam(runners_[i]->native_handle(), SCHED_FIFO, &param);
     }
   }
 }
 
-void CollisionChecker::update(
-  const moveit::core::RobotState & state)
+void CollisionChecker::Impl::add_trajectory(
+  const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt)
 {
-  moveit_msgs::msg::RobotState state_msgs;
-  moveit::core::robotStateToRobotStateMsg(state, state_msgs);
-  for (auto & context : contexts_) {
-    context->update(state_msgs);
-  }
-}
-
-void CollisionChecker::run_once(
-  double point,
-  double look_ahead_time,
-  double & collision_point)
-{
-  if (!started_ || duration_from_start_.empty()) {
+  if (rt->points.empty()) {
+    RCLCPP_ERROR(LOGGER, "Trajectory Empty");
+    // TODO(Briancbn): Proper exception handling.
     return;
   }
-  itr_ = static_cast<int>((point - duration_from_start_.front()) / step_);
-  itr_end_ = static_cast<int>((point + look_ahead_time - duration_from_start_.front()) / step_);
-  // end should not exceed trajectory max
-  if (itr_end_ > static_cast<int>(states_.size())) {
-    itr_end_ = static_cast<int>(states_.size());
-  }
 
-  {
-    std::lock_guard<std::mutex> lk(init_m_);
-    n_active_workers_ = thread_count_;
-    current_iteration_++;
-  }
+  trajectory_.joint_names = rt->joint_names;
 
-  // start all threads
-  init_cv_.notify_all();
-
-  {
-    std::unique_lock<std::mutex> lk(init_m_);
-    init_cv_.wait(
-      lk, [ & n_active_workers_ = n_active_workers_]
-      {return n_active_workers_ == 0;});
-  }
-
-  // Ignore the first index, cuz ... cannot avoid..
-  for (size_t idx = 1; idx < results_.size(); idx++) {
-    if (results_[idx]) {
-      collision_point = duration_from_start_[idx - 1];
-      break;
-    }
-  }
-}
-
-void CollisionChecker::reset()
-{
-  started_ = false;
-  {
-    std::lock_guard<std::mutex> lk(init_m_);
-    current_iteration_++;
-  }
-  RCLCPP_INFO(LOGGER, "Send stopping signal");
-  init_cv_.notify_all();
-  RCLCPP_INFO(LOGGER, "Joining runners.");
-  for (auto & runner : runners_) {
-    if (runner->joinable()) {
-      runner->join();
-    }
-  }
-}
-
-void CollisionChecker::update_traj(
-  const robot_trajectory::RobotTrajectoryPtr & rt,
-  const Option & option)
-{
   // Clear everything
-  states_.clear();
-  duration_from_start_.clear();
+  trajectory_.points.clear();
   results_.clear();
   distances_.clear();
 
-  double full_duration = rt->getDuration();
-  int state_size = static_cast<int>(full_duration / option.step);
-  auto temp_state = std::make_shared<moveit::core::RobotState>(rt->getRobotModel());
-  double start_offset = full_duration - static_cast<double>(state_size) * option.step;
-  for (int i = 0; i < state_size; i++) {
-    duration_from_start_.push_back(start_offset + static_cast<double>(i) * option.step);
-    rt->getStateAtDurationFromStart(duration_from_start_.back(), temp_state);
-    states_.push_back(*temp_state);
+  // Re-time trajectory
+  double full_duration = rclcpp::Duration(rt->points.back().time_from_start).seconds();
+  int state_size = static_cast<int>(full_duration / step_);
+  // record the starting offset
+  start_offset_ = full_duration - static_cast<double>(state_size) * step_;
+  double time_from_start = start_offset_;
+
+  size_t num_points = rt->points.size();
+  size_t before, after;
+  size_t i = 0;
+  for (int idx = 0; idx <= state_size; idx++) {
+    for (; i < rt->points.size(); i++) {
+      if (rclcpp::Duration(rt->points[i].time_from_start).seconds() >= time_from_start) {
+        break;
+      }
+    }
+    before = std::max<size_t>(i - 1, 0);
+    after = std::min<size_t>(i, num_points - 1);
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    point.time_from_start = rclcpp::Duration::from_seconds(time_from_start);
+    emd::core::interpolate_between_points(
+      rt->points[before].time_from_start, rt->points[before],
+      rt->points[after].time_from_start, rt->points[after],
+      point.time_from_start, point);
+    trajectory_.points.push_back(point);
+    time_from_start += step_;
   }
+
+  // Duplicated trajectory to avoid data racing in continuous collision checking
+  if (continuous_) {
+    trajectory2_ = trajectory_;
+  }
+
   // resize result
-  results_.resize(state_size, false);
-  distances_.resize(state_size, -1);
+  results_.resize(trajectory_.points.size(), false);
+  distances_.resize(trajectory_.points.size(), -1);
 }
 
-void CollisionChecker::_discrete_runner_fn(int runner_id)
+void CollisionChecker::Impl::update(const sensor_msgs::msg::JointState & state)
+{
+  for (auto & context : contexts_) {
+    context->update(state);
+  }
+}
+
+void CollisionChecker::Impl::_runner_fn(int runner_id, bool continuous)
 {
   int next_iteration = 1;
   while (true) {
@@ -339,14 +244,33 @@ void CollisionChecker::_discrete_runner_fn(int runner_id)
 
     // ============= runner started ===============
     // Move this to attributes?
-    int itr;
+    size_t itr;
+    size_t itr2;
     // Unlock immediately to start the rest of the thread
     while (true) {
-      itr = static_cast<int>(itr_++);
-      if (itr >= static_cast<int>(itr_end_)) {
-        break;
+      itr = static_cast<size_t>(itr_++);
+      int itr_end = static_cast<int>(itr_end_);
+      if (itr + 1 > itr_end) {
+        if (continuous) {
+          // Continuous collision checking duplicate last point
+          itr2 = itr;
+        }
+        if (itr > itr_end) {
+          // Break when reaches the last point
+          break;
+        }
+      } else {
+        itr2 = itr + 1;
       }
-      contexts_[runner_id]->run(states_[itr], results_[itr], distances_[itr]);
+      size_t runner_id_u = static_cast<size_t>(runner_id);
+      if (continuous) {
+        contexts_[runner_id_u]->run_continuous(
+          trajectory_.joint_names, trajectory_.points[itr],
+          trajectory2_.points[itr2], results_[itr], distances_[itr]);
+      } else {
+        contexts_[runner_id_u]->run_discrete(
+          trajectory_.joint_names, trajectory_.points[itr], results_[itr], distances_[itr]);
+      }
     }
 
     runner_lk.lock();
@@ -356,5 +280,159 @@ void CollisionChecker::_discrete_runner_fn(int runner_id)
     }
   }
 }
+
+void CollisionChecker::Impl::run_once(
+  double current_time,
+  double look_ahead_time,
+  double & collision_time)
+{
+  if (!started_ || trajectory_.points.empty()) {
+    // TODO(Briancbn): proper exception handling
+    return;
+  }
+
+  itr_ = static_cast<int>((current_time - start_offset_) / step_);
+  itr_end_ = static_cast<int>((current_time + look_ahead_time - start_offset_) / step_);
+  // end should not exceed trajectory max
+  if (itr_ < 0) {
+    itr_ = 0;
+  }
+
+  itr_end_ = std::min<int>(itr_end_, static_cast<int>(trajectory_.points.size()) - 1);
+
+  {
+    std::lock_guard<std::mutex> lk(init_m_);
+    n_active_workers_ = thread_count_;
+    current_iteration_++;
+  }
+
+  // start all threads
+  init_cv_.notify_all();
+
+  {
+    std::unique_lock<std::mutex> lk(init_m_);
+    init_cv_.wait(
+      lk, [ & n_active_workers_ = n_active_workers_]
+      {return n_active_workers_ == 0;});
+  }
+
+  // Ignore the first index, cuz ... cannot avoid..
+  // TODO(anyone): fix the first index
+  collision_time = -1;
+  if (results_[0]) {
+    collision_time = start_offset_;
+  } else {
+    for (size_t idx = 1; idx < results_.size(); idx++) {
+      if (results_[idx]) {
+        collision_time = start_offset_ + (static_cast<int>(idx) - 1) * step_;
+        break;
+      }
+    }
+  }
+}
+
+void CollisionChecker::Impl::sample_typical_time_point(
+  int sample_size,
+  double look_ahead_time,
+  std::vector<double> & time_point_samples)
+{
+  double range =
+    rclcpp::Duration(trajectory_.points.back().time_from_start).seconds() - look_ahead_time;
+  std::srand(static_cast<unsigned int>(std::time(nullptr)));
+  time_point_samples.clear();
+  for (int i = 0; i < sample_size; i++) {
+    time_point_samples.push_back(static_cast<double>(std::rand()) / RAND_MAX * range);
+  }
+}
+
+void CollisionChecker::Impl::stop()
+{
+}
+
+void CollisionChecker::Impl::reset()
+{
+  started_ = false;
+  {
+    std::lock_guard<std::mutex> lk(init_m_);
+    current_iteration_++;
+  }
+  RCLCPP_INFO(LOGGER, "Send stopping signal");
+  init_cv_.notify_all();
+  RCLCPP_INFO(LOGGER, "Joining runners.");
+  for (auto & runner : runners_) {
+    if (runner->joinable()) {
+      runner->join();
+    }
+  }
+}
+
+CollisionChecker::CollisionChecker()
+: impl_ptr_(std::make_unique<Impl>())
+{
+}
+
+CollisionChecker::~CollisionChecker()
+{
+  reset();
+}
+
+void CollisionChecker::configure(
+  const CollisionCheckerOption & option,
+  const std::string & robot_urdf,
+  const std::string & robot_srdf)
+{
+  impl_ptr_->configure(option, robot_urdf, robot_srdf);
+}
+
+void CollisionChecker::update(
+  const sensor_msgs::msg::JointState & state)
+{
+  impl_ptr_->update(state);
+}
+
+void CollisionChecker::run_once(
+  double current_time,
+  double look_ahead_time,
+  double & collision_time)
+{
+  impl_ptr_->run_once(current_time, look_ahead_time, collision_time);
+}
+
+double CollisionChecker::polling(
+  double look_ahead_time,
+  int sample_size)
+{
+  std::vector<double> sample_time_points;
+  impl_ptr_->sample_typical_time_point(sample_size, look_ahead_time, sample_time_points);
+  double collision_time;
+  double collision_checking_duration = 0;
+  emd::TimeProfiler<> poller(static_cast<size_t>(sample_size));
+  for (auto & start_time : sample_time_points) {
+    poller.reset();
+    run_once(start_time, look_ahead_time, collision_time);
+    collision_checking_duration += poller.lapse_and_record();
+  }
+  std::ostringstream oss;
+  poller.print(oss);
+  RCLCPP_INFO(LOGGER, oss.str());
+  return collision_checking_duration / sample_size;
+}
+
+void CollisionChecker::reset()
+{
+  impl_ptr_->reset();
+}
+
+void CollisionChecker::stop()
+{
+  impl_ptr_->stop();
+}
+
+void CollisionChecker::add_trajectory(
+  const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt)
+{
+  impl_ptr_->add_trajectory(rt);
+}
+
 
 }  // namespace dynamic_safety

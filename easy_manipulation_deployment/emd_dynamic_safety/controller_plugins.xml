@@ -1,0 +1,7 @@
+<library path="emd_dynamic_safety_controller">
+  <class name="emd_dynamic_safety/DynamicSafetyTrajectoryController" type="dynamic_safety::DynamicSafetyTrajectoryController" base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Joint trajectory controller with dynamic safety module implemented
+    </description>
+  </class>
+</library>

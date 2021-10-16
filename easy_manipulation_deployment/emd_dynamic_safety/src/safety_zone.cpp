@@ -20,7 +20,7 @@ namespace dynamic_safety
 
 bool SafetyZone::verify()
 {
-  // check if vector strictly increasing
+  // check if vector increasing
   for (int i = 0; i < 3; i++) {
     if (zone_[i] > zone_[i + 1]) {
       return false;
@@ -33,9 +33,16 @@ bool SafetyZone::set(const Option & option)
 {
   unit_type_ = option.unit_type;
   zone_[BLIND] = option.collision_checking_deadline;
-  zone_[EMERGENCY] =
-    zone_[BLIND] + option.slow_down_time;
-  // Check if slow down zone is needed
+
+  // Check if slow down zone is defined
+  // as this one could be defined dynamically.
+  if (option.slow_down_time > 0) {
+    zone_[EMERGENCY] =
+      zone_[BLIND] + option.slow_down_time;
+  } else {
+    zone_[EMERGENCY] = zone_[BLIND];
+  }
+
   zone_[SLOWDOWN] = zone_[EMERGENCY] + option.replan_deadline;
 
   // Check if look_ahead_time is long enough
@@ -51,8 +58,16 @@ bool SafetyZone::set(const Option & option)
   if (verify()) {
     printf(
       "Safety Zone:\n"
-      "\tzone: | BLIND | EMERGENCY | SLOWDOWN | REPLAN | SAFE\n"
-      "\t      0     %.2e,       %.2e,      %.2e,    %.2e\n",
+      "   -------      0\n"
+      "   BLIND\n"
+      "   -------      %.2e\n"
+      "   EMERGENCY\n"
+      "   -------      %.2e\n"
+      "   SLOWDOWN\n"
+      "   -------      %.2e\n"
+      "   REPLAN\n"
+      "   -------      %.2e\n"
+      "   SAFE\n",
       zone_[BLIND], zone_[EMERGENCY], zone_[SLOWDOWN], zone_[REPLAN]);
     fflush(stdout);
     return true;

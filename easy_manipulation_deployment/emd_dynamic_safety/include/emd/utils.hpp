@@ -30,7 +30,7 @@ template<typename T>
 /**
  * Referenced from moveit servo.
  */
-inline void declare_or_get_param(
+inline bool declare_or_get_param(
   T & output_value,
   const std::string & param_name,
   const rclcpp::Node::SharedPtr & node,
@@ -41,13 +41,16 @@ inline void declare_or_get_param(
     if (node->has_parameter(param_name)) {
       node->get_parameter_or<T>(param_name, output_value, default_value);
     } else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
       output_value = node->declare_parameter<T>(param_name, default_value);
+#pragma GCC diagnostic pop
     }
   } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {
     // Catch a <double> parameter written in the yaml as "1" being considered an <int>
     if (std::is_same<T, double>::value) {
       node->undeclare_parameter(param_name);
-      output_value = node->declare_parameter<int>(param_name, 0);
+      output_value = static_cast<double>(node->declare_parameter<int>(param_name, 0));
     } else {
       RCLCPP_ERROR(
         logger,
@@ -56,9 +59,14 @@ inline void declare_or_get_param(
       throw e;
     }
   }
-  RCLCPP_INFO_STREAM(
-    logger,
-    "Found parameter - " << param_name << ": " << output_value);
+  if (output_value != default_value) {
+    RCLCPP_INFO_STREAM(
+      logger,
+      "Found parameter - " << param_name << ": " << output_value);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace emd
