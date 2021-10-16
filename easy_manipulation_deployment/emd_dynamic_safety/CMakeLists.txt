@@ -66,7 +66,7 @@ else()
 endif()
 
 # Tesseract
-if (tesseract_environment_FOUND)
+if(tesseract_environment_FOUND)
   message(STATUS Tesseract Found!!)
 
   # Force -Wno-dev
