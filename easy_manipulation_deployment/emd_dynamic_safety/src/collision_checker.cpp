@@ -414,7 +414,7 @@ double CollisionChecker::polling(
   }
   std::ostringstream oss;
   poller.print(oss);
-  RCLCPP_INFO(LOGGER, oss.str());
+  RCLCPP_INFO(LOGGER, oss.str().c_str());
   return collision_checking_duration / sample_size;
 }
 
