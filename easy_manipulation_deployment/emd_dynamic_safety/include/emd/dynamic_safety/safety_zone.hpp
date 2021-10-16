@@ -82,8 +82,19 @@ public:
 
   /// Zone limit: Last zone is not needed since it's infinite.
   /*
-   * zone: | BLIND | EMERGENCY | SLOWDOWN | REPLAN | SAFE
-   *       0    {value1,     value2,    value3,  value4}
+   * ```
+   * zone:
+   *    -------      0
+   *    BLIND
+   *    -------      value1
+   *    EMERGENCY
+   *    -------      value2
+   *    SLOWDOWN
+   *    -------      value3
+   *    REPLAN
+   *    -------      value4
+   *    SAFE
+   * ```
    */
   bool verify();
 
@@ -94,9 +105,21 @@ public:
    * If option is valid, the following output will be printed
    * in the terminal
    * ```
-   * zone: | BLIND | EMERGENCY | SLOWDOWN | REPLAN | SAFE
-   *       0    {value1,     value2,    value3,  value4}
+   * zone:
+   *    -------      0
+   *    BLIND
+   *    -------      value1
+   *    EMERGENCY
+   *    -------      value2
+   *    SLOWDOWN
+   *    -------      value3
+   *    REPLAN
+   *    -------      value4
+   *    SAFE
    * ```
+   *
+   * if slow down time is unset, it will be determined dynamically
+   * and value2 would replaced with
    *
    * \param[in] option Safety zone option.
    */

@@ -15,7 +15,6 @@
 #ifndef EMD__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
 #define EMD__DYNAMIC_SAFETY__COLLISION_CHECKER_HPP_
 
-#include <deque>
 #include <memory>
 #include <string>
 #include <thread>
@@ -23,8 +22,10 @@
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
-#include "moveit/robot_state/robot_state.h"
-#include "moveit/planning_scene/planning_scene.h"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "trajectory_msgs/msg/joint_trajectory.hpp"
+
+#include "emd/dynamic_safety/collision_checker_common.hpp"
 
 namespace dynamic_safety
 {
@@ -33,61 +34,63 @@ namespace dynamic_safety
 class CollisionChecker
 {
 public:
-  /// Collision checker options.
-  struct Option
-  {
-    /// Whether to use distance based collison checking (not fully implemented).
-    bool distance;
-
-    /// Continuous collison checker (not implemented).
-    bool continuous;
-
-    /// Enable realtime configuration (not fully implemented).
-    bool realtime;
-
-    /// Steps (in the unit of time) between states taken from the trajectory (discrete only).
-    double step;
-    /// Thread count used for collision checking (discrete only).
-    int thread_count;
-  };
-
-  /// Collision checking context, each for one thread.
-  class Context;
-
   /// Constructor.
   CollisionChecker();
 
   /// Destructor.
   ~CollisionChecker();
 
+  /// Collision checking implementation pointer.
+  class Impl;
+
   /// Configure the collision checker to prepare for collision checking.
   /**
    * \param[in] option Collison checker options.
-   * \param[in] scene Moveit scene to use / clone for collision checking.
-   * \param[in] rt Robot trajectory to check collision for.
+   * \param[in] robot_urdf Robot URDF Model.
+   * \param[in] robot_srdf Robot SRDFConfiguration
+   * \param[in] collision_checking_plugin Collision checking plugin wrapper
    */
   void configure(
-    const Option & option,
-    const planning_scene::PlanningScenePtr & scene,
-    const robot_trajectory::RobotTrajectoryPtr & rt);
+    const CollisionCheckerOption & option,
+    const std::string & robot_urdf,
+    const std::string & robot_srdf);
 
   /// Update the rest of the robot state beyond the detector group.
   /**
-   * \param[in] state Robot state to reference and update from.
+   * \param[in] joint_state Robot joint state to reference and update from.
    */
   void update(
-    const moveit::core::RobotState & state);
+    const sensor_msgs::msg::JointState & joint_state);
 
   /// Run collision checking once.
   /**
-   * \param[in] point Current time point.
+   * \param[in] current_time Current time_from_start in the trajectory.
    * \param[in] look_ahead_time How far to check beyond the current time point.
-   * \param[out] collision_point Collision time point, -1 if no collision found.
+   * \param[out] collision_time Collision time_from_start in the trajectory, -1 if no collision found.
    */
   void run_once(
-    double point,
+    double current_time,
     double look_ahead_time,
-    double & collision_point);
+    double & collision_time);
+
+  /// Estimate collision checking duration for specific look_ahead_time
+  /**
+   * \param[in] look_ahead_time how far ahead collision checking should do.
+   * \param[in] sample_size the number of sample to average
+   * \return average collision checking duration
+   */
+  double polling(
+    double look_ahead_time,
+    int sample_size = 10);
+
+  /// Reset / stop collision checker.
+  /**
+   * After this is called, configure() has to be called again before running run_once().
+   *
+   * \sa configure()
+   * \sa run_once()
+   */
+  void stop();
 
   /// Reset / stop collision checker.
   /**
@@ -101,46 +104,14 @@ public:
   /// Update the trajectory after collision checker has started.
   /**
    * This cannot run parallel with run_once().
-   * \param[in] traj Trajectory to replace the current one.
-   * \param[in] option Collision checking option to update.
+   * \param[in] rt Robot trajectory to replace the current one.
    */
-  void update_traj(
-    const robot_trajectory::RobotTrajectoryPtr & traj,
-    const Option & option);
+  void add_trajectory(
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt);
 
 private:
-  // Main function for running discrete collision checking
-  void _discrete_runner_fn(int runner_id);
-
-  // robot states to verify
-  std::vector<moveit::core::RobotState> states_;
-  std::vector<double> duration_from_start_;
-  double step_;
-
-  // Run result
-  // cannot use bool https://stackoverflow.com/a/25194424
-  // also bool is not thread safe
-  std::vector<uint8_t> results_;
-  std::vector<double> distances_;
-
-  // Context
-  std::vector<std::unique_ptr<Context>> contexts_;
-
-  // thread handling / Synchronization variables
-  // Similar to https://stackoverflow.com/a/53274193/13517633
-  std::vector<std::shared_ptr<std::thread>> runners_;
-  std::condition_variable init_cv_;
-  std::mutex init_m_;
-  int n_active_workers_;
-  int current_iteration_;
-  int thread_count_;
-
-  // Atomic variables to monitor collision checking progress
-  std::atomic_int itr_;
-  std::atomic_int itr_end_;
-
-  // Atomic variables to control thread starting and ending
-  std::atomic_bool started_;
+  // Implementation Pointer
+  std::unique_ptr<Impl> impl_ptr_;
 };
 
 }  // namespace dynamic_safety

@@ -20,8 +20,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "emd/dynamic_safety/safety_zone.hpp"
 #include "visualization_msgs/msg/marker.hpp"
-#include "moveit/robot_trajectory/robot_trajectory.h"
-
+#include "moveit/planning_scene/planning_scene.h"
 
 namespace dynamic_safety
 {
@@ -35,10 +34,14 @@ public:
   {
     /// Visualizer publish frequency.
     double publish_frequency;
+
     /// Visualizer trajectory display step / resolution.
     double step;
+
     /// Visualizer topic.
     std::string topic;
+
+    std::string tcp_link;
   };
 
   /// Constructor.
@@ -54,10 +57,11 @@ public:
    * \param[in] zone_option This can be used to create safety zone.
    */
   void configure(
-    const robot_trajectory::RobotTrajectoryPtr & rt,
     const rclcpp::Node::SharedPtr & node,
     const Option & option,
-    const SafetyZone::Option & zone_option);
+    const SafetyZone::Option & zone_option,
+    const std::string & robot_urdf,
+    const std::string & robot_srdf);
 
   /// Update existing trajectory.
   /**
@@ -65,8 +69,8 @@ public:
    *
    * \param[in] rt Trajectory to update.
    */
-  void update_trajectory(
-    const robot_trajectory::RobotTrajectoryPtr & rt);
+  void add_trajectory(
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt);
 
   /// Update the current state
   /**
@@ -78,8 +82,22 @@ public:
     double current_time_point,
     double collision_time_point = -1);
 
+  /// Update
+  /**
+   * If there is no collision, collision time point will be -1.
+   * \param[in] zone_option Update safety zone options if needed.
+   */
+  void update(
+    const SafetyZone::Option & zone_option);
+
   /// Start the Visualizer
   void start();
+
+  /// stop the Visualizer
+  /**
+   * Visualizer needs to be configured to start again.
+   */
+  void stop();
 
   /// Reset the Visualizer
   /**
@@ -91,11 +109,17 @@ private:
   // timer callback.
   void _timer_cb();
 
+  // Planning scene
+  planning_scene::PlanningScenePtr scene_;
+
   // The rate the visualizer run.
   double rate_;
 
   // The trajectory display resolution.
   double step_;
+
+  // The link to display the trajectory
+  std::string tcp_link_;
 
   // ROS attributes
   rclcpp::Node::SharedPtr node_;
@@ -116,6 +140,9 @@ private:
   // TODO(anyone): Check if needed to be atomic.
   double current_time_point_;
   double collision_time_point_;
+
+  std::atomic_bool start_;
+  rclcpp::CallbackGroup::SharedPtr visualizer_callback_group_;
 
   // Safety zone
   SafetyZone safety_zone_;
