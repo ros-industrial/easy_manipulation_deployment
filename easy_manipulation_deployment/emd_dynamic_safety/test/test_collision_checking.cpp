@@ -80,7 +80,7 @@ protected:
 
 #ifdef EMD_DYNAMIC_SAFETY_MOVEIT
 // cppcheck-suppress syntaxError
-TEST_F(CollisionCheckingTest, MoveItDiscretePolling)
+TEST_F(CollisionCheckingTest, MoveItDiscreteFCLPolling)
 {
   option_.framework = "moveit";
   option_.group = "panda_arm";
@@ -99,8 +99,11 @@ TEST_F(CollisionCheckingTest, MoveItDiscretePolling)
     "Average MoveIt FCL Discrete "
     "collision_checking time for 1.0s look ahead time: %.4fms\n",
     collision_checker_.polling(1.0, 20) * 1e3);
+}
 
 #ifndef EMD_DYNAMIC_SAFETY_TESSERACT
+TEST_F(CollisionCheckingTest, MoveItDiscreteBulletPolling)
+{
   option_.collision_checking_plugin = "bullet";
   collision_checker_.configure(
     option_,
@@ -113,8 +116,8 @@ TEST_F(CollisionCheckingTest, MoveItDiscretePolling)
     "Average MoveIt Bullet Discrete "
     "collision_checking time for 1.0s look ahead time: %.4fms\n",
     collision_checker_.polling(1.0, 20) * 1e3);
-#endif
 }
+#endif
 
 TEST_F(CollisionCheckingTest, MoveitDiscreteFCL)
 {

@@ -125,7 +125,7 @@ void CollisionChecker::Impl::configure(
   // Start context and runners
   thread_count_ = option.thread_count;
   current_iteration_ = 0;
-  for (size_t i = 0; i < option.thread_count; i++) {
+  for (size_t i = 0; i < static_cast<size_t>(option.thread_count); i++) {
     std::unique_ptr<CollisionCheckerContext> context;
     if (option.framework == "moveit") {
 #ifdef EMD_DYNAMIC_SAFETY_MOVEIT
@@ -249,7 +249,7 @@ void CollisionChecker::Impl::_runner_fn(int runner_id, bool continuous)
     // Unlock immediately to start the rest of the thread
     while (true) {
       itr = static_cast<size_t>(itr_++);
-      int itr_end = static_cast<int>(itr_end_);
+      size_t itr_end = static_cast<size_t>(itr_end_);
       if (itr + 1 > itr_end) {
         if (continuous) {
           // Continuous collision checking duplicate last point

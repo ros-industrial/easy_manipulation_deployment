@@ -67,11 +67,11 @@ MoveitCollisionCheckerContext::MoveitCollisionCheckerContext(
       collision_detection::CollisionDetectorAllocatorFCL::create()
     );
   } else if (to_all_lower(collision_checking_plugin) == "bullet") {
-// #ifndef EMD_DYNAMIC_SAFETY_TESSERACT
-//     scene_->allocateCollisionDetector(
-//       collision_detection::CollisionDetectorAllocatorBullet::create()
-//     );
-// #endif
+#ifndef EMD_DYNAMIC_SAFETY_TESSERACT
+    scene_->allocateCollisionDetector(
+      collision_detection::CollisionDetectorAllocatorBullet::create()
+    );
+#endif
   }
 }
 
