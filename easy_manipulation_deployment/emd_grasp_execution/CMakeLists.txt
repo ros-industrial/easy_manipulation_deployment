@@ -22,7 +22,6 @@ find_package(emd_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(emd_dynamic_safety)
 find_package(yaml_cpp_vendor REQUIRED)
 
 include_directories(
@@ -67,11 +66,9 @@ add_library(grasp_execution_default_plugins
   SHARED
   src/moveit2/executor/default_executor.cpp
   src/gripper/dummy_gripper_driver.cpp
-  src/moveit2/executor/ds_async_executor.cpp
 )
 ament_target_dependencies(grasp_execution_default_plugins
   moveit_ros_planning_interface
-  emd_dynamic_safety
   rclcpp
 )
 
@@ -92,7 +89,6 @@ install(
 ament_export_dependencies(
   moveit_ros_planning_interface
   emd_msgs
-  emd_dynamic_safety
   tf2
   tf2_ros
   yaml_cpp_vendor

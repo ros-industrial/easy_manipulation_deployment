@@ -12,7 +12,6 @@
 
   <depend>moveit_ros_planning_interface</depend>
   <depend>emd_msgs</depend>
-  <depend>emd_dynamic_safety</depend>
   <depend>rclcpp</depend>
 
   <build_depend>pluginlib</build_depend>
