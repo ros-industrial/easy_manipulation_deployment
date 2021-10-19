@@ -104,7 +104,7 @@ void MoveitCollisionCheckerContext::run_discrete(
     collision_request_, collision_result_, current_state, scene_->getAllowedCollisionMatrix());
   distance = collision_result_.distance;
   result |= collision_result_.collision;
-  collision_result_.print();
+  // collision_result_.print();
 
   collision_result_.clear();
 
@@ -113,7 +113,7 @@ void MoveitCollisionCheckerContext::run_discrete(
 
   distance = std::min<double>(distance, collision_result_.distance);
   result |= collision_result_.collision;
-  collision_result_.print();
+  // collision_result_.print();
 
   collision_result_.clear();
 }
@@ -144,7 +144,7 @@ void MoveitCollisionCheckerContext::run_continuous(
     scene_->getAllowedCollisionMatrix());
   distance = collision_result_.distance;
   result |= collision_result_.collision;
-  collision_result_.print();
+  // collision_result_.print();
 
   collision_result_.clear();
   scene_->getCollisionEnvUnpadded()->checkSelfCollision(
@@ -152,7 +152,7 @@ void MoveitCollisionCheckerContext::run_continuous(
 
   distance = std::min<double>(distance, collision_result_.distance);
   result |= collision_result_.collision;
-  collision_result_.print();
+  // collision_result_.print();
 
   collision_result_.clear();
 }

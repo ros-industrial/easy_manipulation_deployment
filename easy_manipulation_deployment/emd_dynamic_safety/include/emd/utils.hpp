@@ -30,7 +30,7 @@ template<typename T>
 /**
  * Referenced from moveit servo.
  */
-inline bool declare_or_get_param(
+inline void declare_or_get_param(
   T & output_value,
   const std::string & param_name,
   const rclcpp::Node::SharedPtr & node,
@@ -59,14 +59,9 @@ inline bool declare_or_get_param(
       throw e;
     }
   }
-  if (output_value != default_value) {
-    RCLCPP_INFO_STREAM(
-      logger,
-      "Found parameter - " << param_name << ": " << output_value);
-    return true;
-  } else {
-    return false;
-  }
+  RCLCPP_INFO_STREAM(
+    logger,
+    "Found parameter - " << param_name << ": " << output_value);
 }
 
 }  // namespace emd
