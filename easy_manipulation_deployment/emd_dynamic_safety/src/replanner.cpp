@@ -116,6 +116,9 @@ public:
           break;
         }
       }
+      if (i == num_points) {
+        end_state = reference_trajectory_.points.back();
+      }
     }
     run_async(reference_trajectory_.joint_names, start_state, end_state);
   }
