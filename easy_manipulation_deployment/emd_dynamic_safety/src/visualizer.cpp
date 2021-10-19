@@ -129,7 +129,7 @@ void Visualizer::add_trajectory(
         break;
       }
     }
-    before = std::max<size_t>(i - 1, 0);
+    before = std::max<size_t>((i == 0) ? 0 : (i - 1), 0);  // Avoid unsigned int 0 minus 1
     after = std::min<size_t>(i, num_points - 1);
     trajectory_msgs::msg::JointTrajectoryPoint point;
     point.time_from_start = rclcpp::Duration::from_seconds(time_from_start);
