@@ -148,8 +148,8 @@ public:
    */
   virtual bool load_ee(
     const std::string & group_name,
-    const std::string & ee_brand,
     const std::string & ee_name,
+    const std::string & ee_brand,
     const std::string & ee_link,
     double ee_clearance,
     const std::string & ee_driver_plugin,
