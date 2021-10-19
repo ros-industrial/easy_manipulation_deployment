@@ -196,7 +196,7 @@ void CollisionChecker::Impl::add_trajectory(
         break;
       }
     }
-    before = std::max<size_t>(i - 1, 0);
+    before = std::max<size_t>((i == 0) ? 0 : (i - 1), 0);  // Avoid unsigned int 0 minus 1
     after = std::min<size_t>(i, num_points - 1);
     trajectory_msgs::msg::JointTrajectoryPoint point;
     point.time_from_start = rclcpp::Duration::from_seconds(time_from_start);
@@ -291,15 +291,18 @@ void CollisionChecker::Impl::run_once(
     return;
   }
 
-  itr_ = static_cast<int>((current_time - start_offset_) / step_);
-  itr_end_ = static_cast<int>((current_time + look_ahead_time - start_offset_) / step_);
+  int start_index = static_cast<int>((current_time - start_offset_) / step_);
+  int end_index = static_cast<int>((current_time + look_ahead_time - start_offset_) / step_);
   // end should not exceed trajectory max
-  if (itr_ < 0) {
-    itr_ = 0;
+  if (start_index < 0) {
+    start_index = 0;
   }
 
-  itr_end_ = std::min<int>(itr_end_, static_cast<int>(trajectory_.points.size()) - 1);
+  start_index = std::min<int>(start_index, static_cast<int>(trajectory_.points.size()) - 1);
+  end_index = std::min<int>(end_index, static_cast<int>(trajectory_.points.size()) - 1);
 
+  itr_ = start_index;
+  itr_end_ = end_index;
   {
     std::lock_guard<std::mutex> lk(init_m_);
     n_active_workers_ = thread_count_;
@@ -319,12 +322,12 @@ void CollisionChecker::Impl::run_once(
   // Ignore the first index, cuz ... cannot avoid..
   // TODO(anyone): fix the first index
   collision_time = -1;
-  if (results_[0]) {
-    collision_time = start_offset_;
+  if (results_[static_cast<size_t>(start_index)]) {
+    collision_time = start_offset_ + step_ * start_index;
   } else {
-    for (size_t idx = 1; idx < results_.size(); idx++) {
-      if (results_[idx]) {
-        collision_time = start_offset_ + (static_cast<int>(idx) - 1) * step_;
+    for (int idx = start_index + 1; idx <= end_index; idx++) {
+      if (results_[static_cast<size_t>(idx)]) {
+        collision_time = start_offset_ + (idx - 1) * step_;
         break;
       }
     }
