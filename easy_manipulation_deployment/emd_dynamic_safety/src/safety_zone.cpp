@@ -56,23 +56,9 @@ bool SafetyZone::set(const Option & option)
     return false;
   }
   if (verify()) {
-    printf(
-      "Safety Zone:\n"
-      "   -------      0\n"
-      "   BLIND\n"
-      "   -------      %.2e\n"
-      "   EMERGENCY\n"
-      "   -------      %.2e\n"
-      "   SLOWDOWN\n"
-      "   -------      %.2e\n"
-      "   REPLAN\n"
-      "   -------      %.2e\n"
-      "   SAFE\n",
-      zone_[BLIND], zone_[EMERGENCY], zone_[SLOWDOWN], zone_[REPLAN]);
-    fflush(stdout);
     return true;
   } else {
-    fprintf(stderr, "Zone limit is not strictly increasing");
+    fprintf(stderr, "Zone limit is not increasing");
     fflush(stderr);
     return false;
   }
@@ -86,6 +72,24 @@ uint8_t SafetyZone::get_zone(double point) const
     }
   }
   return SAFE;
+}
+
+void SafetyZone::print() const
+{
+  printf(
+    "Safety Zone:\n"
+    "   -------      0\n"
+    "   BLIND\n"
+    "   -------      %.2e\n"
+    "   EMERGENCY\n"
+    "   -------      %.2e\n"
+    "   SLOWDOWN\n"
+    "   -------      %.2e\n"
+    "   REPLAN\n"
+    "   -------      %.2e\n"
+    "   SAFE\n",
+    zone_[BLIND], zone_[EMERGENCY], zone_[SLOWDOWN], zone_[REPLAN]);
+  fflush(stdout);
 }
 
 }  // namespace dynamic_safety
