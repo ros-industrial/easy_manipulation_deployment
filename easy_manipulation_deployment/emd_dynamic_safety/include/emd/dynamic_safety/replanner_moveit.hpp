@@ -43,16 +43,16 @@ public:
     const dynamic_safety::ReplannerOption & option,
     const rclcpp::Node::SharedPtr & node);
 
-  virtual void run(
+  void run(
     const std::vector<std::string> & joint_names,
     const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
     const trajectory_msgs::msg::JointTrajectoryPoint & end_point,
     trajectory_msgs::msg::JointTrajectory & plan) override;
 
-  virtual void time_parameterize(
+  void time_parameterize(
     trajectory_msgs::msg::JointTrajectory & plan) override;
 
-  virtual void update(
+  void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
 protected:

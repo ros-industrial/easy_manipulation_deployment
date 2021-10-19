@@ -70,7 +70,8 @@ DynamicSafetyTrajectoryController::on_configure(const rclcpp_lifecycle::State & 
 
     safety_officer_->configure(node_);
     safety_officer_->set_new_trajectory_callback(
-      std::bind(&DynamicSafetyTrajectoryController::add_new_trajectory_msg, this,
+      std::bind(
+        &DynamicSafetyTrajectoryController::add_new_trajectory_msg, this,
         std::placeholders::_1));
   }
   return result;

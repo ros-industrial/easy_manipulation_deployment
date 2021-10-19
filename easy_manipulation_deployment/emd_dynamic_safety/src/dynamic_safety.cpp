@@ -17,6 +17,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -229,7 +230,7 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
         std::make_shared<rclcpp::AsyncParametersClient>(
         joint_limits_node, joint_limits_parameter_server);
 
-      while(!joint_limits_parameters_client->wait_for_service()) {
+      while (!joint_limits_parameters_client->wait_for_service()) {
         if (!rclcpp::ok()) {
           RCLCPP_ERROR(
             LOGGER, "Interrupted while waiting for %s service. Exiting.",
@@ -241,7 +242,8 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
           LOGGER, "%s service not available, waiting again...",
           joint_limits_parameter_server.c_str());
       }
-      RCLCPP_INFO(LOGGER, "Connected to joint limits server %s!!",
+      RCLCPP_INFO(
+        LOGGER, "Connected to joint limits server %s!!",
         joint_limits_parameter_server.c_str());
       rcl_interfaces::msg::ListParametersResult joint_limits_parameters;
       try {
@@ -258,11 +260,12 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
       size_t start_idx = joint_limits_parameter_namespace.size() + 1;
       for (auto & name : joint_limits_parameters.prefixes) {
         name.erase(name.begin(), name.begin() + static_cast<int>(start_idx));
-        auto jl_f = joint_limits_parameters_client->get_parameters({
-          joint_limits_parameter_namespace + "." + name + ".has_velocity_limits",
-          joint_limits_parameter_namespace + "." + name + ".max_velocity",
-          joint_limits_parameter_namespace + "." + name + ".has_acceleration_limits",
-          joint_limits_parameter_namespace + "." + name + ".max_acceleration"
+        auto jl_f = joint_limits_parameters_client->get_parameters(
+          {
+            joint_limits_parameter_namespace + "." + name + ".has_velocity_limits",
+            joint_limits_parameter_namespace + "." + name + ".max_velocity",
+            joint_limits_parameter_namespace + "." + name + ".has_acceleration_limits",
+            joint_limits_parameter_namespace + "." + name + ".max_acceleration"
           });
         rclcpp::spin_until_future_complete(joint_limits_node, jl_f);
         auto jl = jl_f.get();
@@ -277,10 +280,10 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
           RCLCPP_ERROR(LOGGER, e.what());
           continue;
         }
-
       }
       for (auto & limit : joint_limits) {
-        RCLCPP_ERROR(LOGGER, "joint: %s max_vel: %f max_accel: %f",
+        RCLCPP_ERROR(
+          LOGGER, "joint: %s max_vel: %f max_accel: %f",
           limit.first.c_str(),
           limit.second.first,
           limit.second.second);
@@ -395,7 +398,8 @@ public:
     scale_cache_.initRT(1);
   }
 
-  ~Impl() {
+  ~Impl()
+  {
     stop();
   }
 
@@ -491,7 +495,6 @@ protected:
   realtime_tools::RealtimeBuffer<double> current_time_cache_;
   realtime_tools::RealtimeBuffer<double> scale_cache_;
   // realtime_tools::RealtimeBuffer<octomap::OcTree> env_state_cache_;
-
 };
 
 void DynamicSafety::Impl::configure(
@@ -776,12 +779,14 @@ void DynamicSafety::Impl::_main_loop()
       // No replanning
       if (zone <= SafetyZone::EMERGENCY) {
         // Emergency stop
-        RCLCPP_ERROR_ONCE(node_->get_logger(),
+        RCLCPP_ERROR_ONCE(
+          node_->get_logger(),
           "Emergency stop!!");
         scale = 0.0001;
       } else {
         // Slow down
-        RCLCPP_WARN_ONCE(node_->get_logger(),
+        RCLCPP_WARN_ONCE(
+          node_->get_logger(),
           "Slowing down!!");
         scale -= scale_step;
         scale = std::max<double>(scale, 0.0001);
@@ -791,18 +796,21 @@ void DynamicSafety::Impl::_main_loop()
       double current_time = *current_time_cache_.readFromRT();
       if (zone <= SafetyZone::EMERGENCY) {
         // Emergency stop
-        RCLCPP_ERROR_ONCE(node_->get_logger(),
+        RCLCPP_ERROR_ONCE(
+          node_->get_logger(),
           "Emergency stop!!");
         scale = 0.0001;
       } else if (zone == SafetyZone::SLOWDOWN) {
         // TODO(anyone): Better Heuristic
         scale -= scale_step;
         double start_state_time =
-          (current_time + safety_zone_.get_zone_limit(SafetyZone::EMERGENCY) + collision_time_point_) / 2;
+          (current_time + safety_zone_.get_zone_limit(SafetyZone::EMERGENCY) +
+          collision_time_point_) / 2;
         _handle_replanner(start_state_time);
       } else if (zone == SafetyZone::REPLAN) {
         double start_state_time =
-          (current_time + safety_zone_.get_zone_limit(SafetyZone::SLOWDOWN) + collision_time_point_) / 2;
+          (current_time + safety_zone_.get_zone_limit(SafetyZone::SLOWDOWN) +
+          collision_time_point_) / 2;
         _handle_replanner(start_state_time);
       }
     }
@@ -872,12 +880,14 @@ double DynamicSafety::Impl::_cal_scale_time(
   return scale_time;
 }
 
-void DynamicSafety::Impl::_handle_replanner(double start_state_time) {
+void DynamicSafety::Impl::_handle_replanner(double start_state_time)
+{
   // Replanner not started
   auto status = replanner_.get_status();
   if (status == ReplannerStatus::IDLE) {
     // Replanner Started
-    RCLCPP_WARN_ONCE(LOGGER,
+    RCLCPP_WARN_ONCE(
+      LOGGER,
       "Starting replanner [%s] with starting time point",
       option_.replanner_options.planner.c_str());
     double end_state_time = _back_track_last_collision();
@@ -910,7 +920,8 @@ void DynamicSafety::Impl::_handle_replanner(double start_state_time) {
     }
   }
 }
-double DynamicSafety::Impl::_back_track_last_collision() {
+double DynamicSafety::Impl::_back_track_last_collision()
+{
   // Use collision checker to backtrack collision
   // This is not nearly as efficient right now to be improved.
   // TODO(anyone): Enable this in collision checker

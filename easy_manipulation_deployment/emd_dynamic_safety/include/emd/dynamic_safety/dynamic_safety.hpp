@@ -17,8 +17,10 @@
 
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "emd/utils.hpp"
 #include "emd/dynamic_safety/safety_zone.hpp"
