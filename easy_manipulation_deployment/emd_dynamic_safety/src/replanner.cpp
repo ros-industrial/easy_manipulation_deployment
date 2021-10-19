@@ -14,8 +14,10 @@
 
 #include <algorithm>
 #include <memory>
-#include <utility>
+#include <string>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "emd/dynamic_safety/replanner.hpp"
 #include "emd/interpolate.hpp"
@@ -42,7 +44,8 @@ public:
   {
     if (option.framework == "moveit") {
 #ifdef EMD_DYNAMIC_SAFETY_MOVEIT
-      context_ = std::make_unique<dynamic_safety_moveit::MoveitReplannerContext>(robot_urdf, robot_srdf, option, node);
+      context_ = std::make_unique<dynamic_safety_moveit::MoveitReplannerContext>(
+        robot_urdf, robot_srdf, option, node);
 #endif
     }
     deadline_ = option.deadline;
@@ -54,11 +57,14 @@ public:
     const trajectory_msgs::msg::JointTrajectoryPoint & end_point)
   {
     start_time_ = std::chrono::steady_clock::now();
-    plan_future_ = std::async(std::launch::async, &Impl::_run, this, joint_names, start_point, end_point);
+    plan_future_ = std::async(
+      std::launch::async, &Impl::_run, this,
+      joint_names, start_point, end_point);
   }
 
   void add_trajectory(
-    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt) {
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt)
+  {
     // Deep copy;
     reference_trajectory_ = *rt;
   }
@@ -84,7 +90,8 @@ public:
     size_t i = 0;
     for (; i < num_points; i++) {
       if (rclcpp::Duration(reference_trajectory_.points[i].time_from_start).seconds() >=
-          start_state_time_) {
+        start_state_time_)
+      {
         before = std::max<size_t>((i == 0) ? 0 : (i - 1), 0);  // Avoid unsigned int 0 minus 1
         after = std::min<size_t>(i, num_points - 1);
         emd::core::interpolate_between_points(
@@ -104,7 +111,8 @@ public:
     if (end_state_time_ > 0) {
       for (; i < num_points; i++) {
         if (rclcpp::Duration(reference_trajectory_.points[i].time_from_start).seconds() >=
-            end_state_time_) {
+          end_state_time_)
+        {
           before = std::max<size_t>((i == 0) ? 0 : (i - 1), 0);  // Avoid unsigned int 0 minus 1
           after = std::min<size_t>(i, num_points - 1);
           emd::core::interpolate_between_points(
@@ -128,13 +136,13 @@ public:
     const std::vector<std::string> & joint_names,
     const trajectory_msgs::msg::JointTrajectoryPoint & /*current_state*/)
   {
-      // Sort current state to plan joint_names
-      // gather current name ordering of plan joint name
-      // O(n^2) vs O(n) -> current algo
-      auto reorder_joint = [](
-        const std::vector<std::string> & reference_joint_order,
-        std::vector<std::string> & current_joint_order,
-        trajectory_msgs::msg::JointTrajectoryPoint & state) {
+    // Sort current state to plan joint_names
+    // gather current name ordering of plan joint name
+    // O(n^2) vs O(n) -> current algo
+    auto reorder_joint = [](
+      const std::vector<std::string> & reference_joint_order,
+      std::vector<std::string> & current_joint_order,
+      trajectory_msgs::msg::JointTrajectoryPoint & state) {
         std::unordered_map<std::string, size_t> ref_joint_idx_map;
         std::vector<size_t> joint_permutation;
         for (size_t i = 0; i < reference_joint_order.size(); i++) {
@@ -187,7 +195,8 @@ public:
           if (reference_trajectory_.joint_names != plan_.joint_names) {
             // Re-order joint if necessary
             std::vector<std::string> sorted_ref_joint_names = reference_trajectory_.joint_names;
-            trajectory_msgs::msg::JointTrajectoryPoint sorted_point = reference_trajectory_.points[i];
+            trajectory_msgs::msg::JointTrajectoryPoint sorted_point =
+              reference_trajectory_.points[i];
             reorder_joint(plan_.joint_names, sorted_ref_joint_names, sorted_point);
             start_segment.push_back(sorted_point);
           } else {
@@ -229,15 +238,15 @@ public:
 
   uint8_t get_status() const
   {
-    if (plan_future_.valid()){
+    if (plan_future_.valid()) {
       auto status = plan_future_.wait_for(std::chrono::nanoseconds(0));
       double time_passed = std::chrono::duration<double, std::ratio<1>>(
-          std::chrono::steady_clock::now() - start_time_).count();
-      switch(status) {
+        std::chrono::steady_clock::now() - start_time_).count();
+      switch (status) {
         case std::future_status::deferred:
           return ReplannerStatus::IDLE;
         case std::future_status::ready:
-          return  ReplannerStatus::SUCCEED;
+          return ReplannerStatus::SUCCEED;
         case std::future_status::timeout:
           return (time_passed > deadline_) ? ReplannerStatus::TIMEOUT : ReplannerStatus::ONGOING;
         default:
@@ -251,7 +260,8 @@ public:
   trajectory_msgs::msg::JointTrajectory::SharedPtr get_result()
   {
     plan_ = plan_future_.get();
-    RCLCPP_INFO(LOGGER,
+    RCLCPP_INFO(
+      LOGGER,
       "Total time take: %.5fs",
       std::chrono::duration<double, std::ratio<1>>(
         std::chrono::steady_clock::now() - start_time_).count());
@@ -268,7 +278,8 @@ private:
   trajectory_msgs::msg::JointTrajectory _run(
     const std::vector<std::string> joint_names,
     const trajectory_msgs::msg::JointTrajectoryPoint start_point,
-    const trajectory_msgs::msg::JointTrajectoryPoint end_point) {
+    const trajectory_msgs::msg::JointTrajectoryPoint end_point)
+  {
     trajectory_msgs::msg::JointTrajectory trajectory;
     context_->run(joint_names, start_point, end_point, trajectory);
     return trajectory;
@@ -304,9 +315,9 @@ void Replanner::configure(
 }
 
 void Replanner::run_async(
-    const std::vector<std::string> & joint_names,
-    const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
-    const trajectory_msgs::msg::JointTrajectoryPoint & end_point)
+  const std::vector<std::string> & joint_names,
+  const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
+  const trajectory_msgs::msg::JointTrajectoryPoint & end_point)
 {
   impl_ptr_->run_async(joint_names, start_point, end_point);
 }
@@ -338,11 +349,13 @@ void Replanner::update(
   impl_ptr_->update(msg);
 }
 
-uint8_t Replanner::get_status() const {
+uint8_t Replanner::get_status() const
+{
   return impl_ptr_->get_status();
 }
 
-trajectory_msgs::msg::JointTrajectory::SharedPtr Replanner::get_result() {
+trajectory_msgs::msg::JointTrajectory::SharedPtr Replanner::get_result()
+{
   return impl_ptr_->get_result();
 }
 }  // namespace dynamic_safety

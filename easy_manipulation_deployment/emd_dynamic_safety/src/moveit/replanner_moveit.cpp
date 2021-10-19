@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "emd/dynamic_safety/replanner_moveit.hpp"
@@ -57,7 +58,7 @@ MoveitReplannerContext::MoveitReplannerContext(
   auto joint_limit_parameters_client =
     std::make_shared<rclcpp::AsyncParametersClient>(
     joint_limits_node, option.joint_limits_parameter_server);
-  while(!joint_limit_parameters_client->wait_for_service()) {
+  while (!joint_limit_parameters_client->wait_for_service()) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(
         LOGGER, "Interrupted while waiting for %s service. Exiting.",
@@ -69,7 +70,8 @@ MoveitReplannerContext::MoveitReplannerContext(
       LOGGER, "%s service not available, waiting again...",
       option.joint_limits_parameter_server.c_str());
   }
-  RCLCPP_INFO(LOGGER, "Connected to description server %s!!",
+  RCLCPP_INFO(
+    LOGGER, "Connected to description server %s!!",
     option.joint_limits_parameter_server.c_str());
 
   auto joint_group = rm->getJointModelGroup(option.group);
@@ -82,13 +84,13 @@ MoveitReplannerContext::MoveitReplannerContext(
     std::vector<rclcpp::Parameter> hal_p;
     auto hal_f = joint_limit_parameters_client->get_parameters(
       {option.joint_limits_parameter_namespace + "." +
-      joint->getName() + ".has_acceleration_limits"});
+        joint->getName() + ".has_acceleration_limits"});
     rclcpp::spin_until_future_complete(joint_limits_node, hal_f);
     if (hal_f.get()[0].as_bool()) {
       RCLCPP_INFO(LOGGER, "Found acceleration limits");
       auto al_f = joint_limit_parameters_client->get_parameters(
         {option.joint_limits_parameter_namespace + "." +
-        joint->getName() + ".max_acceleration"});
+          joint->getName() + ".max_acceleration"});
       rclcpp::spin_until_future_complete(joint_limits_node, al_f);
       bound.acceleration_bounded_ = true;
       bound.max_acceleration_ = fabs(al_f.get()[0].as_double());
@@ -104,7 +106,7 @@ MoveitReplannerContext::MoveitReplannerContext(
   // load the planning plugin
   auto planner_plugin_loader =
     std::make_unique<pluginlib::ClassLoader<planning_interface::PlannerManager>>(
-      "moveit_core", "planning_interface::PlannerManager");
+    "moveit_core", "planning_interface::PlannerManager");
   auto to_all_lower = [](std::string in) -> std::string {
       std::transform(in.begin(), in.end(), in.begin(), ::tolower);
       return in;
@@ -127,7 +129,7 @@ MoveitReplannerContext::MoveitReplannerContext(
     rclcpp::NodeOptions().allow_undeclared_parameters(true));
   auto parameters_client = std::make_shared<rclcpp::AsyncParametersClient>(
     planner_config_loader_node, option.planner_parameter_server);
-  while(!parameters_client->wait_for_service()) {
+  while (!parameters_client->wait_for_service()) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(
         LOGGER, "Interrupted while waiting for %s service. Exiting.",
@@ -139,10 +141,11 @@ MoveitReplannerContext::MoveitReplannerContext(
       LOGGER, "%s service not available, waiting again...",
       option.planner_parameter_server.c_str());
   }
-  RCLCPP_INFO(LOGGER, "Connected to description server %s!!",
+  RCLCPP_INFO(
+    LOGGER, "Connected to description server %s!!",
     option.planner_parameter_server.c_str());
   rcl_interfaces::msg::ListParametersResult planner_config;
-  while(planner_config.names.empty()) {
+  while (planner_config.names.empty()) {
     try {
       RCLCPP_INFO(LOGGER, "Get parameters");
       auto planner_config_future = parameters_client->list_parameters(
@@ -172,7 +175,10 @@ MoveitReplannerContext::MoveitReplannerContext(
   rclcpp::spin_until_future_complete(planner_config_loader_node, f);
   planner_config_loader_node->set_parameters(f.get());
 
-  if (!planning_manager_->initialize(scene_->getRobotModel(), planner_config_loader_node, option.planner_parameter_namespace)) {
+  if (!planning_manager_->initialize(
+      scene_->getRobotModel(),
+      planner_config_loader_node, option.planner_parameter_namespace))
+  {
     throw std::runtime_error("Unable to initialize planning plugin");
   }
 
@@ -187,10 +193,10 @@ MoveitReplannerContext::MoveitReplannerContext(
 }
 
 void MoveitReplannerContext::run(
-    const std::vector<std::string> & joint_names,
-    const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
-    const trajectory_msgs::msg::JointTrajectoryPoint & end_point,
-    trajectory_msgs::msg::JointTrajectory & plan)
+  const std::vector<std::string> & joint_names,
+  const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
+  const trajectory_msgs::msg::JointTrajectoryPoint & end_point,
+  trajectory_msgs::msg::JointTrajectory & plan)
 {
   // TODO(anyone): This is still a bit unsafe, not thread safe
   // Nothing I can think of to solve this right now
@@ -216,7 +222,7 @@ void MoveitReplannerContext::run(
   planning_interface::MotionPlanResponse planning_response;
 
   auto context =
-  planning_manager_->getPlanningContext(
+    planning_manager_->getPlanningContext(
     scene_, planning_request_, planning_response.error_code_);
   if (context) {
     context->solve(planning_response);

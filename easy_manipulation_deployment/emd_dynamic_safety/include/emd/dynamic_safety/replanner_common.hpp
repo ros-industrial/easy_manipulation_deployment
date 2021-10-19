@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -56,11 +57,11 @@ struct ReplannerOption
 /// Flags for status
 namespace ReplannerStatus
 {
-  static const uint8_t
-    IDLE = 0,
-    ONGOING = 1,
-    SUCCEED = 2,
-    TIMEOUT = 3;  // Not used at the moment
+static const uint8_t
+  IDLE = 0,
+  ONGOING = 1,
+  SUCCEED = 2,
+  TIMEOUT = 3;    // Not used at the moment
 }  // ReplannerStatus
 
 /// Collision checking context to-be-inherited.

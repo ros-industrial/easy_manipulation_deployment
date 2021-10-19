@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "test_hardware.hpp"
 #include "emd/dynamic_safety/replanner.hpp"
@@ -47,10 +48,10 @@ void print_traj(const trajectory_msgs::msg::JointTrajectory::SharedPtr result)
     for (auto & effort : point.effort) {
       printf("  - %.8f\n", effort);
     }
-    printf("  time_from_start: %.8fsecs\n",
+    printf(
+      "  time_from_start: %.8fsecs\n",
       rclcpp::Duration(point.time_from_start).seconds());
   }
-
 }
 
 class ReplannerTest : public ::testing::Test
@@ -87,36 +88,36 @@ protected:
     // OMPL Planner configuration
     planner_config_node_ = std::make_shared<rclcpp::Node>("test_planner_config_node");
     planner_config_node_->declare_parameter(
-        "ompl.panda_arm.planner_configs",
-        std::vector<std::string>{
-          "RRTConnectkConfigDefault",
-          "LBKPIECEkConfigDefault"
-        });
+      "ompl.panda_arm.planner_configs",
+      std::vector<std::string>{
+        "RRTConnectkConfigDefault",
+        "LBKPIECEkConfigDefault"
+      });
 
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.RRTConnectkConfigDefault.type",
-        "geometric::RRTConnect");
+      "ompl.planner_configs.RRTConnectkConfigDefault.type",
+      "geometric::RRTConnect");
 
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.RRTConnectkConfigDefault.range",
-        0.0);
+      "ompl.planner_configs.RRTConnectkConfigDefault.range",
+      0.0);
 
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.LBKPIECEkConfigDefault.type",
-        "geometric::LBKPIECE");
+      "ompl.planner_configs.LBKPIECEkConfigDefault.type",
+      "geometric::LBKPIECE");
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.LBKPIECEkConfigDefault.range",
-        0.0);
+      "ompl.planner_configs.LBKPIECEkConfigDefault.range",
+      0.0);
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.LBKPIECEkConfigDefault.border_fraction",
-        0.9);
+      "ompl.planner_configs.LBKPIECEkConfigDefault.border_fraction",
+      0.9);
     planner_config_node_->declare_parameter(
-        "ompl.planner_configs.LBKPIECEkConfigDefault.min_valid_path_fraction",
-        "0.5");
+      "ompl.planner_configs.LBKPIECEkConfigDefault.min_valid_path_fraction",
+      "0.5");
     // Projection evaluator is needed for LBKPIECE
     planner_config_node_->declare_parameter(
-        "ompl.panda_arm.projection_evaluator",
-        "joints(panda_joint1,panda_joint2)");
+      "ompl.panda_arm.projection_evaluator",
+      "joints(panda_joint1,panda_joint2)");
 
     // Joint limit configuration
     joint_limit_node_ = std::make_shared<rclcpp::Node>("test_joint_limit_node");
@@ -165,7 +166,8 @@ protected:
 
     ok_ = true;
 
-    thr_ = std::thread([this](){
+    thr_ = std::thread(
+      [this]() {
         rclcpp::executors::SingleThreadedExecutor executor;
         executor.add_node(planner_config_node_);
         executor.add_node(joint_limit_node_);
@@ -219,9 +221,9 @@ TEST_F(ReplannerTest, MoveItOMPLReplanner)
   EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::IDLE);
   replanner_.run_async(joint_names_, start_point, end_point);
   EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::ONGOING);
-  std::thread thr([&result, this](){
-    result = replanner_.get_result();
-  });
+  std::thread thr([&result, this]() {
+      result = replanner_.get_result();
+    });
   rclcpp::sleep_for(std::chrono::seconds(1));
   EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::IDLE);
   thr.join();
@@ -259,7 +261,7 @@ TEST_F(ReplannerTest, MoveItOMPLReplannerTimeout)
 
 }  // namespace test_dynamic_safety
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
