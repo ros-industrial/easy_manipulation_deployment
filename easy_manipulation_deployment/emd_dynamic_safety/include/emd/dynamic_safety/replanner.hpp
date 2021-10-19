@@ -19,75 +19,114 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "moveit/planning_pipeline/planning_pipeline.h"
-#include "moveit/kinematic_constraints/utils.h"
-#include "moveit/robot_state/conversions.h"
+#include "emd/dynamic_safety/replanner_common.hpp"
 
 namespace dynamic_safety
 {
 
+/// Collision checking context to-be-inherited.
 class Replanner
 {
 public:
-  struct Option
-  {
-    std::string planner_name;
-  };
+  /// Constructor
+  Replanner();
 
+  /// Destructor
+  virtual ~Replanner();
+
+  /// Replanning implementation pointer.
+  class Impl;
+
+  /// Configure the replanner to prepare for planning.
+  /**
+   * \param[in] option Collison checker options.
+   * \param[in] node to inherite parameters from (MoveIt)
+   * \param[in] robot_urdf Robot URDF Model.
+   * \param[in] robot_srdf Robot SRDFConfiguration
+   */
   void configure(
-    const planning_scene::PlanningScenePtr & scene,
-    const robot_trajectory::RobotTrajectoryPtr & rt,
+    const ReplannerOption & option,
     const rclcpp::Node::SharedPtr & node,
-    const Option & option);
+    const std::string & robot_urdf,
+    const std::string & robot_srdf);
 
-  void start(
-    double start_time_point,
-    double deadline);
+  /// Run asynchronous job to start planning
+  /**
+   * \param[in] joint_names Joint names order for the start point.
+   * \param[in] start_point Robot start state.
+   * \param[in] end_point Robot end state.
+   */
+  void run_async(
+    const std::vector<std::string> & joint_names,
+    const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
+    const trajectory_msgs::msg::JointTrajectoryPoint & end_point);
 
+
+  /// Specialized replanning feature, adding reference trajectory
+  /**
+   * This function needs to be used before `run_async(start_state_time)`.
+   *
+   * \param[in] rt trajectory used as reference for replanning.
+   */
+  void add_trajectory(
+    const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt);
+
+  /// Specialized replanning feature, replan with a starting time on a referenced trajectory.
+  /**
+   * `add_trajectory()` needs to be called before using this function.
+   *
+   * \param[in] start_state_time start time of the reference
+   * \param[in] end_state_time start time of the reference
+   */
+  void run_async(
+    double start_state_time,
+    double end_state_time = -1.0);
+
+  /// Configure the replanner to prepare for planning.
+  /**
+   * \param[in] option Collison checker options.
+   * \param[in] node to inherite parameters from (MoveIt)
+   * \param[in] robot_urdf Robot URDF Model.
+   * \param[in] robot_srdf Robot SRDFConfiguration
+   */
+  trajectory_msgs::msg::JointTrajectory::SharedPtr flatten_result(
+    double current_time,
+    const std::vector<std::string> & joint_names,
+    const trajectory_msgs::msg::JointTrajectoryPoint & current_state);
+
+  /// Get Replanner status
+  /**
+   * Status value defined as follows
+   * ```cpp
+   * struct Status
+   * {
+   *   static const uint8_t
+   *     IDLE = 0,
+   *     ONGOING = 1,
+   *     SUCCEED = 2,
+   *     TIMEOUT = 3;
+   * };
+   * ```
+   * \return replanner status
+   */
+  uint8_t get_status() const;
+
+  /// Get Replanner status
+  /**
+   * \return New trajectory
+   */
+  trajectory_msgs::msg::JointTrajectory::SharedPtr get_result();
+
+  /// Update joint states
+  /**
+   * \param[in] joint_state Robot joint state to reference and update from.
+   */
   void update(
-    const sensor_msgs::msg::JointState::SharedPtr & msg);
-
-  bool started() const
-  {
-    return static_cast<bool>(started_);
-  }
-
-  bool get_result() const
-  {
-    return static_cast<bool>(result_);
-  }
-
-  void reset();
-
-  const robot_trajectory::RobotTrajectoryPtr & get_trajectory() const
-  {
-    return current_traj_;
-  }
+    const sensor_msgs::msg::JointState & joint_states);
 
 private:
-  void _replan(double start_time_point);
-
-  void _replan_internal(
-    double start_time_point,
-    std::promise<bool> && sig);
-
-  robot_trajectory::RobotTrajectoryPtr current_traj_;
-  moveit::core::RobotStatePtr start_state_;
-  moveit::core::RobotStatePtr current_state_;
-  planning_scene::PlanningScenePtr scene_;
-
-  planning_pipeline::PlanningPipelinePtr planner_;
-
-  planning_interface::MotionPlanRequest req_;
-  planning_interface::MotionPlanResponse res_;
-
-  std::shared_ptr<std::thread> planner_thr_;
-  std::shared_ptr<std::thread> planner_monitor_thr_;
-
-  double deadline_;
-
-  std::atomic_bool started_;
-  std::atomic_bool result_;
+  // Implementation Pointer
+  std::unique_ptr<Impl> impl_ptr_;
 };
 
 }  // namespace dynamic_safety

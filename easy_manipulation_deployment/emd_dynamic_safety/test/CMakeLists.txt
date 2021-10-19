@@ -18,5 +18,12 @@ ament_add_gtest(test_collision_checking
 target_link_libraries(test_collision_checking
   test_hardware
   ${PROJECT_NAME}
-  ${PLANNING_FRAMEWORK_LIBRARY}
+)
+
+ament_add_gtest(test_replanner
+  test_replanner.cpp
+)
+target_link_libraries(test_replanner
+  test_hardware
+  ${PROJECT_NAME}
 )

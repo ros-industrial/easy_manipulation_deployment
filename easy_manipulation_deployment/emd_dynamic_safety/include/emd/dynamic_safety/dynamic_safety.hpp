@@ -23,7 +23,7 @@
 #include "emd/dynamic_safety/safety_zone.hpp"
 #include "emd/dynamic_safety/collision_checker.hpp"
 // #include "emd/dynamic_safety/next_point_publisher.hpp"
-// #include "emd/dynamic_safety/replanner.hpp"
+#include "emd/dynamic_safety/replanner.hpp"
 #include "emd/dynamic_safety/visualizer.hpp"
 #include "emd/profiler.hpp"
 #include "realtime_tools/realtime_buffer.h"
@@ -41,6 +41,11 @@ struct Option
 
   std::string description_server;
 
+  std::string joint_limits_parameter_server;
+  std::string joint_limits_parameter_namespace;
+
+  std::unordered_map<std::string, std::pair<double, double>> joint_limits;
+
   std::string robot_description;
   std::string robot_description_semantic;
 
@@ -56,7 +61,7 @@ struct Option
 
   // NextPointPublisher::Option next_point_publisher_options;
 
-  // Replanner::Option replanner_options;
+  ReplannerOption replanner_options;
 
   Visualizer::Option visualizer_options;
 
@@ -95,6 +100,12 @@ public:
 
   void configure(
     const rclcpp::Node::SharedPtr & node);
+
+  void set_new_trajectory_callback(
+    std::function<void(const trajectory_msgs::msg::JointTrajectory::SharedPtr &)> cb)
+  {
+    NewTrajectoryCB = cb;
+  }
 
   void add_trajectory(
     const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt);
@@ -140,23 +151,15 @@ private:
 
   double _cal_scale_time(
     const CurrentState & current_state,
-    double max_accel,
     double current_scale,
-    double target_scale)
-  {
-    double scale_time = -1.0;
-    if (!current_state.state.velocities.empty()) {
-      for (size_t i = 0; i < current_state.state.velocities.size(); i++) {
-        double temp_scale_time =
-          ::fabs(current_state.state.velocities[i] * (current_scale - target_scale)) /
-          current_scale / max_accel;
-        if (temp_scale_time > scale_time) {
-          scale_time = temp_scale_time;
-        }
-      }
-    }
-    return scale_time;
-  }
+    double target_scale);
+
+  void _handle_replanner(double start_state_time);
+
+  // Temporary functions to be moved into collision checker
+  double _back_track_last_collision();
+  double full_duration_;
+  std::function<void(const trajectory_msgs::msg::JointTrajectory::SharedPtr &)> NewTrajectoryCB;
 
   Option option_;
 
@@ -166,12 +169,10 @@ private:
   rclcpp::CallbackGroup::SharedPtr env_state_callback_group_;
   rclcpp::CallbackGroup::SharedPtr main_callback_group_;
 
-  // moveit::core::RobotStatePtr current_state_;
-
   CollisionChecker collision_checker_;
   SafetyZone safety_zone_;
   // NextPointPublisher next_point_publisher_;
-  // Replanner replanner_;
+  Replanner replanner_;
   Visualizer visualizer_;
 
   double collision_time_point_;

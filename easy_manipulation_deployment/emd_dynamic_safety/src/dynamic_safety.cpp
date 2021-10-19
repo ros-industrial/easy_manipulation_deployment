@@ -26,6 +26,7 @@ namespace dynamic_safety
 {
 
 static const rclcpp::Logger & LOGGER = rclcpp::get_logger("dynamic_safety");
+static const double LOG_RATE = 0.5;  // This is duration
 
 const Option & Option::load(const rclcpp::Node::SharedPtr & node)
 {
@@ -201,6 +202,85 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
       collision_checker_options.thread_count =
         static_cast<int>(std::thread::hardware_concurrency()) / 2;
     }
+
+    // Joint limit parameters needed for dynamic parameterization
+    // of slow down time
+    if (safety_zone_options.slow_down_time <= 0) {
+      emd::declare_or_get_param<std::string>(
+        joint_limits_parameter_server,
+        "dynamic_safety.joint_limits_parameter_server",
+        node, LOGGER);
+      emd::declare_or_get_param<std::string>(
+        joint_limits_parameter_namespace,
+        "dynamic_safety.joint_limits_parameter_namespace",
+        node, LOGGER);
+
+      // Joint Limit loader
+      // new node for parameter loading
+      auto joint_limits_node = std::make_shared<rclcpp::Node>(
+        std::string(
+          node->get_name()) + "_joint_limits_loader");
+      auto joint_limits_parameters_client =
+        std::make_shared<rclcpp::AsyncParametersClient>(
+        joint_limits_node, joint_limits_parameter_server);
+
+      while(!joint_limits_parameters_client->wait_for_service()) {
+        if (!rclcpp::ok()) {
+          RCLCPP_ERROR(
+            LOGGER, "Interrupted while waiting for %s service. Exiting.",
+            joint_limits_parameter_server.c_str());
+          // TODO(anyone): exception handling.
+          break;
+        }
+        RCLCPP_ERROR(
+          LOGGER, "%s service not available, waiting again...",
+          joint_limits_parameter_server.c_str());
+      }
+      RCLCPP_INFO(LOGGER, "Connected to joint limits server %s!!",
+        joint_limits_parameter_server.c_str());
+      rcl_interfaces::msg::ListParametersResult joint_limits_parameters;
+      try {
+        RCLCPP_INFO(LOGGER, "Get parameters");
+        auto joint_limits_future = joint_limits_parameters_client->list_parameters(
+          {joint_limits_parameter_namespace},
+          5);
+        rclcpp::spin_until_future_complete(
+          joint_limits_node, joint_limits_future);
+        joint_limits_parameters = joint_limits_future.get();
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(LOGGER, "%s", e.what());
+      }
+      size_t start_idx = joint_limits_parameter_namespace.size() + 1;
+      for (auto & name : joint_limits_parameters.prefixes) {
+        name.erase(name.begin(), name.begin() + static_cast<int>(start_idx));
+        auto jl_f = joint_limits_parameters_client->get_parameters({
+          joint_limits_parameter_namespace + "." + name + ".has_velocity_limits",
+          joint_limits_parameter_namespace + "." + name + ".max_velocity",
+          joint_limits_parameter_namespace + "." + name + ".has_acceleration_limits",
+          joint_limits_parameter_namespace + "." + name + ".max_acceleration"
+          });
+        rclcpp::spin_until_future_complete(joint_limits_node, jl_f);
+        auto jl = jl_f.get();
+        try {
+          if (jl[0].as_bool()) {
+            joint_limits[name].first = jl[1].as_double();
+          }
+          if (jl[2].as_bool()) {
+            joint_limits[name].second = jl[3].as_double();
+          }
+        } catch (const rclcpp::ParameterTypeException & e) {
+          RCLCPP_ERROR(LOGGER, e.what());
+          continue;
+        }
+
+      }
+      for (auto & limit : joint_limits) {
+        RCLCPP_ERROR(LOGGER, "joint: %s max_vel: %f max_accel: %f",
+          limit.first.c_str(),
+          limit.second.first,
+          limit.second.second);
+      }
+    }
   }
 
   // // Next point publisher parameters
@@ -232,13 +312,60 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
   //   "next_point_publisher.publish_joint_effort",
   //   node, LOGGER, false);
 
-  // // Replanner parameters
-  // if (allow_replan) {
-  //   emd::declare_or_get_param<std::string>(
-  //     replanner_options.planner_name,
-  //     "replanner.planner_name",
-  //     node, LOGGER);
-  // }
+  // Replanner parameters
+  if (allow_replan) {
+    emd::declare_or_get_param<std::string>(
+      replanner_options.framework,
+      "dynamic_safety.replanner.framework",
+      node, LOGGER, replanner_options.framework);
+
+    emd::declare_or_get_param<std::string>(
+      replanner_options.planner,
+      "dynamic_safety.replanner.planner",
+      node, LOGGER, replanner_options.planner);
+
+    emd::declare_or_get_param<std::string>(
+      replanner_options.time_parameterization,
+      "dynamic_safety.replanner.time_parameterization",
+      node, LOGGER, replanner_options.time_parameterization);
+
+    emd::declare_or_get_param<std::string>(
+      replanner_options.group,
+      "dynamic_safety.replanner.group",
+      node, LOGGER);
+
+    emd::declare_or_get_param<double>(
+      replanner_options.deadline,
+      "dynamic_safety.replanner.deadline",
+      node, LOGGER);
+
+    emd::declare_or_get_param<std::string>(
+      replanner_options.joint_limits_parameter_server,
+      "dynamic_safety.replanner.joint_limit_parameter_server",
+      node, LOGGER, joint_limits_parameter_server);
+    emd::declare_or_get_param<std::string>(
+      replanner_options.joint_limits_parameter_namespace,
+      "dynamic_safety.replanner.joint_limit_parameter_namespace",
+      node, LOGGER, joint_limits_parameter_namespace);
+
+    if (replanner_options.framework == "moveit") {
+      if (replanner_options.planner == "ompl") {
+        emd::declare_or_get_param<std::string>(
+          replanner_options.ompl_planner_id,
+          "dynamic_safety.replanner.ompl_planner_id",
+          node, LOGGER);
+      }
+
+      emd::declare_or_get_param<std::string>(
+        replanner_options.planner_parameter_server,
+        "dynamic_safety.replanner.planner_parameter_server",
+        node, LOGGER);
+      emd::declare_or_get_param<std::string>(
+        replanner_options.planner_parameter_namespace,
+        "dynamic_safety.replanner.planner_parameter_namespace",
+        node, LOGGER);
+    }
+  }
 
   if (visualize) {
     // TODO(Briancbn): scene synchronization
@@ -304,19 +431,28 @@ void DynamicSafety::configure(
   // Blind zone is the iteration period
   option_.safety_zone_options.collision_checking_deadline = 1.0 / option_.rate;
 
-  if (!safety_zone_.set(option_.safety_zone_options)) {
-    throw std::runtime_error("Wrong safety zone parameters");
-  }
-
   // RCLCPP_INFO(LOGGER, "Configuring next point publisher");
   // next_point_publisher_.configure(
   //   rt, option_.next_point_publisher_options, node, option_.rate);
 
   // current_state_ = std::make_shared<moveit::core::RobotState>(rt->getRobotModel());
 
-  // if (option_.allow_replan) {
-  //   replanner_.configure(scene, rt, node, option_.replanner_options);
-  // }
+  if (option_.allow_replan) {
+    replanner_.configure(
+      option_.replanner_options,
+      node,
+      option_.robot_description,
+      option_.robot_description_semantic);
+    option_.safety_zone_options.replan_deadline = option_.replanner_options.deadline;
+    NewTrajectoryCB = std::bind(&DynamicSafety::add_trajectory, this, std::placeholders::_1);
+  }
+
+
+  if (!safety_zone_.set(option_.safety_zone_options)) {
+    throw std::runtime_error("Wrong safety zone parameters");
+  } else {
+    safety_zone_.print();
+  }
 
   if (option_.visualize) {
     visualizer_.configure(
@@ -373,8 +509,12 @@ void DynamicSafety::add_trajectory(
   const trajectory_msgs::msg::JointTrajectory::SharedPtr & rt)
 {
   collision_checker_.add_trajectory(rt);
+  full_duration_ = rclcpp::Duration(rt->points.back().time_from_start).seconds();
   if (option_.visualize) {
     visualizer_.add_trajectory(rt);
+  }
+  if (option_.allow_replan) {
+    replanner_.add_trajectory(rt);
   }
   activated_ = true;
 }
@@ -414,7 +554,9 @@ void DynamicSafety::start()
 
       started = true;
 
-      // visualizer_.start();
+      if (option_.visualize) {
+        visualizer_.start();
+      }
       sig_ = std::promise<void>();
       future_ = sig_.get_future();
       RCLCPP_INFO(LOGGER, "All started");
@@ -466,6 +608,9 @@ void DynamicSafety::_main_loop()
 {
   // Update environment
   collision_checker_.update(*env_state_cache_.readFromRT());
+  if (option_.allow_replan) {
+    replanner_.update(*env_state_cache_.readFromRT());
+  }
 
   // get scaled time point
   double current_time_point = *current_time_cache_.readFromRT();
@@ -480,41 +625,62 @@ void DynamicSafety::_main_loop()
   );
 
   double scale = *scale_cache_.readFromRT();
+
+  // Dynamically adjust slow down time
+  if (option_.safety_zone_options.slow_down_time <= 0 && option_.dynamic_parameterization) {
+    SafetyZone::Option dynamic_option = option_.safety_zone_options;
+    if (scale != 0.0001) {
+      dynamic_option.slow_down_time =
+        _cal_scale_time(*current_state_cache_.readFromRT(), scale, 0.0001);
+    } else {
+      dynamic_option.slow_down_time = 0;
+    }
+
+    // Dynamically set scale step
+    if (dynamic_option.slow_down_time > 0) {
+      safety_zone_.set(dynamic_option);
+
+      // Update visualizer as well
+      if (option_.visualize) {
+        visualizer_.update(dynamic_option);
+      }
+    } else if (scale != 0.0001) {
+      RCLCPP_ERROR(
+        LOGGER,
+        "There is no velocity state feedback from the robot. "
+        "Please check /joint_states for velocity values!!"
+        "Hard set the slow down time to 0.5s instead");
+      option_.safety_zone_options.slow_down_time = 0.5;
+      safety_zone_.set(option_.safety_zone_options);
+      // Update visualizer as well
+      if (option_.visualize) {
+        visualizer_.update(option_.safety_zone_options);
+      }
+    }
+  } else {
+    // preconfifured slow down time reduce it based on current scale
+    SafetyZone::Option dynamic_option = option_.safety_zone_options;
+    dynamic_option.slow_down_time = option_.safety_zone_options.slow_down_time * scale;
+    safety_zone_.set(dynamic_option);
+    // Update visualizer as well
+    if (option_.visualize) {
+      visualizer_.update(dynamic_option);
+    }
+  }
+
   // Collision Happens in the future
   if (collision_time_point_ >= current_time_point) {
     double scale_step = 0;
     if (option_.safety_zone_options.slow_down_time <= 0 && option_.dynamic_parameterization) {
       // Dynamically adjust slow down time
-      SafetyZone::Option dynamic_option = option_.safety_zone_options;
-      dynamic_option.slow_down_time =
-        _cal_scale_time(*current_state_cache_.readFromRT(), 3, scale, 0.0001);
+      double slow_down_time =
+        _cal_scale_time(*current_state_cache_.readFromRT(), scale, 0.0001);
 
-      // Dynamically set scale step
-      if (dynamic_option.slow_down_time > 0) {
-        safety_zone_.set(dynamic_option);
-
-        // Update visualizer as well
-        if (option_.visualize) {
-          visualizer_.update(dynamic_option);
-        }
-        scale_step = (scale - 0.0001) * (1.0 / option_.rate) / dynamic_option.slow_down_time;
-      } else if (scale != 0.0001) {
-        RCLCPP_ERROR(
-          LOGGER,
-          "There is no velocity state feedback from the robot. "
-          "Please check /joint_states for velocity values!!"
-          "Hard set the slow down time to 0.5s instead");
-        option_.safety_zone_options.slow_down_time = 0.5;
-        safety_zone_.set(option_.safety_zone_options);
-        // Update visualizer as well
-        if (option_.visualize) {
-          visualizer_.update(option_.safety_zone_options);
-        }
-        scale_step = 2 * option_.rate;
-      }
+      scale_step = (scale - 0.0001) * (1.0 / option_.rate) / slow_down_time;
+      scale_step = 2 * option_.rate;
     } else {
       // Static Scale step
-      scale_step = 1.0 * (1.0 / option_.rate) / option_.safety_zone_options.slow_down_time;
+      scale_step = 1 * (1.0 / option_.rate) / option_.safety_zone_options.slow_down_time;
     }
     uint8_t zone = safety_zone_.get_zone(collision_time_point_ - current_time_point);
 
@@ -522,26 +688,52 @@ void DynamicSafety::_main_loop()
       // No replanning
       if (zone <= SafetyZone::EMERGENCY) {
         // Emergency stop
-        RCLCPP_ERROR(LOGGER, "Emergency stop!!");
+        RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE,
+          "Emergency stop!!");
         scale = 0.0001;
       } else {
         // Slow down
-        RCLCPP_WARN(LOGGER, "Slowing down!!");
+        RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE,
+          "Slowing down!!");
         scale -= scale_step;
         scale = std::max<double>(scale, 0.0001);
-        RCLCPP_WARN(LOGGER, "Scale: %.2f", scale);
+        RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE,
+          "Scale: %.2f", scale);
       }
     } else {
       // Replanning
+      double current_time = *current_time_cache_.readFromRT();
+      if (zone <= SafetyZone::EMERGENCY) {
+        // Emergency stop
+        RCLCPP_ERROR_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE,
+          "Emergency stop!!");
+        scale = 0.0001;
+      } else if (zone == SafetyZone::SLOWDOWN) {
+        // TODO(anyone): Better Heuristic
+        scale -= scale_step;
+        double start_state_time =
+          (current_time + safety_zone_.get_zone_limit(SafetyZone::EMERGENCY) + collision_time_point_) / 2;
+        _handle_replanner(start_state_time);
+      } else if (zone == SafetyZone::REPLAN) {
+        double start_state_time =
+          (current_time + safety_zone_.get_zone_limit(SafetyZone::SLOWDOWN) + collision_time_point_) / 2;
+        _handle_replanner(start_state_time);
+      }
     }
   } else {
     // No Collision
     if (scale < 1.0) {
       // Gradually rescale back to 1
-      double scale_time = _cal_scale_time(*current_state_cache_.readFromRT(), 3, scale, 1.0);
-      scale += (1.0 - scale) * (1.0 / option_.rate) / scale_time;
+      double scale_time;
+      if (option_.safety_zone_options.slow_down_time <= 0 && option_.dynamic_parameterization) {
+        scale_time = _cal_scale_time(*current_state_cache_.readFromRT(), scale, 1.0);
+        scale += (1.0 - scale) * (1.0 / option_.rate) / scale_time;
+      } else {
+        scale_time = option_.safety_zone_options.slow_down_time;
+        scale += 1.0 * (1.0 / option_.rate) / scale_time;
+      }
       scale = std::min<double>(scale, 1);
-      RCLCPP_WARN(LOGGER, "Scale: %.2f", scale);
+      RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE, "Scale: %.2f", scale);
     }
   }
   scale_cache_.writeFromNonRT(scale);
@@ -678,5 +870,141 @@ void DynamicSafety::_main_loop()
   // }
 }
 
+double DynamicSafety::_cal_scale_time(
+  const CurrentState & current_state,
+  double current_scale,
+  double target_scale)
+{
+  double scale_time = -1.0;
+  if (!current_state.state.velocities.empty()) {
+    for (size_t i = 0; i < current_state.state.velocities.size(); i++) {
+      // Skip joins with no limits
+      if (option_.joint_limits[current_state.joint_names[i]].first == 0) {
+        continue;
+      }
+      // Skip joins with no limits
+      if (option_.joint_limits[current_state.joint_names[i]].second == 0) {
+        continue;
+      }
+      // Slow down
+      if (current_scale > target_scale) {
+        double temp_scale_time =
+          ::fabs(current_state.state.velocities[i] * (current_scale - target_scale)) /
+          current_scale / option_.joint_limits[current_state.joint_names[i]].second;
+        if (temp_scale_time > scale_time) {
+          scale_time = temp_scale_time;
+        }
+      } else {
+        // Speed up
+        double temp_scale_time =
+          (option_.joint_limits[current_state.joint_names[i]].first -
+          ::fabs(current_state.state.velocities[i])) /
+          option_.joint_limits[current_state.joint_names[i]].second;
+        if (temp_scale_time > scale_time) {
+          scale_time = temp_scale_time;
+        }
+      }
+    }
+  }
+  return scale_time;
+}
+
+void DynamicSafety::_handle_replanner(double start_state_time) {
+
+auto print_traj = [](const trajectory_msgs::msg::JointTrajectory::SharedPtr result)
+{
+  printf("joint_names:\n");
+  for (auto & name : result->joint_names) {
+    printf("- %s\n", name.c_str());
+  }
+  printf("points:\n");
+  for (auto & point : result->points) {
+    printf("- positions:\n");
+    for (auto & position : point.positions) {
+      printf("  - %.8f\n", position);
+    }
+
+    printf("  velocities:\n");
+    for (auto & velocity : point.velocities) {
+      printf("  - %.8f\n", velocity);
+    }
+    printf("  accelerations:\n");
+    for (auto & acceleration : point.accelerations) {
+      printf("  - %.8f\n", acceleration);
+    }
+    printf("  efforts:\n");
+    for (auto & effort : point.effort) {
+      printf("  - %.8f\n", effort);
+    }
+    printf("  time_from_start: %.8fsecs\n",
+      rclcpp::Duration(point.time_from_start).seconds());
+  }
+
+};
+  // Replanner not started
+  auto status = replanner_.get_status();
+  if (status == ReplannerStatus::IDLE) {
+    // Replanner Started
+    RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), LOG_RATE,
+      "Starting replanner [%s] with starting time point",
+      option_.replanner_options.planner.c_str());
+    double end_state_time = _back_track_last_collision();
+    RCLCPP_ERROR(LOGGER, "start_state_time: %f", start_state_time);
+    RCLCPP_ERROR(LOGGER, "end_state_time: %f", end_state_time);
+    RCLCPP_ERROR(LOGGER, "idle full_duration: %f", full_duration_);
+    replanner_.run_async(start_state_time, end_state_time);
+
+  } else if (status == ReplannerStatus::ONGOING) {
+    // Just let it run baby.
+    // TODO(anyone): Better handling?
+  } else if (status == ReplannerStatus::TIMEOUT) {
+    // TODO(anyone): Better termination handling?
+    replanner_.get_result();
+    double end_state_time = _back_track_last_collision();
+    RCLCPP_ERROR(LOGGER, "start_state_time: %f", start_state_time);
+    RCLCPP_ERROR(LOGGER, "end_state_time: %f", end_state_time);
+    RCLCPP_ERROR(LOGGER, "TIMEOUT full_duration: %f", full_duration_);
+    replanner_.run_async(start_state_time, end_state_time);
+  } else if (status == ReplannerStatus::SUCCEED) {
+    // Let's see if you really finished, or just failed and gaveup
+    auto result = replanner_.get_result();
+    if (result->points.empty()) {
+      // Gosh you failure, let's restart
+      double end_state_time = _back_track_last_collision();
+      RCLCPP_ERROR(LOGGER, "start_state_time: %f", start_state_time);
+      RCLCPP_ERROR(LOGGER, "end_state_time: %f", end_state_time);
+      RCLCPP_ERROR(LOGGER, "FAILED full_duration: %f", full_duration_);
+      replanner_.run_async(start_state_time, end_state_time);
+    } else {
+      // Good job replanner, let's add a starting point and
+      // do time_parameterization.
+      auto joint_names = current_state_cache_.readFromRT()->joint_names;
+      auto current_state = current_state_cache_.readFromRT()->state;
+      double current_time = *current_time_cache_.readFromRT();
+      RCLCPP_ERROR(LOGGER, "current_time: %f", current_time);
+      // Get time parameterized result
+      print_traj(result);
+      auto new_traj = replanner_.flatten_result(current_time, joint_names, current_state);
+      print_traj(new_traj);
+      NewTrajectoryCB(new_traj);
+    }
+  }
+}
+double DynamicSafety::_back_track_last_collision() {
+  // Use collision checker to backtrack collision
+  // This is not nearly as efficient right now to be improved.
+  // TODO(anyone): Enable this in collision checker
+  double time_from_start = full_duration_;
+  double step = option_.collision_checker_options.step;
+  double collision_time = -1;
+  while (time_from_start >= 0) {
+    collision_checker_.run_once(time_from_start, 0.0, collision_time);
+    if (collision_time > 0) {
+      return time_from_start + step;
+    }
+    time_from_start -= step;
+  }
+  return full_duration_;
+}
 
 }  // namespace dynamic_safety
