@@ -42,11 +42,13 @@ if(moveit_core_FOUND)
   add_library(${PROJECT_NAME}_moveit
     SHARED
     src/moveit/collision_checker_moveit.cpp
+    src/moveit/replanner_moveit.cpp
   )
 
   ament_target_dependencies(${PROJECT_NAME}_moveit
     rclcpp
     moveit_core
+    pluginlib
   )
 
   ament_export_libraries(
@@ -125,7 +127,7 @@ endif()
 add_library(${PROJECT_NAME}
   SHARED
   #src/next_point_publisher.cpp
-  #src/replanner.cpp
+  src/replanner.cpp
   src/safety_zone.cpp
   src/collision_checker.cpp
   src/interpolate.cpp
