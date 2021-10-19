@@ -167,6 +167,8 @@ public:
     return unit_type_;
   }
 
+  void print() const;
+
 private:
   // Safety zone unit type
   std::string unit_type_;
