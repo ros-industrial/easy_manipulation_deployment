@@ -28,11 +28,9 @@ namespace dynamic_safety
 struct CollisionCheckerOption
 {
   /// Planning framework (moveit or tesseract)
-  // TODO(Briancbn): Implement tesseract
   std::string framework{"moveit"};
 
   /// Collision checking plugin
-  // TODO(Briancbn): Implement this.
   std::string collision_checking_plugin{"fcl"};
 
   /// Group for detection
@@ -53,7 +51,7 @@ struct CollisionCheckerOption
   int thread_count;
 };
 
-/// Collision checking context inherited .
+/// Collision checking context to-be-inherited.
 class CollisionCheckerContext
 {
 public:

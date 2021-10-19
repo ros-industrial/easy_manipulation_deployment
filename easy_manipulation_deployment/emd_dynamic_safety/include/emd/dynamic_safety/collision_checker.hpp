@@ -48,7 +48,6 @@ public:
    * \param[in] option Collison checker options.
    * \param[in] robot_urdf Robot URDF Model.
    * \param[in] robot_srdf Robot SRDFConfiguration
-   * \param[in] collision_checking_plugin Collision checking plugin wrapper
    */
   void configure(
     const CollisionCheckerOption & option,
