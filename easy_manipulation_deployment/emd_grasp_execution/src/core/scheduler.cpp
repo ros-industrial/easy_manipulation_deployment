@@ -343,7 +343,9 @@ Workflow::Status Scheduler::cancel_workflow(
 void Scheduler::wait_till_all_complete() const
 {
   for (auto & worker : impl_->workers) {
-    worker.execution_future.wait();
+    if (worker.execution_future.valid()) {
+      worker.execution_future.wait();
+    }
   }
 }
 
