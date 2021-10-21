@@ -257,29 +257,34 @@ void MoveitReplannerContext::update(
   }
 }
 
-void MoveitReplannerContext::time_parameterize(
-  trajectory_msgs::msg::JointTrajectory & plan)
+bool MoveitReplannerContext::time_parameterize(
+  trajectory_msgs::msg::JointTrajectory & plan,
+  double scale)
 {
   robot_trajectory::RobotTrajectory rt(scene_->getRobotModel(), planning_request_.group_name);
   moveit_msgs::msg::RobotTrajectory rt_msg;
   rt_msg.joint_trajectory = plan;
   auto state = scene_->getCurrentState();
   rt.setRobotTrajectoryMsg(scene_->getCurrentState(), rt_msg);
-  _time_parameterization(rt);
+  if (!_time_parameterization(rt, scale)) {
+    return false;
+  }
   rt.getRobotTrajectoryMsg(rt_msg);
   plan = rt_msg.joint_trajectory;
+  return true;
 }
 
-void MoveitReplannerContext::_time_parameterization(
+bool MoveitReplannerContext::_time_parameterization(
   robot_trajectory::RobotTrajectory & trajectory, double scale)
 {
   if (time_parameterization_ == "totg") {
-    totg_.computeTimeStamps(trajectory, scale);
+    return totg_.computeTimeStamps(trajectory, scale);
   } else if (time_parameterization_ == "iptp") {
-    iptp_.computeTimeStamps(trajectory, scale);
+    return iptp_.computeTimeStamps(trajectory, scale);
   } else if (time_parameterization_ == "isp") {
-    isp_.computeTimeStamps(trajectory, scale);
+    return isp_.computeTimeStamps(trajectory, scale);
   }
+  return false;
 }
 
 }  // namespace dynamic_safety_moveit

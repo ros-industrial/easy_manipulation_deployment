@@ -49,14 +49,14 @@ public:
     const trajectory_msgs::msg::JointTrajectoryPoint & end_point,
     trajectory_msgs::msg::JointTrajectory & plan) override;
 
-  void time_parameterize(
-    trajectory_msgs::msg::JointTrajectory & plan) override;
+  bool time_parameterize(
+    trajectory_msgs::msg::JointTrajectory & plan, double scale = 1.0) override;
 
   void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
 protected:
-  void _time_parameterization(robot_trajectory::RobotTrajectory & trajectory, double scale = 1.0);
+  bool _time_parameterization(robot_trajectory::RobotTrajectory & trajectory, double scale = 1.0);
 
   planning_scene::PlanningScenePtr scene_;
   std::mutex scene_mtx_;

@@ -83,8 +83,9 @@ public:
     const trajectory_msgs::msg::JointTrajectoryPoint & end_point,
     trajectory_msgs::msg::JointTrajectory & plan) = 0;
 
-  virtual void time_parameterize(
-    trajectory_msgs::msg::JointTrajectory & plan) = 0;
+  virtual bool time_parameterize(
+    trajectory_msgs::msg::JointTrajectory & plan,
+    double scale = 1.0) = 0;
 
   virtual void update(
     const sensor_msgs::msg::JointState & joint_states) = 0;
