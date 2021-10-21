@@ -24,6 +24,9 @@
 #ifdef EMD_DYNAMIC_SAFETY_MOVEIT
 #include "emd/dynamic_safety/replanner_moveit.hpp"
 #endif
+#ifdef EMD_DYNAMIC_SAFETY_TESSERACT
+#include "emd/dynamic_safety/replanner_tesseract.hpp"
+#endif
 
 namespace dynamic_safety
 {
@@ -47,6 +50,11 @@ public:
       context_ = std::make_unique<dynamic_safety_moveit::MoveitReplannerContext>(
         robot_urdf, robot_srdf, option, node);
 #endif
+    } else if (option.framework == "tesseract") {
+#ifdef EMD_DYNAMIC_SAFETY_TESSERACT
+      context_ = std::make_unique<dynamic_safety_tesseract::TesseractReplannerContext>(
+        robot_urdf, robot_srdf, option, node);
+#endif
     }
     deadline_ = option.deadline;
   }
@@ -60,6 +68,18 @@ public:
     plan_future_ = std::async(
       std::launch::async, &Impl::_run, this,
       joint_names, start_point, end_point);
+  }
+
+  void terminate_async() {
+    if (!terminate_future_.valid()) {
+      _start_async_termination_thread();
+    } else {
+      auto status = terminate_future_.wait_for(std::chrono::nanoseconds(0));
+      if (status == std::future_status::ready) {
+        terminate_future_.get();
+        terminate_future_ = std::future<void>();
+      }
+    }
   }
 
   void add_trajectory(
@@ -262,7 +282,12 @@ public:
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr get_result()
   {
+    if (!plan_future_.valid()) {
+      return std::make_shared<trajectory_msgs::msg::JointTrajectory>();
+    }
     plan_ = plan_future_.get();
+    // Reset shared future
+    plan_future_ = std::shared_future<trajectory_msgs::msg::JointTrajectory>();
     RCLCPP_INFO(
       LOGGER,
       "Total time take: %.5fs",
@@ -287,8 +312,19 @@ private:
     context_->run(joint_names, start_point, end_point, trajectory);
     return trajectory;
   }
+
+  // Calling blocking get in a new async until it ended
+  // This will result the future to invalid
+  void _start_async_termination_thread() {
+    terminate_future_ = std::async([this] () -> void {
+      plan_future_.get();
+      // Make it invalid;
+      plan_future_ = std::shared_future<trajectory_msgs::msg::JointTrajectory>();
+    });
+  }
   std::unique_ptr<ReplannerContext> context_;
-  std::future<trajectory_msgs::msg::JointTrajectory> plan_future_;
+  std::shared_future<trajectory_msgs::msg::JointTrajectory> plan_future_;
+  std::future<void> terminate_future_;
 
   // Specialized planning feature
   trajectory_msgs::msg::JointTrajectory reference_trajectory_;
@@ -336,6 +372,11 @@ void Replanner::run_async(
   double end_state_time)
 {
   impl_ptr_->run_async(start_state_time, end_state_time);
+}
+
+void Replanner::terminate_async()
+{
+  impl_ptr_->terminate_async();
 }
 
 trajectory_msgs::msg::JointTrajectory::SharedPtr Replanner::flatten_result(

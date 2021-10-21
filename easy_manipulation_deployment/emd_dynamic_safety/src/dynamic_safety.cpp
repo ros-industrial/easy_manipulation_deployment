@@ -812,6 +812,19 @@ void DynamicSafety::Impl::_main_loop()
           (current_time + safety_zone_.get_zone_limit(SafetyZone::SLOWDOWN) +
           collision_time_point_) / 2;
         _handle_replanner(start_state_time);
+      } else if (zone == SafetyZone::SAFE) {
+        auto status = replanner_.get_status();
+        if (status == ReplannerStatus::IDLE) {
+          // Replanner Starte
+          // Nothing to do here
+        } else if (status == ReplannerStatus::ONGOING) {
+          replanner_.terminate_async();
+        } else if (status == ReplannerStatus::TIMEOUT) {
+          replanner_.terminate_async();
+        } else if (status == ReplannerStatus::SUCCEED) {
+          // stop it regularly
+          replanner_.get_result();
+        }
       }
     }
   } else {
@@ -898,9 +911,11 @@ void DynamicSafety::Impl::_handle_replanner(double start_state_time)
     // TODO(anyone): Better handling?
   } else if (status == ReplannerStatus::TIMEOUT) {
     // TODO(anyone): Better termination handling?
-    replanner_.get_result();
-    double end_state_time = _back_track_last_collision();
-    replanner_.run_async(start_state_time, end_state_time);
+    // There is probably nothing we can do here.
+    // async_terminate() function trigger a detached termination thread
+    // to quietly shut down the process.
+    // Once that is done status would become idle;
+    replanner_.terminate_async();
   } else if (status == ReplannerStatus::SUCCEED) {
     // Let's see if you really finished, or just failed and gaveup
     auto result = replanner_.get_result();
@@ -916,7 +931,9 @@ void DynamicSafety::Impl::_handle_replanner(double start_state_time)
       double current_time = *current_time_cache_.readFromRT();
       // Get time parameterized result
       auto new_traj = replanner_.flatten_result(current_time, joint_names, current_state);
-      NewTrajectoryCB(new_traj);
+      if (!new_traj->points.empty()) {
+        NewTrajectoryCB(new_traj);
+      }
     }
   }
 }

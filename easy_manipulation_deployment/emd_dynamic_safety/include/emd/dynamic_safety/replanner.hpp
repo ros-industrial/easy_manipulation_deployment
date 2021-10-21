@@ -62,6 +62,11 @@ public:
     const trajectory_msgs::msg::JointTrajectoryPoint & start_point,
     const trajectory_msgs::msg::JointTrajectoryPoint & end_point);
 
+  /// Start a new thread to terminate asynchronously
+  /**
+   * Upon finish this would set the status to IDLE
+   */
+  void terminate_async();
 
   /// Specialized replanning feature, adding reference trajectory
   /**
