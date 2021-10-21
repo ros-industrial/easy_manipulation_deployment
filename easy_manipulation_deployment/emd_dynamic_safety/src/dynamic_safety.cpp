@@ -132,6 +132,18 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
     node, LOGGER);
 
   // Load collision checker parameters
+  emd::declare_or_get_param<std::string>(
+    collision_checker_options.framework,
+    "dynamic_safety.collision_checker.framework",
+    node, LOGGER, collision_checker_options.framework);  // default: moveit
+
+  emd::declare_or_get_param<std::string>(
+    collision_checker_options.collision_checking_plugin,
+    "dynamic_safety.collision_checker.collision_checking_plugin",
+    node, LOGGER, collision_checker_options.collision_checking_plugin);  // default: fcl
+
+
+  // Load collision checker parameters
   emd::declare_or_get_param<bool>(
     collision_checker_options.distance,
     "dynamic_safety.collision_checker.distance",
