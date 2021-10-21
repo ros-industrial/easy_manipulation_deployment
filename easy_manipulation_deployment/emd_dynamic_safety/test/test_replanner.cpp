@@ -163,6 +163,48 @@ protected:
     joint_limit_node_->declare_parameter(
       "robot_description_planning.joint_limits.panda_joint7.max_acceleration",
       5.0);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint1.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint2.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint3.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint4.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint5.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint6.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint7.has_velocity_limits",
+      true);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint1.max_velocity",
+      2.1750);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint2.max_velocity",
+      2.1750);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint3.max_velocity",
+      2.1750);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint4.max_velocity",
+      2.1750);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint5.max_velocity",
+      2.610);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint6.max_velocity",
+      2.610);
+    joint_limit_node_->declare_parameter(
+      "robot_description_planning.joint_limits.panda_joint7.max_velocity",
+      2.610);
 
     ok_ = true;
 
@@ -257,6 +299,48 @@ TEST_F(ReplannerTest, MoveItOMPLReplannerTimeout)
   replanner_.run_async(joint_names_, start_point, end_point);
   EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::TIMEOUT);
 }
+#endif
+
+#ifdef EMD_DYNAMIC_SAFETY_TESSERACT
+// cppcheck-suppress syntaxError
+TEST_F(ReplannerTest, TesseractTrajOptReplanner)
+{
+  // Dummy node
+  auto replanner_node = std::make_shared<rclcpp::Node>("test_replanner");
+
+  // Initialize option for replanning
+  option_.framework = "tesseract";
+  option_.planner = "trajopt_ifopt";
+  option_.group = "panda_arm";
+  option_.deadline = 1.0;
+
+  replanner_.configure(option_, replanner_node, robot_.get_urdf(), robot_.get_srdf());
+  trajectory_msgs::msg::JointTrajectoryPoint start_point;
+  start_point.positions = {0, 0, 0, 0, 0, 1.571, 0.785};
+  trajectory_msgs::msg::JointTrajectoryPoint end_point;
+  end_point.positions = {0, -0.785, 0, -2.356, 0, 1.571, 0.785};
+
+  auto result = std::make_shared<trajectory_msgs::msg::JointTrajectory>();
+
+  // Idle state before planning
+  EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::IDLE);
+  replanner_.run_async(joint_names_, start_point, end_point);
+  EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::ONGOING);
+  std::thread thr([&result, this]() {
+      result = replanner_.get_result();
+    });
+  rclcpp::sleep_for(std::chrono::seconds(1));
+  EXPECT_EQ(replanner_.get_status(), dynamic_safety::ReplannerStatus::IDLE);
+  thr.join();
+  print_traj(result);
+
+  option_.planner = "trajopt";
+  replanner_.configure(option_, replanner_node, robot_.get_urdf(), robot_.get_srdf());
+  replanner_.run_async(joint_names_, start_point, end_point);
+  result = replanner_.get_result();
+  print_traj(result);
+}
+
 #endif
 
 }  // namespace test_dynamic_safety

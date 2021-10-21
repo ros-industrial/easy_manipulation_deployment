@@ -70,7 +70,8 @@ public:
       joint_names, start_point, end_point);
   }
 
-  void terminate_async() {
+  void terminate_async()
+  {
     if (!terminate_future_.valid()) {
       _start_async_termination_thread();
     } else {
@@ -315,12 +316,14 @@ private:
 
   // Calling blocking get in a new async until it ended
   // This will result the future to invalid
-  void _start_async_termination_thread() {
-    terminate_future_ = std::async([this] () -> void {
-      plan_future_.get();
-      // Make it invalid;
-      plan_future_ = std::shared_future<trajectory_msgs::msg::JointTrajectory>();
-    });
+  void _start_async_termination_thread()
+  {
+    terminate_future_ = std::async(
+      [this]() -> void {
+        plan_future_.get();
+        // Make it invalid;
+        plan_future_ = std::shared_future<trajectory_msgs::msg::JointTrajectory>();
+      });
   }
   std::unique_ptr<ReplannerContext> context_;
   std::shared_future<trajectory_msgs::msg::JointTrajectory> plan_future_;

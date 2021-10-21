@@ -84,15 +84,24 @@ if(tesseract_environment_FOUND)
   add_library(${PROJECT_NAME}_tesseract
     SHARED
     src/tesseract/collision_checker_tesseract.cpp
+    src/tesseract/replanner_tesseract.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}_tesseract
     tesseract::tesseract_environment_core
     tesseract::tesseract_environment_kdl
+    tesseract::tesseract_environment_ofkt
     tesseract::tesseract_collision_core
     tesseract::tesseract_collision_bullet
     tesseract::tesseract_collision_fcl
+    tesseract::tesseract_kinematics_core
+    tesseract::tesseract_kinematics_opw
+    tesseract::tesseract_kinematics_kdl
     tesseract::tesseract_motion_planners_core
+    tesseract::tesseract_motion_planners_ompl
+    tesseract::tesseract_motion_planners_trajopt
+    tesseract::tesseract_motion_planners_trajopt_ifopt
+    tesseract::tesseract_time_parameterization
     tesseract::tesseract_process_managers
     tesseract::tesseract_rosutils
   )
