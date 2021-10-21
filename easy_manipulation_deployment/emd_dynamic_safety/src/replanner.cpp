@@ -232,8 +232,11 @@ public:
     plan_.points.insert(plan_.points.end(), end_segment.begin(), end_segment.end());
 
     // TODO(anyone): Update start state speed
-    context_->time_parameterize(plan_);
-    return std::make_shared<trajectory_msgs::msg::JointTrajectory>(plan_);
+    if (context_->time_parameterize(plan_)) {
+      return std::make_shared<trajectory_msgs::msg::JointTrajectory>(plan_);
+    } else {
+      return std::make_shared<trajectory_msgs::msg::JointTrajectory>();
+    }
   }
 
   uint8_t get_status() const
