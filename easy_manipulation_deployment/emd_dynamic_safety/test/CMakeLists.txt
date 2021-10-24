@@ -20,10 +20,20 @@ target_link_libraries(test_collision_checking
   ${PROJECT_NAME}
 )
 
-ament_add_gtest(test_replanner
-  test_replanner.cpp
+# Flags are set internally
+ament_add_gtest(test_replanner_moveit
+  test_replanner_moveit.cpp
 )
-target_link_libraries(test_replanner
+target_link_libraries(test_replanner_moveit
+  test_hardware
+  ${PROJECT_NAME}
+)
+
+# Flags are set internally
+ament_add_gtest(test_replanner_tesseract
+  test_replanner_tesseract.cpp
+)
+target_link_libraries(test_replanner_tesseract
   test_hardware
   ${PROJECT_NAME}
 )
