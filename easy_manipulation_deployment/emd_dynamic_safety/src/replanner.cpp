@@ -321,6 +321,11 @@ private:
     terminate_future_ = std::async(
       [this]() -> void {
         plan_future_.get();
+        RCLCPP_ERROR(
+          LOGGER,
+          "Unfortunately, Total time take: %.5fs",
+          std::chrono::duration<double, std::ratio<1>>(
+            std::chrono::steady_clock::now() - start_time_).count());
         // Make it invalid;
         plan_future_ = std::shared_future<trajectory_msgs::msg::JointTrajectory>();
       });

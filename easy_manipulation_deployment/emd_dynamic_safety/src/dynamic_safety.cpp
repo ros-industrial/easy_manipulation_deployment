@@ -961,10 +961,9 @@ double DynamicSafety::Impl::_back_track_last_collision()
     time_from_start -= step;
     collision_checker_.run_once(time_from_start, 0.0, collision_time);
     if (collision_time > 0) {
-      if (option_.replanner_options.planner == "trajopt_ifopt" ||
-        option_.replanner_options.planner == "trajopt")
-      {
-        return std::min<double>(time_from_start + 0.5, full_duration_);
+      // Tesseract doesn't see to work well with short segment
+      if (option_.replanner_options.framework == "tesseract") {
+        return std::min<double>(time_from_start + 0.8, full_duration_);
       }
       return time_from_start + step;
     }

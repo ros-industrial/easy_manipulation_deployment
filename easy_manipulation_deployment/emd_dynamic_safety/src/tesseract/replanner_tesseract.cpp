@@ -35,6 +35,7 @@
 #include "tesseract_motion_planners/trajopt/trajopt_motion_planner.h"
 #include "tesseract_motion_planners/trajopt/profile/trajopt_default_plan_profile.h"
 #include "tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h"
+#include "tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h"
 #include "tesseract_motion_planners/trajopt/problem_generators/default_problem_generator.h"
 
 // TrajoptIFOPT
@@ -82,48 +83,75 @@ TesseractReplannerContext::TesseractReplannerContext(
   // manip_.manipulator_ik_solver = "OPWInvKin";
 
   planner_ = option.planner;
-  if (planner_ == "ompl") {
-    ompl_planner_.plan_profiles["DEFAULT"] =
+  if (planner_.size() >= 4 &&
+    planner_.compare(0, 4, "ompl") == 0)
+  {
+    auto profile =
       std::make_shared<tesseract_planning::OMPLDefaultPlanProfile>();
-    ompl_planner_.problem_generator = tesseract_planning::DefaultOMPLProblemGenerator;
+    // We just need one solution
+    profile->max_solutions = 1;
+    profile->planning_time = option.deadline;
 
-    // trajopt IFOPT is needed for cleanup
-    trajopt_ifopt_planner_.plan_profiles["DEFAULT"] =
-      std::make_shared<tesseract_planning::TrajOptIfoptDefaultPlanProfile>();
+    // Hardcoded planner type
+    // Only 1 thread is needed, retrying would be used.
+    if (option.ompl_planner_id == "RRTConnect" ||
+      option.ompl_planner_id.empty())
+    {
+      profile->planners = {
+        std::make_shared<tesseract_planning::RRTConnectConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "SBL") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::SBLConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "PRM") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::PRMConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "PRMstar") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::PRMstarConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "LazyPRM") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::LazyPRMstarConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "EST") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::ESTConfigurator>()
+      };
+    } else if (option.ompl_planner_id == "BKPIECE1") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::BKPIECE1Configurator>()
+      };
+    } else if (option.ompl_planner_id == "KPIECE1") {
+      profile->planners = {
+        std::make_shared<tesseract_planning::KPIECE1Configurator>()
+      };
+    }
 
-    auto composite_profile =
-      std::make_shared<tesseract_planning::TrajOptIfoptDefaultCompositeProfile>();
+    if (planner_ == "ompl") {
+      profile->optimize = true;
+    } else {
+      // optimize using trajopt
+      profile->optimize = false;
+      profile->planning_time /= 4;
+    }
+    ompl_planner_.plan_profiles["DEFAULT"] = profile;
+    ompl_planner_.problem_generator = &tesseract_planning::DefaultOMPLProblemGenerator;
+  }
 
-    // Add in trajopt collision evaluator, not added by default
-    // TODO(Briancbn): parameterize margin here with moveit padding.
-    double margin_coeff = 10;
-    double margin = 0.01;
-    auto collision_config =
-      std::make_shared<trajopt_ifopt::TrajOptCollisionConfig>(margin, margin_coeff);
-
-    collision_config->collision_margin_buffer = 0.10;
-    collision_config->contact_request.type = tesseract_collision::ContactTestType::ALL;
-    collision_config->type = tesseract_collision::CollisionEvaluatorType::DISCRETE;
-
-    // additional margin buffer for the collision check
-    composite_profile->collision_constraint_config = collision_config;
-    composite_profile->collision_cost_config = collision_config;
-
-    // Ensure continuity in vel and accel
-    composite_profile->smooth_velocities = true;
-
-    // Not used atm
-    composite_profile->smooth_accelerations = true;
-    composite_profile->smooth_jerks = true;
-    trajopt_ifopt_planner_.composite_profiles["DEFAULT"] =
-      composite_profile;
-    trajopt_ifopt_planner_.problem_generator =
-      tesseract_planning::DefaultTrajOptIfoptProblemGenerator;
-  } else if (planner_ == "trajopt") {
-    trajopt_planner_.plan_profiles["DEFAULT"] =
-      std::make_shared<tesseract_planning::TrajOptDefaultPlanProfile>();
+  if (planner_ == "trajopt" || planner_ == "ompl-trajopt") {
+    auto plan_profile = std::make_shared<tesseract_planning::TrajOptDefaultPlanProfile>();
     auto composite_profile =
       std::make_shared<tesseract_planning::TrajOptDefaultCompositeProfile>();
+
+    auto solver_profile =
+      std::make_shared<tesseract_planning::TrajOptDefaultSolverProfile>();
+
+    // TODO(Briancbn): Parameterize the following
+    plan_profile->joint_coeff = Eigen::VectorXd::Constant(fwd_kin_->numJoints(), 1, 10);
+
     // Use the fastest way to check collision
     composite_profile->contact_test_type = tesseract_collision::ContactTestType::FIRST;
 
@@ -132,10 +160,27 @@ TesseractReplannerContext::TesseractReplannerContext(
     composite_profile->smooth_accelerations = true;
     composite_profile->smooth_jerks = true;
     composite_profile->avoid_singularity = true;
+
+    composite_profile->collision_constraint_config.enabled = false;
+    composite_profile->collision_cost_config.safety_margin = 0.005;
+    composite_profile->collision_cost_config.coeff = 50;
+
+    solver_profile->opt_info.max_time = option.deadline;
+    if (planner_ != "trajopt") {
+      solver_profile->opt_info.max_time *= 3.0 / 4.0;
+    }
+
+    trajopt_planner_.plan_profiles["DEFAULT"] = plan_profile;
     trajopt_planner_.composite_profiles["DEFAULT"] = composite_profile;
-    trajopt_planner_.problem_generator = tesseract_planning::DefaultTrajoptProblemGenerator;
-  } else if (planner_ == "trajopt_ifopt") {
+    trajopt_planner_.solver_profiles["DEFAULT"] = solver_profile;
+    trajopt_planner_.problem_generator = &tesseract_planning::DefaultTrajoptProblemGenerator;
+  }
+
+  if (planner_ == "trajopt_ifopt" || planner_ == "ompl-trajopt_ifopt") {
     trajopt_ifopt_planner_.plan_profiles["DEFAULT"] =
+      std::make_shared<tesseract_planning::TrajOptIfoptDefaultPlanProfile>();
+
+    auto plan_profile =
       std::make_shared<tesseract_planning::TrajOptIfoptDefaultPlanProfile>();
 
     auto composite_profile =
@@ -143,8 +188,8 @@ TesseractReplannerContext::TesseractReplannerContext(
 
     // Add in trajopt collision evaluator, not added by default
     // TODO(Briancbn): parameterize margin here with moveit padding.
-    double margin_coeff = 10;
-    double margin = 0.001;
+    double margin_coeff = 50;
+    double margin = 0.005;
     auto collision_config =
       std::make_shared<trajopt_ifopt::TrajOptCollisionConfig>(margin, margin_coeff);
     collision_config->contact_request.type = tesseract_collision::ContactTestType::ALL;
@@ -152,21 +197,25 @@ TesseractReplannerContext::TesseractReplannerContext(
 
     // additional margin buffer for the collision check
     collision_config->collision_margin_buffer = 0.001;
-    composite_profile->collision_constraint_config = collision_config;
     composite_profile->longest_valid_segment_fraction = 0.001;
     composite_profile->longest_valid_segment_length = 0.001;
+    composite_profile->collision_constraint_config = collision_config;
     // composite_profile->collision_cost_config = collision_config;
 
     // Ensure continuity in vel and accel
     composite_profile->smooth_velocities = true;
 
     // Not used atm
-    composite_profile->smooth_accelerations = true;
-    composite_profile->smooth_jerks = true;
+    // composite_profile->smooth_accelerations = true;
+    // composite_profile->smooth_jerks = true;
+
+    plan_profile->joint_coeff = Eigen::VectorXd::Constant(fwd_kin_->numJoints(), 1, 10);
+
     trajopt_ifopt_planner_.composite_profiles["DEFAULT"] =
       composite_profile;
+    trajopt_ifopt_planner_.plan_profiles["DEFAULT"] = plan_profile;
     trajopt_ifopt_planner_.problem_generator =
-      tesseract_planning::DefaultTrajOptIfoptProblemGenerator;
+      &tesseract_planning::DefaultTrajOptIfoptProblemGenerator;
   }
 
   // Joint Limit loader
@@ -278,26 +327,46 @@ void TesseractReplannerContext::run(
 
   tesseract_planning::PlannerResponse response;
 
-  if (planner_ == "ompl") {
+  if (planner_.size() >= 4 &&
+    planner_.compare(0, 4, "ompl") == 0)
+  {
     auto ompl_status = ompl_planner_.solve(planning_request_, response);
     if (!ompl_status) {
       RCLCPP_ERROR(LOGGER, "OMPL planning failed:<");
       return;
     }
     RCLCPP_INFO(LOGGER, "OMPL planning successful!!");
-    RCLCPP_INFO(LOGGER, "Using Trajopt IFOPT for cleanup");
 
-    // Using trajopt-ifopt to clean things up
-    planning_request_.seed = response.results;
-    auto trajopt_ifopt_status =
-      trajopt_ifopt_planner_.solve(planning_request_, response);
-    if (!trajopt_ifopt_status) {
-      RCLCPP_WARN(
-        LOGGER, "Trajopt IFOPT clean up failed. "
-        "Using original trajectory");
-      plan = to_joint_trajectory_msg(planning_request_.seed);
-    } else {
+    if (planner_ == "ompl") {
       plan = to_joint_trajectory_msg(response.results);
+    } else if (planner_ == "ompl-trajopt") {
+      RCLCPP_INFO(LOGGER, "Clean up using trajopt");
+      // Using trajopt-ifopt to clean things up
+      planning_request_.seed = response.results;
+      auto trajopt_status =
+        trajopt_planner_.solve(planning_request_, response);
+      if (!trajopt_status) {
+        RCLCPP_WARN(
+          LOGGER, "Trajopt clean up failed. "
+          "Using original trajectory");
+        plan = to_joint_trajectory_msg(planning_request_.seed);
+      } else {
+        plan = to_joint_trajectory_msg(response.results);
+      }
+    } else if (planner_ == "ompl-trajopt_ifopt") {
+      RCLCPP_INFO(LOGGER, "Clean up using trajopt ifopt");
+      // Using trajopt-ifopt to clean things up
+      planning_request_.seed = response.results;
+      auto trajopt_ifopt_status =
+        trajopt_ifopt_planner_.solve(planning_request_, response);
+      if (!trajopt_ifopt_status) {
+        RCLCPP_WARN(
+          LOGGER, "Trajopt IFOPT clean up failed. "
+          "Using original trajectory");
+        plan = to_joint_trajectory_msg(planning_request_.seed);
+      } else {
+        plan = to_joint_trajectory_msg(response.results);
+      }
     }
   } else if (planner_ == "trajopt") {
     auto trajopt_status = trajopt_planner_.solve(planning_request_, response);
