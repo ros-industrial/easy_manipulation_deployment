@@ -155,12 +155,10 @@ public:
   bool home(
     const std::string &) override {return true;}
 
-  // Skipped
-  // TODO(Briancbn): Generic type function call
   bool move_to(
     const std::string &,
     const sensor_msgs::msg::JointState &,
-    bool) override {return true;}
+    bool) override;
 
   double cartesian_to(
     const std::string & planning_group,
