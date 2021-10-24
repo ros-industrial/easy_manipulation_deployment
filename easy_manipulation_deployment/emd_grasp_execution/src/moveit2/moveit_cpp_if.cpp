@@ -527,6 +527,22 @@ bool MoveitCppGraspExecution::move_to(
 }
 
 bool MoveitCppGraspExecution::move_to(
+  const std::string & planning_group,
+  const sensor_msgs::msg::JointState & state,
+  bool execute)
+{
+  auto current_state = moveit_cpp_->getCurrentState();
+
+  for (size_t i = 0; i < state.name.size(); i++) {
+    // TODO(anyone): multi-axis joint
+    if (current_state->getJointModel(state.name[i])) {
+      current_state->setJointPositions(state.name[i], {state.position[i]});
+    }
+  }
+  return move_to(5, planning_group, *current_state, execute);
+}
+
+bool MoveitCppGraspExecution::move_to(
   const int & non_deterministic_max_attempts,
   const std::string & planning_group,
   const moveit::core::RobotState & state,
