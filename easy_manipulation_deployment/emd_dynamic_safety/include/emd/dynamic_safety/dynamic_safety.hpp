@@ -56,6 +56,8 @@ struct Option
 
   bool allow_replan;
 
+  bool benchmark;
+
   bool visualize;
 
   SafetyZone::Option safety_zone_options;

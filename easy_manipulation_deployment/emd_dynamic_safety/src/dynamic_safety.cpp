@@ -115,6 +115,12 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
 
   // Load dyanmic safety parameters
   emd::declare_or_get_param<bool>(
+    benchmark,
+    "dynamic_safety.benchmark",
+    node, LOGGER, false);
+
+  // Load dyanmic safety parameters
+  emd::declare_or_get_param<bool>(
     visualize,
     "dynamic_safety.visualize",
     node, LOGGER, false);
@@ -590,12 +596,16 @@ void DynamicSafety::Impl::configure(
     rclcpp::Duration::from_seconds(1.0 / option_.rate).to_chrono<std::chrono::nanoseconds>(),
     [ = ]() -> void {
       if (started) {
-        if (pf_) {
-          pf_->reset();
+        if (option_.benchmark) {
+          if (pf_) {
+            pf_->reset();
+          }
         }
         _main_loop();
-        if (pf_) {
-          pf_->lapse_and_record();
+        if (option_.benchmark) {
+          if (pf_) {
+            pf_->lapse_and_record();
+          }
         }
       }
     },
@@ -651,7 +661,9 @@ void DynamicSafety::Impl::start()
 
   if (activated_) {
     if (!started) {
-      pf_ = new emd::TimeProfiler<>(5000);
+      if (option_.benchmark) {
+        pf_ = new emd::TimeProfiler<>(5000);
+      }
 
       started = true;
 
@@ -692,13 +704,15 @@ void DynamicSafety::Impl::stop()
   // node_.reset();
 
   // Print out result
-  if (pf_) {
-    std::ostringstream oss;
-    pf_->print(oss);
-    RCLCPP_INFO_STREAM(
-      LOGGER,
-      "Time stats:\n" << oss.str());
-    delete pf_;
+  if (option_.benchmark) {
+    if (pf_) {
+      std::ostringstream oss;
+      pf_->print(oss);
+      RCLCPP_INFO_STREAM(
+        LOGGER,
+        "Time stats:\n" << oss.str());
+      delete pf_;
+    }
   }
   sig_.set_value();
 }
