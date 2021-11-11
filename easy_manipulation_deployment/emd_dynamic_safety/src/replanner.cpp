@@ -175,7 +175,7 @@ public:
         }
         // Apply permutation order
         for (size_t i = 0; i < current_joint_order.size(); i++) {
-          if (joint_permutation[i] != i) {
+          while (joint_permutation[i] != i) {
             std::swap(current_joint_order[joint_permutation[i]], current_joint_order[i]);
             if (!state.positions.empty()) {
               std::swap(
