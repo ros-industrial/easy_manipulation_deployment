@@ -52,7 +52,9 @@ foxy-coverage:
 
   after_script:
     - ./coverage.sh ci
-    - bash <(curl -s https://codecov.io/bash) -f ./coverage.info
+    - curl -Os https://uploader.codecov.io/latest/linux/codecov
+    - chmod +x codecov
+    - ./codecov -f ./coverage.info
 
 galactic-testing:
   image:
