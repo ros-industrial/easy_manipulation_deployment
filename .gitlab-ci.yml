@@ -1,7 +1,12 @@
-# Build only merge request and default branch.
+# Build only merge request and default branch
+# and branches start with (develop).
 # save time for quick demo pushes
-include:
-  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /^develop/
 
 # Build with moveit
 nightly:
