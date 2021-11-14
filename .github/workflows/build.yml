@@ -8,14 +8,10 @@ jobs:
       matrix:
         env:
           - ROS_DISTRO: foxy
-            ROS_REPO: main
             TARGET_CMAKE_ARGS: "-DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage'"
             AFTER_SCRIPT: "./coverage.sh ci"
             ISOLATION: "shell"
             CODE_COVERAGE: "codecov.io"
-          - {ROS_DISTRO: foxy, ISOLATION: "shell"}
-          - {ROS_DISTRO: galactic, ISOLATION: "shell"}
-          - {ROS_DISTRO: rolling, ISOLATION: "shell"}
     env:
       CCACHE_DIR: ~/.ccache
     runs-on: ubuntu-20.04
