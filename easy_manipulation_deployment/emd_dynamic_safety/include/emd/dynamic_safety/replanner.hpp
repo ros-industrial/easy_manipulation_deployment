@@ -130,6 +130,13 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_states);
 
+  /// Sync with MoveIt Scene
+  /**
+   * \param[in] scene_msg MoveIt scene to sync to.
+   */
+  void update(
+    const moveit_msgs::msg::PlanningScene & scene_msg);
+
 private:
   // Implementation Pointer
   std::unique_ptr<Impl> impl_ptr_;

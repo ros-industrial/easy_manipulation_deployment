@@ -102,7 +102,6 @@ void Visualizer::add_trajectory(
   double full_duration = rclcpp::Duration(rt->points.back().time_from_start).seconds();
   int state_size = static_cast<int>(full_duration / step_);
 
-  marker_msg_->header.frame_id = "world";
   marker_msg_->ns = "";
   marker_msg_->id = 0;
   marker_msg_->type = marker_msg_->SPHERE_LIST;
@@ -123,6 +122,7 @@ void Visualizer::add_trajectory(
   size_t i = 0;
   moveit::core::RobotStatePtr rs =
     std::make_shared<moveit::core::RobotState>(scene_->getRobotModel());
+  marker_msg_->header.frame_id = rs->getRobotModel()->getRootLinkName();
   for (int idx = 0; idx <= state_size; idx++) {
     for (; i < rt->points.size(); i++) {
       if (rclcpp::Duration(rt->points[i].time_from_start).seconds() >= time_from_start) {

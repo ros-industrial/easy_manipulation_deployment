@@ -137,6 +137,10 @@ const Option & Option::load(const rclcpp::Node::SharedPtr & node)
     "dynamic_safety.environment_joint_states_topic",
     node, LOGGER);
 
+  emd::declare_or_get_param<std::string>(
+    moveit_scene_topic,
+    "dynamic_safety.moveit_scene_topic",
+    node, LOGGER);
   // Load collision checker parameters
   emd::declare_or_get_param<std::string>(
     collision_checker_options.framework,
@@ -411,6 +415,7 @@ public:
   {
     // Reset Cache
     env_state_cache_.initRT(sensor_msgs::msg::JointState());
+    moveit_scene_cache_.initRT(moveit_msgs::msg::PlanningScene());
     current_state_cache_.initRT(CurrentState());
     current_time_cache_.initRT(0);
     scale_cache_.initRT(1);
@@ -450,6 +455,8 @@ public:
     const std::vector<std::string> & joint_names,
     const trajectory_msgs::msg::JointTrajectoryPoint & current_state);
 
+  void update_scene(const moveit_msgs::msg::PlanningScene::SharedPtr & scene_msg);
+
   double get_scale();
 
   void start();
@@ -482,8 +489,10 @@ protected:
 
   rclcpp::Node::SharedPtr node_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr env_state_sub_;
+  rclcpp::Subscription<moveit_msgs::msg::PlanningScene>::SharedPtr moveit_scene_sub_;
   rclcpp::TimerBase::SharedPtr main_timer_;
   rclcpp::CallbackGroup::SharedPtr env_state_callback_group_;
+  rclcpp::CallbackGroup::SharedPtr moveit_scene_callback_group_;
   rclcpp::CallbackGroup::SharedPtr main_callback_group_;
 
   CollisionChecker collision_checker_;
@@ -509,6 +518,7 @@ protected:
 
   // realtime_tools::RealtimeBuffer<trajectory_msgs::msg::JointTrajectoryPoint> state_cache_;
   realtime_tools::RealtimeBuffer<sensor_msgs::msg::JointState> env_state_cache_;
+  realtime_tools::RealtimeBuffer<moveit_msgs::msg::PlanningScene> moveit_scene_cache_;
   realtime_tools::RealtimeBuffer<CurrentState> current_state_cache_;
   realtime_tools::RealtimeBuffer<double> current_time_cache_;
   realtime_tools::RealtimeBuffer<double> scale_cache_;
@@ -579,17 +589,37 @@ void DynamicSafety::Impl::configure(
   env_state_sub_option.callback_group = env_state_callback_group_;
   auto qos = rclcpp::QoS(2);
 
-  env_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-    option_.environment_joint_states_topic,
-    qos,
-    [ = ](sensor_msgs::msg::JointState::UniquePtr joint_state_msg) -> void
-    {
-      if (started) {
-        update_state(std::move(joint_state_msg));
-      }
-    },
-    env_state_sub_option
-  );
+  if (!option_.environment_joint_states_topic.empty()) {
+    env_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+      option_.environment_joint_states_topic,
+      qos,
+      [ = ](sensor_msgs::msg::JointState::UniquePtr joint_state_msg) -> void
+      {
+        if (started) {
+          update_state(std::move(joint_state_msg));
+        }
+      },
+      env_state_sub_option
+    );
+  }
+
+  moveit_scene_callback_group_ = node->create_callback_group(
+    rclcpp::CallbackGroupType::MutuallyExclusive);
+  rclcpp::SubscriptionOptions moveit_scene_sub_option;
+  moveit_scene_sub_option.callback_group = moveit_scene_callback_group_;
+  if (!option_.moveit_scene_topic.empty()) {
+    moveit_scene_sub_ = node_->create_subscription<moveit_msgs::msg::PlanningScene>(
+      option_.moveit_scene_topic,
+      qos,
+      [ = ](moveit_msgs::msg::PlanningScene::UniquePtr scene_msg) -> void
+      {
+        if (started) {
+          update_scene(std::move(scene_msg));
+        }
+      },
+      env_state_sub_option
+    );
+  }
 
   main_callback_group_ = node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   main_timer_ = node_->create_wall_timer(
@@ -647,6 +677,12 @@ void DynamicSafety::Impl::update_state(
 {
   current_state_cache_.writeFromNonRT(CurrentState(joint_names, current_state));
 }
+
+void DynamicSafety::Impl::update_scene(const moveit_msgs::msg::PlanningScene::SharedPtr & scene_msg)
+{
+  moveit_scene_cache_.writeFromNonRT(*scene_msg);
+}
+
 
 double DynamicSafety::Impl::get_scale()
 {
@@ -723,10 +759,20 @@ void DynamicSafety::Impl::_deadline_cb(rclcpp::QOSDeadlineRequestedInfo &)
 
 void DynamicSafety::Impl::_main_loop()
 {
-  // Update environment
-  collision_checker_.update(*env_state_cache_.readFromRT());
-  if (option_.allow_replan) {
-    replanner_.update(*env_state_cache_.readFromRT());
+  // Update joint state
+  if (!option_.environment_joint_states_topic.empty()) {
+    collision_checker_.update(*env_state_cache_.readFromRT());
+    if (option_.allow_replan) {
+      replanner_.update(*env_state_cache_.readFromRT());
+    }
+  }
+
+  // Scene with MoveIt Scene
+  if (!option_.moveit_scene_topic.empty()) {
+    collision_checker_.update(*moveit_scene_cache_.readFromRT());
+    if (option_.allow_replan) {
+      replanner_.update(*moveit_scene_cache_.readFromRT());
+    }
   }
 
   // get scaled time point

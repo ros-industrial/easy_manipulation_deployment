@@ -53,6 +53,9 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
+  void update(
+    const moveit_msgs::msg::PlanningScene & scene_msgs) override;
+
 protected:
   planning_scene::PlanningScenePtr scene_;
 
