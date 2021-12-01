@@ -54,6 +54,8 @@ struct Option
 
   std::string environment_joint_states_topic;
 
+  std::string moveit_scene_topic;
+
   bool allow_replan;
 
   bool benchmark;

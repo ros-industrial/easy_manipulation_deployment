@@ -20,6 +20,7 @@
 
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
+#include "moveit_msgs/msg/planning_scene.hpp"
 
 namespace dynamic_safety
 {
@@ -79,6 +80,9 @@ public:
 
   virtual void update(
     const sensor_msgs::msg::JointState & joint_states) = 0;
+
+  virtual void update(
+    const moveit_msgs::msg::PlanningScene & scene_msgs) = 0;
 };
 
 }  // namespace dynamic_safety

@@ -303,6 +303,13 @@ public:
     context_->update(joint_states);
   }
 
+
+  void update(
+    const moveit_msgs::msg::PlanningScene & scene_msg)
+  {
+    context_->update(scene_msg);
+  }
+
 private:
   trajectory_msgs::msg::JointTrajectory _run(
     const std::vector<std::string> joint_names,
@@ -397,6 +404,12 @@ trajectory_msgs::msg::JointTrajectory::SharedPtr Replanner::flatten_result(
 
 void Replanner::update(
   const sensor_msgs::msg::JointState & msg)
+{
+  impl_ptr_->update(msg);
+}
+
+void Replanner::update(
+  const moveit_msgs::msg::PlanningScene & msg)
 {
   impl_ptr_->update(msg);
 }

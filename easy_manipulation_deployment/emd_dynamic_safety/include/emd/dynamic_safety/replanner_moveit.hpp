@@ -55,6 +55,9 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
+  void update(
+    const moveit_msgs::msg::PlanningScene & scene_msg) override;
+
 protected:
   bool _time_parameterization(robot_trajectory::RobotTrajectory & trajectory, double scale = 1.0);
 

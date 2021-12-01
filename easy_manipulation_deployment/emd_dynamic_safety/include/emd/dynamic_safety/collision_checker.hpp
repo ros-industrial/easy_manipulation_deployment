@@ -61,6 +61,13 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_state);
 
+  /// Update other information such as collision objects from the scene.
+  /**
+   * \param[in] scene_msg MoveIt scene message to sync to.
+   */
+  void update(
+    const moveit_msgs::msg::PlanningScene & scene_msg);
+
   /// Run collision checking once.
   /**
    * \param[in] current_time Current time_from_start in the trajectory.

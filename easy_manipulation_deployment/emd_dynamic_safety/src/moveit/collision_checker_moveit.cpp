@@ -169,4 +169,9 @@ void MoveitCollisionCheckerContext::update(const sensor_msgs::msg::JointState & 
   }
 }
 
+void MoveitCollisionCheckerContext::update(const moveit_msgs::msg::PlanningScene & scene_msgs)
+{
+  scene_->processPlanningSceneWorldMsg(scene_msgs.world);
+}
+
 }  // namespace dynamic_safety_moveit

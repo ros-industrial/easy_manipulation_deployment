@@ -277,6 +277,17 @@ void MoveitReplannerContext::update(
   }
 }
 
+void MoveitReplannerContext::update(
+  const moveit_msgs::msg::PlanningScene & scene)
+{
+  if (scene_mtx_.try_lock()) {
+    scene_->processPlanningSceneWorldMsg(scene.world);
+    scene_mtx_.unlock();
+  } else {
+    RCLCPP_WARN(LOGGER, "Planning ongoing scene is not updated");
+  }
+}
+
 bool MoveitReplannerContext::time_parameterize(
   trajectory_msgs::msg::JointTrajectory & plan,
   double scale)

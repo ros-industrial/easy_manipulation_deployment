@@ -110,6 +110,7 @@ if(tesseract_environment_FOUND)
     rclcpp
     tesseract_rosutils
     tesseract_msgs
+    moveit_msgs
   )
 
   ament_export_libraries(

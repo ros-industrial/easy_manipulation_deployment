@@ -64,6 +64,9 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
+  void update(
+    const moveit_msgs::msg::PlanningScene &) override {}
+
 protected:
   trajectory_msgs::msg::JointTrajectory to_joint_trajectory_msg(
     const tesseract_planning::CompositeInstruction & result);

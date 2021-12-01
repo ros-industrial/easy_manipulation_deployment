@@ -61,6 +61,9 @@ public:
   void update(
     const sensor_msgs::msg::JointState & joint_states) override;
 
+  void update(
+    const moveit_msgs::msg::PlanningScene &) {}
+
   static tesseract_environment::Environment::Ptr env;
   static int instances;
 

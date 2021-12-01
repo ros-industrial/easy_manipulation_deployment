@@ -52,6 +52,8 @@ public:
 
   void update(const sensor_msgs::msg::JointState & state);
 
+  void update(const moveit_msgs::msg::PlanningScene & scene_msg);
+
   void run_once(
     double current_time,
     double look_ahead_time,
@@ -225,6 +227,13 @@ void CollisionChecker::Impl::update(const sensor_msgs::msg::JointState & state)
   }
 }
 
+void CollisionChecker::Impl::update(const moveit_msgs::msg::PlanningScene & scene_msg)
+{
+  for (auto & context : contexts_) {
+    context->update(scene_msg);
+  }
+}
+
 void CollisionChecker::Impl::_runner_fn(int runner_id, bool continuous)
 {
   int next_iteration = 1;
@@ -391,6 +400,12 @@ void CollisionChecker::update(
   const sensor_msgs::msg::JointState & state)
 {
   impl_ptr_->update(state);
+}
+
+void CollisionChecker::update(
+  const moveit_msgs::msg::PlanningScene & scene_msg)
+{
+  impl_ptr_->update(scene_msg);
 }
 
 void CollisionChecker::run_once(
