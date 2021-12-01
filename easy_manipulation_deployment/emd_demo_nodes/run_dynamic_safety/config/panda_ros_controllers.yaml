@@ -1,0 +1,70 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    panda_arm_controller:
+      type: emd_dynamic_safety/DynamicSafetyTrajectoryController
+      # type: joint_trajectory_controller/JointTrajectoryController
+
+
+    panda_hand_controller:
+      type: position_controllers/GripperActionController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+
+panda_arm_controller:
+  ros__parameters:
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    joints:
+      - panda_joint1
+      - panda_joint2
+      - panda_joint3
+      - panda_joint4
+      - panda_joint5
+      - panda_joint6
+      - panda_joint7
+
+    state_publish_rate: 50.0
+    dynamic_safety:
+      dynamic_parameterization: true
+      use_description_server: true
+      description_server: /run_moveit_cpp
+      moveit_scene_topic: /moveit_cpp/monitored_planning_scene
+      joint_limits_parameter_server: /run_moveit_cpp
+      joint_limits_parameter_namespace: "robot_description_planning.joint_limits"
+      allow_replan: true
+      visualize: true
+      look_ahead_time: 1.2
+
+      rate: 200.0  # Optional
+
+      collision_checker:
+        framework: moveit
+        collision_checking_plugin: fcl
+        step: 0.01
+        thread_count: 4
+      visualizer:
+        publish_frequency: 10
+        step: 0.1
+        topic:  dynamic_safety_markers
+        tcp_link: panda_link8
+      replanner:
+        framework: moveit
+        planner: ompl  # tesseract + trajopt works best
+        ompl_planner_id: RRTConnectkConfigDefault
+        planner_parameter_server: /run_moveit_cpp
+        planner_parameter_namespace: ompl
+        time_parameterization: totg
+        group: panda_arm
+        deadline: 0.5
+
+
+panda_hand_controller:
+  ros__parameters:
+    joint: panda_finger_joint1
