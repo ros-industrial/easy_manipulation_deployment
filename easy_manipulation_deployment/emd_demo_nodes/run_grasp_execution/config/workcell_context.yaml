@@ -3,9 +3,6 @@ workcell:
   executors:
     default:
       plugin: grasp_execution/DefaultExecutor
-    ds_async:
-      plugin: grasp_execution/DynamicSafetyAsyncExecutor
-      controller: ur5_arm_controller
   end_effectors:
     robotiq_2f0:
       brand: robotiq_2f

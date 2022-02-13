@@ -3,8 +3,8 @@
 
   <arg name="use_sim_time" default="false" />
 
-  <node pkg="emd_grasp_execution" exec="fake_grasp_pose_publisher" name="fake_grasp_pose_publisher" output="both">
-    <param from="$(find-pkg-share grasp_execution)/config/fake_grasp_pose_publisher.yaml" />
+  <node pkg="run_grasp_execution" exec="fake_grasp_pose_publisher" name="fake_grasp_pose_publisher" output="both">
+    <param from="$(find-pkg-share run_grasp_execution)/config/fake_grasp_pose_publisher.yaml" />
   </node>
 
 </launch>

@@ -169,17 +169,21 @@ public:
       }
     }
 
-    float cartesian_step_size = static_cast<float>(node_->get_parameter(
+    grasp_execution::GraspExecutionContext options;
+    options.world_frame = "world";
+    options.planning_group = planning_group;
+    options.ee_link = ee_link;
+    options.move_to_collide_step_size = node_->get_parameter(
+      "planning_strategy.cartesian_planning.collide_step_length").as_double();
+    options.cartesian_step_size = static_cast<float>(node_->get_parameter(
         "planning_strategy.cartesian_planning.move_step_length").as_double());
-
-    int backtrack_steps = node_->get_parameter(
+    options.backtrack_steps = node_->get_parameter(
       "planning_strategy.cartesian_non_deterministic_hybrid.backtrack_steps").as_int();
-
-    int hybrid_max_attempts = node_->get_parameter(
+    options.hybrid_max_attempts = node_->get_parameter(
       "planning_strategy.cartesian_non_deterministic_hybrid.max_planning_tries").as_int();
-
-    int non_deterministic_max_attempts = node_->get_parameter(
+    options.non_deterministic_max_attempts = node_->get_parameter(
       "planning_strategy.non_deterministic.max_planning_tries").as_int();
+    options.clearance = clearance;
 
     // Exit if brand name not found.
     if (ee_link.empty()) {
@@ -193,38 +197,13 @@ public:
 
     bool result;
 
-    // ------------------- Plan to grasp location --------------------------
-    prompt_job_start(node_->get_logger(), target_id, "Plan to grasp location.");
-
-    // Initial approach doesn't move down yet
-    result = this->default_plan_pre_grasp(
-      cartesian_step_size,
-      backtrack_steps,
-      hybrid_max_attempts,
-      non_deterministic_max_attempts,
-      planning_group, ee_link, grasp_pose, clearance);
-
-    prompt_job_end(node_->get_logger(), result);
-
-    if (!result) {
-      return false;
-    }
-
-    // ------------------- Move to grasp location --------------------------
-    prompt_job_start(node_->get_logger(), target_id, "Move to grasp location.");
-
-    result = squash_and_execute(planning_group);
-
-    arms_[planning_group].traj.clear();
-
-    prompt_job_end(node_->get_logger(), result);
-
-    if (!result) {
-      return false;
-    }
-
-    // TODO(Briancbn): Call to gripper driver
-
+    if(!this->plan_and_execute_job(
+        options,
+        "Grasp location",
+        target_id,
+        grasp_pose)){
+          return false;
+      }
     // ------------------- Attach grasp object to robot --------------------------
     prompt_job_start(
       node_->get_logger(), target_id,
@@ -232,18 +211,7 @@ public:
 
     attach_object_to_ee(target_id, ee_link);
 
-    result = true;
-
-    prompt_job_end(node_->get_logger(), result);
-
-    if (!result) {
-      return false;
-    }
-
-    // ------------------- Plan to release location --------------------------
-    prompt_job_start(
-      node_->get_logger(), target_id,
-      "Plan to release location");
+    prompt_job_end(node_->get_logger(), true);
 
     // TODO(Briancbn): Configurable release pose
     geometry_msgs::msg::PoseStamped base_grasp_pose;
@@ -252,32 +220,13 @@ public:
     release_pose.pose.position.z = base_grasp_pose.pose.position.z;
     release_pose.pose.orientation = base_grasp_pose.pose.orientation;
 
-    result = this->default_plan_transport(
-      cartesian_step_size,
-      backtrack_steps,
-      hybrid_max_attempts,
-      non_deterministic_max_attempts,
-      planning_group, ee_link, release_pose, clearance);
-
-    prompt_job_end(node_->get_logger(), result);
-    if (!result) {
-      return false;
-    }
-
-    // TODO(Briancbn): Call to gripper driver
-
-    // ------------------- Move to release location --------------------------
-    prompt_job_start(node_->get_logger(), target_id, "Move to release location.");
-
-    result = squash_and_execute(planning_group);
-
-    prompt_job_end(node_->get_logger(), result);
-
-    arms_[planning_group].traj.clear();
-
-    if (!result) {
-      return false;
-    }
+    if(!this->plan_and_execute_job(
+        options,
+        "Grasp release",
+        target_id,
+        release_pose)){
+          return false;
+      }
 
     // ------------------- detach grasp object from robot --------------------------
     prompt_job_start(
@@ -286,20 +235,14 @@ public:
 
     detach_object_from_ee(target_id, ee_link);
 
-    result = true;
-
-    prompt_job_end(node_->get_logger(), result);
-
-    if (!result) {
-      return false;
-    }
+    prompt_job_end(node_->get_logger(), true);
 
     // ------------------- Move back to Home --------------------------
     prompt_job_start(
       node_->get_logger(), target_id,
       "Move back to home");
     result = move_to(
-      non_deterministic_max_attempts,
+      options.non_deterministic_max_attempts,
       planning_group, *home_state);
 
     prompt_job_end(node_->get_logger(), result);

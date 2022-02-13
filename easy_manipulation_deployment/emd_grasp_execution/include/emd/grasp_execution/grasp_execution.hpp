@@ -40,6 +40,36 @@
 
 namespace grasp_execution
 {
+/// Collision checker options.
+struct GraspExecutionContext
+{
+  /// World frame of workcell
+  std::string world_frame;
+
+  /// Name of planning group
+  std::string planning_group;
+
+  /// Name of end effector link
+  std::string ee_link;
+
+  /// How far forward to plan for a trajectory during move unitl collide workflow
+  double move_to_collide_step_size;
+
+  /// TODO(Anyone): Better explanation of option
+  float cartesian_step_size;
+
+  /// TODO(Anyone): Better explanation of option
+  float backtrack_steps;
+
+  /// TODO(Anyone): Better explanation of option
+  int hybrid_max_attempts;
+
+  /// TODO(Anyone): Better explanation of option
+  int non_deterministic_max_attempts;
+
+  /// TODO(Anyone): Better explanation of option
+  float clearance;
+};
 
 class GraspExecutionInterface
 {
@@ -161,66 +191,23 @@ public:
     return true;
   }
 
-  bool default_plan_pre_grasp(
-    const float & cartesian_step_size,
-    const int & backtrack_steps,
-    const int & hybrid_max_attempts,
-    const int & non_deterministic_max_attempts,
-    const std::string & planning_group,
-    const std::string & ee_link,
-    const geometry_msgs::msg::PoseStamped & grasp_pose,
-    double clearance);
+  bool execute_plan(
+    const std::string & action_description,
+    const std::string & id,
+    const std::string & planning_group);
 
-  bool default_plan_transport(
-    const float & cartesian_step_size,
-    const int & backtrack_steps,
-    const int & hybrid_max_attempts,
-    const int & non_deterministic_max_attempts,
-    const std::string & planning_group,
-    const std::string & ee_link,
-    const geometry_msgs::msg::PoseStamped & release_pose,
-    double clearance);
+  bool plan_and_execute_job(
+    const GraspExecutionContext & option,
+    const std::string action_description,
+    const std::string target_id,
+    const geometry_msgs::msg::PoseStamped & target_pose);
 
-  bool default_plan_post_release(
-    const float & cartesian_step_size,
-    const int & non_deterministic_max_attempts,
-    const std::string & planning_group,
-    const std::string & ee_link,
-    bool home,
-    double clearance);
-
-  [[deprecated("Use the full configuration function for default plan actions")]]
-  bool default_plan_pre_grasp(
-    const std::string & planning_group,
-    const std::string & ee_link,
-    const geometry_msgs::msg::PoseStamped & grasp_pose,
-    double clearance)
-  {
-    return GraspExecutionInterface::default_plan_pre_grasp(
-      0.01, 20, 5, 5, planning_group, ee_link, grasp_pose, clearance);
-  }
-
-  [[deprecated("Use the full configuration function for default plan actions")]]
-  bool default_plan_transport(
-    const std::string & planning_group,
-    const std::string & ee_link,
-    const geometry_msgs::msg::PoseStamped & grasp_pose,
-    double clearance)
-  {
-    return GraspExecutionInterface::default_plan_transport(
-      0.01, 20, 5, 5, planning_group, ee_link, grasp_pose, clearance);
-  }
-
-  [[deprecated("Use the full configuration function for default plan actions")]]
-  bool default_plan_post_release(
-    const std::string & planning_group,
-    const std::string & ee_link,
-    bool home,
-    double clearance)
-  {
-    return GraspExecutionInterface::default_plan_post_release(
-      0.01, 5, planning_group, ee_link, home, clearance);
-  }
+  bool plan_and_execute_collision_job(
+    const GraspExecutionContext & option,
+    const std::string action_description,
+    const std::string target_id,
+    char axis,
+    const geometry_msgs::msg::PoseStamped & target_pose);
 
   virtual bool home(
     const std::string & planning_group) = 0;
@@ -249,6 +236,11 @@ public:
     const std::string & planning_group,
     const geometry_msgs::msg::PoseStamped & pose,
     const std::string & link,
+    bool execute = true) = 0;
+
+  virtual bool move_to(
+    const GraspExecutionContext & option,
+    const geometry_msgs::msg::PoseStamped & pose,
     bool execute = true) = 0;
 
   virtual bool move_to(
@@ -329,6 +321,10 @@ protected:
   std::string gen_target_object_id(
     const shape_msgs::msg::SolidPrimitive & target_object_shape,
     std::string task_id,
+    size_t index) const;
+
+  std::string gen_target_mesh_id(
+    const std::string & task_id,
     size_t index) const;
 
   void to_frame(

@@ -12,6 +12,7 @@ grasp_execution_node:
     planning_strategy:
       cartesian_planning:
         move_step_length: 0.01
+        collide_step_length: 0.0005
       cartesian_non_deterministic_hybrid:
         backtrack_steps: 20
         max_planning_tries: 5

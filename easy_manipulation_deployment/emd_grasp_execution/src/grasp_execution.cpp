@@ -116,4 +116,14 @@ std::string GraspExecutionInterface::gen_target_object_id(
   return ss.str();
 }
 
+std::string GraspExecutionInterface::gen_target_mesh_id(
+  const std::string & task_id,
+  size_t index) const
+{
+  std::string shape_type;
+  std::stringstream ss;
+  ss << "#" << "box" << "-" << task_id << "-" << index;
+  return ss.str();
+}
+
 }  // namespace grasp_execution

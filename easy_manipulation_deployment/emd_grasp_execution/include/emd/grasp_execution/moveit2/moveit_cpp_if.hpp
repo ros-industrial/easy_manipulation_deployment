@@ -90,6 +90,13 @@ public:
     const std::string & execution_type = "",
     const std::string & controller_name = "");
 
+  std::string register_target_object_mesh(
+    const std::string & mesh_filepath,
+    const geometry_msgs::msg::PoseStamped & target_object_pose,
+    int index,
+    const std::string & task_id,
+    const std::vector<std::string> & disabled_links = {});
+
   void register_target_object(
     const shape_msgs::msg::SolidPrimitive & target_object_shape,
     const geometry_msgs::msg::PoseStamped & target_object_pose,
@@ -121,6 +128,12 @@ public:
     const std::string & planning_group,
     const geometry_msgs::msg::PoseStamped & pose,
     const std::string & link,
+    bool execute = true) override;
+
+
+  bool move_to(
+    const GraspExecutionContext & option,
+    const geometry_msgs::msg::PoseStamped & pose,
     bool execute = true) override;
 
   [[deprecated("Use the full configuration function move_to")]]

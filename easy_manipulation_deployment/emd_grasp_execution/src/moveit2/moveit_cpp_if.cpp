@@ -39,6 +39,11 @@
 #include "tf2_eigen/tf2_eigen.h"
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "shape_msgs/msg/mesh.hpp"
+#include "shape_msgs/msg/solid_primitive.hpp"
+#include "geometric_shapes/shapes.h"
+#include "geometric_shapes/mesh_operations.h"
+#include "geometric_shapes/shape_operations.h"
 
 namespace grasp_execution
 {
@@ -356,6 +361,76 @@ void MoveitCppGraspExecution::register_target_object(
   prompt_job_end(LOGGER, result);
 }
 
+std::string MoveitCppGraspExecution::register_target_object_mesh(
+  const std::string & mesh_filepath,
+  const geometry_msgs::msg::PoseStamped & target_object_pose,
+  int index,
+  const std::string & task_id,
+  const std::vector<std::string> & disabled_links)
+{
+  std::string target_id;
+  // Add all targets into the scene
+  moveit_msgs::msg::CollisionObject temp_collision_object;
+  temp_collision_object.operation = temp_collision_object.ADD;
+
+  shapes::Mesh * m = shapes::createMeshFromResource(mesh_filepath);
+  shape_msgs::msg::Mesh obj_mesh;
+  shapes::ShapeMsg obj_mesh_msg;
+  shapes::constructMsgFromShape(m, obj_mesh_msg);
+  obj_mesh = boost::get<shape_msgs::msg::Mesh>(obj_mesh_msg);
+  temp_collision_object.meshes.resize(1);
+
+  target_id = gen_target_mesh_id(task_id, index);
+
+  // Check if object already exists
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    if (scene->getWorld()->getObject(target_id)) {
+      delete m;
+      return "";
+    }
+  }    // Unlock PlanningScene
+
+  prompt_job_start(
+    LOGGER, target_id,
+    "Register object in the world");
+
+  temp_collision_object.id = target_id;
+  temp_collision_object.header.frame_id =
+    target_object_pose.header.frame_id;
+
+  temp_collision_object.meshes.clear();
+  temp_collision_object.mesh_poses.clear();
+
+  temp_collision_object.meshes.push_back(obj_mesh);
+  temp_collision_object.mesh_poses.push_back(target_object_pose.pose);
+
+  // // Print out all object poses as debug information
+  // print_pose_ros(LOGGER, target.target_pose);
+
+  auto tmp_pose = target_object_pose;
+  to_frame(target_object_pose, tmp_pose, this->robot_frame_);
+
+  // // Print out all object poses as debug information
+  // print_pose_ros(LOGGER, tmp_pose);
+
+  bool result;
+  // Add object to planning scene
+  {    // Lock PlanningScene
+    planning_scene_monitor::LockedPlanningSceneRW scene(moveit_cpp_->getPlanningSceneMonitor());
+    result = scene->processCollisionObjectMsg(temp_collision_object);
+
+    if (!disabled_links.empty()) {
+      auto & acm = scene->getAllowedCollisionMatrixNonConst();
+      acm.setEntry(target_id, disabled_links, true);
+    }
+  }    // Unlock PlanningScene
+
+  prompt_job_end(LOGGER, result);
+  delete m;
+  return target_id;
+}
+
 geometry_msgs::msg::Pose MoveitCppGraspExecution::get_object_pose(
   const std::string & object_id) const
 {
@@ -407,6 +482,118 @@ geometry_msgs::msg::PoseStamped MoveitCppGraspExecution::get_curr_pose(
   return output_pose;
 }
 
+bool MoveitCppGraspExecution::move_to(
+  const GraspExecutionContext & option,
+  const geometry_msgs::msg::PoseStamped & pose,
+  bool execute)
+{
+  auto & arm = arms_[option.planning_group];
+  const auto & ee_link = (option.ee_link.empty() ? arm.default_ee.link : option.ee_link);
+
+  // Flag for planning
+  bool result = false;
+
+  // Set the start state to the last point of the trajectory
+  // if immediate execution is not needed
+  if (!execute &&
+    !arm.traj.empty())
+  {
+    arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
+  } else {
+    arm.planner->setStartStateToCurrentState();
+  }
+
+  // Strategy 1
+  RCLCPP_INFO(
+    LOGGER, "\nStarting strategy 1: Cartesian move to destination with 1cm step. "
+    "This works well within relatively empty space");
+  robot_trajectory::RobotTrajectoryPtr traj;
+  auto fraction = cartesian_to(
+    option.planning_group, *arm.planner->getStartState(), {pose.pose},
+    traj, option.ee_link, option.cartesian_step_size, 0);
+
+  RCLCPP_INFO(LOGGER, "fraction: %f", fraction);
+  result = (fraction == 1.0);
+
+  // Strategy 2
+  if (!result && static_cast<int>(traj->getWayPointCount()) > option.backtrack_steps) {
+    RCLCPP_INFO(
+      LOGGER,
+      "\nStrategy 1 failed :<\n"
+      "Starting strategy 2: Back track cartesian path 10cm"
+      "to last viable point and start non-deterministic planning");
+
+    arm.planner->setStartState(
+      traj->getWayPoint(traj->getWayPointCount() - option.backtrack_steps));
+
+
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
+    int count = 0;
+
+    while (!plan_solution && count < option.hybrid_max_attempts) {
+      arm.planner->setGoal(pose, ee_link);
+      plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+      count++;
+    }
+
+    if (plan_solution) {
+      auto temp_traj = *traj;
+      traj->clear();
+      traj->append(temp_traj, 0, 0, temp_traj.getWayPointCount() - option.backtrack_steps);
+      traj->append(*plan_solution.trajectory, 0, 1);
+
+      trajectory_processing::IterativeParabolicTimeParameterization time_param;
+      time_param.computeTimeStamps(*traj, 1.0);
+      result = true;
+    }
+  }
+
+  // Strategy 3
+  if (!result) {
+    RCLCPP_INFO(
+      LOGGER,
+      "\nStrategy 1 & 2 failed :<\n"
+      "Starting strategy 3: Start over with non-deterministic planning");
+
+    // Reset the start state
+    if (!execute &&
+      !arm.traj.empty())
+    {
+      arm.planner->setStartState(arm.traj.back()->getLastWayPoint());
+    } else {
+      arm.planner->setStartStateToCurrentState();
+    }
+
+    // Hardset to try 5 times
+    moveit_cpp::PlanningComponent::PlanSolution plan_solution;
+    int count = 0;
+
+    while (!plan_solution && count < option.non_deterministic_max_attempts) {
+      arm.planner->setGoal(pose, ee_link);
+      plan_solution = arm.planner->plan();  // PlanningComponent::PlanSolution
+      count++;
+    }
+
+    if (plan_solution) {
+      traj = plan_solution.trajectory;
+      result = true;
+    }
+  }
+
+  // All strategies failed, exiting
+  if (!result) {
+    return false;
+  }
+
+  // Execute immediately
+  if (execute) {
+    RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
+    moveit_cpp_->execute(option.planning_group, traj);  // blocked execution
+  } else {
+    arm.traj.push_back(traj);
+  }
+  return true;
+}
 
 bool MoveitCppGraspExecution::move_to(
   const float & cartesian_step_size,
@@ -976,6 +1163,9 @@ bool MoveitCppGraspExecution::squash_and_execute(
       return false;
     }
   }
+
+  arms_[group].traj.clear();
+
   return true;
 }
 
