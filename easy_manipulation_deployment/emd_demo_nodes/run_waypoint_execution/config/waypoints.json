@@ -1,0 +1,62 @@
+{
+  "actions" : ["move_up", "rotate", "put_down"],
+
+  "move_up" : {
+    "relative_waypoint" : true,
+    "action_type" : "move",
+    "frame_id" : "world",
+    "position":{
+      "x": 0.4,
+      "y": 0.2,
+      "z": 0.15
+    },
+    "orientation":{
+      "r": 0.0,
+      "p": 0.0,
+      "y": 0.0
+    }
+  },
+
+  "rotate" : {
+    "relative_waypoint" : true,
+    "action_type" : "move",
+    "frame_id" : "world",
+    "position":{
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "orientation":{
+      "r": 0.0,
+      "p": 1.57,
+      "y": 0.0
+    }
+  },
+
+  "put_down" : {
+    "relative_waypoint" : true,
+    "action_type" : "collision",
+    "collision_axis" : [1,0,0],
+    "frame_id" : "world",
+    "position":{
+      "x": 0.0,
+      "y": 0.0,
+      "z": -0.2
+    },
+    "orientation":{
+      "r": 0.0,
+      "p": 0.0,
+      "y": 0.0
+    }
+  },
+
+  "release_object" : {
+    "action_type" : "release",
+    "grasp_width" : 85
+  },
+
+  "grasp_object" : {
+    "action_type" : "grasp",
+    "grasp_width" : 30
+  }
+}

@@ -1,0 +1,31 @@
+grasp_execution_node:
+  ros__parameters:
+    planning_scene_monitor_options:
+      name: "planning_scene_monitor"
+      robot_description: "robot_description"
+      joint_state_topic: "/joint_states"
+      attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+      publish_planning_scene_topic: "/moveit_cpp/publish_planning_scene"
+      monitored_planning_scene_topic: "/moveit_cpp/monitored_planning_scene"
+      wait_for_initial_state_timeout: 10.0
+
+    planning_strategy:
+      cartesian_planning:
+        move_step_length: 0.01
+        collide_step_length: 0.0005
+      cartesian_non_deterministic_hybrid:
+        backtrack_steps: 20
+        max_planning_tries: 5
+      non_deterministic:
+        max_planning_tries: 5
+    
+    planning_pipelines:
+      #namespace: "moveit_cpp"  # optional, default is ~
+      pipeline_names: ["ompl"]
+    
+    plan_request_params:
+      planning_attempts: 1
+      planning_time: 0.5
+      planning_pipeline: ompl
+      max_velocity_scaling_factor: 1.0
+      max_acceleration_scaling_factor: 1.0

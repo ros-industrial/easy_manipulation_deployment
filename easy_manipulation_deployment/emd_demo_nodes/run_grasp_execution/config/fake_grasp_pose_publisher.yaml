@@ -1,0 +1,14 @@
+fake_grasp_pose_publisher:
+  ros__parameters:
+    interface: service
+    frame_id: camera_frame
+    ee_id: robotiq_2f
+    grasp_pose: [0.0126, 0.0322, 0.55,
+                 0.0, 0.0, 0.9997, 0.0250]
+    
+    object_pose: [0.0128, 0.0330, 0.605,
+                  0.0, 0.0, 0.9997, 0.0250]
+
+    object_dimensions: [0.075, 0.167, 0.1]
+
+    delay: 1.5

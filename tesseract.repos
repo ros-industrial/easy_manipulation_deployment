@@ -1,0 +1,39 @@
+repositories:
+  ros_industrial_cmake_boilerplate:
+    type: git
+    url: https://github.com/ros-industrial/ros_industrial_cmake_boilerplate
+    version: 4e7e97d16cc9849ac60118487f8f2dc3cfc9efbd
+  tesseract:
+    type: git
+    url: https://github.com/tesseract-robotics/tesseract
+    version: f1a628bf4cb03565d08067dd721f6d2146ccac6c
+  tesseract_planning:
+    type: git
+    url: https://github.com/tesseract-robotics/tesseract_planning
+    version: 63c4ecc10578b8442a4c0f002e25afc1a95df200
+  tesseract_external:
+    type: git
+    url: https://github.com/ros-industrial-consortium/tesseract_ext
+    version: 9035fb3c2daedf7badbdeebe81e0e83e81c4ff4c
+  trajopt:
+    type: git
+    url: https://github.com/tesseract-robotics/trajopt
+    version: 83d18f8f3e0941abb83620cba93d0c67042d7cdd
+  descartes_light:
+    type: git
+    url: https://github.com/swri-robotics/descartes_light
+    version: 0eeeaf216677112c24d8ec51b984044e7f62c209
+  opw_kinematics:
+    type: git
+    url: https://github.com/Jmeyer1292/opw_kinematics
+    version: 0.4.3
+  ifopt:
+    type: git
+    url: https://github.com/ethz-adrl/ifopt
+    version: 27451ce3212d3c0ccd3a0db9a1ee9a9963466674
+
+  # Fork on Bainian's account
+  tesseract_ros2:
+    type: git
+    url: https://github.com/Briancbn/tesseract_ros2
+    version: 33c091a4092b6fe4e66dcc1381687851cdee8f8a

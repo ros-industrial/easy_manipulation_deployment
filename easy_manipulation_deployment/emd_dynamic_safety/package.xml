@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>emd_dynamic_safety</name>
+  <version>0.1.0</version>
+  <description>
+      A collection of scripts for enabling dynamic safety capability during trajectory execution
+  </description>
+  <maintainer email="chenbn@artc.a-star.edu.sg">Chen Bainian</maintainer>
+  <maintainer email="glenn_tan@artc.a-star.edu.sg">Tan Jing Peng Glenn</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>realtime_tools</depend>
+  <depend>pluginlib</depend>
+  <depend>joint_trajectory_controller</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <test_depend>moveit_resources_panda_description</test_depend>
+  <test_depend>moveit_planners_ompl</test_depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

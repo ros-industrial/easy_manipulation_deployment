@@ -1,0 +1,13 @@
+workcell:
+- group_name: manipulator
+  executors:
+    default:
+      plugin: grasp_execution/DefaultExecutor
+  end_effectors:
+    robotiq_2f0:
+      brand: robotiq_2f
+      link: ee_palm
+      clearance: 0.1
+      driver:
+        plugin: grasp_execution/DummyGripperDriver
+        controller: ""

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="use_sim_time" default="false" />
+
+  <node pkg="run_grasp_execution" exec="fake_grasp_pose_publisher" name="fake_grasp_pose_publisher" output="both">
+    <param from="$(find-pkg-share run_grasp_execution)/config/fake_grasp_pose_publisher.yaml" />
+  </node>
+
+</launch>

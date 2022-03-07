@@ -1,10 +1,11 @@
-FROM ros:foxy-ros-base-focal
+FROM ros:rolling
 
 ENV MOVEIT_WS=/opt/moveit2
 WORKDIR ${MOVEIT_WS}
 
 # Install dependencies
 RUN apt-get update -qq && \
+    apt-get upgrade -qq -y && \
     apt-get install -qq python3-vcstool \
                         curl && \
     mkdir src && \
