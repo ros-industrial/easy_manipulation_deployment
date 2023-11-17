@@ -8,17 +8,19 @@
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
 
   <depend>moveit_ros_planning_interface</depend>
+  <depend>trajectory_msgs</depend>
+  <build_depend>moveit_common</build_depend>
 
   <exec_depend>controller_manager</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
-  <exec_depend>rviz2</exec_depend>
-  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
 
   <exec_depend>emd_dynamic_safety</exec_depend>
+  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
+  <exec_depend>python-yaml</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

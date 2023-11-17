@@ -20,6 +20,19 @@
   <url type="repository">https://github.com/ros-planning/moveit_resources</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>controller_manager</depend>
+  <depend>gazebo_ros</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>joy</depend>
+  <depend>moveit_resources_fanuc_moveit_config</depend>
+  <depend>moveit_ros_benchmarks</depend>
+  <depend>moveit_ros_move_group</depend>
+  <depend>moveit_ros_visualization</depend>
+  <depend>moveit_ros_warehouse</depend>
+  <depend>moveit_setup_assistant</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>rviz</depend>
+  <depend>warehouse_ros_mongo</depend>
 
   <!-- Disabled to avoid circular dependencies with MoveIt packages
        depending on moveit_resources for testing -->
@@ -31,8 +44,6 @@
   <exec_depend>moveit_ros_visualization</exec_depend>
   <exec_depend>moveit_setup_assistant</exec_depend>
   -->
-  <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>xacro</exec_depend>
   <!-- This package is referenced in the warehouse launch files, but does not build out of the box at the moment.
