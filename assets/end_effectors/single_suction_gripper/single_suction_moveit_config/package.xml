@@ -15,6 +15,19 @@
   <url type="repository">https://github.com/ros-planning/moveit-resources</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>joint_state_publisher</depend>
+  <depend>joy</depend>
+  <depend>moveit_ros_benchmarks</depend>
+  <depend>moveit_ros_move_group</depend>
+  <depend>moveit_ros_visualization</depend>
+  <depend>moveit_ros_warehouse</depend>
+  <depend>moveit_setup_assistant</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>robotiq_85_description</depend>
+  <depend>robotiq_85_moveit_config</depend>
+  <depend>rviz</depend>
+  <depend>warehouse_ros</depend>
+  <depend>xacro</depend>
 
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>

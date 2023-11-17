@@ -11,19 +11,24 @@
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>joint_trajectory_controller</depend>
+  <depend>pluginlib</depend>
+  <depend>pluginlib</depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>realtime_tools</depend>
-  <depend>pluginlib</depend>
-  <depend>joint_trajectory_controller</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>moveit_planners_ompl</test_depend>
 
   <test_depend>moveit_resources_panda_description</test_depend>
-  <test_depend>moveit_planners_ompl</test_depend>
   
   <export>
     <build_type>ament_cmake</build_type>
