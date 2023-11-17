@@ -11,13 +11,10 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>emd_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>geometry_msgs</depend>
   <depend>message_filters</depend>
   <depend>octomap</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>shape_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>visualization_msgs</depend>
   <build_depend>builtin_interfaces</build_depend>

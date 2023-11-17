@@ -13,7 +13,6 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>joint_trajectory_controller</depend>
   <depend>pluginlib</depend>
-  <depend>pluginlib</depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>

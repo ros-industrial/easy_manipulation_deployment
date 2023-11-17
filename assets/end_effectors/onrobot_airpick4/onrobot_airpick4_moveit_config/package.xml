@@ -22,18 +22,13 @@
   <depend>moveit_ros_visualization</depend>
   <depend>moveit_ros_warehouse</depend>
   <depend>moveit_setup_assistant</depend>
+  <depend>onrobot_airpick4_description</depend>
   <depend>robot_state_publisher</depend>
   <depend>robotiq_85_description</depend>
   <depend>robotiq_85_moveit_config</depend>
   <depend>rviz</depend>
   <depend>warehouse_ros</depend>
   <depend>xacro</depend>
-
-  <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>xacro</exec_depend>
-  <build_depend>onrobot_airpick4_description</build_depend>
-  <exec_depend>onrobot_airpick4_description</exec_depend>
 
   <export>
       <build_type>ament_cmake</build_type>
