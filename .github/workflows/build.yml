@@ -24,7 +24,7 @@ jobs:
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
       # Run industrial_ci
       - uses: 'ros-industrial/industrial_ci@master'
-        env: ${{matrix.env}}i
+        env: ${{matrix.env}}
       # Upload Coverage report if configured
       - name: Install dependency for Codecov
         run: sudo apt install curl -y
