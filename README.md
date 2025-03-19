@@ -3,6 +3,10 @@
 <img src="./images/emd_logo.png"  width="30%" height="30%">
 <br>
 
+> Note that EMD is currently NOT under maintenance and we DO NOT recommend its use in new projects.
+> 
+> We still welcome contributions and bug fixes, and will work out a maintenance plan in the future.
+
 [![Build Status](https://github.com/ros-industrial/easy_manipulation_deployment/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/ros-industrial/easy_manipulation_deployment/actions/workflows/build.yml)
 [![Documentation Status](https://readthedocs.org/projects/easy-manipulation-deployment-docs/badge/?version=latest)](https://easy-manipulation-deployment-docs.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/github/license/ros-industrial/easy_manipulation_deployment.svg)](https://github.com/ros-industrial/easy_manipulation_deployment/blob/master/LICENSE)
