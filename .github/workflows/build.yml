@@ -14,7 +14,9 @@ jobs:
             CODE_COVERAGE: "codecov.io"
     env:
       CCACHE_DIR: ~/.ccache
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
     steps:
       - uses: actions/checkout@v2
       # step up caching
