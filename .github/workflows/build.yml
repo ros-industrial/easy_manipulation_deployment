@@ -13,7 +13,7 @@ jobs:
             ISOLATION: "shell"
             CODE_COVERAGE: "codecov.io"
     env:
-      CCACHE_DIR: ~/.ccache
+      CCACHE_DIR: /github/home/.ccache
     runs-on: ubuntu-latest
     container:
       image: ubuntu:20.04
@@ -29,7 +29,7 @@ jobs:
         env: ${{matrix.env}}
       # Upload Coverage report if configured
       - name: Install dependency for Codecov
-        run: sudo apt install curl -y
+        run: sudo apt install curl git -y
       - name: Upload coverage reports to Codecov
         if: ${{ matrix.env.CODE_COVERAGE == 'codecov.io' }}
         uses: codecov/codecov-action@v5
