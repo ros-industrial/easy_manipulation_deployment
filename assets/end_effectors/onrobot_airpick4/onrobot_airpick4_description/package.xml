@@ -10,6 +10,7 @@
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>dual_gripper</depend>
 
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
@@ -18,4 +19,3 @@
       <build_type>ament_cmake</build_type>
   </export>
 </package>
-
